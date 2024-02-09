@@ -1,0 +1,261 @@
+/* JSWINDOW(JW) CSS - www.jswindow.com */
+
+
+
+/*ANA TAGLAR*/
+
+#jswindow						{		}
+
+#jw-statik						{	position:absolute; top:0; left:0; width:100%; height:100%; z-index:1000; display:none;	}
+
+#jw-dinamik						{	position:absolute; top:0px; left:0px; height:0; width:0; z-index:1039;	}
+
+#jw-dinamikT					{	position:fixed; padding:0 0 0 7px; bottom:0px; left:0px; z-index:999; background:rgba(0,0,0,0.7); width:100%; border-top:solid 1px rgba(0,0,0,0.7);	}
+
+
+
+/*STATİK PENCERE*/
+
+.jw-s-cerceve					{	position:absolute; left:0; top:0; width:100%; height:100%; display:none; }
+
+.jw-s-perde						{ 	position:fixed; height:100%; width:100%; top:0px; left:0px; background-color:rgba(0,0,0,0.4); }
+
+.jw-s-perdeTABLE				{	width:100%; height:100%; /*border-collapse:collapse; BUG: IE9: içindeki elementlerin gölgesini kaldırıyor!*/ border-spacing:0; }
+
+.jw-s-perdeTD					{	 }
+
+
+
+.jw-s-pencere					{ 	width:300px; margin:0 auto; box-shadow:0px 0px 3px 1px rgba(0,0,0,0.3); overflow:hidden; display:none; line-height:15px; color:#333;
+
+									background:-webkit-linear-gradient(top, #20DBF0 , #0FBFD2);
+
+									background:-moz-linear-gradient(top, #20DBF0 , #0FBFD2);
+
+									background:-ms-linear-gradient(top, #20DBF0 , #0FBFD2);
+
+									background:-o-linear-gradient(top, #20DBF0 , #0FBFD2);
+
+									filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#20DBF0', endColorstr='#0FBFD2',GradientType=0 ); }
+
+.jw-s-baslikSatir				{ 	position:relative; height:29px; background-color:rgba(0,0,0,0.1); box-shadow:0 1px 0 rgba(0,0,0,0.15); overflow:hidden; cursor:default; }
+
+	.jw-s-baslikDIV				{ 	padding:9px 0 7px 8px; font-size:13px; line-height:13px; font-weight:bold; text-shadow:-1px -1px 0 rgba(255,255,255,0.3); }
+
+	.jw-s-carpiImg				{ 	position:absolute; right:8px; top:9px; opacity:0.5;	cursor:pointer; }
+
+	.jw-s-carpiImg:hover		{ 	opacity:0.7; }
+
+
+
+.jw-s-govde						{ 	width:100%; position:relative; overflow:hidden; }
+
+.jw-s-govdeTABLE				{ 	width:100%; position:relative; overflow:hidden; border-collapse:collapse; border-spacing:0; }
+
+	.jw-s-icerikTD				{ 	width:100%; color:#333; margin:0; font-size:12px; text-align:center; vertical-align:middle; text-shadow:1px 1px 0 rgba(0,0,0,0.1); overflow:hidden; }
+
+		.jw-s-icerikDIV1		{	padding:23px 0; margin:25px 0; display:none; }
+
+		.jw-s-icerikDIV2		{	padding:25px 15px 22px 15px; }
+
+	
+
+.jw-s-tusDiv					{ 	padding:7px 3px; text-align:right; display:none; background-color:rgba(0,0,0,0.075); border-top:1px solid rgba(0,0,0,0.05); }
+
+
+
+/*DİNAMİK PENCERE*/
+
+.jw-s-pencereTABLE				{	position:absolute; top:0; left:0; width:100%; height:100%; display:table; }
+
+.jw-s-pencereTD					{	display:table-cell; vertical-align:middle; }
+
+.jw-d-pencere					{	position:absolute; border-radius:0px; display:none; overflow:hidden; opacity:1; box-shadow:0 0 0px 1px rgba(0,0,0,0.4);
+
+									background:-webkit-linear-gradient(top, #FFFFFF, #F2F2F2);
+
+									background:-moz-linear-gradient(top, #FFFFFF, #EFF4F5);
+
+									background:-ms-linear-gradient(top, #FFFFFF, #EFF4F5);
+
+									background:-o-linear-gradient(top, #FFFFFF, #EFF4F5);
+
+									filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#FFFFFF', endColorstr='#EFF4F5',GradientType=0 ); }
+
+
+
+.jw-d-baslikSatir				{	border-radius:0px 0px 0 0; cursor:default; -webkit-user-select: none; background:-webkit-linear-gradient(top, #588BA7, #588BA7);
+
+									background:-moz-linear-gradient(top, #4B768D, #588BA7);
+
+									background:-ms-linear-gradient(top, #4B768D, #588BA7);
+
+									background:-o-linear-gradient(top, #4B768D, #588BA7);
+
+									filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#577780', endColorstr='#699099',GradientType=0 ); }
+
+	.jw-d-baslikSatirTABLE		{	width:100%; overflow:hidden; padding:0px; margin:0px; height:30px; border-collapse:collapse; border-spacing:0; }
+
+	.jw-d-baslikTD				{	width:100%; margin:0; position:relative; overflow:hidden; outline:hidden; vertical-align:top; }
+
+	.jw-d-baslikDIV				{ 	position:absolute; width:100%; left:0px; top:7px; font-size:13px; line-height:18px; font-weight:bold; color:#FFF; text-shadow:-1px -1px 0px rgba(0,0,0,0.3); cursor:default;
+
+									white-space:nowrap; overflow:hidden; text-overflow: ellipsis; text-indent:10px; padding-bottom:2px; }
+
+	.jw-d-tusTD					{	padding-left:1px; margin:0; overflow:hidden; vertical-align:top; text-align:right; }
+
+	.jw-d-tusDIV				{	height:25px; padding:5px 0 0 3px; margin:0px 10px 0 0px; /*border-left:1px solid rgba(0,0,0,0.2);*/ white-space:nowrap; overflow:hidden; }
+
+	.jw-d-tus1					{	margin-left:7px; opacity:0.5; filter:alpha(opacity=50); cursor:pointer; border:0; }
+
+	.jw-d-tus1:hover			{	opacity:0.8; filter:alpha(opacity=80); }
+
+
+
+.jw-d-govdeCerceve				{	border:3px solid #588BA7; border-top-width:0; }
+
+.jw-d-govde						{	position:relative; border:1px solid #406579; overflow:auto; }
+
+	.jw-d-govdePerde			{	width:100%; height:100%; position:absolute; top:0px; left:0px; z-index:1; display:none; }
+
+	.jw-d-govdeTABLE			{	width:100%; height:100%; /*border-collapse:collapse; BUG: IE9: içindeki elementlerin gölgesini kaldırıyor!*/ border-spacing:0; }
+
+	.jw-d-icerikTD				{	font-size:12px; margin:0; padding:8px; text-shadow:1px 1px 0px rgba(0,0,0,0.1); color:#333; z-index:0; background-color: rgba(0,0,0,0.05); overflow:hidden; vertical-align:top; }
+
+
+
+.jw-d-boyutla					{	}
+
+	.jw-d-boyutlaSag			{	position:absolute; width:5px;  height:100%; right:0px;  top:0px;    z-index:1; cursor:w-resize;  background-color:rgba(0,0,0,0);/*IE için cursor alanı gormuyor*/ }
+
+	.jw-d-boyutlaAlt			{	position:absolute; width:100%; height:5px;  left:0px;   bottom:0px; z-index:1; cursor:n-resize;  background-color:rgba(0,0,0,0);/*IE için cursor alanı gormuyor*/ }
+
+	.jw-d-boyutlaKose			{	position:absolute; width:8px;  height:8px; padding:4px;  bottom:-2px; right:-2px;  z-index:2; cursor:nw-resize; background-color:rgba(0,0,0,0);/*IE için cursor alanı gormuyor*/ }
+
+		.jw-d-boyutlaKN			{	position:absolute; width:1px;  height:1px;  background-color:rgba(0,0,0,0.6); }
+
+
+
+.jw-d-pencereAktif				{	box-shadow:0 0 0px 1px rgba(0,0,0,0.5) , 0 0 2px 1px rgba(0,0,0,0.3) , 3px 3px 2px 0 rgba(0,0,0,0.3); opacity:1;  }
+
+.jw-d-pencerePasif				{	opacity:0.7;  }
+
+
+
+/*DINAMIK PENCERE TEMSIL KUTUSU*/
+
+.jw-d-temsilKutu				{	float:left; position:relative; width:142px; height:30px; margin:10px 3px; font-size:12px; line-height:12px; font-weight:bold; color:rgba(255,255,255,0.8);
+
+									border:1px solid rgba(255,255,255,0.3); 
+
+									text-shadow:-1px -1px 0 rgba(0,0,0,0.5); display:none; user-select:none; MozUserSelect:none; -webkit-user-select: none;background:#365668; cursor:pointer;  }
+
+.jw-d-temsilKutu:hover			{	border-color:rgba(255,255,255,0.4); }
+
+	.jw-d-temsilDIV2			{	position:absolute; width:100%; height:100%; top:0px; left:0px; background-color:#446C82; z-index:0; opacity:0; }
+
+	.jw-d-temsilDIV1			{	position:absolute; width:100%; height:100%; top:0px; left:0px; z-index:1; }
+
+	.jw-d-temsilSimgeDIV		{	float:left; position:relative; height:20px; width:20px; margin:5px; }
+
+	.jw-d-temsilBaslikDIV		{	float:left; width:88px; padding:10px 5px 0 2px; white-space:nowrap; overflow: hidden; text-overflow: ellipsis; user-select:none; MozUserSelect:none; -webkit-user-select: none; }
+
+	.jw-d-temsilKapatDIV		{	float:left; width:16px; height:30px; border-left:1px solid rgba(0,0,0,0.2); box-shadow:-1px 0 0 0 rgba(255,255,255,0.2); text-align:left; cursor:pointer; }
+
+	.jw-d-temsilKapatDIV:hover	{	background-color:rgba(0,0,0,0.1); }
+
+	.jw-d-temsilKapatTus		{	margin:11px 0 0 3px; }
+
+
+
+.jw-d-temsilKutuAktif			{	 }
+
+.jw-d-temsilDIV2Aktif			{	opacity:1; }
+
+
+
+/*DİNAMİK PENCERE SİMGE1*/
+
+.jw-d-simge1					{		}
+
+	.jw-d-simge1-C1				{	position:absolute; top:0px; left:0px; height:12px; width:12px; border:2px solid rgba(0,0,0,0.4); z-index:0;	}
+
+	.jw-d-simge1-P1				{	background-color:#CCC; height:12px; width:12px;	}
+
+	.jw-d-simge1-C2				{	position:absolute; bottom:0px; right:0px; height:12px; width:12px; border:2px solid #3A5056; z-index:1;	}
+
+	.jw-d-simge1-P2				{	background-color:#EEE; height:12px; width:12px;	}
+
+
+
+/*TUŞ*/
+
+.jw-t-standart					{	min-width:50px; margin:0; padding:4px 8px; margin:0px 4px; font-size:12px; text-align:center; color:#000; border:0; border-radius:0px;
+
+									text-shadow:1px 1px 0 rgba(0,0,0,0.1); box-shadow:0 0 0 1px rgba(0,0,0,0.2); cursor:pointer;							
+
+									background:-webkit-linear-gradient(top, #EEEEEE , #B1B1B1);
+
+									background:-moz-linear-gradient(top, #EEEEEE , #B1B1B1);
+
+									background:-ms-linear-gradient(top, #EEEEEE , #B1B1B1);
+
+									background:-o-linear-gradient(top, #EEEEEE , #B1B1B1);
+
+									filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#EEEEEE', endColorstr='#B1B1B1',GradientType=0 ); }
+
+.jw-t-standart:hover			{	box-shadow:0 0 1px 1px rgba(0,0,0,0.2);
+
+									background:-webkit-linear-gradient(top, #F3F3F3 , #BFBFBF);
+
+									background:-moz-linear-gradient(top, #F3F3F3 , #BFBFBF);
+
+									background:-ms-linear-gradient(top, #F3F3F3 , #BFBFBF);
+
+									background:-o-linear-gradient(top, #F3F3F3 , #BFBFBF);
+
+									filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#F3F3F3', endColorstr='#BFBFBF',GradientType=0 ); }
+
+
+
+/*ARKAPLAN*/
+
+.jw-ap1							{	background:-webkit-linear-gradient(top, #B4E311, #A1CA0F);
+
+									background:-moz-linear-gradient(top, #B4E311 , #A1CA0F);
+
+									background:-ms-linear-gradient(top, #B4E311 , #A1CA0F);
+
+									background:-o-linear-gradient(top, #B4E311 , #A1CA0F);
+
+									filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#B4E311', endColorstr='#A1CA0F',GradientType=0 ); }
+
+.jw-ap2							{	background:-webkit-linear-gradient(top, #10CDE2, #0EB5C7);
+
+									background:-moz-linear-gradient(top, #10CDE2 , #0EB5C7);
+
+									background:-ms-linear-gradient(top, #10CDE2 , #0EB5C7);
+
+									background:-o-linear-gradient(top, #10CDE2 , #0EB5C7);
+
+									filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#10CDE2', endColorstr='#0EB5C7',GradientType=0 ); }
+
+.jw-ap3							{	background:-webkit-linear-gradient(top, #F4E30B, #CDBE0A);
+
+									background:-moz-linear-gradient(top, #F4E30B , #E1D10B);
+
+									background:-ms-linear-gradient(top, #F4E30B , #E1D10B);
+
+									background:-o-linear-gradient(top, #F4E30B , #E1D10B);
+
+									filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#F4E30B', endColorstr='#E1D10B',GradientType=0 ); }
+
+.jw-ap4							{	background:-webkit-linear-gradient(top, #F53E10, #EA370E);
+
+									background:-moz-linear-gradient(top, #F53E10 , #EA370E);
+
+									background:-ms-linear-gradient(top, #F53E10 , #EA370E);
+
+									background:-o-linear-gradient(top, #F53E10 , #EA370E);
+
+									filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#F53E10', endColorstr='#EA370E',GradientType=0 ); }

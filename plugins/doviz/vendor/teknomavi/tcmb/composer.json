@@ -1,0 +1,46 @@
+{
+  "name": "teknomavi/tcmb",
+  "type": "library",
+  "description": "T.C. Merkez Bankası üzerinden güncel döviz kurlarını çeker",
+  "minimum-stability": "dev",
+  "license": "MIT",
+  "keywords": [
+    "tcmb",
+    "doviz",
+    "kur",
+    "currency"
+  ],
+  "homepage": "https://github.com/teknomavi/tcmb",
+  "authors": [
+    {
+      "name": "Teknomavi",
+      "email": "info@teknomavi.com",
+      "homepage": "http://www.teknomavi.com"
+    }
+  ],
+  "support": {
+    "issues": "https://github.com/teknomavi/tcmb/issues"
+  },
+  "require": {
+    "php": "> 5.4",
+    "teknomavi/common": "~2.0"
+  },
+  "require-dev": {
+    "doctrine/cache": "1.5.x-dev",
+    "phpunit/phpunit": "~4.8|~5.0",
+    "squizlabs/php_codesniffer": "~2.0"
+  },
+  "suggest": {
+    "doctrine/cache": "Kütüphanenin cache mekanizmasını kullanmasını sağlayarak performansını arttırır."
+  },
+  "autoload": {
+    "psr-4": {
+      "Teknomavi\\Tcmb\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Teknomavi\\Tests\\": "tests/Teknomavi/Tests"
+    }
+  }
+}
