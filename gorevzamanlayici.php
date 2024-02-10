@@ -704,6 +704,7 @@ x x -SEÇILEN GÜN BUGÜN DEĞIL ISE SONRAKI GÜNE VE SAAT XX DAKIKA XX KAYDET
         $yerel_korunacak_yedek          = '-1';
         $uzak_sunucu_ici_dizin_adi      = null;
         $ftp_yedekle                    = 0;
+        $google_yedekle                 = 0;
     }
 ###########################################################################################################################
 
