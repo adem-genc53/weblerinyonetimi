@@ -367,7 +367,7 @@ function OK(x){
        data: str,
        success: function(veriler){       
 		   bekleme.kapat();
-       jw("b olumlu").baslik("Zipli Dosyalar Silme Sonucu").icerik(veriler).en(400).boy(10).kilitle().akilliKapatPasif().kapaninca(function(){ window.location.href='<?php echo $_SERVER['REQUEST_URI']; ?>' }).ac();
+       jw("b olumlu").baslik("Zipli Dosyalar Silme Sonucu").icerik(veriler).en(500).boy(10).kilitle().akilliKapatPasif().kapaninca(function(){ window.location.href='<?php echo $_SERVER['REQUEST_URI']; ?>' }).ac();
        }
       });             
      } //if(x==1){
