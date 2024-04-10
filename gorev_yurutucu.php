@@ -704,8 +704,16 @@ fwrite($dosya,$yaz); fclose($dosya);
         preg_match('/<div style="display:none">(.*?)<\/div>/s', $output, $cikti);
 
         //echo '<pre>' . print_r($url, true) . '</pre>';
+
+// json nu denetleme
+function isJson($str) {
+    $json = json_decode($str);
+    return $json && $str != $json;
+}
         $output_array = [];
-        $output_array = json_decode( $cikti[1] ?? [], JSON_UNESCAPED_SLASHES );
+        if(isJson($cikti[1])){
+            $output_array = json_decode( $cikti[1] ?? [], JSON_UNESCAPED_SLASHES );
+        }
 
         $gorev_adi = $row['gorev_adi'];
         $calistirilan_dosya = $row['dosya_adi'];                                          
