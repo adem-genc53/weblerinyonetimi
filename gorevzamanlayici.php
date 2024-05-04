@@ -723,7 +723,7 @@ include('includes/sub_navbar.php');
         <select class="form-control" name="saat" id="saat" style="min-width: 70px;max-width:350px;">
                 <?php
                 $options = array(
-                    array("-1", "Her saatte(*)"),
+                    array("-1", "Her saat(*)"),
                     array("-1/0.30", "Her Yarım Saatte(*/0.30)"),
                     array("-1/2", "Her İki Saatte(*/2)"),
                     array("-1/3", "Her Üç Saatte(*/3)"),
@@ -1300,7 +1300,7 @@ include('includes/sub_navbar.php');
         <select class="form-control" name="saat" id="saat" style="min-width: 70px;max-width:350px;">
                 <?php
                 $options = array(
-                    array("-1", "Her saatte(*)"),
+                    array("-1", "Her saat(*)"),
                     array("-1/0.30", "Her Yarım Saatte(*/0.30)"),
                     array("-1/2", "Her İki Saatte(*/2)"),
                     array("-1/3", "Her Üç Saatte(*/3)"),
@@ -1718,6 +1718,28 @@ include('includes/sub_navbar.php');
 <?php 
 include('includes/footer.php');
 ?>
+
+<script>
+    $(document).ready(function(){
+        // SAAT seçeneğinin değişiklik olayı
+        $('#saat').change(function(){
+            var selectedSaat = $(this).val();
+            if(selectedSaat.startsWith("-1/")){
+                // Eğer saat seçeneğinde ('Her Dakika hariç') 'Her...' ile başlayan bir seçenek seçildiyse, 
+                // DAKİKA seçeneğinindeki 'Her...' ile başlayan tüm seçenekleri devre dışı bırak
+                $('#dakika option[value^="-1"]').attr('selected',false);
+                $('#dakika option[value^="-1"]').prop('disabled', true);
+                // DAKİKA seçeneğini "0" olarak seç
+                if($('#dakika').val()==null){
+                    $('#dakika option[value^="0"]').attr('selected',true);
+                }
+            } else {
+                // Eğer 'Her...' seçeneği seçilmediyse, DAKİKA seçeneğini aktif hale getir
+                $('#dakika option[value^="-1"]').prop('disabled', false);
+            }
+        });
+    });
+</script>
 
 <script type="text/javascript">
 $(document).ready(function() {
