@@ -1719,6 +1719,14 @@ include('includes/sub_navbar.php');
 include('includes/footer.php');
 ?>
 
+<style>
+option:disabled {
+   background: #ccc;
+   width: 500px;
+   padding: 5px;
+   }
+</style>
+
 <script>
     $(document).ready(function(){
         // SAAT seçeneğinin değişiklik olayı
