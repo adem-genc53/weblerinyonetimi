@@ -1924,7 +1924,7 @@ $(document).ready(function() {
             $('#diizn_secilen_yedekleme').prop('selectedIndex',0);
             $("#veritabani_tablo").hide();
             $("#dizin_ziple_tablo").hide();
-            $("#dosya_adi").val("kurlar.php");
+            $("#dosya_adi").val("<?php if(isset($editrow['dosya_adi'])){ echo $editrow['dosya_adi']; }else{ echo "kurlar.php"; } ?>");
             $('input[name="secilen_yedekleme_oneki"]').val("");
         }
     });
