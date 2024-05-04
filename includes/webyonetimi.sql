@@ -169,7 +169,9 @@ CREATE TABLE IF NOT EXISTS `zamanlanmisgorev` (
   `ozel_onek` int NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `sonraki_calisma` (`sonraki_calisma`)
-) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+INSERT INTO `zamanlanmisgorev` VALUES(1, 'deneme', 'test_gorev.php', 1714813140, '-1', '-1', '-1', '-1/2', 'Aktif', 'Aktif', 3, 0, 0, NULL, -1, -1, NULL, -1, -1, -1, -1, -1, -1, NULL, NULL, 0);
 
 -- --------------------------------------------------------
 
@@ -187,7 +189,10 @@ CREATE TABLE IF NOT EXISTS `zamanlanmisgorev_gunluk` (
   `calisma_suresi` varchar(20) DEFAULT NULL,
   `veritabani_yedekle` int NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
+) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+INSERT INTO `zamanlanmisgorev_gunluk` VALUES(1, 'USD den TL Güncellendi<br>EURO dan TL Güncellendi<br>EURO dan USD Güncellendi<br>', 'deneme', 'test_gorev.php', 1714813687, '00:00:00:00006', 0);
+
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
