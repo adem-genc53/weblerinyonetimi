@@ -700,7 +700,8 @@ fwrite($dosya,$yaz); fclose($dosya);
         curl_close($ch);
 
         //Çalıştılan sayfada {} süslü parantez içindeki veriyi almak
-        preg_match('/<div style="display:none">(.*?)<\/div>/', $output, $cikti);
+        //preg_match('#{(.*?)}#',$output,$cikti);
+        preg_match('/<div style="display:none">(.*?)<\/div>/s', $output, $cikti);
 
         //echo '<pre>' . print_r($url, true) . '</pre>';
 
