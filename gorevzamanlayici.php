@@ -383,7 +383,7 @@ require("cron_zamanlayici.php");
 
         if($editrow['ozel_onek'] == '1'){
             $ozel_onek_sec = 'checked="checked"';
-            $ozel_onek_disabled = 'required';
+            $ozel_onek_disabled = '';
         }elseif($editrow['ozel_onek'] == '0'){
             $ozel_onek_sec = '';
             $ozel_onek_disabled = 'disabled';
@@ -950,7 +950,7 @@ include('includes/sub_navbar.php');
                 <input class="form-check-input" type="checkbox" name="zip_dosya_adi_degistir" id="zip_dosya_adi_degistir" value="1" <?php echo $ozel_onek_sec ?> style="margin-right: 0;">
             </div>
         </td>
-        <td colspan="4" style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;"><input type="text" class="form-control" value="<?php echo $editrow['secilen_yedekleme_oneki']; ?>" id="dizin_secilen_yedekleme_oneki" name="dizin_secilen_yedekleme_oneki" style="width:350px;" <?php echo $ozel_onek_disabled ?> /></td>
+        <td colspan="4" style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;"><input type="text" class="form-control" value="<?php echo $editrow['secilen_yedekleme_oneki']; ?>" id="dizin_secilen_yedekleme_oneki" name="dizin_secilen_yedekleme_oneki" style="width:350px;" <?php echo $ozel_onek_disabled ?> disabled /></td>
         <td colspan="2">Yedeklenecek web dizin adıdır. Zip çıkarırken buradaki dizin adı ile çıkarılacaktır</td>
     </tr>
 
@@ -1074,7 +1074,7 @@ include('includes/sub_navbar.php');
                 <input class="form-check-input" type="checkbox" name="veritabani_dosya_adi_degistir" id="veritabani_dosya_adi_degistir" value="1" <?php echo $ozel_onek_sec ?> style="margin-right: 0;">
             </div>
         </td>
-        <td colspan="4" style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;"><input type="text" class="form-control" name="veritabani_secilen_yedekleme_oneki" id="veritabani_secilen_yedekleme_oneki" value="<?php echo $secilen_yedekleme_oneki; ?>" style="width:350px;" <?php echo $ozel_onek_disabled ?> /></td>
+        <td colspan="4" style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;"><input type="text" class="form-control" name="veritabani_secilen_yedekleme_oneki" id="veritabani_secilen_yedekleme_oneki" value="<?php echo $secilen_yedekleme_oneki; ?>" style="width:350px;" <?php echo $ozel_onek_disabled ?> disabled /></td>
         <td colspan="2"><input type="hidden" name="hide_veritabani_secilen_yedekleme" id="hide_veritabani_secilen_yedekleme">Yedeklenecek veri tabanına boşluksuz sadece Latin karakter ile bir isim vermelisiniz</td>
     </tr>
 
