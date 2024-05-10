@@ -58,7 +58,7 @@ $dakika = $row['dakika'] ?? "-1";
 // Gönderilen haftanın değeri
 $haftanin_gunu = explode(",", $row['haftanin_gunu']);
 
-include_once("cron_zamanlayici.php");
+require_once("cron_zamanlayici.php");
 
     if(isset($sonraki_calisma)){
         if(strlen((string) $sonraki_calisma) == 10){
@@ -71,7 +71,7 @@ include_once("cron_zamanlayici.php");
 ########################################### GÖREVLERİ YÜRÜTME BAŞLANGICI ################################################
 #########################################################################################################################
 
-include("gorev_yurutucu.php");
+require_once("gorev_yurutucu.php");
 
 #########################################################################################################################
 ########################################### GÖREVLERİ YÜRÜTME SONU ######################################################
