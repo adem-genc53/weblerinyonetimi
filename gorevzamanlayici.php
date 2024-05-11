@@ -16,24 +16,605 @@ if($grup != 1){
 */
 $haftadizi = array();
 $haftadizi = array(1,2,3,4,5,6,7);
+/*
+if(is_array($_POST['haftanin_gunu']) AND array_intersect($haftadizi, $_POST['haftanin_gunu'])){
+echo "hafta gün ve günleri if kontrolu tamam";
+exit;
+}
+*/
+################################################################################
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+########### HAFTA HESAPLAMALARI ################################################
+         
+########### HAFTA HESAPLAMALARI BİTTİ ##########################################
+////////////////////////////////////////////////////////////////////////////////
+/*
+* * * -  Şimdi güne, saate ve dakkaya arti 1 dakika ekle
 
-// Gönderilen gün değeri
-$gun = isset($_POST['gun']) ? $_POST['gun'] : '-1';
-// Gönderilen saat değeri
-$saat = isset($_POST['saat']) ? $_POST['saat'] : '-1';
-// Gönderilen dakika değeri
-$dakika = isset($_POST['dakika']) ? $_POST['dakika'] : '-1';
-// Gönderilen haftanın değeri
-$haftanin_gunu = isset($_POST['haftanin_gunu']) ? $_POST['haftanin_gunu'] : [0=>-1];
+x * * -x gün geçti ise saat 00, dakika 00 arti 1 ay ertele
+x * * -x güne eşit ise "şimdiki saat ve dakika arti 1 dakika ekle
+x * * -x gün daha gelmedi ise x günü saat 00 dakika 00 kaydet
 
-require("cron_zamanlayici.php");
+x x * -x gün geçti ise x günü x saati dakika 00 1 ay ertele
+x x * -x güne eşit x saat geçti ise x günü x saati dakika 00 1 ay ertele
+x x * -x güne eşit x saate eşit ise x günü x saati ve şimdiki dakikaya 1 dakika ekle
+x x * -x güne eşit x saat daha gelmedi ise x günü x saati dakika 00 kaydet
+x x * -x gün daha gelmedi ise x gün x saat dakika 00 kaydet
+
+x x x -x gün geçti ise 1 ay ertele
+x x x -x güne eşit x saat eşit dakika eşit yada geçti ise 1 ay ertele
+x x x -x güne eşit x saat eşit dakika daha gelmedi ise aynen kaydet
+x x x -x güne eşit x saat daha gelmedi aynen kaydet
+x x x -x gün daha gelmedi aynen kaydet
+
+* * x -x dakika eşit yada geçti ise bugünün, bu saatine 1 saat ertle
+* * x -x dakika daha gelmedi ise bugün bu saate x dakika kaydet
+
+* x x -x saat geçti ise 1 gün ertele
+* x x -x saat eşit dakika eşit yada geçti ise 1 gün ertele
+* x x -x saat eşit dakika dakika daha gelmedi ise bugüne aynen kaydet
+* x x -x saat daha gelmedi ise bugüne aynen kaydet
+ 
+* x * -x saat eşit veya geçti ise bir gün erteler
+* x * -x saat daha gelmedi ise bugün, x saat ve 00 dakika kaydet
+ 
+x * x -x gün geçti ise 1 ay ertele
+x * x -x gün ve dakika eşit ise 1 saat ertele (saat 11'i geçmedi ise)
+x * x -x gün eşit ve dakika daha gelmedi ise aynen zamanı kaydet
+x * x -x gün daha gelmedi ise aynen kaydet 
+*/
+////////////////////////////////////////////////////////////////////////////////
+
+########### HAFTASIZ ZAMANLARI HESAPLAMA #######################################
+          if(isset($_POST['haftanin_gunu'])){
+          if(is_array($_POST['haftanin_gunu']) AND in_array('-1', $_POST['haftanin_gunu'])){
+          ## * * * ##
+          // Şimdi güne, saate ve dakkaya arti 1 dakika ekle
+          if($_POST['gun']<0 AND $_POST['saat']<0 AND $_POST['dakika']<0){
+
+          $sonraki_calisma = mktime(date('G'), date('i')+1, 0, date('n'), date('j'), date('Y'));
+
+          }
+################################################################################          
+          ## x * * ##
+          // x gün geçti ise saat 00, dakika 00 arti 1 ay ertele
+          if($_POST['gun']>-1 AND $_POST['gun'] < date('j') AND $_POST['saat']<0 AND $_POST['dakika']<0){
+
+          $gun = $_POST['gun'];
+          $sonraki_calisma = mktime(0, 0, 0, date('n')+1, $gun, date('Y'));
+                   
+          }
+          ## x * * ##
+          // x güne eşit ise "şimdiki saat ve dakika arti 1 dakika ekle
+          if($_POST['gun']>-1 AND $_POST['gun']==date('j') AND $_POST['saat']<0 AND $_POST['dakika']<0){
+
+          $gun = $_POST['gun'];
+          $sonraki_calisma = mktime(date('G'), date('i')+1, 0, $ay, $gun, date('Y'));
+
+          }
+          ## x * * ##
+          // x gün daha gelmedi ise x günü saat 00 dakika 00 kaydet
+          if($_POST['gun']>-1 AND $_POST['gun'] > date('j') AND $_POST['saat']<0 AND $_POST['dakika']<0){
+
+          $gun = $_POST['gun'];
+          $sonraki_calisma = mktime(0, 0, 0, date('n'), $gun, date('Y')); 
+
+          }
+################################################################################          
+          ## x x * ##
+          // x gün geçti ise x günü x saati dakika 00 1 ay ertele
+          if($_POST['gun']>-1 AND $_POST['gun'] < date('j') AND $_POST['saat']>-1 AND $_POST['dakika']<0){
+
+          $gun = $_POST['gun'];
+          $saat = $_POST['saat'];
+          $sonraki_calisma = mktime($saat, 0, 0, date('n')+1, $gun, date('Y'));
+
+          }
+          ## x x * ##
+          // x güne eşit x saat geçti ise x günü x saati dakika 00 1 ay ertele
+          if($_POST['gun']>-1 AND $_POST['gun']==date('j') AND $_POST['saat']>-1 AND $_POST['saat'] < date('G') AND $_POST['dakika']<0){
+
+          $gun = $_POST['gun'];
+          $saat = $_POST['saat'];
+          $sonraki_calisma = mktime($saat, 0, 0, date('n')+1, $gun, date('Y'));
+
+          }
+          ## x x * ##
+          // x güne eşit x saate eşit ise x günü x saati ve şimdiki dakikaya 1 dakika ekle
+          if($_POST['gun']>-1 AND $_POST['gun']==date('j') AND $_POST['saat']>-1 AND $_POST['saat']==date('G') AND $_POST['dakika']<0){
+
+          $gun = $_POST['gun'];
+          $saat = $_POST['saat'];
+          $sonraki_calisma = mktime($saat, date('i')+1, 0, date('n'), $gun, date('Y'));
+
+          }
+          ## x x * ##
+          // x güne eşit x saat daha gelmedi ise x günü x saati dakika 00 kaydet
+          if($_POST['gun']>-1 AND $_POST['gun']==date('j') AND $_POST['saat']>-1 AND $_POST['saat'] > date('G') AND $_POST['dakika']<0){
+
+          $gun = $_POST['gun'];
+          $saat = $_POST['saat'];
+          $sonraki_calisma = mktime($saat, 0, 0, date('n'), $gun, date('Y'));
+
+          }
+          ## x x * ##
+          // x gün daha gelmedi ise x gün x saat dakika 00 kaydet
+          if($_POST['gun']>-1 AND $_POST['gun'] > date('j') AND $_POST['saat']>-1 AND $_POST['dakika']<0){
+
+          $gun = $_POST['gun'];
+          $saat = $_POST['saat'];
+          $sonraki_calisma = mktime($saat, 0, 0, date('n'), $gun, date('Y'));
+
+          }
+################################################################################
+          ## x x x ##
+          // x gün geçti ise 1 ay ertele
+          if($_POST['gun']>-1 AND $_POST['gun'] < date('j') AND $_POST['saat']>-1 AND $_POST['dakika']>-1){
+
+          $gun = $_POST['gun'];
+          $saat = $_POST['saat'];
+          $dakika = $_POST['dakika'];
+          $sonraki_calisma = mktime($saat, $dakika, 0, date('n')+1, $gun, date('Y'));
+
+          }
+          ## x x x ##
+          // x güne eşit x saat eşit dakika eşit yada geçti ise 1 ay ertele
+          if($_POST['gun']>-1 AND $_POST['gun']==date('j') AND $_POST['saat']>-1 AND $_POST['saat']==date('G') AND $_POST['dakika']>-1 AND $_POST['dakika']<=date('i')){
+
+          $gun = $_POST['gun'];
+          $saat = $_POST['saat'];
+          $dakika = $_POST['dakika'];
+          $sonraki_calisma = mktime($saat, $dakika, 0, date('n')+1, $gun, date('Y'));
+
+          }
+          ## x x x ##
+          // x güne eşit x saat eşit dakika daha gelmedi ise aynen kaydet
+          if($_POST['gun']>-1 AND $_POST['gun']==date('j') AND $_POST['saat']>-1 AND $_POST['saat']==date('G') AND $_POST['dakika']>-1 AND $_POST['dakika'] > date('i')){
+
+          $gun = $_POST['gun'];
+          $saat = $_POST['saat'];
+          $dakika = $_POST['dakika'];
+          $sonraki_calisma = mktime($saat, $dakika, 0, date('n'), $gun, date('Y'));
+
+          }
+          ## x x x ##
+          // x güne eşit x saat daha gelmedi aynen kaydet
+          if($_POST['gun']>-1 AND $_POST['gun']==date('j') AND $_POST['saat']>-1 AND $_POST['saat'] > date('G') AND $_POST['dakika']>-1){
+
+          $gun = $_POST['gun'];
+          $saat = $_POST['saat'];
+          $dakika = $_POST['dakika'];
+          $sonraki_calisma = mktime($saat, $dakika, 0, date('n'), $gun, date('Y'));
+
+          }
+          ## x x x ##
+          // x gün daha gelmedi aynen kaydet
+          if($_POST['gun']>-1 AND $_POST['gun'] > date('j') AND $_POST['saat']>-1 AND $_POST['dakika']>-1){
+
+          $gun = $_POST['gun'];
+          $saat = $_POST['saat'];
+          $dakika = $_POST['dakika'];
+          $sonraki_calisma = mktime($saat, $dakika, 0, date('n'), $gun, date('Y'));
+
+          }
+################################################################################
+          ## * * x ##
+          // x dakika eşit yada geçti ise bugünün, bu saatine 1 saat ertle
+          if($_POST['gun']<0 AND $_POST['saat']<0 AND $_POST['dakika']>-1 AND $_POST['dakika'] <= date('i')){
+
+          $dakika = $_POST['dakika'];
+          $sonraki_calisma = mktime(date('G')+1, $dakika, 0, date('n'), date('j'), date('Y'));
+
+          }
+          ## * * x ##
+          // x dakika daha gelmedi ise bugün bu saate x dakika kaydet
+          if($_POST['gun']<0 AND $_POST['saat']<0 AND $_POST['dakika']>-1 AND $_POST['dakika'] > date('i')){
+
+          $dakika = $_POST['dakika'];
+          $sonraki_calisma = mktime(date('G'), $dakika, 0, date('n'), date('j'), date('Y'));
+
+          }
+################################################################################
+          ## * x x ##
+          // x saat geçti ise 1 gün ertele
+          if($_POST['gun']<0 AND $_POST['saat']>-1 AND $_POST['saat'] < date('G') AND $_POST['dakika']>-1){
+
+          $saat = $_POST['saat'];
+          $dakika = $_POST['dakika'];
+          $sonraki_calisma = mktime($saat, $dakika, 0, date('n'), date('j')+1, date('Y'));
+
+          }
+          ## * x x ##
+          // x saat eşit dakika eşit yada geçti ise 1 gün ertele
+          if($_POST['gun']<0 AND $_POST['saat']>-1 AND $_POST['saat']==date('G') AND $_POST['dakika']>-1 AND $_POST['dakika']<=date('i')){
+
+          $saat = $_POST['saat'];
+          $dakika = $_POST['dakika'];
+          $sonraki_calisma = mktime($saat, $dakika, 0, date('n'), date('j')+1, date('Y'));
+
+          }
+          ## * x x ##
+          // x saat eşit dakika dakika daha gelmedi ise bugüne aynen kaydet
+          if($_POST['gun']<0 AND $_POST['saat']>-1 AND $_POST['saat']==date('G') AND $_POST['dakika']>-1 AND $_POST['dakika'] > date('i')){
+
+          $saat = $_POST['saat'];
+          $dakika = $_POST['dakika']; 
+          $sonraki_calisma = mktime($saat, $dakika, 0, date('n'), date('j'), date('Y'));
+
+          }
+          ## * x x ##
+          // x saat daha gelmedi ise bugüne aynen kaydet
+          if($_POST['gun']<0 AND $_POST['saat']>-1 AND $_POST['saat'] > date('G') AND $_POST['dakika']>-1){
+
+          $saat = $_POST['saat'];
+          $dakika = $_POST['dakika'];
+          $sonraki_calisma = mktime($saat, $dakika, 0, date('n'), date('j'), date('Y'));
+
+          }
+################################################################################
+          ## * x * ##
+          // x saat eşit yada geçti ise bir gün ertele
+          if($_POST['gun']<0 AND $_POST['saat']>-1 AND $_POST['saat'] <= date('G') AND $_POST['dakika']<0){
+
+          $saat = $_POST['saat'];
+          $sonraki_calisma = mktime($saat, 0, 0, date('n'), date('j')+1, date('Y'));
+
+          }
+          // x saat eşit yada geçti ise bir gün ertele
+          if($_POST['gun']<0 AND $_POST['saat']>-1 AND $_POST['saat'] > date('G') AND $_POST['dakika']<0){
+
+          $saat = $_POST['saat'];
+          $sonraki_calisma = mktime($saat, 0, 0, date('n'), date('j'), date('Y'));
+
+          }
+################################################################################
+          ## x * ##
+          //x * x -x gün geçti ise 1 ay ertele
+          if($_POST['gun']>-1 AND $_POST['gun'] < date('j') AND $_POST['saat']<0 AND $_POST['dakika']>-1){
+
+          $gun = $_POST['gun'];
+          $dakika = $_POST['dakika'];
+          $sonraki_calisma = mktime(0, $dakika, 0, date('n')+1, $gun, date('Y'));
+
+          }
+          //x * x -x gün eşit ve dakika eşit yada geçti ise 1 saat ertele (saat 11'i geçmedi ise)
+          if($_POST['gun']>-1 AND $_POST['gun']==date('j') AND $_POST['saat']<0 AND $_POST['dakika']>-1 AND $_POST['dakika']<=date('i')){
+
+          $gun = $_POST['gun'];
+          $dakika = $_POST['dakika'];
+          $sonraki_calisma = mktime(date('G'), $dakika, 0, date('n'), $gun, date('Y'));
+
+          if(date('G')<=22 AND $_POST['dakika']<=59){
+            $artibirsaat=1;
+            $sonraki_calisma = mktime($saat, $dakika, 0, date('n'), $gun, date('Y'));
+          }
+          if(date('G')==23 AND $_POST['dakika']>=0){
+            $artibiray=1;
+            $sonraki_calisma = mktime($saat, $dakika, 0, date('n'), $gun, date('Y'));
+          }
+          }
+          //x * x -x gün eşit ve dakika daha gelmedi ise aynen zamanı kaydet
+          if($_POST['gun']>-1 AND $_POST['gun']==date('j') AND $_POST['saat']<0 AND $_POST['dakika']>-1 AND $_POST['dakika']>date('i')){
+
+          $gun = $_POST['gun'];
+          $dakika = $_POST['dakika'];
+          $sonraki_calisma = mktime(date('G'), $dakika, 0, date('n'), $gun, date('Y'));
+
+          }
+          //x * x -x gün daha gelmedi ise aynen kaydet
+          if($_POST['gun']>-1 AND $_POST['gun'] > date('j') AND $_POST['saat']<0 AND $_POST['dakika']>-1){
+
+          $gun = $_POST['gun'];
+          $dakika = $_POST['dakika'];
+          $sonraki_calisma = mktime(0, $dakika, 0, date('n')+1, $gun, date('Y'));
+
+          }
+                            
+          } // if(is_array($_POST['haftanin_gunu']) AND in_array('-1', $_POST['haftanin_gunu'])){
+          } // if(isset($_POST['haftanin_gunu'])){
+########### HAFTASIZ ZAMANLARI HESAPLAMA #######################################
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+########### ÇALIŞMA ZAMANI UNIX DEĞERİ ALMA İŞLEMİ #############################
+################################################################################
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+/*                    ÇOKLU HAFTA GÜNLERİ HESAPLAMA                           */
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+/*
+* * -Seçilen gün bugün ise şimdi saat ve şimdiki dakikaya artı 1 dakika ekle
+* * -SEÇILEN GÜN BUGÜN DEĞIL ISE SONRAKI GÜNE VE SAAT 00 DAKIKA 00 ERTELE
+
+x * -Seçilen gün bugün ise saat geçti ise SONRAKI GÜNE ve saat xx dakika 00 ertele
+x * -Seçilen gün bugün ise saat eşit ise bugüne saat xx şimdiki dakikaya artı 1 dakika ekle
+x * -Seçilen gün bugün ise saat henüz gelmedi ise bugüne saat xx dakika 00 ayarla
+x * -SEÇILEN GÜN BUGÜN DEĞIL ISE SONRAKI GÜNE VE SAAT XX DAKIKA 00 KAYDET
+
+x x -Seçilen gün bugün ise saat geçti ise SONRAKI GÜNE ve saat xx dakika xx ertele
+x x -Seçilen gün bugün ise saat eşit ise dakika eşit yada geçti ise SONRAKI GÜNE ve saat xx dakika xx ertele
+x x -Seçilen gün bugün ise saat eşit ise dakika henüz gelmedi ise bugüne ve saat xx dakika xx kaydet
+x x -Seçilen gün bugün ise saat henüz gelmedi ise bugüne ve saat xx dakika xx kaydet
+x x -SEÇILEN GÜN BUGÜN DEĞIL ISE SONRAKI GÜNE VE SAAT XX DAKIKA XX KAYDET
+
+* x -Seçilen gün bugün ise dakika eşit yada geçti ise şimdiki saat ve dakika xx artı 1 saat ertele
+* x -Seçilen gün bugün ise dakika henüz gelmedi ise şimdiki saat ve dakika xx kaydet
+* x -SEÇILEN GÜN BUGÜN DEĞIL ISE SONRAKI GÜNE VE SAAT 00 DAKIKA XX KAYDET
+*/
+########### HAFTA HESAPLAMALARI ################################################
+          if(isset($_POST['haftanin_gunu'])){
+          if(is_array($_POST['haftanin_gunu']) AND array_intersect($haftadizi, $_POST['haftanin_gunu'])){
+          $haftanin_gunleri = $_POST['haftanin_gunu'];
+          $gunsayisi = count($haftanin_gunleri);
+          $haftaninbugunu = date('N');
+          if(isset($haftanin_gunleri)){
+          // Dizide bugün varsa bugünü ver                    
+          if(in_array($haftaninbugunu,$haftanin_gunleri)){
+          $haftaningunu=date('N');
+          // Dizide bugün yoksa dizideki bugünden sonra gelen günü ver 
+          }elseif(!in_array($haftaninbugunu,$haftanin_gunleri)){
+          $number = $_POST['haftanin_gunu'];
+          sort($number);
+          $sourc = $haftaninbugunu;
+          $haftaningunu = $number[0];
+  
+          foreach($number as $numbe) {
+          if($numbe > $sourc) {
+          $haftaningunu = $numbe;
+          break;
+          }
+          }
+          
+          }
+////////////////////////////////////////////////////////////////////////////////
+          $numbers = $_POST['haftanin_gunu'];
+          sort($numbers);
+          $source = $haftaninbugunu;
+          $sonraki_gun = $numbers[0];
+  
+          foreach($numbers as $number) {
+          if($number > $source) {
+          $sonraki_gun = $number;
+          break;
+          }
+          }
+
+               if($sonraki_gun=='1'){
+          $h_tarihi=date('d.m.Y', strtotime('noon monday')); // Pazartesi
+          }elseif($sonraki_gun=='2'){
+          $h_tarihi=date('d.m.Y', strtotime('noon tuesday')); // Salı
+          }elseif($sonraki_gun=='3'){
+          $h_tarihi=date('d.m.Y', strtotime('noon wednesday')); // Çarşamba
+          }elseif($sonraki_gun=='4'){
+          $h_tarihi=date('d.m.Y', strtotime('noon thursday')); // Perşembe
+          }elseif($sonraki_gun=='5'){
+          $h_tarihi=date('d.m.Y', strtotime('noon friday')); // Cuma
+          }elseif($sonraki_gun=='6'){
+          $h_tarihi=date('d.m.Y', strtotime('noon saturday')); // Cumartesi
+          }elseif($sonraki_gun=='7'){
+          $h_tarihi=date('d.m.Y', strtotime('noon sunday')); // Pazar
+          }
+////////////////////////////////////////////////////////////////////////////////
+          }
+       
+################################################################################
+               if($haftaningunu=='1'){
+          $haftanintarihi=date('d.m.Y', strtotime('noon monday')); // Pazartesi
+          }elseif($haftaningunu=='2'){
+          $haftanintarihi=date('d.m.Y', strtotime('noon tuesday')); // Salı
+          }elseif($haftaningunu=='3'){
+          $haftanintarihi=date('d.m.Y', strtotime('noon wednesday')); // Çarşamba
+          }elseif($haftaningunu=='4'){
+          $haftanintarihi=date('d.m.Y', strtotime('noon thursday')); // Perşembe
+          }elseif($haftaningunu=='5'){
+          $haftanintarihi=date('d.m.Y', strtotime('noon friday')); // Cuma
+          }elseif($haftaningunu=='6'){
+          $haftanintarihi=date('d.m.Y', strtotime('noon saturday')); // Cumartesi
+          }elseif($haftaningunu=='7'){
+          $haftanintarihi=date('d.m.Y', strtotime('noon sunday')); // Pazar
+          }
+        
+          ## * * ##
+          // Seçilen gün bugün ise şimdi saat ve şimdiki dakikaya artı 1 dakika ekle          
+          if(date('N') == $haftaningunu AND $_POST['saat'] <0 AND $_POST['dakika'] <0){
+          $degisken = explode(".", $haftanintarihi);
+          $ay = $degisken[1];
+          $gun = $degisken[0];
+          $yil = $degisken[2];
+          $sonraki_calisma = mktime(date('G'), date('i')+1, 0, $ay, $gun, $yil);
+
+          //echo mktime($saat, $dakika+$artibirdakika, 0, $ay, $gun, $yil)."<br>";
+          //echo date_tr('d M Y, l, H:i', mktime($saat, $dakika+$artibirdakika, 0, $ay, $gun, $yil));       
+          }
+          ## x * ##
+          // x * -Seçilen gün bugün ise saat eşit ise bugüne saat xx şimdiki dakikaya artı 1 dakika ekle          
+          if(date('N')==$haftaningunu AND $_POST['saat']>-1 AND $_POST['dakika']<0 AND $_POST['saat']==date('G')){
+          $degisken=explode(".", $haftanintarihi);
+          $ay = $degisken[1];
+          $gun = $degisken[0];
+          $yil = $degisken[2];
+          $saat = $_POST['saat'];
+          $sonraki_calisma = mktime($saat, date('i')+1, 0, $ay, $gun, $yil);          
+          }
+          ## x * ##
+          // x * -Seçilen gün bugün ise saat henüz gelmedi ise bugüne saat xx dakika 00 ayarla          
+          if(date('N')==$haftaningunu AND $_POST['saat']>-1 AND $_POST['dakika']<0 AND $_POST['saat']>date('G')){
+          $degisken=explode(".", $haftanintarihi);
+          $ay = $degisken[1];
+          $gun = $degisken[0];
+          $yil = $degisken[2];
+          $saat = $_POST['saat'];
+          $sonraki_calisma = mktime($saat, 0, 0, $ay, $gun, $yil);          
+          }
+          
+          ## x x ##
+          // x x -Seçilen gün bugün ise saat eşit ise dakika henüz gelmedi ise bugüne ve saat xx dakika xx kaydet
+          if(date('N')==$haftaningunu AND $_POST['saat']>-1 AND $_POST['dakika']>-1 AND $_POST['saat']==date('G') AND $_POST['dakika']>date('i')){
+          $degisken=explode(".", $haftanintarihi);
+          $ay = $degisken[1];
+          $gun = $degisken[0];
+          $yil = $degisken[2];
+          $saat = $_POST['saat'];
+          $dakika = $_POST['dakika'];
+          $sonraki_calisma = mktime($saat, $dakika, 0, $ay, $gun, $yil);         
+          }
+          ## x x ##
+          // x x -Seçilen gün bugün ise saat henüz gelmedi ise bugüne ve saat xx dakika xx kaydet
+          if(date('N')==$haftaningunu AND $_POST['saat']>-1 AND $_POST['dakika']>-1 AND $_POST['saat']>date('G')){
+          $degisken=explode(".", $haftanintarihi);
+          $ay = $degisken[1];
+          $gun = $degisken[0];
+          $yil = $degisken[2];
+          $saat = $_POST['saat'];
+          $dakika = $_POST['dakika'];
+          $sonraki_calisma = mktime($saat, $dakika, 0, $ay, $gun, $yil);         
+          }
+          
+          ## * x ##
+          // * x -Seçilen gün bugün ise dakika eşit yada geçti ise şimdiki saat ve dakika xx artı 1 saat ertele
+          if(date('N')==$haftaningunu AND $_POST['saat']<0 AND $_POST['dakika']>-1 AND $_POST['dakika']<=date('i')){
+          $degisken=explode(".", $haftanintarihi);
+          $ay = $degisken[1];
+          $gun = $degisken[0];
+          $yil = $degisken[2];
+          $dakika = $_POST['dakika'];
+          $sonraki_calisma = mktime(date('G')+1, $dakika, 0, $ay, $gun, $yil);          
+          }
+          ## * x ##
+          // * x -Seçilen gün bugün ise dakika henüz gelmedi ise şimdiki saat ve dakika xx kaydet
+          if(date('N')==$haftaningunu AND $_POST['saat']<0 AND $_POST['dakika']>-1 AND $_POST['dakika']>date('i')){
+          $degisken=explode(".", $haftanintarihi);
+          $ay = $degisken[1];
+          $gun = $degisken[0];
+          $yil = $degisken[2];
+          $dakika = $_POST['dakika'];
+          $sonraki_calisma = mktime(date('G'), $dakika, 0, $ay, $gun, $yil);          
+          }
+## BUGÜN ANCAK SAAT VEYA DAKİKA EŞİT YADA GEÇTİ ##########          
+          ## x * ##
+          // x * -Seçilen gün bugün ve saat geçti ise SONRAKI GÜNE ve saat xx dakika 00 ertele          
+          if(date('N')==$haftaningunu AND $_POST['saat']>-1 AND $_POST['dakika']<0  AND $_POST['saat'] < date('G') AND $gunsayisi=='1'){
+          $degisken=explode(".", $haftanintarihi);
+          $ay = $degisken[1];
+          $gun = $degisken[0];
+          $yil = $degisken[2];
+          $saat = $_POST['saat'];
+          $sonraki_calisma = mktime($saat, 0, 0, $ay, $gun+7, $yil);
+
+          }elseif(date('N')==$haftaningunu AND $_POST['saat']>-1 AND $_POST['dakika']<0  AND $_POST['saat'] < date('G') AND $gunsayisi!='1'){
+
+          $degisken=explode(".", $h_tarihi);
+          $ay = $degisken[1];
+          $gun = $degisken[0];
+          $yil = $degisken[2];          
+          $saat = $_POST['saat'];
+          $sonraki_calisma = mktime($saat, 0, 0, $ay, $gun, $yil);                         
+          } 
+          ## x x ##
+          // x x -Seçilen gün bugün ise saat geçti ise SONRAKI GÜNE ve saat xx dakika xx ertele          
+          if(date('N')==$haftaningunu AND $_POST['saat']>-1 AND $_POST['dakika']>-1  AND $_POST['saat'] < date('G') AND $gunsayisi=='1'){
+          $degisken=explode(".", $haftanintarihi);
+          $ay = $degisken[1];
+          $gun = $degisken[0];
+          $yil = $degisken[2];
+          $saat = $_POST['saat'];
+          $dakika = $_POST['dakika'];
+          $sonraki_calisma = mktime($saat, $dakika, 0, $ay, $gun+7, $yil);
+
+          }elseif(date('N')==$haftaningunu AND $_POST['saat']>-1 AND $_POST['dakika']>-1  AND $_POST['saat'] < date('G') AND $gunsayisi!='1'){
+
+          $degisken=explode(".", $h_tarihi);
+          $ay = $degisken[1];
+          $gun = $degisken[0];
+          $yil = $degisken[2];          
+          $saat = $_POST['saat'];
+          $dakika = $_POST['dakika'];
+          $sonraki_calisma = mktime($saat, $dakika, 0, $ay, $gun, $yil);
+          }
+          ## x x ##
+          // x x -Seçilen gün bugün ise saat eşit ise dakika eşit yada geçti ise SONRAKI GÜNE ve saat xx dakika xx ertele         
+          if(date('N')==$haftaningunu AND $_POST['saat']>-1 AND $_POST['dakika']>-1 AND $_POST['saat']==date('G') AND $_POST['dakika']<=date('i') AND $gunsayisi=='1'){
+          $degisken=explode(".", $haftanintarihi);
+          $ay = $degisken[1];
+          $gun = $degisken[0];
+          $yil = $degisken[2];
+          $saat = $_POST['saat'];
+          $dakika = $_POST['dakika'];
+          $sonraki_calisma = mktime($saat, $dakika, 0, $ay, $gun+7, $yil);
+
+          }elseif(date('N')==$haftaningunu AND $_POST['saat']>-1 AND $_POST['dakika']>-1 AND $_POST['saat']==date('G') AND $_POST['dakika']<=date('i') AND $gunsayisi!='1'){
+
+          $degisken=explode(".", $h_tarihi);
+          $ay = $degisken[1];
+          $gun = $degisken[0];
+          $yil = $degisken[2];          
+          $saat = $_POST['saat'];
+          $dakika = $_POST['dakika'];
+          $sonraki_calisma = mktime($saat, $dakika, 0, $ay, $gun, $yil);
+          }
+                              
+## BUGÜN DEĞİL İSE ###################          
+          ## * * ##
+          // * * -SEÇILEN GÜN BUGÜN DEĞIL ISE SONRAKI GÜNE VE SAAT 00 DAKIKA 00 ERTELE          
+          if(date('N')!=$haftaningunu AND $_POST['saat']<0 AND $_POST['dakika']<0){
+          $degisken=explode(".", $haftanintarihi);
+          $ay = $degisken[1];
+          $gun = $degisken[0];
+          $yil = $degisken[2];
+          $sonraki_calisma = mktime(0, 0, 0, $ay, $gun, $yil);          
+          }
+          ## x * ##
+          // x * -SEÇILEN GÜN BUGÜN DEĞIL ISE SONRAKI GÜNE VE SAAT XX DAKIKA 00 KAYDET          
+          if(date('N')!=$haftaningunu AND $_POST['saat']>-1 AND $_POST['dakika']<0){
+          $degisken=explode(".", $haftanintarihi);
+          $ay = $degisken[1];
+          $gun = $degisken[0];
+          $yil = $degisken[2];
+          $saat = $_POST['saat'];
+          $sonraki_calisma = mktime($saat, 0, 0, $ay, $gun, $yil);          
+          }
+          ## x x ##
+          // x x -SEÇILEN GÜN BUGÜN DEĞIL ISE SONRAKI GÜNE VE SAAT XX DAKIKA XX KAYDET         
+          if(date('N')!=$haftaningunu AND $_POST['saat']>-1 AND $_POST['dakika']>-1){
+          $degisken=explode(".", $haftanintarihi);
+          $ay = $degisken[1];
+          $gun = $degisken[0];
+          $yil = $degisken[2];
+          $saat = $_POST['saat'];
+          $dakika = $_POST['dakika'];
+          $sonraki_calisma = mktime($saat, $dakika, 0, $ay, $gun, $yil);          
+          }
+          ## * x ##
+          // * x -SEÇILEN GÜN BUGÜN DEĞIL ISE SONRAKI GÜNE VE SAAT 00 DAKIKA XX KAYDET          
+          if(date('N')!=$haftaningunu AND $_POST['saat']<0 AND $_POST['dakika']>-1){
+          $degisken=explode(".", $haftanintarihi);
+          $ay = $degisken[1];
+          $gun = $degisken[0];
+          $yil = $degisken[2];
+          $dakika = $_POST['dakika'];
+          $sonraki_calisma = mktime(0, $dakika, 0, $ay, $gun, $yil);          
+          }
+     } // if(is_array($_POST['haftanin_gunu']) AND array_intersect($haftadizi, $_POST['haftanin_gunu'])){
+     } // if(isset($_POST['haftanin_gunu'])){
+
+    if($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['veri_del'])){
+        $sil = $PDOdb->prepare("DELETE FROM zamanlanmisgorev WHERE id = ?");
+        $sil->execute([$_POST['veri_del']]);
+        if($sil->rowCount()){
+            $messages[] = "Görev Başarıyla Silindi.";
+            header("Refresh:2");
+        }else{
+            $errors[] = "Bir Hatadan Dolayı Görev Silinemedi. Tekrar Deneyin.";
+        }
+    }
 
     if($_SERVER['REQUEST_METHOD'] == 'POST' && (isset($_POST['gorev_ekle']) || isset($_POST['gorevi_duzelt']))){
         //echo '<pre>' . print_r($_POST, true) . '</pre>';
 
         // Ekleme ve güncelleme için
         if(is_array($_POST['haftanin_gunu']) AND array_intersect($haftadizi, $_POST['haftanin_gunu'])){$gun = '-1';}
-        if(is_array($_POST['haftanin_gunu']) AND in_array('-1', $_POST['haftanin_gunu'])){$gun = $gun;}
+        if(is_array($_POST['haftanin_gunu']) AND in_array('-1', $_POST['haftanin_gunu'])){$gun = $_POST['gun'];}
         $gorev_adi                      = $_POST['gorev_adi'];
         $dosya_adi                      = $_POST['dosya_adi'];
 
@@ -188,9 +769,9 @@ require("cron_zamanlayici.php");
             $ftvtk->bindValue(':dosya_adi', $dosya_adi, PDO::PARAM_STR);
             $ftvtk->bindValue(':sonraki_calisma', $sonraki_calisma, PDO::PARAM_INT);
             $ftvtk->bindValue(':haftanin_gunu', $haftanin_gunu, PDO::PARAM_STR);
-            $ftvtk->bindValue(':gun', $gun, PDO::PARAM_STR);
-            $ftvtk->bindValue(':saat', $saat, PDO::PARAM_STR);
-            $ftvtk->bindValue(':dakika', $dakika, PDO::PARAM_STR);
+            $ftvtk->bindValue(':gun', $gun, PDO::PARAM_INT);
+            $ftvtk->bindValue(':saat', $saat, PDO::PARAM_INT);
+            $ftvtk->bindValue(':dakika', $dakika, PDO::PARAM_INT);
             $ftvtk->bindValue(':aktif', $aktif, PDO::PARAM_STR);
             $ftvtk->bindValue(':gunluk_kayit', $gunluk_kayit, PDO::PARAM_STR);
             $ftvtk->bindValue(':yedekleme_gorevi', $yedekleme_gorevi, PDO::PARAM_INT);
@@ -230,41 +811,41 @@ require("cron_zamanlayici.php");
 
     try {
         $ftvtk = $PDOdb->prepare("UPDATE zamanlanmisgorev SET 
-        gorev_adi                       = :gorev_adi, 
-        dosya_adi                       = :dosya_adi,  
-        sonraki_calisma                 = :sonraki_calisma,
-        haftanin_gunu                   = :haftanin_gunu,
-        gun                             = :gun, 
-        saat                            = :saat, 
-        dakika                          = :dakika, 
-        aktif                           = :aktif, 
-        gunluk_kayit                    = :gunluk_kayit, 
-        yedekleme_gorevi                = :yedekleme_gorevi,
-        ftp_yedekle                     = :ftp_yedekle,
-        google_yedekle                  = :google_yedekle,
-        uzak_sunucu_ici_dizin_adi       = :uzak_sunucu_ici_dizin_adi,
-        google_sunucu_korunacak_yedek   = :google_sunucu_korunacak_yedek,
-        ftp_sunucu_korunacak_yedek      = :ftp_sunucu_korunacak_yedek,
-        secilen_yedekleme_oneki         = :secilen_yedekleme_oneki,
-        yerel_korunacak_yedek           = :yerel_korunacak_yedek,
-        gz                              = :gz,
-        dbbakim                         = :dbbakim,
-        dblock                          = :dblock,
-        combine                         = :combine,
-        elle                            = :elle,
-        tablolar                        = :tablolar,
-        secilen_yedekleme               = :secilen_yedekleme,
-        ozel_onek                       = :ozel_onek
+        gorev_adi = :gorev_adi, 
+        dosya_adi = :dosya_adi,  
+        sonraki_calisma = :sonraki_calisma,
+        haftanin_gunu = :haftanin_gunu,
+        gun = :gun, 
+        saat = :saat, 
+        dakika = :dakika, 
+        aktif = :aktif, 
+        gunluk_kayit = :gunluk_kayit, 
+        yedekleme_gorevi = :yedekleme_gorevi,
+        ftp_yedekle = :ftp_yedekle,
+        google_yedekle = :google_yedekle,
+        uzak_sunucu_ici_dizin_adi = :uzak_sunucu_ici_dizin_adi,
+        google_sunucu_korunacak_yedek = :google_sunucu_korunacak_yedek,
+        ftp_sunucu_korunacak_yedek = :ftp_sunucu_korunacak_yedek,
+        secilen_yedekleme_oneki = :secilen_yedekleme_oneki,
+        yerel_korunacak_yedek = :yerel_korunacak_yedek,
+        gz = :gz,
+        dbbakim = :dbbakim,
+        dblock = :dblock,
+        combine = :combine,
+        elle = :elle,
+        tablolar = :tablolar,
+        secilen_yedekleme = :secilen_yedekleme,
+        ozel_onek = :ozel_onek
         WHERE
-        id                              = :id");
+        id = :id");
 
         $ftvtk->bindValue(':gorev_adi', $gorev_adi, PDO::PARAM_STR);
         $ftvtk->bindValue(':dosya_adi', $dosya_adi, PDO::PARAM_STR);
         $ftvtk->bindValue(':sonraki_calisma', $sonraki_calisma, PDO::PARAM_INT);
         $ftvtk->bindValue(':haftanin_gunu', $haftanin_gunu, PDO::PARAM_STR);
-        $ftvtk->bindValue(':gun', $gun, PDO::PARAM_STR);
-        $ftvtk->bindValue(':saat', $saat, PDO::PARAM_STR);
-        $ftvtk->bindValue(':dakika', $dakika, PDO::PARAM_STR);
+        $ftvtk->bindValue(':gun', $gun, PDO::PARAM_INT);
+        $ftvtk->bindValue(':saat', $saat, PDO::PARAM_INT);
+        $ftvtk->bindValue(':dakika', $dakika, PDO::PARAM_INT);
         $ftvtk->bindValue(':aktif', $aktif, PDO::PARAM_STR);
         $ftvtk->bindValue(':gunluk_kayit', $gunluk_kayit, PDO::PARAM_STR);
         $ftvtk->bindValue(':yedekleme_gorevi', $yedekleme_gorevi, PDO::PARAM_INT);
@@ -478,7 +1059,7 @@ include('includes/sub_navbar.php');
                             <div class="card-header" id="headingOne">
                             <h5 class="m-0">
                                 <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
-                                Websiteleri Yedekleme Yönetimi Hakkında Bilmeniz Gerekenler!
+                                Websiteleri Yedekleme Yönetimi Hakkında Bilmeniz Gerekenler !
                                 </button>
                             </h5>
                             </div>
@@ -495,23 +1076,13 @@ include('includes/sub_navbar.php');
                                 </p>
                                 <p><strong>kurlar.php</strong> TCMB dan döviz kuru günceller
                                 </p>
-                                <p>Eğer PHP kodu yazma bilginiz varsa kendize özel görevi yerine getirecek script yazabilirsiniz. Örnek <b>test_gorev.php</b> dosyaya bakınız.
+                                <p>Eğer PHP kodu yazma bilginiz varsa kendize özel görevi yerine getirecek script yazabilirsiniz
                                 </p>
                                 <p>Buradan veritabanı yedekleme, web site dizin yedekleme, ve döviz kuru güncelleme görevleri ekleyebilir ve yönetebilirsiniz.
                                 </p>
                                 <p>Eklenmiş görevleri zamanı gelmeden dahi elle yürütme imkanı mevcuttur.
                                 </p>
                                 <p>Haftanın günlerinde hem * yıldız hemde haftanın günü veya günleri aynı anda seçilemez * yıldız seçildiğinde haftanın günleri devre dışı kalır, haftanın günü veya günleri seçildiğinde ayın günleri devre dışı kalır seçilen haftanın gün vey günlerinde çalışıyor. Bu seçenek mesai günlerinde veya mesai dışı günlerinde çalıştırma imkanı sağlar.
-                                </p>
-                                <p>Tablo sütunların açıklamaları.<br />
-                                <strong>Çalışacağı Zaman</strong> Görevin ne zaman çalışacağını gösterir<br />
-                                <strong>Haftanın Günü</strong> -1 ise haftanın günü devre dışı demektir, gün adı yazıyorsa haftanın günü aktif ve çalışacağı günü gösterir.<br />
-                                <strong>Gün</strong> -1 ise her gün çalışacak, -1/2,-1/3,-1/4 biri ise -1/x gün ara ile çalışacak, normal gün sayısı varsa her ay o gün çalışacak demektir.<br />
-                                <strong>Saat</strong> -1 ise her saat, -1/0.30 ise her yarım saatte, -1/12 ise gece 00:00 ve veya gündüz 12:00 saatlerde yani 12 saatte bir, -1/2,-1/3,-1/4,-1/6 biri ise -/x saat ara ile, normal saat ise o saatte çalışacak demektir<br />
-                                <strong>Dakika</strong> -1 ise her dakika, -1/2,-1/3,-1/4,-1/5,-1/10,-1/15 biri ise -/x dakika ara ile, normal dakika ise o dakikada çalışacak demektir<br />
-                                <strong>Görev</strong> Aktif olduğunda görev çalışır. Pasif olduğunda görev çalışmaz.<br />
-                                <strong>Günlük</strong> Aktif olduğunda görev sonucu günlüğe yazar. Pasif olduğunda görev sonucu günlüğe yazmaz.<br />
-                                <strong>Yürüt</strong> Çalışacak zamanı gelmezse bile elle görevi çalıştırabilirsiniz
                                 </p>
                                 <b>Veritabanı yedeklerin bulunduğu dizin: </b><span id="yol"><?php echo strtolower(htmlpath('./'.BACKUPDIR)); ?></span><br />
                                 <p><b>Web site zip yedeklerin bulunduğu dizin: </b><span id="yol"><?php echo strtolower(htmlpath('./'.ZIPDIR)); ?></span></p>
@@ -647,33 +1218,33 @@ include('includes/sub_navbar.php');
         <col style="width:5%"></col>
         <col style="width:5%"></col>
         <col style="width:5%"></col>
-        <col style="width:60%"></col>
+        <col style="width:50%"></col>
     </colgroup>
 <thead>
     <tr class="bg-primary" style="line-height: .40;font-size: 1rem;">
         <th style="text-align:center;" colspan="8">Zamanlanmış Görevi Düzelt</th>
     </tr>
 </thead>
-<tbody>
+</tbody>
     <tr>
-        <td colspan="8">Düzenlemek İstediğiniz Görev Zaman Bilgilerini Giriniz</td>
+        <td colspan="8"><div>Düzenlemek İstediğiniz Görev Zaman Bilgilerini Giriniz</td>
     </tr>
 
     <tr>
         <td colspan="2">Görev Adı</td>
-        <td colspan="4" style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;"><input type="text" class="form-control" name="gorev_adi" id="gorev_adi" value="<?php echo $editrow['gorev_adi']; ?>" style="width:350px;" /></td>
-        <td colspan="2">Görevi tanımlayan kısa bir tanım giriniz</td>
+        <td colspan="5" style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;"><input type="text" class="form-control" name="gorev_adi" id="gorev_adi" value="<?php echo $editrow['gorev_adi']; ?>" style="width:350px;" /></td>
+        <td>Görevi tanımlayan kısa bir tanım giriniz</td>
     </tr>
 
     <tr>
         <td colspan="2">Lokal yolu ve dosya adı veya tam URL</td>
-        <td colspan="4" style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;"><input type="text" class="form-control" name="dosya_adi" id="dosya_adi" value="<?php echo $editrow['dosya_adi']; ?>" style="width:350px;" /></td>
-        <td colspan="2">Görevde çalışıtırlacak yerel dosya veya uzak dosya için tam URL giriniz.</td>
+        <td colspan="5" style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;"><input type="text" class="form-control" name="dosya_adi" id="dosya_adi" value="<?php echo $editrow['dosya_adi']; ?>" style="width:350px;" /></td>
+        <td>Görevde çalışıtırlacak yerel dosya veya uzak dosya için tam URL giriniz.</td>
     </tr>
 
     <tr>
-        <td colspan="2" rowspan="2" style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;">Haftanın Günü seçildiğinde 'ayın günü' dikkate almaz)<br /><br /><br />1 den fazla Gün seçmek için klavyenizde Ctrl tuşuna basılı tutarak seçiniz.</td>
-        <td colspan="2" rowspan="2" style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;">
+        <td colspan="2">Haftanın Günü (Not: bu seçenek 'ayın günü' dikkate almaz)<br /><br /><br />1 den fazla Gün seçmek için klavyenizde Ctrl tuşuna basılı tutarak seçiniz.</td>
+        <td colspan="3" style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;">
         <select size="8" name="haftanin_gunu[]" id="haftanin_gunu" class="form-control" style="width: 150px;" multiple>
             <?php
                 $haftanin_gunleri = array(-1 => '*', 1 => "Pazartesi","Salı","Çarşamba","Perşembe","Cuma","Cumartesi","Pazar");
@@ -682,119 +1253,74 @@ include('includes/sub_navbar.php');
                 {
                 $id = $value;
                 $selected = in_array($id, $secili) ? ' selected="selected"' : '';
-                echo "<option value=\"$id\" $selected>$haftanin_gunu</option>\n";
+                echo "<option value=\"$id\"$selected>$haftanin_gunu</option>\n";
                 }
                 ?>
         </select>
         </td>
-        <td colspan="4" style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;">* Yıldız seçeneği haftayı devre dışı bırakır.</td>
+        <td colspan="3">* Yıldız seçeneği haftayı devre dışı bırakır.</td>
     </tr>
 
     <tr>
-        <td colspan="4" style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;"><b>Zamanlanan zaman:</b> <span id="scheduledTime" style="font-weight: bold;color:red;"></span><br />Zamanlama seçeneklerine göre çalışacağı zaman örnekte gösteriliyor.<br />Formu gönderdiğinizde o anki geçerli zamana göre oluşturulacağı için değişebilir.</td>
-    </tr>
-
-    <tr>
-        <td colspan="2">Gün</td>
-        <td colspan="4" style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;">
-        <select class="form-control" name="gun" id="gun" style="min-width: 70px;max-width:350px;">
-              <?php 
-                $gun_options = array(
-                    array("-1", "Her Gün(*)"),
-                    array("-1/2", "Her İki Günde(*/2)"),
-                    array("-1/3", "Her Üç Günde(*/3)"),
-                    array("-1/4", "Her Dört Günde(*/4)")
-                );
-
-                foreach ($gun_options as $option) {
-                    $value = $option[0];
-                    $label = $option[1];
-                    $selected = $editrow['gun'] == $value ? "selected" : "";
-                    echo "<option value=\"$value\" $selected>$label</option>\n";
-                }
-
-              for ($i = 1; $i <= 31; $i++){
-                $formatted_day = sprintf("%02d", $i);
-                if($editrow['gun'] == $i){
-                    echo "<option value=\"$formatted_day\" selected>$i</option>\n";
-                }else{
-                    echo "<option value=\"$formatted_day\">$i</option>\n";
-                }
-              }     
-              ?>
+        <td >Gün / Saat / Dakika</td>
+        <td style="text-align:right;">Gün:</td>
+        <td style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;">
+        <select class="form-control" name="gun" id="gun" style="min-width: 70px;">
+            <?php
+            $gunler = array(-1 => '*', 1 => '1');
+            for ($x = 2; $x <=31; $x++)
+            {
+            $gunler[] = $x;
+            }
+            $secili = $editrow['gun'];
+            foreach($gunler as $value=>$gun)
+            {
+            $id = $value;
+            $selected = $id == $secili ? ' selected="selected"' : '';
+            echo "<option value=\"$id\"$selected>$gun</option>\n";
+            } 
+            ?>
         </select>
         </td>
-        <td colspan="2">Görevin çalışacağı günü veya gün aralıkları belirleyin</td>
-    </tr>
-
-    <tr>
-        <td colspan="2">Saat</td>
-        <td colspan="4" style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;">
-        <select class="form-control" name="saat" id="saat" style="min-width: 70px;max-width:350px;">
-                <?php
-                $options = array(
-                    array("-1", "Her saat(*)"),
-                    array("-1/0.30", "Her Yarım Saatte(*/0.30)"),
-                    array("-1/2", "Her İki Saatte(*/2)"),
-                    array("-1/3", "Her Üç Saatte(*/3)"),
-                    array("-1/4", "Her Dört Saatte(*/4)"),
-                    array("-1/6", "Her Altı Saatte(*/6)"),
-                    array("-1/12", "Her Oniki Saatte(0,12)")
-                );
-
-                foreach ($options as $option) {
-                    $value = $option[0];
-                    $label = $option[1];
-                    $selected = $editrow['saat'] == $value ? "selected" : "";
-                    echo "<option value=\"$value\" $selected>$label</option>\n";
-                }
-
-                for ($i = 0; $i <= 23; $i++) {
-                    if($editrow['saat'] == $i){
-                    echo "<option value=\"$i\" selected>$i</option>\n";
-                }else{
-                    echo "<option value=\"$i\">$i</option>\n";
-                }
-                }
-                ?>
+        <td style="text-align:right;">Saat:</td>
+        <td style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;">
+        <select class="form-control" name="saat" id="saat" style="min-width: 70px;">
+            <?php
+            $saatler = array(-1 => '*');
+            for ($x = 0; $x < 24; $x++)
+            {
+            $saatler[] = $x;
+            }
+            $secili = $editrow['saat'];
+            foreach($saatler as $value=>$saat)
+            {
+            $id = $value;
+            $selected = $id == $secili ? ' selected="selected"' : '';
+            echo "<option value=\"$id\"$selected>$saat</option>\n";
+            } 
+            ?>
+        </select>        
+        </td>
+        <td>Dakika:</td>
+        <td style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;">
+        <select class="form-control" name="dakika" id="dakika" style="min-width: 70px;">
+            <?php
+            $dakikalar = array(-1 => '*');
+            for ($x = 0; $x < 60; $x++)
+            {
+            $dakikalar[] = $x;
+            }
+            $secili = $editrow['dakika'];
+            foreach($dakikalar as $value=>$dakika)
+            {
+            $id = $value;
+            $selected = $id == $secili ? ' selected="selected"' : '';
+            echo "<option value=\"$id\"$selected>$dakika</option>\n";
+            } 
+            ?>
         </select>
         </td>
-        <td colspan="2">Görevin çalışacağı saat veya saat aralıkları belirleyin</td>
-    </tr>
-
-    <tr>
-        <td colspan="2">Dakika</td>
-        <td colspan="4" style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;">
-        <select class="form-control" name="dakika" id="dakika" style="min-width: 70px;max-width:350px;">
-              <?php 
-                $dakika_options = array(
-                    array("-1", "Her Dakika(*)"),
-                    array("-1/2", "Her İki Dakikada(*/2)"),
-                    array("-1/3", "Her Üç Dakikada(*/3)"),
-                    array("-1/4", "Her Dört Dakikada(*/4)"),
-                    array("-1/5", "Her Beş Dakikada(*/5)"),
-                    array("-1/10", "Her On Dakikada(*/10)"),
-                    array("-1/15", "Her Onbeş Dakikada(*/15)")
-                );
-
-                foreach ($dakika_options as $option) {
-                    $value = $option[0];
-                    $label = $option[1];
-                    $selected = $editrow['dakika'] == $value ? "selected" : "";
-                    echo "<option value=\"$value\" $selected>$label</option>\n";
-                }
-
-              for ($i = 0; $i <= 59; $i++){
-                if($editrow['dakika'] == $i){
-                    echo "<option value=\"$i\" selected>$i</option>\n";
-                }else{
-                    echo "<option value=\"$i\">$i</option>\n";
-                }
-              }    
-              ?>
-        </select>
-        </td>
-        <td colspan="2">Görevin çalışacağı dakika veya dakika aralıkları belirleyin</td>
+        <td>&nbsp;</td>
     </tr>
 
     <tr>
@@ -837,8 +1363,8 @@ include('includes/sub_navbar.php');
             }
         ?>
         </td>
-        <td style="text-align:right;">Diğer</td>
-        <td colspan="2">
+        <td style="text-align:right;">Hiçbiri</td>
+        <td>
         <?php 
             if(!empty($editrow['yedekleme_gorevi']) && $editrow['yedekleme_gorevi'] == 3){
                 echo "<input type='radio' name='gorev_nedir' value='3' checked/>";
@@ -847,6 +1373,7 @@ include('includes/sub_navbar.php');
             }
         ?>
         </td>
+        <td>&nbsp;</td>
     </tr>
 
     <tbody id="dizin_ziple_tablo" style="display:none;">
@@ -950,7 +1477,7 @@ include('includes/sub_navbar.php');
                 <input class="form-check-input" type="checkbox" name="zip_dosya_adi_degistir" id="zip_dosya_adi_degistir" value="1" <?php echo $ozel_onek_sec ?> style="margin-right: 0;">
             </div>
         </td>
-        <td colspan="4" style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;"><input type="text" class="form-control" value="<?php echo $editrow['secilen_yedekleme_oneki']; ?>" id="dizin_secilen_yedekleme_oneki" name="dizin_secilen_yedekleme_oneki" style="width:350px;" <?php echo $ozel_onek_disabled ?> disabled /></td>
+        <td colspan="4" style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;"><input type="text" class="form-control" value="<?php echo $editrow['secilen_yedekleme_oneki']; ?>" name="dizin_secilen_yedekleme_oneki" style="width:350px;" required <?php echo $ozel_onek_disabled ?> /></td>
         <td colspan="2">Yedeklenecek web dizin adıdır. Zip çıkarırken buradaki dizin adı ile çıkarılacaktır</td>
     </tr>
 
@@ -1002,7 +1529,7 @@ include('includes/sub_navbar.php');
         <td>
         <?php 
             if(!empty($editrow['ftp_yedekle']) && $editrow['ftp_yedekle'] == 1){
-                echo "<input type='checkbox' name='veritabani_ftp_yedekle' value='1' checked />";
+                echo "<input type='checkbox' name='veritabani_ftp_yedekle' value='1' checked/>";
             }else{
                 echo "<input type='checkbox' name='veritabani_ftp_yedekle' value='1' />";
             }
@@ -1012,7 +1539,7 @@ include('includes/sub_navbar.php');
         <td>
         <?php 
             if(!empty($editrow['google_yedekle']) && $editrow['google_yedekle'] == 1){
-                echo "<input type='checkbox' name='veritabani_google_yedekle' value='1' checked />";
+                echo "<input type='checkbox' name='veritabani_google_yedekle' value='1' checked/>";
             }else{
                 echo "<input type='checkbox' name='veritabani_google_yedekle' value='1' />";
             }
@@ -1074,7 +1601,7 @@ include('includes/sub_navbar.php');
                 <input class="form-check-input" type="checkbox" name="veritabani_dosya_adi_degistir" id="veritabani_dosya_adi_degistir" value="1" <?php echo $ozel_onek_sec ?> style="margin-right: 0;">
             </div>
         </td>
-        <td colspan="4" style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;"><input type="text" class="form-control" name="veritabani_secilen_yedekleme_oneki" id="veritabani_secilen_yedekleme_oneki" value="<?php echo $secilen_yedekleme_oneki; ?>" style="width:350px;" <?php echo $ozel_onek_disabled ?> disabled /></td>
+        <td colspan="4" style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;"><input type="text" class="form-control" name="veritabani_secilen_yedekleme_oneki" id="veritabani_secilen_yedekleme_oneki" value="<?php echo $secilen_yedekleme_oneki; ?>" style="width:350px;" required <?php echo $ozel_onek_disabled ?> /></td>
         <td colspan="2"><input type="hidden" name="hide_veritabani_secilen_yedekleme" id="hide_veritabani_secilen_yedekleme">Yedeklenecek veri tabanına boşluksuz sadece Latin karakter ile bir isim vermelisiniz</td>
     </tr>
 
@@ -1159,7 +1686,7 @@ include('includes/sub_navbar.php');
         <td colspan="8" style="text-align: center;">
             <button type="submit" class="btn btn-success btn-sm" name="gorevi_duzelt" accesskey="s" onclick="return GorevEkle();" /><span class="glyphicon glyphicon-repeat"></span> Değişiklikleri Güncelle </button>
             <button type="reset" class="btn btn-warning btn-sm" value="" accesskey="r" /><span class="glyphicon glyphicon-erase"></span> Sıfırla </button>
-            <button type="submit" class="btn btn-danger btn-sm" value="" accesskey="s" onclick="return hide();" /><span class="glyphicon glyphicon-off"></span> Vazget </button>
+            <button type="submit" class="btn btn-danger btn-sm" value="" accesskey="s" onclick="return hide();" /><span class="glyphicon glyphicon-off"></span> Vazget </buttom>
         </td>
     </tr>
 </tfoot>
@@ -1189,7 +1716,7 @@ include('includes/sub_navbar.php');
                                     <div style="text-align:center;">
                                         <button type="submit" class="btn btn-success btn-sm" name="gorevi_duzelt" accesskey="s" onclick="return GorevEkle();" /><span class="glyphicon glyphicon-repeat"></span> Değişiklikleri Güncelle </button>
                                         <button type="reset" class="btn btn-warning btn-sm" value="" accesskey="r" /><span class="glyphicon glyphicon-erase"></span> Sıfırla </button>
-                                        <button type="submit" class="btn btn-danger btn-sm" value="" accesskey="s" onclick="return hide();" /><span class="glyphicon glyphicon-off"></span> Vazget </button>
+                                        <button type="submit" class="btn btn-danger btn-sm" value="" accesskey="s" onclick="return hide();" /><span class="glyphicon glyphicon-off"></span> Vazget </buttom>
                                     </div>
                                 </div>
                                 <br />
@@ -1238,7 +1765,7 @@ include('includes/sub_navbar.php');
         <th style="text-align:center;" colspan="8">Yeni Görev Zamanla & Ekle</th>
     </tr>
 </thead>
-<tbody>
+</tbody>
     <tr>
         <td colspan="8">Eklemek İstediğiniz Görev Zaman Bilgilerini Giriniz</td>
     </tr>
@@ -1256,8 +1783,8 @@ include('includes/sub_navbar.php');
     </tr>
 
     <tr>
-        <td colspan="2" rowspan="2">Haftanın Günü (Not: bu seçenek 'ayın günü' dikkate almaz)<br /><br /><br />1 den fazla Gün seçmek için klavyenizde Ctrl tuşuna basılı tutarak seçiniz.</td>
-        <td colspan="2" rowspan="2" style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;">
+        <td colspan="2">Haftanın Günü (Not: bu seçenek 'ayın günü' dikkate almaz)<br /><br /><br />1 den fazla Gün seçmek için klavyenizde Ctrl tuşuna basılı tutarak seçiniz.</td>
+        <td colspan="3" style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;">
             <select size="8" name="haftanin_gunu[]" id="haftanin_gunu" style="width: 150px;" class="form-control" multiple>  
                 <option value="-1" selected="selected">*</option>
                 <option value="1">Pazartesi</option>
@@ -1269,99 +1796,42 @@ include('includes/sub_navbar.php');
                 <option value="7">Pazar</option>		
             </select>
         </td>
-        <td colspan="4">* Yıldız seçeneği haftayı devre dışı bırakır.</td>
+        <td colspan="3">* Yıldız seçeneği haftayı devre dışı bırakır.</td>
     </tr>
 
     <tr>
-        <td colspan="4"><b>Zamanlanan zaman:</b> <span id="scheduledTime" style="font-weight: bold;color:red;"></span><br />Zamanlama seçeneklerine göre çalışacağı zaman örnekte gösteriliyor.<br />Formu gönderdiğinizde o anki geçerli zamana göre oluşturulacağı için değişebilir.</td>
-    </tr>
-
-    <tr>
-        <td colspan="2">Gün</td>
-        <td colspan="4" style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;">
-        <select class="form-control" name="gun" id="gun" style="min-width: 70px;max-width:350px;">
-              <?php 
-                $gun_options = array(
-                    array("-1", "Her Gün(*)"),
-                    array("-1/2", "Her İki Günde(*/2)"),
-                    array("-1/3", "Her Üç Günde(*/3)"),
-                    array("-1/4", "Her Dört Günde(*/4)")
-                );
-
-                foreach ($gun_options as $option) {
-                    $value = $option[0];
-                    $label = $option[1];
-                    echo "<option value=\"$value\">$label</option>\n";
-                }
-
-              for ($i = 1; $i <= 31; $i++){
-                $formatted_day = sprintf("%02d", $i);
-                    echo "<option value=\"$formatted_day\">$i</option>\n";
-              }     
-              ?>
-        </select>
+        <td>Gün / Saat / Dakika</td>
+        <td style="text-align:right;">Gün:</td>
+        <td style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;">
+            <select class="form-control" name="gun" id="gun" style="min-width: 70px;">
+            <option value="-1" selected="selected">*</option>       
+            <?php
+            for ($i=1;$i<=31;$i++)
+            echo "<option value=\"$i\">$i</option>\n";       
+            ?>
+            </select>
         </td>
-        <td colspan="2">Görevin çalışacağı günü veya gün aralıkları belirleyin</td>
-    </tr>
-
-    <tr>
-        <td colspan="2">Saat</td>
-        <td colspan="4" style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;">
-        <select class="form-control" name="saat" id="saat" style="min-width: 70px;max-width:350px;">
-                <?php
-                $options = array(
-                    array("-1", "Her saat(*)"),
-                    array("-1/0.30", "Her Yarım Saatte(*/0.30)"),
-                    array("-1/2", "Her İki Saatte(*/2)"),
-                    array("-1/3", "Her Üç Saatte(*/3)"),
-                    array("-1/4", "Her Dört Saatte(*/4)"),
-                    array("-1/6", "Her Altı Saatte(*/6)"),
-                    array("-1/12", "Her Oniki Saatte(0,12)")
-                );
-
-                foreach ($options as $option) {
-                    $value = $option[0];
-                    $label = $option[1];
-                    echo "<option value=\"$value\">$label</option>\n";
-                }
-
-                for ($i = 0; $i <= 23; $i++) {
-                    echo "<option value=\"$i\">$i</option>\n";
-                }
-                ?>
-        </select>
+        <td style="text-align:right;">Saat:</td>
+        <td style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;">
+            <select class="form-control" name="saat" id="saat" style="min-width: 70px;">
+            <option value="-1" selected="selected">*</option>       
+            <?php
+            for ($i=0;$i<=23;$i++)
+            echo "<option value=\"$i\">$i</option>\n";       
+            ?>
+            </select>        
         </td>
-        <td colspan="2">Görevin çalışacağı saat veya saat aralıkları belirleyin</td>
-    </tr>
-
-    <tr>
-        <td colspan="2">Dakika</td>
-        <td colspan="4" style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;">
-        <select class="form-control" name="dakika" id="dakika" style="min-width: 70px;max-width:350px;">
-              <?php 
-                $dakika_options = array(
-                    array("-1", "Her Dakika(*)"),
-                    array("-1/2", "Her İki Dakikada(*/2)"),
-                    array("-1/3", "Her Üç Dakikada(*/3)"),
-                    array("-1/4", "Her Dört Dakikada(*/4)"),
-                    array("-1/5", "Her Beş Dakikada(*/5)"),
-                    array("-1/10", "Her On Dakikada(*/10)"),
-                    array("-1/15", "Her Onbeş Dakikada(*/15)")
-                );
-
-                foreach ($dakika_options as $option) {
-                    $value = $option[0];
-                    $label = $option[1];
-                    echo "<option value=\"$value\">$label</option>\n";
-                }
-
-              for ($i = 0; $i <= 59; $i++){
-                    echo "<option value=\"$i\">$i</option>\n";
-              }    
-              ?>
-        </select>
+        <td>Dakika:</td>
+        <td style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;">
+            <select class="form-control" name="dakika" id="dakika" style="min-width: 70px;">
+            <option value="-1" selected="selected">*</option>       
+            <?php
+            for ($i=0;$i<=59;$i++)
+            echo "<option value=\"$i\">$i</option>\n";       
+            ?>
+            </select>
         </td>
-        <td colspan="2">Görevin çalışacağı dakika veya dakika aralıkları belirleyin</td>
+        <td>&nbsp;</td>
     </tr>
 
     <tr>
@@ -1388,7 +1858,7 @@ include('includes/sub_navbar.php');
         <td><input type="radio" name="gorev_nedir" value="1" /></td>
         <td style="text-align:right;">Dizin Yedekleme</td>
         <td><input type="radio" name="gorev_nedir" value="2" /></td>
-        <td style="text-align:right;">Diğer</td>
+        <td style="text-align:right;">Hiçbiri</td>
         <td><input type="radio" name="gorev_nedir" value="3" checked /></td>
         <td>&nbsp;</td>
     </tr>
@@ -1466,7 +1936,7 @@ include('includes/sub_navbar.php');
                 <input class="form-check-input" type="checkbox" name="zip_dosya_adi_degistir" id="zip_dosya_adi_degistir" value="1" style="margin-right: 0;">
             </div>
         </td>
-        <td colspan="4" style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;"><input type="text" class="form-control" id="dizin_secilen_yedekleme_oneki" name="dizin_secilen_yedekleme_oneki" style="width:350px;" required disabled /></td>
+        <td colspan="4" style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;"><input type="text" class="form-control" name="dizin_secilen_yedekleme_oneki" style="width:350px;" required disabled /></td>
         <td colspan="2">Yedeklenecek web dizin adıdır. Zip çıkarırken buradaki dizin adı ile çıkarılacaktır</td>
     </tr>
 
@@ -1643,7 +2113,7 @@ include('includes/sub_navbar.php');
         <td colspan="8" style="text-align: center;">
             <button type="submit" class="btn btn-success btn-sm" name="gorev_ekle" accesskey="s" onclick="return GorevEkle();" /><span class="glyphicon glyphicon-plus"></span> Yeni Görev Ekle </button>
             <button type="reset" class="btn btn-warning btn-sm" value="" accesskey="r" /><span class="glyphicon glyphicon-erase"></span> Sıfırla </button>
-            <button type="submit" class="btn btn-danger btn-sm" value="" accesskey="s" onclick="return hide();" /><span class="glyphicon glyphicon-off"></span> Vazget </button>
+            <button type="submit" class="btn btn-danger btn-sm" value="" accesskey="s" onclick="return hide();" /><span class="glyphicon glyphicon-off"></span> Vazget </buttom>
         </td>
     </tr>
 </tfoot>
@@ -1674,7 +2144,7 @@ include('includes/sub_navbar.php');
                                     <div>
                                         <button type="submit" class="btn btn-success btn-sm" name="gorev_ekle" accesskey="s" onclick="return GorevEkle();" /><span class="glyphicon glyphicon-plus"></span> Yeni Görev Ekle </button>
                                         <button type="reset" class="btn btn-warning btn-sm" value="" accesskey="r" /><span class="glyphicon glyphicon-erase"></span> Sıfırla </button>
-                                        <button type="submit" class="btn btn-danger btn-sm" value="" accesskey="s" onclick="return hide();" /><span class="glyphicon glyphicon-off"></span> Vazget </button>
+                                        <button type="submit" class="btn btn-danger btn-sm" value="" accesskey="s" onclick="return hide();" /><span class="glyphicon glyphicon-off"></span> Vazget </buttom>
                                     </div>
                                 </div>
                                 <br />
@@ -1729,70 +2199,6 @@ include('includes/sub_navbar.php');
 include('includes/footer.php');
 ?>
 
-<style>
-option:disabled {
-   background: #ccc;
-   width: 500px;
-   padding: 5px;
-   }
-</style>
-
-<script>
-    $(document).ready(function(){
-        // SAAT seçeneğinin değişiklik olayı
-        $('#saat').change(function(){
-            var selectedSaat = $(this).val();
-            if(selectedSaat.startsWith("-1/")){
-                // Eğer saat seçeneğinde ('Her Dakika hariç') 'Her...' ile başlayan bir seçenek seçildiyse, 
-                // DAKİKA seçeneğinindeki 'Her...' ile başlayan tüm seçenekleri devre dışı bırak
-                $('#dakika option[value^="-1"]').attr('selected',false);
-                $('#dakika option[value^="-1"]').prop('disabled', true);
-                // DAKİKA seçeneğini "0" olarak seç
-                if($('#dakika').val()==null){
-                    $('#dakika option[value^="0"]').attr('selected',true);
-                }
-            } else {
-                // Eğer 'Her...' seçeneği seçilmediyse, DAKİKA seçeneğini aktif hale getir
-                $('#dakika option[value^="-1"]').prop('disabled', false);
-            }
-        });
-    });
-</script>
-
-<script type="text/javascript">
-$(document).ready(function() {
-    // Select alanı değiştiğinde
-    $('#haftanin_gunu, #gun, #saat, #dakika').change(function() {
-        var formData = $('#gorev_zamanlayici').serialize(); // Form verilerini al
-        var additionalData = { ajaxtan: true }; // Harici post verisi
-        formData = formData + '&' + $.param(additionalData); // Serialize edilen veriye ekleyin
-        $.post('cron_zamanlayici.php', formData, function(data) { // cron_zamanlayici.php'ye POST gönder
-            $('#scheduledTime').text(data); // Dönen Unix zaman damgasını göster
-        });
-    });
-
-    // Sayfa yüklendiğinde bir kez tetikle
-    $('#gorev_zamanlayici select').trigger('change');
-});
-</script>
-
-<script>
-    $(document).ready(function(){
-        $('#haftanin_gunu').change(function(){
-            var selectedValue = $(this).val();
-            var gunSelect = $('#gun');
-
-            if(selectedValue == -1 || selectedValue.indexOf("-1") !== -1){
-                gunSelect.prop('disabled', false);
-            } else {
-                gunSelect.prop('disabled', true);
-            }
-        });
-        // Sayfa yüklendiğinde bir kez tetikle
-        $('#haftanin_gunu').trigger('change');
-    });
-</script>
-
 <script type="text/javascript">
 
     function simdiCalistir(gorev_adi, runid){
@@ -1837,20 +2243,9 @@ $(document).ready(function() {
         }
     });
 
-    // GÖREVİ DÜZENLERKEN SEÇİM KUTUSU SEÇİLİ İSE ELLE GİRİLEN VERİTABANI ÖNEKİ YÜKLE
-    $(document).ready(function(){
-        if ($("#veritabani_dosya_adi_degistir").is(':checked')) {
-            $('input[name="veritabani_secilen_yedekleme_oneki"]').val('<?php if(isset($editrow['secilen_yedekleme_oneki'])){ echo $editrow['secilen_yedekleme_oneki']; } ?>');
-            $('input[name="hide_veritabani_secilen_yedekleme"]').val('<?php if(isset($editrow['secilen_yedekleme_oneki'])){ echo $editrow['secilen_yedekleme_oneki']; } ?>');
-        }
-    });
-
-    // 
     $("#veritabani_dosya_adi_degistir").change(function() {
         if(this.checked) {
             $("input[name='veritabani_secilen_yedekleme_oneki']").prop('disabled', false);
-            $('input[name="veritabani_secilen_yedekleme_oneki"]').val('<?php if(isset($editrow['secilen_yedekleme_oneki'])){ echo $editrow['secilen_yedekleme_oneki']; } ?>');
-            $('input[name="hide_veritabani_secilen_yedekleme"]').val('<?php if(isset($editrow['secilen_yedekleme_oneki'])){ echo $editrow['secilen_yedekleme_oneki']; } ?>');
         }else{
             $('input[name="veritabani_secilen_yedekleme_oneki"]').val($.trim($("select[name='veritabani_secilen_yedekleme'] option:selected").text()));
             $('input[name="hide_veritabani_secilen_yedekleme"]').val($.trim($("select[name='veritabani_secilen_yedekleme'] option:selected").text()));
@@ -1964,25 +2359,19 @@ $(document).ready(function() {
             $("#veritabani_tablo").show();
             $("#dosya_adi").val("backup.php");
             $('input[name="secilen_yedekleme_oneki"]').val("");
-            $("input[name='dizin_secilen_yedekleme_oneki']").prop('disabled', true);
-            $("input[name='veritabani_secilen_yedekleme_oneki']").prop('disabled', false);
         }else if( $(this).val() == 2 ) { // dizin_
             $('#veritabani_secilen_yedekleme').prop('selectedIndex',0);
             $("#veritabani_tablo").hide();
             $("#dizin_ziple_tablo").show();
             $("#dosya_adi").val("zipyap.php");
             $('input[name="secilen_yedekleme_oneki"]').val("");
-            $("input[name='dizin_secilen_yedekleme_oneki']").prop('disabled', false);
-            $("input[name='veritabani_secilen_yedekleme_oneki']").prop('disabled', true);
         } else { // kurlar_
             $('#veritabani_secilen_yedekleme').prop('selectedIndex',0);
             $('#diizn_secilen_yedekleme').prop('selectedIndex',0);
             $("#veritabani_tablo").hide();
             $("#dizin_ziple_tablo").hide();
-            $("#dosya_adi").val("<?php if(isset($editrow['dosya_adi'])){ echo $editrow['dosya_adi']; }else{ echo "kurlar.php"; } ?>");
+            $("#dosya_adi").val("kurlar.php");
             $('input[name="secilen_yedekleme_oneki"]').val("");
-            $("input[name='dizin_secilen_yedekleme_oneki']").prop('disabled', true);
-            $("input[name='veritabani_secilen_yedekleme_oneki']").prop('disabled', true);
         }
     });
     $('input:radio[name="gorev_nedir"][value="<?php echo isset($editrow['yedekleme_gorevi']) ? $editrow['yedekleme_gorevi'] : 3; ?>"]').attr('checked',true).trigger("click");
