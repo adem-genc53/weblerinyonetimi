@@ -353,8 +353,8 @@ include('includes/sub_navbar.php');
                                                 
                                                 <select name="sayfada" id="sayfada">
                                                     <option value="5">5</option>
-                                                    <option value="15" selected>15</option>
-                                                    <option value="25">25</option>
+                                                    <option value="15">15</option>
+                                                    <option value="25" selected>25</option>
                                                     <option value="50">50</option>
                                                     <option value="100">100</option>
                                                     <option value="250">250</option>

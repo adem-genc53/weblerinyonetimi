@@ -65,7 +65,8 @@ CREATE TABLE IF NOT EXISTS `genel_ayarlar` (
   `port` int DEFAULT NULL,
   `username` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `password` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `patch` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `path` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '/',
+  `zip_tercihi` int NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -73,7 +74,7 @@ CREATE TABLE IF NOT EXISTS `genel_ayarlar` (
 -- Tablo döküm verisi `genel_ayarlar`
 --
 
-INSERT INTO `genel_ayarlar` VALUES(1, '{\"UTC\": \"UTC +0:00\", \"Europe/Kiev\": \"Kiev +2:00\", \"Europe/Oslo\": \"Oslo +1:00\", \"Europe/Riga\": \"Riga +2:00\", \"Europe/Rome\": \"Rome +1:00\", \"Europe/Malta\": \"Malta +1:00\", \"Europe/Minsk\": \"Minsk +2:00\", \"Europe/Paris\": \"Paris +1:00\", \"Europe/Sofia\": \"Sofia +2:00\", \"Europe/Vaduz\": \"Vaduz +1:00\", \"Europe/Athens\": \"Athens +2:00\", \"Europe/Berlin\": \"Berlin +1:00\", \"Europe/Dublin\": \"Dublin +0:00\", \"Europe/Jersey\": \"Jersey +0:00\", \"Europe/Lisbon\": \"Lisbon +0:00\", \"Europe/London\": \"London +0:00\", \"Europe/Madrid\": \"Madrid +1:00\", \"Europe/Monaco\": \"Monaco +1:00\", \"Europe/Moscow\": \"Moscow +3:00\", \"Europe/Prague\": \"Prague +1:00\", \"Europe/Samara\": \"Samara +4:00\", \"Europe/Skopje\": \"Skopje +1:00\", \"Europe/Tirane\": \"Tirane +1:00\", \"Europe/Vienna\": \"Vienna +1:00\", \"Europe/Warsaw\": \"Warsaw +1:00\", \"Europe/Zagreb\": \"Zagreb +1:00\", \"Europe/Zurich\": \"Zurich +1:00\", \"Europe/Andorra\": \"Andorra +1:00\", \"Europe/Belfast\": \"Belfast +0:00\", \"Europe/Nicosia\": \"Nicosia +2:00\", \"Europe/Tallinn\": \"Tallinn +2:00\", \"Europe/Vatican\": \"Vatican +1:00\", \"Europe/Vilnius\": \"Vilnius +2:00\", \"Europe/Belgrade\": \"Belgrade +1:00\", \"Europe/Brussels\": \"Brussels +1:00\", \"Europe/Budapest\": \"Budapest +1:00\", \"Europe/Chisinau\": \"Chisinau +2:00\", \"Europe/Guernsey\": \"Guernsey +0:00\", \"Europe/Helsinki\": \"Helsinki +2:00\", \"Europe/Istanbul\": \"Istanbul +3:00\", \"Europe/Sarajevo\": \"Sarajevo +1:00\", \"Europe/Tiraspol\": \"Tiraspol +2:00\", \"Europe/Uzhgorod\": \"Uzhgorod +2:00\", \"Europe/Amsterdam\": \"Amsterdam +1:00\", \"Europe/Bucharest\": \"Bucharest +2:00\", \"Europe/Gibraltar\": \"Gibraltar +1:00\", \"Europe/Ljubljana\": \"Ljubljana +1:00\", \"Europe/Mariehamn\": \"Mariehamn +2:00\", \"Europe/Podgorica\": \"Podgorica +1:00\", \"Europe/Stockholm\": \"Stockholm +1:00\", \"Europe/Volgograd\": \"Volgograd +3:00\", \"Europe/Bratislava\": \"Bratislava +1:00\", \"Europe/Copenhagen\": \"Copenhagen +1:00\", \"Europe/Luxembourg\": \"Luxembourg +1:00\", \"Europe/San_Marino\": \"San_Marino +1:00\", \"Europe/Simferopol\": \"Simferopol +2:00\", \"Europe/Zaporozhye\": \"Zaporozhye +2:00\", \"Europe/Isle_of_Man\": \"Isle_of_Man +0:00\", \"Europe/Kaliningrad\": \"Kaliningrad +2:00\"}', 'Europe/Istanbul', '[\"webyonetimi\"]', '{\"gbk\": {\"gbk_chinese_ci\": \"GBK Simplified Chinese\"}, \"hp8\": {\"hp8_english_ci\": \"HP West European\"}, \"big5\": {\"big5_chinese_ci\": \"Big5 Traditional Chinese\"}, \"dec8\": {\"dec8_swedish_ci\": \"DEC West European\"}, \"sjis\": {\"sjis_japanese_ci\": \"Shift-JIS Japanese\"}, \"swe7\": {\"swe7_swedish_ci\": \"7bit Swedish\"}, \"ucs2\": {\"ucs2_general_ci\": \"UCS-2 Unicode\"}, \"ujis\": {\"ujis_japanese_ci\": \"EUC-JP Japanese\"}, \"ascii\": {\"ascii_general_ci\": \"US ASCII\"}, \"cp850\": {\"cp850_general_ci\": \"DOS West European\"}, \"cp852\": {\"cp852_general_ci\": \"DOS Central European\"}, \"cp866\": {\"cp866_general_ci\": \"DOS Russian\"}, \"cp932\": {\"cp932_japanese_ci\": \"SJIS for Windows Japanese\"}, \"euckr\": {\"euckr_korean_ci\": \"EUC-KR Korean\"}, \"greek\": {\"greek_general_ci\": \"ISO 8859-7 Greek\"}, \"koi8r\": {\"koi8r_general_ci\": \"KOI8-R Relcom Russian\"}, \"koi8u\": {\"koi8u_general_ci\": \"KOI8-U Ukrainian\"}, \"macce\": {\"macce_general_ci\": \"Mac Central European\"}, \"utf16\": {\"utf16_general_ci\": \"UTF-16 Unicode\"}, \"utf32\": {\"utf32_general_ci\": \"UTF-32 Unicode\"}, \"binary\": {\"binary\": \"Binary pseudo charset\"}, \"cp1250\": {\"cp1250_general_ci\": \"Windows Central European\"}, \"cp1251\": {\"cp1251_general_ci\": \"Windows Cyrillic\"}, \"cp1256\": {\"cp1256_general_ci\": \"Windows Arabic\"}, \"cp1257\": {\"cp1257_general_ci\": \"Windows Baltic\"}, \"gb2312\": {\"gb2312_chinese_ci\": \"GB2312 Simplified Chinese\"}, \"hebrew\": {\"hebrew_general_ci\": \"ISO 8859-8 Hebrew\"}, \"latin1\": {\"latin1_swedish_ci\": \"cp1252 West European\"}, \"latin2\": {\"latin2_general_ci\": \"ISO 8859-2 Central European\"}, \"latin5\": {\"latin5_turkish_ci\": \"ISO 8859-9 Turkish\"}, \"latin7\": {\"latin7_general_ci\": \"ISO 8859-13 Baltic\"}, \"tis620\": {\"tis620_thai_ci\": \"TIS620 Thai\"}, \"eucjpms\": {\"eucjpms_japanese_ci\": \"UJIS for Windows Japanese\"}, \"gb18030\": {\"gb18030_chinese_ci\": \"China National Standard GB18030\"}, \"geostd8\": {\"geostd8_general_ci\": \"GEOSTD8 Georgian\"}, \"keybcs2\": {\"keybcs2_general_ci\": \"DOS Kamenicky Czech-Slovak\"}, \"utf16le\": {\"utf16le_general_ci\": \"UTF-16LE Unicode\"}, \"utf8mb4\": {\"utf8mb3_general_ci\": \"UTF-8 Unicode\"}, \"utf8mb4\": {\"utf8mb4_0900_ai_ci\": \"UTF-8 Unicode\"}, \"armscii8\": {\"armscii8_general_ci\": \"ARMSCII-8 Armenian\"}, \"macroman\": {\"macroman_general_ci\": \"Mac West European\"}}', 'utf8mb4', 'ftp.domainadiniz.com', 21, 'ftpdeneme@domainadiniz.com', 'xxxxxxxxxx', '/');
+INSERT INTO `genel_ayarlar` VALUES(1, '{\"UTC\": \"UTC +0:00\", \"Europe/Kiev\": \"Kiev +2:00\", \"Europe/Oslo\": \"Oslo +1:00\", \"Europe/Riga\": \"Riga +2:00\", \"Europe/Rome\": \"Rome +1:00\", \"Europe/Malta\": \"Malta +1:00\", \"Europe/Minsk\": \"Minsk +2:00\", \"Europe/Paris\": \"Paris +1:00\", \"Europe/Sofia\": \"Sofia +2:00\", \"Europe/Vaduz\": \"Vaduz +1:00\", \"Europe/Athens\": \"Athens +2:00\", \"Europe/Berlin\": \"Berlin +1:00\", \"Europe/Dublin\": \"Dublin +0:00\", \"Europe/Jersey\": \"Jersey +0:00\", \"Europe/Lisbon\": \"Lisbon +0:00\", \"Europe/London\": \"London +0:00\", \"Europe/Madrid\": \"Madrid +1:00\", \"Europe/Monaco\": \"Monaco +1:00\", \"Europe/Moscow\": \"Moscow +3:00\", \"Europe/Prague\": \"Prague +1:00\", \"Europe/Samara\": \"Samara +4:00\", \"Europe/Skopje\": \"Skopje +1:00\", \"Europe/Tirane\": \"Tirane +1:00\", \"Europe/Vienna\": \"Vienna +1:00\", \"Europe/Warsaw\": \"Warsaw +1:00\", \"Europe/Zagreb\": \"Zagreb +1:00\", \"Europe/Zurich\": \"Zurich +1:00\", \"Europe/Andorra\": \"Andorra +1:00\", \"Europe/Belfast\": \"Belfast +0:00\", \"Europe/Nicosia\": \"Nicosia +2:00\", \"Europe/Tallinn\": \"Tallinn +2:00\", \"Europe/Vatican\": \"Vatican +1:00\", \"Europe/Vilnius\": \"Vilnius +2:00\", \"Europe/Belgrade\": \"Belgrade +1:00\", \"Europe/Brussels\": \"Brussels +1:00\", \"Europe/Budapest\": \"Budapest +1:00\", \"Europe/Chisinau\": \"Chisinau +2:00\", \"Europe/Guernsey\": \"Guernsey +0:00\", \"Europe/Helsinki\": \"Helsinki +2:00\", \"Europe/Istanbul\": \"Istanbul +3:00\", \"Europe/Sarajevo\": \"Sarajevo +1:00\", \"Europe/Tiraspol\": \"Tiraspol +2:00\", \"Europe/Uzhgorod\": \"Uzhgorod +2:00\", \"Europe/Amsterdam\": \"Amsterdam +1:00\", \"Europe/Bucharest\": \"Bucharest +2:00\", \"Europe/Gibraltar\": \"Gibraltar +1:00\", \"Europe/Ljubljana\": \"Ljubljana +1:00\", \"Europe/Mariehamn\": \"Mariehamn +2:00\", \"Europe/Podgorica\": \"Podgorica +1:00\", \"Europe/Stockholm\": \"Stockholm +1:00\", \"Europe/Volgograd\": \"Volgograd +3:00\", \"Europe/Bratislava\": \"Bratislava +1:00\", \"Europe/Copenhagen\": \"Copenhagen +1:00\", \"Europe/Luxembourg\": \"Luxembourg +1:00\", \"Europe/San_Marino\": \"San_Marino +1:00\", \"Europe/Simferopol\": \"Simferopol +2:00\", \"Europe/Zaporozhye\": \"Zaporozhye +2:00\", \"Europe/Isle_of_Man\": \"Isle_of_Man +0:00\", \"Europe/Kaliningrad\": \"Kaliningrad +2:00\"}', 'Europe/Istanbul', '[\"webyonetimi\"]', '{\"gbk\": {\"gbk_chinese_ci\": \"GBK Simplified Chinese\"}, \"hp8\": {\"hp8_english_ci\": \"HP West European\"}, \"big5\": {\"big5_chinese_ci\": \"Big5 Traditional Chinese\"}, \"dec8\": {\"dec8_swedish_ci\": \"DEC West European\"}, \"sjis\": {\"sjis_japanese_ci\": \"Shift-JIS Japanese\"}, \"swe7\": {\"swe7_swedish_ci\": \"7bit Swedish\"}, \"ucs2\": {\"ucs2_general_ci\": \"UCS-2 Unicode\"}, \"ujis\": {\"ujis_japanese_ci\": \"EUC-JP Japanese\"}, \"ascii\": {\"ascii_general_ci\": \"US ASCII\"}, \"cp850\": {\"cp850_general_ci\": \"DOS West European\"}, \"cp852\": {\"cp852_general_ci\": \"DOS Central European\"}, \"cp866\": {\"cp866_general_ci\": \"DOS Russian\"}, \"cp932\": {\"cp932_japanese_ci\": \"SJIS for Windows Japanese\"}, \"euckr\": {\"euckr_korean_ci\": \"EUC-KR Korean\"}, \"greek\": {\"greek_general_ci\": \"ISO 8859-7 Greek\"}, \"koi8r\": {\"koi8r_general_ci\": \"KOI8-R Relcom Russian\"}, \"koi8u\": {\"koi8u_general_ci\": \"KOI8-U Ukrainian\"}, \"macce\": {\"macce_general_ci\": \"Mac Central European\"}, \"utf16\": {\"utf16_general_ci\": \"UTF-16 Unicode\"}, \"utf32\": {\"utf32_general_ci\": \"UTF-32 Unicode\"}, \"binary\": {\"binary\": \"Binary pseudo charset\"}, \"cp1250\": {\"cp1250_general_ci\": \"Windows Central European\"}, \"cp1251\": {\"cp1251_general_ci\": \"Windows Cyrillic\"}, \"cp1256\": {\"cp1256_general_ci\": \"Windows Arabic\"}, \"cp1257\": {\"cp1257_general_ci\": \"Windows Baltic\"}, \"gb2312\": {\"gb2312_chinese_ci\": \"GB2312 Simplified Chinese\"}, \"hebrew\": {\"hebrew_general_ci\": \"ISO 8859-8 Hebrew\"}, \"latin1\": {\"latin1_swedish_ci\": \"cp1252 West European\"}, \"latin2\": {\"latin2_general_ci\": \"ISO 8859-2 Central European\"}, \"latin5\": {\"latin5_turkish_ci\": \"ISO 8859-9 Turkish\"}, \"latin7\": {\"latin7_general_ci\": \"ISO 8859-13 Baltic\"}, \"tis620\": {\"tis620_thai_ci\": \"TIS620 Thai\"}, \"eucjpms\": {\"eucjpms_japanese_ci\": \"UJIS for Windows Japanese\"}, \"gb18030\": {\"gb18030_chinese_ci\": \"China National Standard GB18030\"}, \"geostd8\": {\"geostd8_general_ci\": \"GEOSTD8 Georgian\"}, \"keybcs2\": {\"keybcs2_general_ci\": \"DOS Kamenicky Czech-Slovak\"}, \"utf16le\": {\"utf16le_general_ci\": \"UTF-16LE Unicode\"}, \"utf8mb4\": {\"utf8mb3_general_ci\": \"UTF-8 Unicode\"}, \"utf8mb4\": {\"utf8mb4_0900_ai_ci\": \"UTF-8 Unicode\"}, \"armscii8\": {\"armscii8_general_ci\": \"ARMSCII-8 Armenian\"}, \"macroman\": {\"macroman_general_ci\": \"Mac West European\"}}', 'utf8mb4', 'ftp.domainadiniz.com', 21, 'ftpdeneme@domainadiniz.com', 'xxxxxxxxxx','/', 1);
 
 -- --------------------------------------------------------
 
@@ -139,16 +140,16 @@ CREATE TABLE IF NOT EXISTS `veritabanlari` (
 -- Tablo için tablo yapısı `zamanlanmisgorev`
 --
 
-DROP TABLE IF EXISTS `zamanlanmisgorev`;
+DROP TABLE IF EXISTS zamanlanmisgorev;
 CREATE TABLE IF NOT EXISTS `zamanlanmisgorev` (
-  `id` int UNSIGNED NOT NULL AUTO_INCREMENT,
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
   `gorev_adi` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `dosya_adi` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `sonraki_calisma` int NOT NULL,
   `haftanin_gunu` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '-1',
-  `gun` varchar(10) COLLATE utf8mb4_general_ci NOT NULL,
-  `saat` varchar(10) COLLATE utf8mb4_general_ci NOT NULL,
-  `dakika` varchar(10) COLLATE utf8mb4_general_ci NOT NULL,
+  `gun` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `saat` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `dakika` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `aktif` varchar(11) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `gunluk_kayit` varchar(11) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `yedekleme_gorevi` int NOT NULL,
@@ -167,13 +168,20 @@ CREATE TABLE IF NOT EXISTS `zamanlanmisgorev` (
   `tablolar` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `secilen_yedekleme` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `ozel_onek` int NOT NULL DEFAULT '0',
+  `isleniyor` int NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `sonraki_calisma` (`sonraki_calisma`)
 ) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-INSERT INTO `zamanlanmisgorev` VALUES(1, 'deneme', 'test_gorev.php', 1714813140, '-1', '-1', '-1', '-1/2', 'Aktif', 'Aktif', 3, 0, 0, NULL, -1, -1, NULL, -1, -1, -1, -1, -1, -1, NULL, NULL, 0);
+--
+-- Tablonun veri dökümü `zamanlanmisgorev`
+--
 
--- --------------------------------------------------------
+INSERT INTO `zamanlanmisgorev` VALUES(1, 'deneme', 'test_gorev.php', 1714813140, '-1', '-1', '-1', '-1/2', 'Aktif', 'Aktif', 3, 0, 0, NULL, -1, -1, NULL, -1, -1, -1, -1, -1, -1, NULL, NULL, 0, 0);
+
+--
+-- TABLO_ADI zamanlanmisgorev 1
+--
 
 --
 -- Tablo için tablo yapısı `zamanlanmisgorev_gunluk`
@@ -182,7 +190,7 @@ INSERT INTO `zamanlanmisgorev` VALUES(1, 'deneme', 'test_gorev.php', 1714813140,
 DROP TABLE IF EXISTS `zamanlanmisgorev_gunluk`;
 CREATE TABLE IF NOT EXISTS `zamanlanmisgorev_gunluk` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `calistirma_ciktisi` varchar(100) DEFAULT NULL,
+  `calistirma_ciktisi` varchar(1000) DEFAULT NULL,
   `gorev_adi` varchar(50) NOT NULL,
   `calistirilan_dosya` varchar(50) DEFAULT NULL,
   `calisma_zamani` int DEFAULT NULL,

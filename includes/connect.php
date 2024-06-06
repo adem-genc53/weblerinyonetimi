@@ -4,13 +4,14 @@ if (session_id() == '' && !headers_sent()) {
 session_start();
 }
 
-//Tüm hataları gizle
-//error_reporting(0);
-//ini_set('display_errors', 0);
-
-// Tüm hataları göster
-error_reporting(E_ALL);
+// Hata raporlamayı aç
 ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
+// Hata günlüğünü belirli bir dosyaya yönlendir
+ini_set('log_errors', 1);
+ini_set('error_log', '/home/user/error.log'); // Bu yolu kendi sunucunuzdaki uygun bir yolla değiştirin
 
     require(dirname(dirname(__FILE__))."/hash.php");
     $hash = new Hash;
@@ -31,7 +32,7 @@ ini_set('display_errors', 1);
     $dsn = "mysql:host=".DB_HOST.";dbname=".DB_NAME.";charset=".CHARSET.";port=".PORT."";
     try {
         $PDOdb = new PDO($dsn, DB_USER, DB_PASSWORD, $options);
-        $PDOdb->exec("set names utf8");
+        $PDOdb->exec("set names ".CHARSET);
         $PDOdb->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     } catch (\PDOException $e) {
         echo '<h2 style="text-align: center;">' . $e->getMessage() . ' Bağlantı başarısız oldu</h2>';
@@ -55,25 +56,29 @@ ini_set('display_errors', 1);
     $genel_ayarlar = $gene_ayarlar->fetch(PDO::FETCH_ASSOC);
 ########################################################################################################################
     // Google Drive Servis Hesabının hesap bilgileri içeren json dosyanın yolu
-    $authConfigPath = 'plugins/google_drive/client_json/client_secrets.json';
+    // Bu yolun tam yol olması gerekiyor yani "../../" gibi değil "/home/user/website/plugins/google_drive/client_json/client_secrets.json" gibi tam yol olmalıdır
+    $authConfigPath = '/home/user/web_site_dizin/plugins/google_drive/client_json/client_secrets.json';
 ########################################################################################################################
 
     // veritabanı yedeklenecek 'DATABASEBACKUP' klasör adını değiştirebilirsiniz
     // Bu web sitenin dışında yedekleme klasörü oluşturabilirsiniz
     // Bu sayede bu web sitenin boyutu artmaz
-    defined('BACKUPDIR')        or define('BACKUPDIR', '../DATABASEBACKUP');    // Veritabanıları yedeklenecek Klasörün adı, SONUNDA EĞİK ÇİZGİ YOK
+    // Bu yolun tam yol olması gerekiyor yani "../../" gibi değil "/home/user/DATABASEBACKUP" gibi tam yol olmalıdır
+    defined('BACKUPDIR')        or define('BACKUPDIR', '/home/user/DATABASEBACKUP');    // Veritabanıları yedeklenecek Klasörün adı, SONUNDA EĞİK ÇİZGİ YOK
 
     // "Web Site Dizinleri" sayfasında listelenecek web dizinlerinin bulunduğu alanın yolu girilmedir.
-    defined("DIZINDIR")         or define("DIZINDIR", "../");    // Yolun sonunda / eğik çizgi olmalıdır
+    // Bu yolun tam yol olması gerekiyor yani "../../" gibi değil "/home/user/" gibi tam yol olmalıdır
+    defined("DIZINDIR")         or define("DIZINDIR", "/home/user/");    // Yolun sonunda / eğik çizgi olmalıdır
     
     // "Zipli Web Site Dizinleri" sayfasında listelecek yedeklemek için sıkıştırılan zipli dosyaların bulunduğu alanın yolu girilmelidir
-    defined("ZIPDIR")           or define("ZIPDIR", "../WEBZIPLER/");     // Yolun sonunda / eğik çizgi olmalıdır
+    // Bu yolun tam yol olması gerekiyor yani "../../" gibi değil "/home/user/WEBZIPLER/" gibi tam yol olmalıdır
+    defined("ZIPDIR")           or define("ZIPDIR", "/home/user/WEBZIPLER/");     // Yolun sonunda / eğik çizgi olmalıdır
 
     // KOKYOLU sunucunuzda en geriye ulaşamabildiğiniz yoldur.
     // Örnek "/home/user/" en geri user alanına kadar gidilebilir
     // Bunun kullanım özelliği zipli web site dizinin zipi açarken otomatik olarak yolun başlangıcı olarak "/home/user/" bunu sağlayacak bundan sonra istediğiniz gibi yol girebilirsiniz
     // Örnek /home/user/111/222/333 diye belirlediğiniz user alana 111 dizini ve alt-dizinleride oluşturup 333 dizine zip dosyayı açacaktır
-    defined("KOKYOLU")          or define("KOKYOLU", "D:/SUNUCU/www/projelerim/"); // web sitelerin dizinleri bulunduğu tam yolu girin. Yolun sonunda / eğik çizgi olmalıdır
+    defined("KOKYOLU")          or define("KOKYOLU", "/home/user/"); // web sitelerin dizinleri bulunduğu tam yolu girin. Yolun sonunda / eğik çizgi olmalıdır
 
     //Script versiyonu
     defined('VERSIYON')         or define('VERSIYON', '2.0.1');

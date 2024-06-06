@@ -1,6 +1,6 @@
 <?php 
     if($_POST)
-    {
+    { // uzayuydu@gmail.com ve antenfiyati.com bölümünde
         if(isset($_POST["g-recaptcha-response"])){
             $response = $_POST["g-recaptcha-response"];
             $secret = "6Le6jL0UAAAAAOU4EEWIN-_95Fz01tF1Aoj103R7";

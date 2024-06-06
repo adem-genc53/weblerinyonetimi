@@ -109,8 +109,8 @@ include('includes/sub_navbar.php');
 </p>
 <p>Veritabanı boyutunun artması sorun teşkil ediyorsa zaman zaman eski günlükleri sile bilirsiniz.
 </p>
-                                <b>Veritabanı yedeklerin bulunduğu dizin: </b><span id="yol"><?php echo strtolower(htmlpath('./'.BACKUPDIR)); ?></span><br />
-                                <p><b>Web site zip yedeklerin bulunduğu dizin: </b><span id="yol"><?php echo strtolower(htmlpath('./'.ZIPDIR)); ?></span></p>
+                                <b>Veritabanı yedeklerin bulunduğu dizin: </b><span id="yol"><?php echo strtolower(htmlpath(BACKUPDIR)); ?></span><br />
+                                <p><b>Web site zip yedeklerin bulunduğu dizin: </b><span id="yol"><?php echo strtolower(htmlpath(ZIPDIR)); ?></span></p>
                             </div>
                             </div>
                         </div><!-- / <div class="card"> -->
@@ -169,8 +169,8 @@ include('includes/sub_navbar.php');
                                                 
                                                 <select name="sayfada" id="sayfada">
                                                     <option value="5">5</option>
-                                                    <option value="15" selected>15</option>
-                                                    <option value="25">25</option>
+                                                    <option value="15">15</option>
+                                                    <option value="25" selected>25</option>
                                                     <option value="50">50</option>
                                                     <option value="100">100</option>
                                                     <option value="250">250</option>

@@ -1,28 +1,470 @@
 <?php 
 // Bismillahirrahmanirrahim
-//echo '<pre>' . print_r($_POST, true) . '</pre>';
-//exit;
+require_once('includes/connect.php');
+require_once("includes/turkcegunler.php");
+    //echo '<pre>' . print_r($_POST, true) . '</pre>';
+    //exit;
+
+if (!function_exists('veritabaniYedekleme')) {
+    function veritabaniYedekleme($PDOdbsecilen, $veritabani_id, $secilen_yedekleme_oneki, $combine, $elle, $grup, $dbbakim, $gz, $yedekleyen, $dblock, $db_name, $yedeklenecek_tablolar, $dosya_tarihi) {
+        // ÇIKTI MESAJI BAŞLAT
+        $backup_mesaji = [];
+
+        // SUNUCU BİLGİLERİNİ VE AYARLARI BELİRLEME
+    if (!function_exists('getInitialSettings')) {
+        function getInitialSettings($PDOdbsecilen) {
+            $settings = [];
+
+            $settings['sql_mode'] = $PDOdbsecilen->query("SELECT @@sql_mode")->fetchColumn();
+            $settings['time_zone'] = $PDOdbsecilen->query("SELECT @@time_zone")->fetchColumn();
+
+            // Eski karakter seti ayarlarını alın
+            $settings['character_set_client'] = $PDOdbsecilen->query("SELECT @@character_set_client")->fetchColumn();
+            $settings['character_set_results'] = $PDOdbsecilen->query("SELECT @@character_set_results")->fetchColumn();
+            $settings['collation_connection'] = $PDOdbsecilen->query("SELECT @@collation_connection")->fetchColumn();
+
+            // Karakter setini al
+            $mysqlcharacter = $PDOdbsecilen->query("SHOW VARIABLES LIKE 'character_set_connection'");
+            $characterSetResult = $mysqlcharacter->fetch(PDO::FETCH_ASSOC);
+            $settings['karakter_seti'] = $characterSetResult['Value'] ?? null;
+
+            // VERİTABANI ADI
+            $settings['database_name'] = $PDOdbsecilen->query("SELECT DATABASE()")->fetchColumn();
+
+            $host = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : '127.0.0.1:3306';
+            $settings['http_host'] = $host;
+
+            $settings['mysql_sunucu_surumu'] = $PDOdbsecilen->query('SELECT VERSION()')->fetchColumn();
+            $settings['olusturma_zamani'] = date('Y-m-d H:i:s');
+
+            // Tabloların listesi
+            $tables = $PDOdbsecilen->query("SHOW TABLES")->fetchAll(PDO::FETCH_COLUMN);
+            $settings['tables'] = $tables;
+
+            // Her tablo için kayıt satır sayısı
+            foreach ($tables as $table) {
+                $count = $PDOdbsecilen->query("SELECT COUNT(*) FROM `$table`")->fetchColumn();
+                $settings['table_counts'][$table] = $count;
+            }
+
+            return $settings;
+        }
+    }
+        // YEDEK DOSYANIN BİTİŞ AYARLARINI BELİRLEME
+    if (!function_exists('finalSettings')) {
+        function finalSettings($PDOdbsecilen){
+            // buradan kanak şimdilik gönderilmiyor
+            return null;
+        }
+    }
+
+        // DİZİN OLUŞTURMA FONKSİYONU
+    if (!function_exists('createDirectoryIfNotExists')) {
+        function createDirectoryIfNotExists($directory) {
+            if (!file_exists($directory)) {
+                if (!mkdir($directory, 0755, true)) {
+                    die('Failed to create folders...');
+                }
+            }
+        }
+    }
+
+        // .htaccess DOSYAYI OLUŞTURMA FONKSİYONU
+    if (!function_exists('createHtaccessFile')) {
+        function createHtaccessFile($directory) {
+            $content = "deny from all";
+            file_put_contents($directory . '/.htaccess', $content);
+        }
+    }
+
+        // YEDEKLENECEK DOSYANIN ADINI BELİRLEME FONKSİYONU
+    if (!function_exists('getBackupFilenamePrefix')) {
+        function getBackupFilenamePrefix($prefix, $date) {
+            return isset($prefix) && !empty($prefix) ? $prefix . "-" . $date : $date;
+        }
+    }
+
+        // TABLOLARI BELİRLEME VE TABLOLARI DİZİ İÇİNE ALMA FONKSİYONU
+    if (!function_exists('determineTablesToBackup')) {
+        function determineTablesToBackup($PDOdbsecilen, $combine, $yedekleyen, $selectedTables) {
+            if (empty($selectedTables) && ($combine == '1' || $combine == '2')) {
+                return $PDOdbsecilen->query("SHOW TABLES")->fetchAll(PDO::FETCH_COLUMN); // TÜM TABLOLAR
+            } elseif ($combine == '3' && $yedekleyen == '2') {
+                return $selectedTables; // ELLE YEDEKLEMEDE ELLE SEÇİLEN TABLOLAR
+            } elseif ($combine == '3' && $yedekleyen == '1') {
+                return is_array($selectedTables) ? $selectedTables : explode(',', $selectedTables); // GÖREVLE VERİTABANINDAN GELEN VİRGÜLLE AYRILMIŞ TABLOLAR
+            }
+            return [];
+        }
+    }
+
+        // VERİTABANI BAKIM FONKSİYONU
+    if (!function_exists('performDatabaseMaintenance')) {
+        function performDatabaseMaintenance($PDOdbsecilen, $tables, $lockTables = false) {
+            try {
+                foreach ($tables as $table) {
+                    if ($lockTables) {
+                        $PDOdbsecilen->query('LOCK TABLES `' . $table . '` WRITE');
+                    }
+
+                    $operations = ['check', 'repair', 'optimize', 'analyze'];
+
+                    foreach ($operations as $operation) {
+                        $PDOdbsecilen->query(strtoupper($operation) . ' TABLE `' . $table . '`');
+                    }
+
+                    if ($lockTables) {
+                        $PDOdbsecilen->query('UNLOCK TABLES');
+                    }
+                }
+                return true;
+            } catch (PDOException $e) {
+                return false;
+            }
+        }
+    }
+
+        // TABLOLARI YEDEKLEME FONKSİYONU
+    if (!function_exists('backupTables')) {
+        function backupTables($PDOdbsecilen, $tables, $combine, $elle, $onek_ve_tarih, $db_name, $gz) {
+
+            $backup_mesaji = [];
+            $handle = "";
+            $success = false;
+
+            // YEDEK DOSYANIN BAŞLANGIÇ AYARLARINI GETİR
+            $initialSettings = getInitialSettings($PDOdbsecilen);
+
+            // YEDEK DOSYANIN BİTİŞ AYARLARINI GETİR
+            $finalSettings = finalSettings($PDOdbsecilen);
+
+            // YEDEK DOSYANIN BİTİŞ AYARLARINI OLUŞTUR
+            $finalSettingsString = generateFinalSettingsString($finalSettings);
+
+            if ($combine == '1') { // TÜM TABLOLARI TEK DOSYAYA YAZ
+                $filePath = BACKUPDIR . '/' . $onek_ve_tarih . '-Tam.sql';
+                // YEDEKLEME BAŞLANGIÇ AYARLARINI OLUŞTUR
+                $initialSettingsString = generateInitialSettingsString($tables, $initialSettings);
+                writeToFile($filePath, $initialSettingsString); // BAŞLANGIÇ AYARLARINI YAZ
+                        $backup_mesaji[] = "Veritabanı Başarıyla Yedeklendi";                
+                    if ($gz) {
+                        $backup_mesaji["dosya_adi"] = $filePath.".gz";
+                    }else{
+                        $backup_mesaji["dosya_adi"] = $filePath;
+                    }
+            }
+
+            if ($combine == '3' && $elle == '1'){ // ELLE SEÇİLEN BİRDEN FAZLA TABLOLARI TEK DOSYAYA YAZ
+                if(count($tables) > 1){
+                    $filePath = BACKUPDIR . '/' . $onek_ve_tarih . '-Elle.sql';
+                    // YEDEKLEME BAŞLANGIÇ AYARLARINI OLUŞTUR
+                    $initialSettingsString = generateInitialSettingsString($tables, $initialSettings);
+                    writeToFile($filePath, $initialSettingsString); // BAŞLANGIÇ AYARLARINI YAZ
+                        $backup_mesaji[] = "Veritabanı Başarıyla Yedeklendi";                
+                    if ($gz) {
+                        $backup_mesaji["dosya_adi"] = $filePath.".gz";
+                    }else{
+                        $backup_mesaji["dosya_adi"] = $filePath;
+                    }
+                }
+            }
+
+            foreach ($tables as $table) {
+                $tableStructure = getTableStructure($PDOdbsecilen, $table);
+                $tableData = getTableData($PDOdbsecilen, $table);
+                $triggers = getTriggers($PDOdbsecilen, $table);
+                $backupContent = generateBackupContent($tableStructure, $tableData, $table, $triggers);
+
+                if ($combine == '2'){ // TÜM TABLO(LARI) ALT-DİZİNE AYRI AYRI YEDEKLE
+
+                    $subBackupDir = BACKUPDIR . '/' . $onek_ve_tarih;
+                    createDirectoryIfNotExists($subBackupDir);
+                    $filePath = $subBackupDir . '/' . trim($table) . '.sql';
+                    // HER TABLO YEDEĞİNE KENDİ TABLO ADINI VE SATIR SAYISINI YAZAR 
+                    $initialSettingsString = generateInitialSettingsString([$table], $initialSettings);
+                    writeToFile($filePath, $initialSettingsString . $backupContent); //BAŞLANGIÇ AYARLARINI YAZ
+                    // HER TABLONUN YEDEK DOSYANIN SONUNA BİLGİ EKLE
+                    appendInfoToFile($filePath, $finalSettingsString);
+                    // HER YEDEKLENEN TABLOYA GZİP AKTİF İSE SIKIŞTIR
+                    if ($gz) {
+                        gzipFileChunked($filePath);
+                    }
+                        $backup_mesaji[] = "Veritabanı Başarıyla Yedeklendi";
+                        $backup_mesaji["dosya_adi"] = $subBackupDir;
+
+                } elseif ($combine == '3' && $elle == '1'){ // ELLE SEÇİLEN TABLO(LAR)
+
+                    if(count($tables) == 1){ // EĞER ELLE TEK TABLO SEÇİLİ İSE TABLO ADINI DOSYA ADINA EKLE
+                        $filePath = BACKUPDIR . '/' . $onek_ve_tarih . '-' . trim($table) . '-Elle.sql';
+                        // YEDEKLEME BAŞLANGIÇ AYARLARINI OLUŞTUR
+                        $initialSettingsString = generateInitialSettingsString($tables, $initialSettings);
+                        writeToFile($filePath, $initialSettingsString . $backupContent); //BAŞLANGIÇ AYARLARINI YAZ
+                        // YEDEK DOSYANIN SONUNA BİLGİ EKLE
+                        appendInfoToFile($filePath, $finalSettingsString);
+                            $backup_mesaji[] = "Veritabanı Başarıyla Yedeklendi";                
+                        if ($gz) {
+                            gzipFileChunked($filePath);
+                            $backup_mesaji["dosya_adi"] = $filePath.".gz";
+                        }else{
+                            $backup_mesaji["dosya_adi"] = $filePath;
+                        }
+                    }else{ // $combile 3 && $elle 1 için Genel bilgi bir kez yazıldıktan sonra kalan tablo yedek içeriği yazılır
+                        writeToFile($filePath, $backupContent);
+                    }
+
+                } elseif ($combine == '3' && $elle == '2'){ // ELLE SEÇİLEN TABLO(LARI) ALT-DİZİNE AYRI AYRI YEDEKLE
+
+                    $subBackupDir = BACKUPDIR . '/' . $onek_ve_tarih;
+                    createDirectoryIfNotExists($subBackupDir);
+                    $filePath = $subBackupDir . '/' . trim($table) . '.sql';
+                    // HER TABLO YEDEĞİNE KENDİ TABLO ADINI VE SATIR SAYISINI YAZAR 
+                    $initialSettingsString = generateInitialSettingsString([$table], $initialSettings);
+                    writeToFile($filePath, $initialSettingsString . $backupContent); //BAŞLANGIÇ AYARLARINI YAZ
+                    // HER TABLONUN YEDEK DOSYANIN SONUNA BİLGİ EKLE
+                    appendInfoToFile($filePath, $finalSettingsString);
+                    // HER YEDEKLENEN TABLOYA GZİP AKTİF İSE SIKIŞTIR
+                    if ($gz) {
+                        gzipFileChunked($filePath);
+                    }
+                        $backup_mesaji[] = "Veritabanı Başarıyla Yedeklendi";
+                        $backup_mesaji["dosya_adi"] = $subBackupDir;
+                } else { // $combine 1 için Genel bilgi bir kez yazıldıktan sonra kalan tablo yedek içeriği yazılır
+                    writeToFile($filePath, $backupContent);
+                }
+
+            } // foreach ($tables as $table) {
+
+            // YEDEKLENECEK KURALLARA UYGUN DOSYA İÇİN GZİP AKTİF İSE YEDEĞİ SIKIŞTIR
+            if (($combine == '1' || $combine == '3' && $elle == '1')) {
+                if($gz){
+                    appendInfoToFile($filePath, $finalSettingsString);
+                    gzipFileChunked($filePath);
+                }else{
+                    appendInfoToFile($filePath, $finalSettingsString);
+                }
+            }
+
+        return $backup_mesaji;
+        }
+    }
+
+        // DOSYAYA BİLGİ EKLEYEN FONKSİYON
+    if (!function_exists('appendInfoToFile')) {
+        function appendInfoToFile($filePath, $info) {
+            writeToFile($filePath, $info);
+        }
+    }
+
+        // Başlangıç ayarlarını string olarak oluşturma fonksiyonu
+    if (!function_exists('generateInitialSettingsString')) {
+        function generateInitialSettingsString($tables, $initialSettings) {
+/*
+            // BELKİ BAŞKA ZAMAN KULLANIRIZ DİYE ŞİMDİLİK KALSIN
+
+            $initialSettingsString = "-- ----------------------------\n";
+            $initialSettingsString .= "-- Veritabanı yedeği oluşturma başlangıç ayarları\n";
+            $initialSettingsString .= "-- ----------------------------\n";
+            $initialSettingsString .= "SET sql_mode = '" . $initialSettings['sql_mode'] . "';\n";
+            $initialSettingsString .= "SET time_zone = '" . $initialSettings['time_zone'] . "';\n";
+            $initialSettingsString .= "SET character_set_client = '" . $initialSettings['character_set_client'] . "';\n";
+            $initialSettingsString .= "SET character_set_results = '" . $initialSettings['character_set_results'] . "';\n";
+            $initialSettingsString .= "SET collation_connection = '" . $initialSettings['collation_connection'] . "';\n";
+            $initialSettingsString .= "SET NAMES '" . $initialSettings['karakter_seti'] . "';\n";
+            $initialSettingsString .= "\n";
+            return $initialSettingsString;
+*/
+            $sql_mode = empty($initialSettings['sql_mode']) ? 'NO_AUTO_VALUE_ON_ZERO' : $initialSettings['sql_mode'];
+            $genel_bilgi =
+                "\n-- WebSiteler Yönetimi Scripti\n" .
+                "-- WebSiteler Yönetimi Script Versiyonu: " . VERSIYON . "\n\n" .
+                "-- Anamakine: " . $initialSettings['http_host'] . "\n" .
+                "-- Yedekleme Zamanı: " . $initialSettings['olusturma_zamani'] . "\n" .
+                "-- MySQL Sunucu Sürümü: " . $initialSettings['mysql_sunucu_surumu'] . "\n" .
+                "-- PHP Sürümü: " . phpversion() . "\n" .
+                "-- Karakter Seti: " . $initialSettings['karakter_seti'] . "\n\n" . 
+                "-- Veritabanı Adı: " . $initialSettings['database_name'] . "\n" . 
+                "-- Tablolar:\n";
+            // BAŞLANGIÇ BİLGİLERİNDE TABLO ADI VE VERİ SATIR SAYISI GÖSTERMEK İÇİNDİR
+            foreach ($initialSettings['tables'] as $table) {
+                if(in_array($table, $tables)){
+                    $count = $initialSettings['table_counts'][$table];
+                    $genel_bilgi .= "-- - {$table}: {$count} kayıt\n";
+                }
+            }
+            $genel_bilgi .= "-- - SON\n";
+
+            $genel_bilgi .= 
+                "\n\nSET SQL_MODE = '" . $sql_mode . "';\n" .
+                "START TRANSACTION;\n" .
+                "SET time_zone = '" . $initialSettings['time_zone'] . "';\n\n" .
+
+                "/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;\n" .
+                "/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;\n" .
+                "/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;\n" .
+                "/*!40101 SET NAMES " . $initialSettings['karakter_seti'] . " */;\n\n";
+        return $genel_bilgi;
+        }
+    }
+
+        // Bitiş ayarlarını string olarak oluşturma fonksiyonu
+    if (!function_exists('generateFinalSettingsString')) {
+        function generateFinalSettingsString($finalSettings) {
+            return "\nCOMMIT;" .
+                "\n\n" .
+                "/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;\n" .
+                "/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;\n" .
+                "/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;\n";
+        }
+    }
+
+        // TABLO YAPISINI ALMA FONKSİYONU
+    if (!function_exists('getTableStructure')) {
+        function getTableStructure($PDOdbsecilen, $table) {
+            $quotedTable = '`' . str_replace('`', '``', $table) . '`'; // Tablo adını escape et
+            $result = $PDOdbsecilen->query("SHOW CREATE TABLE {$quotedTable}")->fetch(PDO::FETCH_NUM);
+            $structure = str_replace('CREATE TABLE', 'CREATE TABLE IF NOT EXISTS', $result[1]) . ";\n";
+            return $structure;
+        }
+    }
+
+        // TABLO VERİLERİ ALMA FONKSİYONU
+    if (!function_exists('getTableData')) {
+        function getTableData($PDOdbsecilen, $table) {
+            $quotedTable = '`' . str_replace('`', '``', $table) . '`'; // Tablo adını escape et
+            $data = [];
+            $result = $PDOdbsecilen->query("SELECT * FROM {$quotedTable}")->fetchAll(PDO::FETCH_ASSOC);
+            foreach ($result as $row) {
+                $values = [];
+                foreach ($row as $key => $value) {
+                    $values[] = quoteOrNull($PDOdbsecilen, $value);
+                }
+                $data[] = 'INSERT INTO `' . $table . '` VALUES(' . implode(', ', $values) . ');';
+            }
+            return $data;
+        }
+    }
+
+        // DEĞERİ QUOTE YAP VEYA NULL YAP FONKSİYONU
+    if (!function_exists('quoteOrNull')) {
+        function quoteOrNull($PDOdbsecilen, $value) {
+            // Eğer değer null ise 'NULL' stringini döndür
+            if ($value === null) {
+                return 'NULL';
+            }
+            // Eğer değer sayısal ise doğrudan döndür
+            if (is_numeric($value)) {
+                return $value;
+            }
+            // Eğer değer ne null ne de sayısal ise PDO::quote fonksiyonunu kullan
+            return $PDOdbsecilen->quote($value);
+        }
+    }
+
+        // TETİKLEYİCİLER TRIGGER ALMA FONKSİYONU
+    if (!function_exists('getTriggers')) {
+        function getTriggers($PDOdbsecilen, $table) {
+            $quotedTable = str_replace('`', '``', $table); // Tablo adını escape et
+            $triggers = '';
+            $triggersQuery = $PDOdbsecilen->query("SHOW TRIGGERS LIKE '" . $quotedTable . "'")->fetchAll(PDO::FETCH_ASSOC);
+
+            foreach ($triggersQuery as $trigger) {
+                $triggers .= 'DELIMITER $$' . "\n";
+                $triggers .= "CREATE TRIGGER " . $trigger['Trigger'] . " " . $trigger['Timing'] . " " . $trigger['Event'] . " ON `" . $trigger['Table'] . "` FOR EACH ROW\n" . $trigger['Statement'] . "\n";
+                $triggers .= 'DELIMITER ;' . "\n";
+            }
+        return $triggers;
+        }
+    }
+
+        // YEDEKLEME İÇERİĞİ OLUŞTURMA FONKSİYONU
+    if (!function_exists('generateBackupContent')) {
+        function generateBackupContent($tableStructure, $tableData, $table, $triggers) {
+            $content = "\n\n\n-- ---------------------------\n";
+            $content .= "-- Tablo için tablo yapısı `" . $table . "`\n";
+            $content .= "-- ---------------------------\n";
+            $content .= "DROP TABLE IF EXISTS `" . $table . "`;\n";
+            $content .= $tableStructure;
+
+            if (!empty($tableData)) {
+                $content .= "\n\n-- ---------------------------\n";
+                $content .= "-- Tablonun veri dökümü `" . $table . "`\n";
+                $content .= "-- ---------------------------\n";
+                $content .= implode("\n", $tableData);
+            }
+
+            if (!empty($triggers)) {
+                $content .= "\n\n\n-- ---------------------------\n";
+                $content .= "-- Tablo için Tetikleyiciler `" . $table . "`\n";
+                $content .= "-- ---------------------------\n";
+                $content .= $triggers;
+            }
+
+            return $content;
+        }
+    }
+
+        // DOSYAYA YAZMA FONKSİYONU
+    if (!function_exists('writeToFile')) {
+        function writeToFile($filePath, $content) {
+            return file_put_contents($filePath, $content, FILE_APPEND);
+        }
+    }
+
+        // GZİP SIKIŞTIRMA FONKSİYONU
+    if (!function_exists('gzipFileChunked')) {
+        function gzipFileChunked($filePath) {
+            $gzfile = $filePath . '.gz';
+            $chunkSize = 4096; // 4KB
+            $fp = gzopen($gzfile, 'w9');
+            $input = fopen($filePath, 'rb');
+            while (!feof($input)) {
+                gzwrite($fp, fread($input, $chunkSize));
+            }
+            fclose($input);
+            gzclose($fp);
+            unlink($filePath); // Gzipped olduktan sonra orijinal dosyayı silebiliriz
+        }
+    }
+
+        // YEDEKLEME YAPILACAK ANA DİZİN MEVCUT DEĞİL İSE OLUŞTUR
+        createDirectoryIfNotExists(BACKUPDIR);
+
+        // YEDEKLEME DİZİNE DIŞARIDAN ULAŞIMI ENGELLEMEK İÇİN .htaccess DOSYASI OLUŞTUR
+        createHtaccessFile(BACKUPDIR);
+
+        // YEDEKLEME DOSYA ADINI BELİRLE
+        $onek_ve_tarih = getBackupFilenamePrefix($secilen_yedekleme_oneki, $dosya_tarihi);
+
+        // TABLOLARI BELİRLEME
+        $tables = determineTablesToBackup($PDOdbsecilen, $combine, $yedekleyen, $yedeklenecek_tablolar);
+
+        // VERİTABANI BAKIMI YAP
+        if ($dbbakim == '1') {
+            performDatabaseMaintenance($PDOdbsecilen, $tables, $dblock);
+        }
+
+        // YEDEKLEME İŞLEMİNİ BAŞLAT
+        $backup_mesaji = backupTables($PDOdbsecilen, $tables, $combine, $elle, $onek_ve_tarih, $db_name, $gz);
+
+    return $backup_mesaji;
+    }
+}
+
+###################################################################################################################################################
+###################################################################################################################################################
+###################################################################################################################################################
+###################################################################################################################################################
+###################################################################################################################################################
+###################################################################################################################################################
+
+// Fonksiyonu çağırarak işlemleri başlatın
+if(isset($_POST['yedekleyen']) && $_POST['yedekleyen'] == 2){
 
 ini_set('memory_limit', '-1');
 ignore_user_abort(true);
 set_time_limit(0);
-require('includes/connect.php');
-require_once("includes/turkcegunler.php");
 
-//Bu tarih yedek dosya adı ve klasör adı için kullanıcak.
-// !! BOŞLUKSUZ !!
-	define('datetime',date('Y-m-d-H-i-s')); /* Date fortmat. See: http://tr1.php.net/manual/en/function.date.php */
-#########################################################################################################################################
-    // Ajax ile veritabanı ID geliyormu, geliyorsa hem değişkene hemde sessiona ata
-    // Gelmiyorsa else den sesiiondan kullan
-    if(isset($_POST['veritabani_id']) && $_POST['veritabani_id'] > 0){
-        //unset($_SESSION['secili_veritabani_id']);
-        //$_SESSION['secili_veritabani_id'] = $_POST['veritabani_id'];
-        $veritabani_id = $_POST['veritabani_id'];
-    }else{
-        $veritabani_id = 0;
-    }
-#########################################################################################################################################
+    $veritabani_id = isset($_POST['veritabani_id']) ? $_POST['veritabani_id'] : "";
     // Seçilen veritabanı 
     $default = $PDOdb->prepare("SELECT * FROM veritabanlari WHERE id=? LIMIT 1");
     $default->execute([$veritabani_id]);
@@ -30,478 +472,123 @@ require_once("includes/turkcegunler.php");
 
     // Seçilen veritabanı varsa bağlantı oluşturuyoruz
     $secilen = "mysql:host=".$varsayilan['database_host'].";dbname=".$varsayilan['db_name'].";charset=".CHARSET.";port=".PORT."";
-
+    try {
     $PDOdbsecilen = new PDO($secilen, $hash->take($varsayilan['database_user']), $hash->take($varsayilan['database_password']), $options);
-    $PDOdbsecilen->exec("set names utf8");
+    $PDOdbsecilen->exec("set names ".CHARSET);
     $PDOdbsecilen->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    } catch (\PDOException $e) {
+        die($e->getMessage());
+    }
     $db_name = $varsayilan['db_name'];
-#########################################################################################################################################
-/*
-$dosya = fopen ("backup.txt" , "a"); //dosya oluşturma işlemi 
-$yaz = "Varsayılan veritabanı: ".$varsayilan['db_name']."\n".print_r($_POST, true); // Yazmak istediginiz yazı 
-fwrite($dosya,$yaz); fclose($dosya);
 
-    $jsonData = array("basarili"=>"Veritabanı Başarıyla Yedeklendi", "dosya_adi"=>'deneme');
-    echo "<span>".json_encode($jsonData)."</span>";
-    exit;
-*/
-################################################################################
-// Yedekleme dizi yoksa dizin oluşturuyoruz
-if(!file_exists(BACKUPDIR)){
-    if (!mkdir(BACKUPDIR, 0777, true)) {
-        die('Failed to create folders...');
+    $secilen_yedekleme_oneki    = isset($_POST['onek'])         ? $_POST['onek']        : "";
+    $combine                    = isset($_POST['combine'])      ? $_POST['combine']     : "";
+    $elle                       = isset($_POST['elle'])         ? $_POST['elle']        : "";
+    $grup                       = isset($_POST['grup'])         ? $_POST['grup']        : "";
+    $dbbakim                    = isset($_POST['bakim'])        ? $_POST['bakim']       : "";
+    $gz                         = isset($_POST['gz'])           ? $_POST['gz']          : "";
+    $yedekleyen                 = isset($_POST['yedekleyen'])   ? $_POST['yedekleyen']  : "0";
+    $dblock                     = isset($_POST['lock'])         ? $_POST['lock']        : "";
+    $yedeklenecek_tablolar      = isset($_POST['tablolar'])     ? $_POST['tablolar']    : [];
+    $dosya_tarihi               = date_tr('Y-m-d-H-i-s', time());
+
+    $backup_yedekleme_sonucu = veritabaniYedekleme($PDOdbsecilen, $veritabani_id, $secilen_yedekleme_oneki, $combine, $elle, $grup, $dbbakim, $gz, $yedekleyen, $dblock, $db_name, $yedeklenecek_tablolar, $dosya_tarihi);
+
+if(!empty($backup_yedekleme_sonucu)){
+
+// Boş değerleri çıkarın
+$backup_yedekleme_sonucu = array_filter($backup_yedekleme_sonucu, function($value) {
+    return !empty($value);
+});
+
+// Tekrar eden değerleri kaldırın
+$backup_yedekleme_sonucu = array_unique($backup_yedekleme_sonucu);
+
+//echo '<pre>' . print_r($backup_yedekleme_sonucu, true) . '</pre>';
+
+foreach ($backup_yedekleme_sonucu as &$mesaj) {
+    if (strpos($mesaj, BACKUPDIR . "/") === 0) {
+        if(is_dir($mesaj)){
+            $mesaj = "<b>Alt-Dizin Adı:</b> ".str_replace(BACKUPDIR . "/", '', $mesaj);
+        }else{
+            $mesaj = "<b>Dosya Adı:</b> ".str_replace(BACKUPDIR . "/", '', $mesaj);
+        }
     }
 }
-// Yedekleme dizinin içine kimse ulaşamasın diye .htaccess oluşturuyoruz ve içine 'deny from all' yazıyoruz
-$content = 'deny from all';
-$file = new SplFileObject(BACKUPDIR . '/.htaccess', "w") ;
-$file->fwrite($content);
-################################################################################
-// yedeklemede önek belirlenmiş mi
-// belirlenmiş ise onek ile datetime zamanı ilave ediyoruz
-// belirlenmedi ise sadece datetime zamanı ekliyoruz
-if(isset($_POST['onek']) && !empty($_POST['onek'])){
-$onek = $_POST['onek']."-";
-$tarih_onek = $onek.datetime;
-}else{
-$tarih_onek = datetime;    
+$calistirmasonucmesaji = implode("<br>", $backup_yedekleme_sonucu);
+echo $calistirmasonucmesaji;
 }
-################################################################################
-// Tablolar dizi başlatıyoruz
-$tables = array();
-################################################################################
-// combine 1 ise Tam tek dosya olarak yedekleme
-// "-Tam" metin ekliyoruz
-// Tüm tablolar için "*" yıldız belirliyoruz
-if(isset($_POST['combine']) && $_POST['combine']=='1'){
-$tabloadi='-Tam'; 
-$tables = '*';
+
 }
-################################################################################
-// combine 2 ise Tabloları Ayrı Ayrı yedekleme
-// Tüm tablolar için "*" yıldız belirliyoruz
-// Tabloların oluşturulacağı alt-dizin oluşturuyoruz
-if(isset($_POST['combine']) && $_POST['combine']=='2'){
-$tables = '*';
-define('SUBBACKUPDIR', BACKUPDIR.'/'.$tarih_onek ) ;
-if(!file_exists(SUBBACKUPDIR)){
-    if (!mkdir(SUBBACKUPDIR, 0777, true)) {
-        die('Failed to create folders...');
+###################################################################################################################################################
+###################################################################################################################################################
+###################################################################################################################################################
+###################################################################################################################################################
+###################################################################################################################################################
+###################################################################################################################################################
+
+
+//echo '<pre>' . print_r($backup_yedekleme_sonucu, true) . '</pre>';
+/* 
+$backup_mesaji[] = "Veritabanı Başarıyla Yedeklendi";
+$backup_mesaji["dosya_adi"] = $filePath;
+*/
+
+
+/*
+İleri Seviye Yedekleme Teknikleri ve İyileştirmeler
+
+    Yedekleme İyileştirme ve Paralel İşlemler
+        İşlemci ve Bellek Kullanımı: Veritabanı yedekleme işlemi sırasında CPU ve bellek kullanımını izleyin. Bu sayede yedekleme işlemini optimize edebilirsiniz.
+        Paralel Yedekleme: Büyük veritabanlarını yedeklerken işlemleri paralel hale getirin. Özellikle veritabanı tablolarını paralel olarak yedeklemek zaman kazandırabilir.
+
+function backupTableParallel($tables) {
+    $processes = [];
+    foreach ($tables as $table) {
+        $pid = pcntl_fork();
+        if ($pid == -1) {
+            die('could not fork');
+        } else if ($pid) {
+            $processes[] = $pid;
+        } else {
+            backupTable($table);
+            exit(0);
+        }
+    }
+    foreach ($processes as $process) {
+        pcntl_waitpid($process, $status);
     }
 }
-// Yedekleme alt-dizinin içine kimse ulaşamasın diye .htaccess oluşturuyoruz ve içine 'deny from all' yazıyoruz
-$content = 'deny from all';
-$file = new SplFileObject(SUBBACKUPDIR . '/.htaccess', "w") ;
-$file->fwrite($content) ;
+
+Veritabanı Bağlantı Yönetimi
+
+    PDO ile Veritabanı Bağlantısı: PDO'yu veritabanı bağlantısı için kullanmaya devam edin. Ancak, bağlantı işlemlerini optimize edin. Örneğin, birden fazla bağlantı açmak yerine tek bir bağlantıyı yeniden kullanın.
+
+function getPDOConnection($dsn, $username, $password) {
+    static $pdo = null;
+    if ($pdo === null) {
+        $pdo = new PDO($dsn, $username, $password);
+    }
+    return $pdo;
 }
 
-################################################################################
-// combine 3 ise Tabloları elle seçildi ve elle 1 seçeği tabloları birleştirip tek dosya olarak yedekleyecek
-if(isset($_POST['combine']) && $_POST['combine']=='3' && isset($_POST['elle']) && $_POST['elle']=='1'){
-$toplam_tablo = count($_POST['tablolar']);
-if($toplam_tablo==1){
-$tables = $_POST['tablolar'];
-sort($tables);
-$tabloadi="-".$tables[0]; // Seçilen bir tablo ise tablo adını dosyaya ekliyoruz
-}else{
-$tables = $_POST['tablolar'];
-sort($tables);
-$tabloadi='-Elle'; // Seçilen birden fazla tablo ise Elle metni dosyaya ekliyoruz
-}
-}
-################################################################################
-// combine 3 ise Tabloları elle seçildi ve elle 2 seçeneği seçilen tabloları ayrı ayrı alt-klasöre yedekleyecek
-// Tabloların oluşturulacağı alt-dizin oluşturuyoruz
-if(isset($_POST['combine']) && $_POST['combine']=='3' && isset($_POST['elle']) && $_POST['elle']=='2'){
-define('SUBBACKUPDIR', BACKUPDIR.'/'.$tarih_onek ) ;
-if(!file_exists(SUBBACKUPDIR)){
-    if (!mkdir(SUBBACKUPDIR, 0777, true)) {
-        die('Failed to create folders...');
+Yedekleme İşlemlerini Bölme
+
+    Parçalı Yedekleme: Büyük veritabanlarını küçük parçalara bölerek yedekleyin. Her tabloyu veya tablonun her bölümünü ayrı bir dosyaya yedekleyin.
+
+function backupTableInChunks($pdo, $table, $chunkSize = 1000) {
+    $offset = 0;
+    while (true) {
+        $query = $pdo->query("SELECT * FROM {$table} LIMIT $chunkSize OFFSET $offset");
+        $rows = $query->fetchAll(PDO::FETCH_ASSOC);
+        if (count($rows) == 0) {
+            break;
+        }
+        // Yedekleme işlemini gerçekleştir
+        backupRows($table, $rows);
+        $offset += $chunkSize;
     }
 }
-// Yedekleme alt-dizinin içine kimse ulaşamasın diye .htaccess oluşturuyoruz ve içine 'deny from all' yazıyoruz
-$content = 'deny from all';
-$file = new SplFileObject(SUBBACKUPDIR . '/.htaccess', "w") ;
-$file->fwrite($content) ;
-$tables = $_POST['tablolar'];
-sort($tables);
-}
-################################################################################
-// grup 1 geldi ise yedekleme başlayabilir
-if(isset($_POST['grup']) && $_POST['grup']=='1'){
-// Satır başlangıcı
-$return = null;
-// Yedek dosyanın başına sunucu depolama gibi temel bilgileri yazmak için
-$mysql_version = $PDOdbsecilen->query('select version()')->fetchColumn();
-$mysqlcharacter = $PDOdbsecilen->query("SHOW VARIABLES LIKE 'character_set_connection'");
-$mysql_character = $mysqlcharacter->fetchColumn(1);
-// fonksiyon ile başlıkları istediğimde dosyanın başına ekliyoruz
-function db_genel_bilgi(){
-    GLOBAL $mysql_character, $mysql_version, $db_name, $return;
-$return .= "\n-- Karakter Seti: {$mysql_character}\n";
-$return .= "-- PHP Sürümü: ".phpversion()."\n";
-$return .= "-- Sunucu sürümü: {$mysql_version}\n";
-$return .= "-- Anamakine: ".$_SERVER['HTTP_HOST']."\n";
-$return .= '-- Üretim Zamanı: ' . date_tr('j F Y, H:i', time() ) . "\n";
-$return .= "-- Veritabanı: {$db_name}\n";
-$return .= "--\n";
-$return .= "-- --------------------------------------------------------\n";
-$return .= 'SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";' ."\n" ;
-$return .= 'SET AUTOCOMMIT = 0;' ."\n";
-$return .= 'START TRANSACTION;' ."\n" ;
-$return .= 'SET time_zone = "+00:00";' ."\n" ;
-$return .="-- --------------------------------------------------------\n\n";
-
-$return .="--\n";
-$return .="-- Veritabanı: `{$db_name}`\n"; // Karşılaştırmada dosyanın hangi veritabanı olduğunu buradan bakacak
-$return .="--\n\n";
-}
-// Başlık bilgileri fonksiyondan buraya çağırıyoruz
-echo db_genel_bilgi();
-/*
-$lock_write = 'LOCK TABLES';
-$lock_read = 'LOCK TABLES';
-// BASE TABLE SAVE  
-// get all of the tables 
 */
-// Eğer yıldız ile tüm tablo isteniyorsa
-if($tables == '*'){
 
-$tables = array();
-
-$tables = $PDOdbsecilen->query("SHOW TABLES")->fetchAll(PDO::FETCH_COLUMN);
-/*
-while($row = $result->fetch(PDO::FETCH_NUM)){
-$tables[] = $row[0];
-$lock_write .= ' '.$row[0].' WRITE,';
-$lock_read .= ' '.$row[0].' READ,';
-}
-*/
-// Eğer yıldız değil ise virgülle ayrılmış tabloları dizi oluşturuyoruz
-}else{
-$tables = is_array($tables) ? $tables : explode(',',$tables);
-/*
-foreach ($tables AS $table){
-$lock_write .= ' '.$table.' WRITE,';
-$lock_read .= ' '.$table.' READ,';
-}
-*/
-}
-    // Yedek sonuna veri eklemek için tablo sayısını alıyoruz
-    $tablosayisi = count($tables);
-
-##############################################################################################################################
-
-	// Repair & Optimize Tables
-	function repairTables($PDOdbsecilen, &$tables)
-	{
-		foreach ($tables AS $table){
-
-            // Tablo onarımda tabloların kilitlenmesi belirlendi ise kilitliyoruz
-            if ($_POST['lock']=='1')
-            {
-                $PDOdbsecilen->query('LOCK TABLES `'.$table.'` WRITE');
-            }
-
-			// Check Table
-			$check = $PDOdbsecilen->query(' CHECK TABLE `'.$table.'` ')->fetch(PDO::FETCH_NUM);
-
-            // Repair Table
-            $repair = $PDOdbsecilen->query(' REPAIR TABLE `'.$table.'` ')->fetch(PDO::FETCH_BOTH);
-
-            // Optimize Table
-            $optimize = $PDOdbsecilen->query(' OPTIMIZE TABLE `'.$table.'` ')->fetch(PDO::FETCH_BOTH);
-
-
-            // Tablo onarımda tabloların kilitlenmesi belirlendi ise kilitlenen tabloların kilidini açıyoruz ki veri dökümü yapılabilsin
-            if ($_POST['lock']=='1')
-            {
-                $PDOdbsecilen->query('UNLOCK TABLES;');
-            }
-
-    } // foreach ($tables AS $table)
-
-	}
-    // Bakım seçildi ise önce tablolara bakım yapıyoruz
-    if($_POST['bakim']=='1'){
-        repairTables($PDOdbsecilen, $tables);
-    }
-
-##############################################################################################################################
-
-    //sadece sayı türlerin dizisi
-    // sayı olan verilere tırnak işareti koymamak içindir
-    $numtypes = array('tinyint', 'smallint', 'mediumint', 'int', 'bigint', 'float', 'double', 'decimal', 'real', 'int unsigned');
-
-$handle = "";
-$basarili = false;
-$t = 0;
-foreach($tables as $table){
-$t++;
-// İlk sutuna göre sıralamak için sutun adlarını alıyoruz
-// Sutun adlarını tek diziye diziyoruz
-$tablonun_sutun_adlari = $PDOdbsecilen->query("DESCRIBE `$table`")->fetchAll(PDO::FETCH_COLUMN);
-
-$sutun_sayisi = $PDOdbsecilen->query(" SELECT * FROM `$table` ORDER BY $tablonun_sutun_adlari[0] ASC ");
-$num_fields =  $sutun_sayisi->columnCount();
-$numrow = $sutun_sayisi->rowCount();
-
-################################################################################
-
-// Tabloları ayrı ayrı yedekleme yolu ve dosya adı
-if($_POST['combine']=='2' OR $_POST['combine']=='3' AND $_POST['elle']=='2'){
-$handle = fopen(SUBBACKUPDIR.'/'.trim($table).'.sql','a');
-// GZip için dosya yolu ve dosya adı
-$dosya = SUBBACKUPDIR.'/'.trim($table).'.sql';
-
-if($t>1){
-echo db_genel_bilgi();
-}
-}
-
-// Tek dosyada yedekleme yolu ve dosya adı
-if($_POST['combine']=='1' OR $_POST['combine']=='3' AND $_POST['elle']!='2'){
-$handle = fopen(BACKUPDIR.'/'.$tarih_onek.$tabloadi.'.sql','a');
-// GZip için dosya yolu ve dosya adı
-$dosya = BACKUPDIR.'/'.$tarih_onek.$tabloadi.'.sql';
-}
-
-$type = array();
-
-################################################################################
-// Tablo yapısının üstündeki verileri dosyaya ekliyoruz
-$return .= "--\n" ;
-$return .= "-- Tablonun yapısı `{$table}`\n" ;
-$return .= "--\n\n";
-// Tablo yapısının başına "DROP TABLE IF EXISTS tabloadı" ekliyoruz ki geri yüklerken tablo varsa önce silsin diye
-$return .= "DROP TABLE IF EXISTS {$table};";
-
-$pstm2 = $PDOdbsecilen->query("SHOW CREATE TABLE `{$table}` ");
-$row2 = $pstm2->fetch(PDO::FETCH_NUM);
-$ifnotexists = str_replace('CREATE TABLE', 'CREATE TABLE IF NOT EXISTS', $row2[1]);
-// Tablo oluşturma başlığı ve tablo yapısını dosyaya ekliyoruz
-$return .= "\n{$ifnotexists};\n";
-$return .= "\n--\n" ;
-$return .= "-- Tablonun veri dökümü `{$table}`\n" ;
-$return .= "--\n\n" ;
-
-##############################################################################################
-        //Tablonun sutün tiplerini alıyoruz ki sayı formatlı mı metin formatlı mı diye
-        // Aşağıdaki foreach döngüde kullanacağız
-        if ($numrow) {
-            $pstm3 = $PDOdbsecilen->query("SHOW COLUMNS FROM `$table` ");
-            $type = array();
-
-            while ($rows = $pstm3->fetch(PDO::FETCH_NUM)) {
-                if (stripos($rows[1], '(')) {
-                    $type[$table][] = stristr($rows[1], '(', true);
-                } else {
-                    $type[$table][] = $rows[1];
-                }
-            }
-        }
-##############################################################################################
-
-##############################################################################################
-$sutunozellikleri = $PDOdbsecilen->query(" SHOW COLUMNS FROM `{$table}` ");
-$sutun_ozellikleri = $sutunozellikleri->fetchAll(PDO::FETCH_NUM);
-##############################################################################################
-// Foreach döngü ile veri satırları dosyaya ekliyoruz
-@set_time_limit(0);
-$s = 0;
-while($satirlardizi = $sutun_sayisi->fetch(PDO::FETCH_NUM)){
-    $s++;
-    $return .= 'INSERT INTO `' . trim($table) . '` VALUES(';
-        foreach($satirlardizi AS $key => $value){
-
-            // Veri olup olmadığını kontrol ediyoruz
-            if (strlen((string) $value)>0) {
-                // Sutün tipi sayı formatlı ise '15', gibi yerine kesmeyi kaldırıp 15, sadece sayı değeri ekle
-                if ((in_array($type[$table][$key], $numtypes)) && (strlen((string) $value)>0)) {
-                    $return .= $value;
-                } else {
-                    $return .= $PDOdbsecilen->quote($value); // Sutün tipi sayı formatlı olmadığı için 'veri' gibi veriyi kesme içine alarak ekle
-                }
-            } else {
-                if( $sutun_ozellikleri[$key][2] == 'YES' && empty($sutun_ozellikleri[$key][4]) ){ // Veri yok ve "Tanımlandığı gibi" de yok ise NULL ekle
-                    $return .= 'NULL';
-                }else{ // Veri yok ve "Tanımlandığı gibi" de veri var ise ekle
-                    if ((in_array($type[$table][$key], $numtypes))) {
-                        $return .= $sutun_ozellikleri[$key][4];
-                    } else {
-                        // Sutün tipi NOT NULL olduğu halde veri yoksa burada hata verecektir.
-                        // Çözümü, sutün tipi NOT NULL ise boş olmayacak, boş olacaksa DEFAULT NULL olacak
-                        if(empty($sutun_ozellikleri[$key][4])){
-                            $return .= '\'\'';
-                        }else{
-                            $return .= $PDOdbsecilen->quote( $sutun_ozellikleri[$key][4] );
-                        }
-                    }
-                }
-            }
-
-            if ($key < ($num_fields - 1)) {
-                $return .= ', ' ;
-            }
-        }
-        $return .= ");\n";
-        // Tablonun verileri dosyaya eklendikten sonra altına karşılaştırmada kullanılacak tablo adı ve kaç satır veri var ekliyoruz
-        // Karşılaştırmada kaynak ile yedek karşılaştırırken yedekteki tablo adı ve satır sayısı için buraya bakacak
-        if ( $s == ( $numrow - 0 ) ){
-        $return .="\n--\n";
-        $return .="-- TABLO_ADI {$table} {$numrow}\n";
-        $return .="--\n";
-
-        $return .="\n-- --------------------------------------------------------\n\n";
-        }
-
-        // Okunan veriyi dosyaya yazıyoruz
-        if(fwrite($handle, $return) === FALSE){
-            echo "Veri satırı dosyaya yazılamıyor";
-            exit;
-        }
-            $return=null;
-        
-}
-
-        // Tabloda veri yoksa sadece tablo yapısını dosyaya yazıyoruz
-        if($numrow == '0'){
-        $return .="--\n";
-        $return .="-- TABLO_ADI {$table} {$numrow}\n";
-        $return .="--\n";
-
-        $return .="\n-- --------------------------------------------------------\n\n";
-        if(fwrite($handle, $return) === FALSE){
-            echo "Veri satırı dosyaya yazılamıyor";
-            exit;
-        }
-            $return=null;
-        }
-       
-####################################################################################################
-    // Eğer tablonun denetim iz kayıtları tetikleyici varsa onuda buradan dosyaya ekliyoruz
-    // "table_create", "table_update", "table_delete" tablo yapıları yedekler
-    $trigger = $PDOdbsecilen->query(" SELECT * FROM INFORMATION_SCHEMA.TRIGGERS WHERE TRIGGER_SCHEMA = '{$db_name}' AND EVENT_OBJECT_TABLE = '{$table}' ");
-    $trigger_dizi = $trigger->fetchAll(PDO::FETCH_ASSOC);
-
-        if(count($trigger_dizi)>0){
-            $tri = 1;
-            foreach($trigger_dizi AS $trigger){
-            if($tri == 1){
-                $return .= "--\n";
-                $return .= "-- Tetikleyiciler `".$trigger['EVENT_OBJECT_TABLE']."`"; // Tetikleyici tablo adı
-                $return .= "\n--\n\n";
-            }
-                $return .= "DROP TRIGGER IF EXISTS `".$trigger['TRIGGER_NAME']."`;\n"; // Aynı tablo varsa silerek drop komutu
-                $return .= "DELIMITER $$\n";
-                $return .= 'CREATE TRIGGER `'.$trigger['TRIGGER_NAME'].'` '.$trigger['ACTION_TIMING'].' '.$trigger['EVENT_MANIPULATION'].' ON `'.$trigger['EVENT_OBJECT_TABLE'].'` FOR EACH ROW ';
-                $return .= $trigger['ACTION_STATEMENT'];
-                $return .= "\n$$\n";
-                $return .= "DELIMITER ;\n";
-            $tri++;
-            }
-                $return .= "COMMIT;\n\n";
-
-            // Okunan veriyi dosyaya yazıyoruz
-            if(fwrite($handle, $return) === FALSE){
-                echo "Veri satırı dosyaya yazılamıyor";
-                exit;
-            }
-                $return=null;
-        }
-####################################################################################################
-
-            // Dosyanın en sonuna ekliyoruz
-            if ( ($t == ( $tablosayisi - 0 ) AND $tablosayisi > 1 AND $_POST['combine']=='1') OR ($_POST['combine']=='2' OR @$_POST['elle']=='2') ){
-            $return .= "\n";
-            $return .= 'SET FOREIGN_KEY_CHECKS = 1 ; '  . "\n" ; 
-            $return .= 'COMMIT ; '  . "\n" ;
-            $return .= 'SET AUTOCOMMIT = 1 ; ' . "\n"  ;
-            if(fwrite($handle, $return) === FALSE){
-                echo "Veri satırı dosyaya yazılamıyor";
-                exit;
-            }
-                $return=null;
-            }
-
-            // GZip olmayan Açılmış dosyayı kapatıyoruz          
-            if($_POST['gz']=='0'){
-                fclose($handle);
-            }
-
-            // Alt-klasöre Tablo Tablo yedekleri GZip ile sıkıştırır
-            if($_POST['gz']=='1' && ($_POST['combine']=='2' || $_POST['combine']=='3' && isset($_POST['elle']) && $_POST['elle'] == '2')){
-            fclose($handle);
-            $input = $dosya;
-            $output = $input.".gz";
-            $basarili = file_put_contents("compress.zlib://$output", file_get_contents($input));
-            // Sıkıştırma başarılı ise 
-            if($basarili){
-                @unlink($dosya);
-            }
-            }
-
-}//foreach($tables as $table){
-##############################################################################################################################################################
-            // Tam tek dosya olarak GZip yok
-            if($_POST['gz'] == '0' && $_POST['combine']=='1'){
-                $goreve_gidecek = $dosya;
-            }
-            // Elle tabloları seçerek GZip yok ve birleştirilmiş tablolar tek dosya
-            if($_POST['gz'] == '0' && $_POST['combine']=='3' && isset($_POST['elle']) && $_POST['elle'] == '1'){
-                $goreve_gidecek = $dosya;
-            }
-##############################################################################################################################################################
-                // Tek dosyada yedeği GZip ile sıkıştırır
-                if($handle && $_POST['gz']=='1' && ($_POST['combine']=='1' || $_POST['combine']=='3' && isset($_POST['elle']) && $_POST['elle'] == '1')){
-                fclose($handle); // burası hata veriyor
-                $input = $dosya;
-                $output = $input.".gz";
-                $basarili = file_put_contents("compress.zlib://$output", file_get_contents($input));                        
-                if($basarili){
-                    @unlink($dosya);
-                }
-                }
-##############################################################################################################################################################
-            // Tam tek dosya olarak yedeklendiğin GZip var dosya adı
-            if($_POST['gz'] == '1' && $_POST['combine']=='1'){
-                $goreve_gidecek = $output;
-            // Tabloları Ayrı Ayrı yedeklendiğinde dizin adı alıyoruz GZip var yok fark etmez dizin adı önemlidir
-            }else if($_POST['combine']=='2'){
-                $goreve_gidecek = SUBBACKUPDIR;
-            // Elle tablolar seçiliyor ve tablolar Ayrı Ayrı alt-dizine yedeklendiğinde dizin adı alıyoruz GZip var yok fark etmez dizin adı önemlidir
-            }else if($_POST['combine']=='3' && isset($_POST['elle']) && $_POST['elle'] == '2'){
-                $goreve_gidecek = SUBBACKUPDIR;
-            // Elle tablolar seçiliyor ve tablolar birleştirilecek tek dosya ve GZip var
-            }else if($_POST['gz'] == '1' && $_POST['combine']=='3' && isset($_POST['elle']) && $_POST['elle'] == '1' ){
-                $goreve_gidecek = $output;
-            }
-##############################################################################################################################################################
-/*
-$dosya = fopen ("backup3.txt" , "a"); //dosya oluşturma işlemi 
-$yaz = print_r($goreve_gidecek."\n", true); // Yazmak istediginiz yazı 
-fwrite($dosya,$yaz); fclose($dosya);
-*/
-            if($handle != "" OR $basarili){
-                unset($PDOdbsecilen);
-            // Otomatik yedekleme başarılı olduğundaki mesaj
-                if(isset($_POST['oto_yedek']) && $_POST['oto_yedek'] == 1){
-                    $jsonData = array("basarili"=>"Veritabanı Başarıyla Yedeklendi", "dosya_adi"=>$goreve_gidecek);
-                    echo "<span>".json_encode($jsonData)."</span>";
-                }else{
-                    echo 'Veritabanı Başarıyla Yedeklendi';
-                }
-            }else{
-            // Otomatik yedekleme başarısız olduğundaki mesaj
-                if(isset($_POST['oto_yedek']) && $_POST['oto_yedek'] == 1){
-                    $jsonData = array("basarili"=>"Veritabanı Bir Hatadan Dolayı Yedeklenemedi", "dosya_adi"=>$goreve_gidecek);
-                    echo "<span>".json_encode($jsonData)."</span>";
-                }else{
-                    echo 'Veritabanı Bir Hatadan Dolayı Yedeklenemedi';
-                }
-            }
-            //echo $dosyaa; // klasör adı
-
-}//if($_POST['grup']=='1'){
-    unset($_POST,$PDOdbsecilen,$PDOdb);
 ?>

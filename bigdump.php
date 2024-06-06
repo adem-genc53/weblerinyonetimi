@@ -92,10 +92,13 @@ if(isset($_POST['veritabani_id']) && $_POST['veritabani_id'] > 0 || isset($_SESS
 
     // Seçilen veritabanı varsa bağlantı oluşturuyoruz
     $secilen = "mysql:host=".$varsayilan['database_host'].";dbname=".$varsayilan['db_name'].";charset=".CHARSET.";port=".PORT."";
-
+    try {
     $PDOdbsecilen = new PDO($secilen, $hash->take($varsayilan['database_user']), $hash->take($varsayilan['database_password']), $options);
-    $PDOdbsecilen->exec("set names utf8");
+    $PDOdbsecilen->exec("set names ".CHARSET);
     $PDOdbsecilen->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    } catch (\PDOException $e) {
+        die($e->getMessage());
+    }
     $db_yok = true;
     $db_name = $varsayilan['db_name'];
 }else{
@@ -159,7 +162,7 @@ $string_quotes = '\'';                  // Döküm dosyanız dizeler için çift
 $max_query_lines = 300;
 
 // Yükleme dosyalarının nereye yerleştirileceği (varsayılan: bigdump klasörü)
- $upload_dir = dirname(__FILE__)."/".BACKUPDIR.$altdizin;
+ $upload_dir = BACKUPDIR.$altdizin;
 
 // *******************************************************************************************
 // PHP'ye aşina değilseniz lütfen bu satırın altındaki hiçbir şeyi değiştirmeyin
@@ -171,7 +174,7 @@ if ($ajax)
 define ('VERSION','0.36b');
 define ('DATA_CHUNK_LENGTH',16384);  // Bir seferde kaç karakter okunur
 define ('TESTMODE',$testmode);          // Dosyayı gerçekten veritabanına erişmeden işlemek için true olarak ayarlayın
-define ('BIGDUMP_DIR',dirname(__FILE__)."/".BACKUPDIR.$altdizin);
+define ('BIGDUMP_DIR',BACKUPDIR.$altdizin);
 define ('PLUGIN_DIR',BIGDUMP_DIR.'/plugins/');
 
 //header("Expires: Mon, 1 Dec 2003 01:00:00 GMT");
@@ -343,8 +346,8 @@ div tt {
                                 <p>Tabloları ayrı ayrı yedeklemenin avantajı tüm veri tabını geri yükleme yerine geri getirmek istediğiniz bir veya birden fazla tabloları ayrı ayrı geri yükleme imkanı sağlamasıdır.</p>
                                 <p>Buradan yedeklerinizi geri yükleme yapabileceğiniz gibi DENEME MODUNDA yükleme yaparak alınan yedeğin geri yüklemede herhangi bir sorun çıkarıp çıkarmayacağını yani yedeklemenin sağlıklı yapılıp yapılmadığını da test etmiş olursunuz (yedeğin sorunsuz olduğunu garantilemez).</p>
                                 <p><b>Not:</b> Buradan geri yükleme yapıldığında yedeğin içinde mevcut tablo adı ile sunucudaki veri tabanındaki tablo adı ile eşleşenler silinerek yerine yedekten geri yüklenecektir. Eşleşmeyen tablolar ise silinmeden kalacaktır.</p>
-                                <b>Veritabanı yedeklerin bulunduğu dizin: </b><span id="yol"><?php echo strtolower(htmlpath('./'.BACKUPDIR)); ?></span><br />
-                                <p><b>Web site zip yedeklerin bulunduğu dizin: </b><span id="yol"><?php echo strtolower(htmlpath('./'.ZIPDIR)); ?></span></p>
+                                <b>Veritabanı yedeklerin bulunduğu dizin: </b><span id="yol"><?php echo strtolower(htmlpath(BACKUPDIR)); ?></span><br />
+                                <p><b>Web site zip yedeklerin bulunduğu dizin: </b><span id="yol"><?php echo strtolower(htmlpath(ZIPDIR)); ?></span></p>
                             </div>
                             </div>
                         </div><!-- / <div class="card"> -->
@@ -399,7 +402,7 @@ div tt {
           </tr>
           <tr>
             <td>Yedeklerin bulunduğu dizin:</td>
-            <td colspan="2"><span id="yol"><?php echo strtolower(htmlpath('./'.BACKUPDIR)); ?></span></td>
+            <td colspan="2"><span id="yol"><?php echo strtolower(htmlpath(BACKUPDIR)); ?></span></td>
           </tr>
 
           <tr>

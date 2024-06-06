@@ -124,8 +124,8 @@ include('includes/sub_navbar.php');
                                 <p><i class="fa fa-minus" aria-hidden="true" style="color:red;"></i> ikonu diğer veritabanında olan tablonun burada olmadığını gösterir.</p>
                                 <p><i class="fa fa-check" aria-hidden="true" style="color:green;"></i> İkonu her iki veritabanında bu tablo ve veri satırları tam yedeklendiğini gösterir.</p>
                                 <p><i class="fa fa-exclamation-circle" aria-hidden="true" style="color:red;"></i> İkonu bu tablonun veri satırlarında sorun olduğunu, muhtemelen eksik veri satırı yedeklendiğini gösterir.</p>
-                                <b>Veritabanı yedeklerin bulunduğu dizin: </b><span id="yol"><?php echo strtolower(htmlpath('./'.BACKUPDIR)); ?></span><br />
-                                <p><b>Web site zip yedeklerin bulunduğu dizin: </b><span id="yol"><?php echo strtolower(htmlpath('./'.ZIPDIR)); ?></span></p>
+                                <b>Veritabanı yedeklerin bulunduğu dizin: </b><span id="yol"><?php echo strtolower(htmlpath(BACKUPDIR)); ?></span><br />
+                                <p><b>Web site zip yedeklerin bulunduğu dizin: </b><span id="yol"><?php echo strtolower(htmlpath(ZIPDIR)); ?></span></p>
                             </div>
                             </div>
                         </div><!-- / <div class="card"> -->

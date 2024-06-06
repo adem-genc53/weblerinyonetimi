@@ -61,8 +61,8 @@ include('includes/sub_navbar.php');
                             <div class="card-body">
 <p>Buradan web dizinleri sıkıştırmadan dizin olarak uzak Google Drive hesabına elle yedekleyebileceğiniz gibi dizinler içinde gezinerek özel bir dosyayı da yedekleyebilirsiniz.
 </p>
-                                <b>Veritabanı yedeklerin bulunduğu dizin: </b><span id="yol"><?php echo strtolower(htmlpath('./'.BACKUPDIR)); ?></span><br />
-                                <p><b>Web site zip yedeklerin bulunduğu dizin: </b><span id="yol"><?php echo strtolower(htmlpath('./'.ZIPDIR)); ?></span></p>
+                                <b>Veritabanı yedeklerin bulunduğu dizin: </b><span id="yol"><?php echo strtolower(htmlpath(BACKUPDIR)); ?></span><br />
+                                <p><b>Web site zip yedeklerin bulunduğu dizin: </b><span id="yol"><?php echo strtolower(htmlpath(ZIPDIR)); ?></span></p>
                             </div>
                             </div>
                         </div><!-- / <div class="card"> -->

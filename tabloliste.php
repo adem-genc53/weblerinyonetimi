@@ -40,11 +40,12 @@ require_once("includes/turkcegunler.php");
             $secilen = "mysql:host=".$varsayilan['database_host'].";dbname=".$varsayilan['db_name'].";charset=".CHARSET.";port=".PORT."";
             try {
                 $PDOdbsecilen = new PDO($secilen, $hash->take($varsayilan['database_user']), $hash->take($varsayilan['database_password']), $options);
-                $PDOdbsecilen->exec("set names utf8");
+                $PDOdbsecilen->exec("set names ".CHARSET);
                 $PDOdbsecilen->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
                 $db_yok = true;
                 $db_name = $varsayilan['db_name'];
             } catch (\PDOException $e) {
+                die($e->getMessage());
                 $PDOdbsecilen = false;
                 $db_yok = false;
                 //echo $e->getMessage(); // Unknown database 'antenfiyati_uce-stok' 

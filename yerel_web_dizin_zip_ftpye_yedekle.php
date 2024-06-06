@@ -52,10 +52,10 @@ include('includes/sub_navbar.php');
 
                             <div id="collapseOne" class="collapse" aria-labelledby="headingOne" data-parent="#accordion">
                             <div class="card-body">
-<p>Buradan web dizinlerin zip formatında sıkıştırılarak yedeklenen zipli dosyaların uzak FTP hesabına elle yedekleyebilirsiniz
-</p>
-                                <b>Veritabanı yedeklerin bulunduğu dizin: </b><span id="yol"><?php echo strtolower(htmlpath('./'.BACKUPDIR)); ?></span><br />
-                                <p><b>Web site zip yedeklerin bulunduğu dizin: </b><span id="yol"><?php echo strtolower(htmlpath('./'.ZIPDIR)); ?></span></p>
+                                <p>Buradan web dizinlerin zip formatında sıkıştırılarak yedeklenen zipli dosyaların uzak FTP hesabına elle yedekleyebilirsiniz
+                                </p>
+                                <b>Veritabanı yedeklerin bulunduğu dizin: </b><span id="yol"><?php echo strtolower(htmlpath(BACKUPDIR)); ?></span><br />
+                                <p><b>Web site zip yedeklerin bulunduğu dizin: </b><span id="yol"><?php echo strtolower(htmlpath(ZIPDIR)); ?></span></p>
                             </div>
                             </div>
                         </div><!-- / <div class="card"> -->
@@ -235,9 +235,9 @@ include('includes/footer.php');
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     function ftpDenSil() {
-        var ftpden_kaynak_sil = $('#ftp_den_secilen_dosya').val();
+        var ftp_den_secileni_sil = $('#ftp_den_secilen_dosya').val();
 
-        if( ftpden_kaynak_sil == '' ){
+        if( ftp_den_secileni_sil == '' ){
             $(function(){
             jw("b olumsuz").baslik("FTP'den Dosya Seçilmedi").icerik("FTP'den yedek silmek için bir dosya seçmelisiniz").kilitle().en(450).boy(100).ac();
             })
@@ -258,7 +258,7 @@ include('includes/footer.php');
             url: "elle_uzak_ve_yerel_sunucudan_dosyalari_sil.php",
             type: "POST",
             dataType: "json",
-            data: { ftpden_sil: 1, ftpden_kaynak_sil : ftpden_kaynak_sil },
+            data: { ftpden_sil: 1, ftp_den_secileni_sil : ftp_den_secileni_sil },
             success: function (data) {
                 bekleme.kapat();
                 jw("b olumlu").baslik("FTP'den Silme Sonucu").icerik(data.mesaj).en(500).boy(10).kilitle().akilliKapatPasif().kapaninca(function(){ ftpSatirSil(data.li_sil_adi); }).ac(); 
@@ -401,7 +401,7 @@ $(document).ready( function() {
 
 	$( '#ftp_uzaktan_agac' ).html( '<ul class="filetree start"><li class="wait" style="padding-left: 20px;">' + 'FTP içerik ağacı oluşturuluyor...' + '<li></ul>' );
 	
-	getfilelist( $('#ftp_uzaktan_agac') , '<?php echo $genel_ayarlar['patch']; ?>' );
+	getfilelist( $('#ftp_uzaktan_agac') , '/' );
 	
 	function getfilelist( cont, root ) {
 	
@@ -414,13 +414,13 @@ $(document).ready( function() {
 
 
 			
-            if( '<?php echo $genel_ayarlar['patch']; ?>' == root ) {
-            if(data=='<ul id="uzak" class="filetree" style="display: none;"></ul>'){
+            if( '/' == root ) {
+            if(data=='<ul id="ftp_uzak" class="filetree" style="display: none;"></ul>'){
                 $( cont ).find('UL:hidden').show();
-                $("#ftp_uzak").append('<li class="uzak_home pointer"><a rel="<?php echo $genel_ayarlar['patch']; ?>">Ana Dizin<span style="float: right;color: black;padding-right: 10px;">4 KB</span></a></li>');
+                $("#ftp_uzak").append('<li class="uzak_home pointer"><a rel="/">Ana Dizin<span style="float: right;color: black;padding-right: 10px;">4 KB</span></a></li>');
             }else{
 				$( cont ).find('UL:hidden').show();
-                $("#ftp_uzak li:first-child").before('<li class="uzak_home pointer"><a rel="<?php echo $genel_ayarlar['patch']; ?>">Ana Dizin<span style="float: right;color: black;padding-right: 10px;">4 KB</span></a></li>');
+                $("#ftp_uzak li:first-child").before('<li class="uzak_home pointer"><a rel="/">Ana Dizin<span style="float: right;color: black;padding-right: 10px;">4 KB</span></a></li>');
             }
             } else {
 				$( cont ).find('UL:hidden').slideDown({ duration: 500, easing: null });
@@ -431,7 +431,7 @@ $(document).ready( function() {
 	
 	$( '#ftp_uzaktan_agac' ).on('click', 'LI A', function() {
 		var entry = $(this).parent();
-        if(entry.hasClass('uzak_home') && '<?php echo $genel_ayarlar['patch']; ?>' == $(this).attr('rel') )
+        if(entry.hasClass('uzak_home') && '/' == $(this).attr('rel') )
         {
             $('#ftp_den_secilen_dosya').val( $(this).attr('rel') );
             $('#ftp_uzaktan_agac a').removeClass("aktif");

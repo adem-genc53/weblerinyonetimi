@@ -1,8 +1,7 @@
 <?php 
 // Bismillahirrahmanirrahim
-require_once("includes/turkcegunler.php");
-
 if(isset($_POST['ajaxtan'])){
+require_once("includes/turkcegunler.php");
     //echo '<pre>' . print_r($_POST, true) . '</pre>';
 // Gönderilen gün değeri
 $gun = isset($_POST['gun']) ? $_POST['gun'] : '-1';
@@ -14,7 +13,7 @@ $dakika = isset($_POST['dakika']) ? $_POST['dakika'] : '-1';
 $haftanin_gunu = isset($_POST['haftanin_gunu']) ? $_POST['haftanin_gunu'] : [0=>-1];
 }
 
-if(isset($gun) && isset($saat) && isset($dakika) && isset($haftanin_gunu)){
+if((isset($gun) && isset($saat) && isset($dakika) && isset($haftanin_gunu)) || isset($gorevden)){
 
 // Şu anki tarihi ve saat bilgisini al
 $bugun = new DateTime();
@@ -84,7 +83,7 @@ if ($saat == -1 && $dakika == -1) { // SAAT && DAKİKA * YILDIZ SEÇİLİ İSE
                             }
                             //echo "6 Saat ve Dakika Kontrol Bölümü<br>";
 
-} else if (strpos($saat, '/') === false && $saat != -1 && $dakika != -1) { // SAAT NORMAL SEÇİLİ && DAKİKA NORMAL SEÇİLİ İSE
+} else if (strpos($saat, '/') === false && $saat != -1 && strpos($dakika, '/') === false && $dakika != -1) { // SAAT NORMAL SEÇİLİ && DAKİKA NORMAL SEÇİLİ İSE
 
                             $tarih->setTime($saat, $dakika, 0); // SAAT VE DAKİKA NORMAL SEÇİLİ OLDUĞUNDAN SEÇİLİ SAAT VE DAKİKA AYARLIYORUZ
                             //echo "7 Saat ve Dakika Kontrol Bölümü<br>";
@@ -402,23 +401,22 @@ if ($saat == -1 && $dakika == -1) { // SAAT && DAKİKA * YILDIZ SEÇİLİ İSE
 ##############################################################################################################################################################
 ##############################################################################################################################################################
 ##############################################################################################################################################################
-
+if(isset($_POST['ajaxtan'])){
     // HAFTANIN GÜN(LERİ) SEÇİLİ İSE HAFTANIN GÜN(LERİ) İŞLEMLERİNE BAŞLA
     if (!in_array("-1", $haftanin_gunu)){
 
+        //$tarih->setTimezone(new DateTimeZone('UTC'));
         $tarih = haftaKontrolu($bugun, $tarih, $haftanin_gunu, $gun, $saat, $dakika);
 
     }else{ // HAFTANIN GÜNÜ -1 * YILDIZ SEÇİLİ İSE GÜN İŞLEMLERİNE BAŞLA
 
+        //$tarih->setTimezone(new DateTimeZone('UTC'));
         $tarih = gunKontrolu($bugun, $tarih, $gun, $saat, $dakika);
 
     }
-        $tarih->setTimezone(new DateTimeZone('UTC'));
+        $tarih->setTimezone(new DateTimeZone('Europe/Istanbul')); // UTC // Europe/Istanbul
 
-    if(isset($_POST['ajaxtan'])){
         echo date_tr('j F Y l, H:i', $tarih->format('U'));
-    }else{
-        $sonraki_calisma = $tarih->format('U');
     }
 } // if(isset($gun) && isset($saat) && isset($dakika) && isset($haftanin_gunu)){
 ?>

@@ -1,96 +1,179 @@
 <?php 
 // Bismillahirrahmanirrahim
-require_once('includes/connect.php');
-@ini_set('display_errors', true);
-@ini_set('memory_limit', '-1');
-@ignore_user_abort(true);
-require_once("includes/turkcegunler.php");
-/*
-$dosya = fopen ("zipyap.txt" , "a"); //dosya oluşturma işlemi 
-$yaz = "görev yurutucusu\n".print_r($_POST, true); // Yazmak istediginiz yazı 
-fwrite($dosya,$yaz); fclose($dosya);
-*/
-if(isset($_POST['zipyap'])){
- //echo '<pre>' . print_r($_POST, true) . '</pre>';
- //exit;
-/*
-    $simdizaman         = date("Y-m-d-H-i-s",time());
-    $dizinyolu          = ZIPDIR;
-    $dizinadi           = 'yeni-webyonetimi';//$_POST['dizinadi'];
-    $ziparsivadi        = 'deneme_dizin.zip';//pathinfo($_POST['ziparsivadi'], PATHINFO_EXTENSION) == "zip" ? $_POST['ziparsivadi'] : $_POST['ziparsivadi'].".zip";
-    $zipyorumadizinadi  = pathinfo($ziparsivadi, PATHINFO_FILENAME);
-*/
-    $simdizaman         = date("Y-m-d-H-i-s",time());
-    $zipdizinyolu       = ZIPDIR; // zip dosyalarının bulunacağın konum "../WEBZIPLER/" bu site dizinin bir gerisinde WEBZIPLER klasör olmalıdır
-    $dizinyolu          = $_POST['dizindir']; // sıkıştırılacak web site dizinin bulunduğu alan "../" bu site dizinin bir gerisinde
-    $dizinadi           = $_POST['dizinadi']; // sıkıştırılacak web site dizin adı
-    // zip dosya adı varsayılan dizin adıdır ancak sıkıştıran isterse adının değiştirebilir. zip dosya adının sonunda .zip uzantı yoksa ekliyoruz
-    $ziparsivadi        = pathinfo($_POST['ziparsivadi'], PATHINFO_EXTENSION) == "zip" ? $_POST['ziparsivadi'] : $_POST['ziparsivadi'].".zip";
-    // zip dosya adına tarih eklendiği için zip açarken dosya adını alabilmek için zipin yorum alanına dosya adını ekliyoruz
-    $zipyorumadizinadi  = pathinfo($ziparsivadi, PATHINFO_FILENAME);
 
-function zipData( $source, $destination ) 
-{
-if (file_exists($source) && count(glob($source . '*')) !== 0) {
-    $zip = new ZipArchive();
-    if($zip->open($destination, ZIPARCHIVE::CREATE) === true) {
-        $source = realpath($source);
-        global $zipyorumadizinadi;
-        $zip->setArchiveComment($zipyorumadizinadi);
-        if(is_dir($source)) {
-        $iterator = new RecursiveDirectoryIterator($source);
-        $iterator->setFlags(RecursiveDirectoryIterator::SKIP_DOTS);
-        $files = new RecursiveIteratorIterator($iterator, RecursiveIteratorIterator::SELF_FIRST);
-        foreach($files as $file) {
-            $file = realpath($file);
-            if(is_dir($file)) {
-            $zip->addEmptyDir(str_replace($source . DIRECTORY_SEPARATOR, '', $file . DIRECTORY_SEPARATOR));
-            }elseif(is_file($file)) {
-            $zip->addFile($file,str_replace($source . DIRECTORY_SEPARATOR, '', $file));
+if (!function_exists('zipDataUsingZipArchive')) {
+    function zipDataUsingZipArchive($source, $destination, $comment = '') {
+        $zipsonuc = [];
+
+        // Kaynak dizin veya dosyanın var olup olmadığını kontrol et
+        if (!file_exists($source)) {
+            $zipsonuc[] = "HATA: Kaynak dosya veya dizin mevcut değil: " . $source;
+            return $zipsonuc;
+        }
+
+        // Hedef dizinin mevcut olup olmadığını kontrol et ve gerekirse oluştur
+        $destinationDirRealPath = dirname($destination);
+        if (!file_exists($destinationDirRealPath)) {
+            if (!mkdir($destinationDirRealPath, 0777, true)) {
+                $zipsonuc[] = "HATA: Hedef dizin oluşturulamadı: " . $destinationDirRealPath;
+                return $zipsonuc;
+            } else {
+                //$zipsonuc[] = "Hedef dizin oluşturuldu: " . $destinationDirRealPath;
+            }
+        } else {
+            //$zipsonuc[] = "Hedef dizin zaten mevcut: " . $destinationDirRealPath;
+        }
+
+        // Zip işlemi
+        $zip = new ZipArchive();
+        if ($zip->open($destination, ZipArchive::CREATE) !== TRUE) {
+            $zipsonuc[] = "HATA: Zip arşivi açılamadı: " . $destination;
+            return $zipsonuc;
+        } else {
+            //$zipsonuc[] = "Zip arşivi başarıyla açıldı: " . $destination;
+        }
+
+        $sourceRealPath = realpath($source);
+        if ($sourceRealPath === false) {
+            $zipsonuc[] = "HATA: Gerçek kaynak yolu bulunamadı: " . $source;
+            return $zipsonuc;
+        }
+
+        if (is_dir($sourceRealPath)) {
+            //$zipsonuc[] = "Kaynak bir dizin: " . $sourceRealPath;
+            // Kaynak bir dizinse, tüm dosyaları ve alt dizinleri ekleyin
+            $sourceIterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($sourceRealPath), RecursiveIteratorIterator::LEAVES_ONLY);
+
+            foreach ($sourceIterator as $file) {
+                if (!$file->isDir()) {
+                    $filePath = $file->getRealPath();
+                    if ($filePath === false) {
+                        $zipsonuc[] = "HATA: Dosya yolu bulunamadı.";
+                        continue;
+                    }
+                    $relativePath = substr($filePath, strlen($sourceRealPath) + 1);
+                    if ($zip->addFile($filePath, $relativePath)) {
+                        //$zipsonuc[] = "Eklendi: " . $filePath . " -> " . $relativePath;
+                    } else {
+                        $zipsonuc[] = "HATA: Eklenemedi: " . $filePath;
+                    }
+                }
+            }
+        } elseif (is_file($sourceRealPath)) {
+            // Kaynak bir dosyaysa, sadece bu dosyayı ekleyin
+            //$zipsonuc[] = "Kaynak bir dosya: " . $sourceRealPath;
+            if ($zip->addFile($sourceRealPath, basename($sourceRealPath))) {
+                //$zipsonuc[] = "Eklendi: " . $sourceRealPath;
+            } else {
+                $zipsonuc[] = "HATA: Eklenemedi: " . $sourceRealPath;
+            }
+        } else {
+            $zipsonuc[] = "HATA: Kaynak ne dosya ne de dizin: " . $sourceRealPath;
+            return $zipsonuc;
+        }
+
+        // Yorum ekleme işlemi
+        if ($comment !== '') {
+            if ($zip->setArchiveComment($comment)) {
+                //$zipsonuc[] = "Yorum eklendi: " . $comment;
+            } else {
+                $zipsonuc[] = "HATA: Yorum eklenemedi.";
             }
         }
-        }elseif(is_file($source)) {
-        $zip->addFile($source,basename($source));
-        }
-    }
-        if($zip->close()){
-            return 1; //"Zip Arşivi Başarıyla Oluşturuldu";
-        }else{
-            return 0; //"Zip Arşivi Bir Hatadan Dolayı Oluşturulamadı";
-        }
-}
-    return "none"; //"Klasör yolu geçersiz: <b>".$source."</b>";
-}
-##################################################################################################################################################################
-##################################################################################################################################################################
 
-##################################################################################################################################################################
-##################################################################################################################################################################
-    $zipyap_sonucu = zipData($dizinyolu.'/'.$dizinadi,    $zipdizinyolu.$zipyorumadizinadi."-".$simdizaman.'.zip');
+        $zip->close();
 
-    // Otomatik veya elle yürütme başarılı sonuç çıktısı
-    if(trim($zipyap_sonucu) == 1 && isset($_POST['oto_yedek']) && $_POST['oto_yedek'] == 1){
-        $jsonData = array("basarili"=>"Zip Arşivi Başarıyla Oluşturuldu", "dosya_adi"=>$zipdizinyolu.$zipyorumadizinadi."-".$simdizaman.'.zip');
-        echo "<span>".json_encode($jsonData)."</span>";
-    // Otomatik veya elle yürütme başarısız sonuç çıktısı
-    }else if(trim($zipyap_sonucu) == 0 && isset($_POST['oto_yedek']) && $_POST['oto_yedek'] == 1){
-        $jsonData = array("basarili"=>"Zip Arşivi Bir Hatadan Dolayı Oluşturulamadı", "dosya_adi"=>$zipdizinyolu.$zipyorumadizinadi."-".$simdizaman.'.zip');
-        echo "<span>".json_encode($jsonData)."</span>";
-    // Otomatik veya elle yürütme klasör yolu geçersiz sonuç çıktısı
-    }else if(trim($zipyap_sonucu) == 'none' && isset($_POST['oto_yedek']) && $_POST['oto_yedek'] == 1){
-        $jsonData = array("basarili"=>"Klasör yolu geçersiz: ".$dizinyolu.'/'.$dizinadi."", "dosya_adi"=>$zipdizinyolu.$zipyorumadizinadi."-".$simdizaman.'.zip');
-        echo "<span>".json_encode($jsonData)."</span>";
-    // Dizin listelemede zip yapma sonucu
-    }else{
-        if(trim($zipyap_sonucu) == 1){
-            echo "Zip Arşivi Başarıyla Oluşturuldu<br />".$zipyorumadizinadi."-".$simdizaman.'.zip';
-        }elseif(trim($zipyap_sonucu) == 0){
-            echo "Zip Arşivi Bir Hatadan Dolayı Oluşturulamadı";
-        }elseif(trim($zipyap_sonucu) == 'none'){
-            echo "Klasör yolu geçersiz: <b>".$dizinyolu.'/'.$dizinadi."</b>";
+        // Orijinal dosya adındaki tek tırnakları kaldır
+        $destinationClean = str_replace("'", "", $destination);
+
+        $zipsonuc[] = "Zip Arşivi Başarıyla Oluşturuldu";
+        $zipsonuc["dosya_adi"] = $destinationClean;
+
+        return $zipsonuc;
+    } // function zipDataUsingZipArchive($source, $destination, $comment = '') {
+} // if (!function_exists('zipDataUsingZipArchive')) {
+
+######################################################################################################################################################
+
+if (!function_exists('zipDataUsingSystem')) {
+    function zipDataUsingSystem($source, $destination, $comment = '') {
+        $zipsonuc = [];
+
+        // Kaynak dizin veya dosyanın var olup olmadığını kontrol et
+        if (!file_exists($source)) {
+            $zipsonuc[] = "HATA: Kaynak dosya veya dizin mevcut değil: " . $source;
+            return $zipsonuc;
         }
-    }
 
-}
+        // Dosya yollarını işlemek ve güvenli hale getirmek
+        $sourceRealPath = realpath($source);
+        if ($sourceRealPath === false) {
+            $zipsonuc[] = "HATA: Kaynak yolu bulunamadı: " . $source;
+            return $zipsonuc;
+        }
+        $destinationSafe = escapeshellarg($destination); // Sadece komut için güvenli hale getir
+
+        // Hedef dizinin mevcut olup olmadığını kontrol et ve gerekirse oluştur
+        $destinationDirRealPath = dirname($destination);
+        if (!file_exists($destinationDirRealPath)) {
+            if (!mkdir($destinationDirRealPath, 0777, true)) {
+                $zipsonuc[] = "HATA: Hedef dizin oluşturulamadı: " . $destinationDirRealPath;
+                return $zipsonuc;
+            } else {
+                //$zipsonuc[] = "Hedef dizin oluşturuldu: " . $destinationDirRealPath;
+            }
+        } else {
+            //$zipsonuc[] = "Hedef dizin zaten mevcut: " . $destinationDirRealPath;
+        }
+
+        // zip komutunu oluştur
+        if (is_dir($sourceRealPath)) {
+            // Kaynak bir dizinse, içine girip içeriklerini ekle
+            $command = "cd " . escapeshellarg($sourceRealPath) . " && zip -r $destinationSafe .";
+        } elseif (is_file($sourceRealPath)) {
+            // Kaynak bir dosyaysa, dosyayı ekle
+            $sourceSafe = escapeshellarg($sourceRealPath);
+            $command = "zip $destinationSafe $sourceSafe";
+        } else {
+            $zipsonuc[] = "HATA: Kaynak ne dosya ne de dizin: " . $sourceRealPath;
+            return $zipsonuc;
+        }
+
+        $output = [];
+        $return_var = 0;
+        exec($command, $output, $return_var);
+
+        // Sonuçları kontrol et
+        if ($return_var === 0) {
+            $zipsonuc[] = "Zip arşivi başarıyla oluşturuldu";
+
+            // Yorum ekleme işlemi
+            if ($comment !== '') {
+                $comment = escapeshellarg(iconv(mb_detect_encoding($comment, mb_detect_order(), true), "UTF-8", $comment));
+                $commentCommand = "echo $comment | zip -z $destinationSafe";
+                exec($commentCommand, $commentOutput, $commentReturnVar);
+
+                if ($commentReturnVar === 0) {
+                    //$zipsonuc[] = "Yorum başarıyla eklendi.";
+                } else {
+                    $zipsonuc[] = "HATA: Yorum eklenemedi.";
+                }
+            }
+
+            // Orijinal dosya adındaki tek tırnakları kaldır
+            $destinationClean = str_replace("'", "", $destination);
+            $zipsonuc["dosya_adi"] = $destinationClean;
+        } else {
+            $zipsonuc[] = "HATA: Zip arşivi oluşturulamadı. Hata kodu: $return_var";
+            $zipsonuc[] = "Çıktı: " . implode("\n", $output);
+        }
+
+        return $zipsonuc;
+    } // function zipDataUsingSystem($source, $destination, $comment = '') {
+} // if (!function_exists('zipDataUsingSystem')) {
+
+
+
+
 
 ?>

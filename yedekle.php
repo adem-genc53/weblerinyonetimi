@@ -65,8 +65,8 @@ include('includes/sub_navbar.php');
                                 <p>Yedeklenmiş veritabanlarınıza URL ile doğrudan ulaşılması mümkün değil, sadece FTP ile ulaşmak mümkündür. Ancak web sitenize hack gibi durumlar için garanti edilemez.</p>
                                 <p>MySQL yedeklerden <b>.gz</b> ve <b>.sql</b> uzantılı dosyaların adını tıklayarak bilgisayarınıza indirebilirsiniz.</p>
                                 <p><b>ÖNEMLİ NOT:</b> sitenizde riskli değişiklikler ve ayarlamalar yapmadan önce veritabanın yedeğini almanız şiddetle önerilir.</p>
-                                <b>Veritabanı yedeklerin bulunduğu dizin: </b><span id="yol"><?php echo strtolower(htmlpath('./'.BACKUPDIR)); ?></span><br />
-                                <p><b>Web site zip yedeklerin bulunduğu dizin: </b><span id="yol"><?php echo strtolower(htmlpath('./'.ZIPDIR)); ?></span></p>
+                                <b>Veritabanı yedeklerin bulunduğu dizin: </b><span id="yol"><?php echo strtolower(htmlpath(BACKUPDIR)); ?></span><br />
+                                <p><b>Web site zip yedeklerin bulunduğu dizin: </b><span id="yol"><?php echo strtolower(htmlpath(ZIPDIR)); ?></span></p>
                             </div>
                             </div>
                         </div><!-- / <div class="card"> -->
@@ -117,7 +117,7 @@ include('includes/sub_navbar.php');
                                 </tr>
                                 <tr>
                                     <td>Yedeklerin bulunduğu dizin</td>
-                                    <td colspan="6"><span id="yol"><?php echo strtolower(htmlpath('./'.BACKUPDIR)); ?></span></td>
+                                    <td colspan="6"><span id="yol"><?php echo strtolower(htmlpath(BACKUPDIR)); ?></span></td>
                                 </tr>
                                 <tr>
                                     <td style="padding: 0.75rem 0.75rem 0.75rem 1.5rem;vertical-align: middle;">Veritabanı Yedeğin <b>Öneki</b></td>
@@ -323,7 +323,7 @@ include('includes/sub_navbar.php');
             echo "</td>";
             echo "<td style='text-align: right;padding-right: 20px;'>";
             if($icon[0]==3){
-                echo count(glob(BACKUPDIR."/".$value . "/*.{sql,gz}",GLOB_BRACE));
+                echo count(glob(BACKUPDIR."/".$value . "/*.{sql,gz}",GLOB_BRACE)); // dizin içindeki dosya sayısını döndürür
             }else{
                 echo "";
             }
@@ -441,7 +441,7 @@ include('includes/sub_navbar.php');
                 data: str,
                     success: function(veriler){
                         bekleme.kapat();
-                        jw("b olumlu").baslik("Veritabanı Silme Sonucu").icerik(veriler).en(400).boy(10).kilitle().akilliKapatPasif().kapaninca(function(){ window.location.href='<?php echo $_SERVER['REQUEST_URI']; ?>' }).ac();       
+                        jw("b olumlu").baslik("Veritabanı Silme Sonucu").icerik(veriler).en(450).boy(10).kilitle().akilliKapatPasif().kapaninca(function(){ window.location.href='<?php echo $_SERVER['REQUEST_URI']; ?>' }).ac();       
                     }
                 });             
             } //if(x==1){
@@ -529,7 +529,7 @@ include('includes/sub_navbar.php');
         function OK(x){
             if(x==1){
             var bekleme = jw("b bekle").baslik("Veri Tabanı Yedekleniyor...").en(350).boy(10).kilitle().akilliKapatPasif().ac();
-                var str = 'grup=1';
+                var str = 'yedekleyen=2';
                 var t = $('#f').serialize();
                 (t !='')? str += '&'+t :'';
                 $.ajax({
@@ -538,7 +538,7 @@ include('includes/sub_navbar.php');
                 data: str,
                 success: function(veriler){       
                 bekleme.kapat();
-                jw("b olumlu").baslik("Veri Tabanı Yedekleme Sonucu").icerik(veriler).en(350).boy(10).kilitle().akilliKapatPasif().kapaninca(function(){ window.location.href=window.location.href }).ac();       
+                jw("b olumlu").baslik("Veri Tabanı Yedekleme Sonucu").icerik(veriler).en(450).boy(10).kilitle().akilliKapatPasif().kapaninca(function(){ window.location.href=window.location.href }).ac();       
                 }
                 });             
             } //if(x==1){

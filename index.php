@@ -107,12 +107,12 @@ include('includes/sub_navbar.php');
                                 </p>
                                 <p>Eğer görevlerin tam zamanında yerine getirilmesini istiyorsanız &quot;<strong>Cron İşleri</strong>&quot; kullanmanız gerekir.
                                 </p>
-                                <p><strong>cPanele</strong> Giriş yapın &gt; <strong>Cron Jobs/Cron İşleri</strong> tıklayın <strong>Ortak Ayarlar</strong> alanında görevlerinize uygun bir zaman seçin <strong>Komut:</strong> alanına <strong>curl --silent https://webyonetimi.com/gorev.php</strong> girip kaydedin (<em>domain adını düzenlemeyi unutmayın</em>)
+                                <p><strong>cPanele</strong> Giriş yapın &gt; <strong>Cron Jobs/Cron İşleri</strong> tıklayın <strong>Ortak Ayarlar</strong> alanında görevlerinize uygun bir zaman seçin <strong>Komut:</strong> alanına "<strong>/usr/local/bin/php /home/user/alan_adiniz.com/gorev.php >/dev/null 2>&1</strong>" girip kaydedin (<em>domain adını düzenlemeyi unutmayın</em>)
                                 </p>
                                 <p>Artık siteyi kimse tarafında ziyaret edilmese bile <strong>Cron İşleri</strong>nde belirlediğiniz zaman dilimlerinde gorev.php dosyayı çalıştıracak ve zamanı gelen görevler zamanında yerine gitirilecektir.&nbsp;
                                 </p>
-                                <b>Veritabanı yedeklerin bulunduğu dizin: </b><span id="yol"><?php echo strtolower(htmlpath('./'.BACKUPDIR)); ?></span><br />
-                                <p><b>Web site zip yedeklerin bulunduğu dizin: </b><span id="yol"><?php echo strtolower(htmlpath('./'.ZIPDIR)); ?></span></p>
+                                <b>Veritabanı yedeklerin bulunduğu dizin: </b><span id="yol"><?php echo strtolower(htmlpath(BACKUPDIR)); ?></span><br />
+                                <p><b>Web site zip yedeklerin bulunduğu dizin: </b><span id="yol"><?php echo strtolower(htmlpath(ZIPDIR)); ?></span></p>
                             </div>
                             </div>
                         </div><!-- / <div class="card"> -->

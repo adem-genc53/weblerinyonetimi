@@ -15,6 +15,7 @@ echo "<div style='margin: 25px;'>";
 $ftphost = $genel_ayarlar['sunucu'];
 $ftpuser = $genel_ayarlar['username'];
 $ftppass = $genel_ayarlar['password'];
+$ftp_path = $genel_ayarlar['path'];
 
 
 $ftp_connect = @ftp_ssl_connect($ftphost) 
@@ -30,7 +31,44 @@ if ((!$ftp_connect) || (!$login_result))
 
 if(isset($_POST['ftp_den_secilen_dosya']) && !empty($_POST['ftp_den_secilen_dosya'])){
     $ftp_kaynak = trim($_POST['ftp_den_secilen_dosya']); //"/dizinsizwebyonetimitablotablo-2023-10-12-00-00/"; // başında ve sonunda eğik çizgi var
+
+    // Başlangıçta değişkeni boş olarak tanımla
+    $ftp_secilen_kaynak_indir = '';
+    $ftp_hesabindaki_dizini_bosalt = false;
+
+    $ftp_kaynak = trim($_POST['ftp_den_secilen_dosya']);
+    
+    // FTP Hesap bilgileri ile DİZİN belirlenmedi ise ve / eğik çizgi varsa
+    if ($ftp_path === '/') {
+
+        $ftp_secilen_kaynak_indir .= "/"; // eğik / çizgiyi tekrar ekle
+
+    // FTP hesabında DİZİN var ve Ağaçtan Ev seçildi ise / eğik çizgi geliyor
+    }elseif($ftp_path != '/' && $ftp_kaynak == '/'){
+
+        // FTP hesabında DİZİN var ve AĞAÇ tan Ev seçilerek / eğik çizgi geldi
+        // Bu durumda FTP hesabındaki dizini boşaltacağız
+        $ftp_secilen_kaynak_indir .= "/".ltrim(rtrim($ftp_path, '/'), '/');
+        // Bu değişken true gönderek FTP hesab dizini silmesini engelleyecek
+        $ftp_hesabindaki_dizini_bosalt = true;
+
+    // FTP hesabında DİZİN var ve Ağaçtan DOSYA veya DİZİN seçildiz ise
+    }elseif($ftp_path !== '/' && $ftp_kaynak !== '/'){
+
+        // Ağaçta klasör veya dosya seçildi ise seçileni sil
+        $ftp_secilen_kaynak_indir .= "/".ltrim(rtrim($ftp_path, '/'), '/');
+
+    }
+
+    // Ağaçtan Ev seçili DEĞİL İSE
+    if ($ftp_kaynak !== '/') {
+
+        // Ağaçtan seçilen dosya veya klasörü sil
+        $ftp_secilen_kaynak_indir .= $ftp_kaynak;
+
+    }
 }
+
 if(isset($_POST['yerel_den_secilen_dosya']) && !empty($_POST['yerel_den_secilen_dosya'])){
     if(!@ftp_chdir($ftp_connect, trim($_POST['ftp_den_secilen_dosya']))){
         $yerel_dizin = trim($_POST['yerel_den_secilen_dosya']);
@@ -108,7 +146,7 @@ function ftp_sync($_from = null, $_to = null) {
 
 ftp_pasv($ftp_connect, true); // pasif FTP bağlantısı (comment-out if needed)
 
-ftp_sync(trim($ftp_kaynak), trim($yerel_dizin));
+ftp_sync(trim($ftp_secilen_kaynak_indir), trim($yerel_dizin));
 
 ftp_close($ftp_connect);
 

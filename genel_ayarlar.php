@@ -30,7 +30,10 @@ require_once("includes/turkcegunler.php");
             closedir();
         }
     }
-    //echo '<pre>' . print_r($dizin_array, true) . '</pre>';
+            if($_SERVER['REQUEST_METHOD'] == 'POST'){
+                //echo '<pre>' . print_r($_POST, true) . '</pre>';
+                //exit;
+            }
 ##########################################################################################################
     // Seçili veritabanı karakter seti belirlemek için
     if( isset($_POST['karakter_seti']) )
@@ -123,11 +126,11 @@ require_once("includes/turkcegunler.php");
 
 ##########################################################################################################
     if(isset($_POST['sunucu'])){
-        $sunucu = isset($_POST['sunucu']) ? $_POST['sunucu'] : null;
-        $port = isset($_POST['port']) ? $_POST['port'] : null;
-        $username = isset($_POST['username']) ? $_POST['username'] : null;
-        $password = isset($_POST['password']) ? $_POST['password'] : null;
-        $patch = isset($_POST['patch']) ? $_POST['patch'] : null;
+        $sunucu     = $_POST['sunucu']      ?? null;
+        $port       = $_POST['port']        ?? null;
+        $username   = $_POST['username']    ?? null;
+        $password   = $_POST['password']    ?? null;
+        $path       = $_POST['path']       ?? "/";
 
     try {
     $sorgu = "UPDATE genel_ayarlar SET
@@ -135,11 +138,11 @@ require_once("includes/turkcegunler.php");
             port=?,
             username=?,
             password=?,
-            patch=?
+            path=?
             LIMIT 1 ";
 
                 $stmt= $PDOdb->prepare($sorgu);
-                $stmt->execute([$sunucu, $port, $username, $password, $patch]);
+                $stmt->execute([$sunucu, $port, $username, $password, $path]);
             if ($stmt->rowCount() > 0) {
                 $messages[] = "FTP Bilgileri Başarıyla Güncellendi.";
                 header("Refresh: 2; url=".htmlspecialchars($_SERVER["PHP_SELF"])."?");
@@ -160,6 +163,44 @@ require_once("includes/turkcegunler.php");
 ##########################################################################################################
 
 ##########################################################################################################
+    if(isset($_POST['zip_tercihi'])){
+        $zip_tercihi = $_POST['zip_tercihi'] ?? 1;
+
+    try {
+    $sorgu = "UPDATE genel_ayarlar SET
+            zip_tercihi=?
+            LIMIT 1 ";
+
+                $stmt= $PDOdb->prepare($sorgu);
+                $stmt->execute([$zip_tercihi]);
+            if ($stmt->rowCount() > 0) {
+                $messages[] = "ZİP Arşivleme Tercihi Başarıyla Güncellendi.";
+                header("Refresh: 2; url=".htmlspecialchars($_SERVER["PHP_SELF"])."?");
+            } else {
+                $errors[] = "ZİP Arşivleme Tercihi Bir Hatadan Dolayı Güncelleme Başarısız Oldu.<br />Hiçbir değişiklik yapmadan güncelleme yapıyor olabilirsiniz";
+            }
+        
+        } catch (PDOException $e) {
+            $existingkey = "Integrity constraint violation: 1062 Duplicate entry";
+            if (strpos($e->getMessage(), $existingkey) !== FALSE) {
+                $errors[] = "Güncellemeye çalıştığınız ZİP Arşivleme Tercihi veritabanında zaten kayıtlıdır";
+            } else {
+                throw $e;
+                $errors[] = $e->getMessage();
+            }
+        }
+    }
+##########################################################################################################
+
+if(isset($_POST['dosya_kilidi_ac'])){
+    $lock_file = '/tmp/gorev.lock';
+    if (file_exists($lock_file)) {
+        unlink($lock_file);
+        $messages[] = "gorev.php dosyanın başarıyla kilidi serbest bırakıldı.";
+    }else{
+        $errors[] = "gorev.php dosyası kilitli değil.";
+    }
+}
 
 include('includes/header.php');
 include('includes/navigation.php');
@@ -236,8 +277,8 @@ include('includes/sub_navbar.php');
 </p>
 <p><strong>FTP Bilgileri</strong> bu alana uzak sunucuda bir FTP hesabınız varsa bilgilerini giriniz. Eğer uzak sunucuda FTP hesabınız yoksa hata mesajı vermemesi için bu hosting alanınızda bir dizin &quot;FTP_dizin&quot; oluşturarak bir FTP hesabı oluşturup bilgileri bu alana giriniz. Görev zamanlamada FTP ye yedekle seçeneği seçmeyerek aynı yedeği bir hostin alanında iki yerde yedeklenmesini önleyebilirsiniz.
 </p>
-                                <b>Veritabanı yedeklerin bulunduğu dizin: </b><span id="yol"><?php echo strtolower(htmlpath('./'.BACKUPDIR)); ?></span><br />
-                                <p><b>Web site zip yedeklerin bulunduğu dizin: </b><span id="yol"><?php echo strtolower(htmlpath('./'.ZIPDIR)); ?></span></p>
+                                <b>Veritabanı yedeklerin bulunduğu dizin: </b><span id="yol"><?php echo strtolower(htmlpath(BACKUPDIR)); ?></span><br />
+                                <p><b>Web site zip yedeklerin bulunduğu dizin: </b><span id="yol"><?php echo strtolower(htmlpath(ZIPDIR)); ?></span></p>
                             </div>
                             </div>
                         </div><!-- / <div class="card"> -->
@@ -490,7 +531,8 @@ include('includes/sub_navbar.php');
                                                     <tbody>
                                                         <tr>
                                                             <td colspan="5">
-                                                                Web sitelerinizin herhangi bir nedenden dolayı veritabanı ve yedeğinin silinmesi durumunda geriye döne bilmek için uzak sunucuda en son yedeğin sağlam kalması faydalı olacağından FTP ile uzak sunucuya otomatik depolayabilirsiniz.
+                                                                Sunucunuzun hacklenmesi gibi durumlarda web sitenizi veya sitelerinizi geri getirebilmeniz için sunucunuzun dışında başka bir yerde de yedekleme yapılması gerekir.<br />
+                                                                FTP iç Yolu: eğer FTP de A Firmaya ait tüm yedekleri sabit bir dizine yedekleme yapmak istiyorsanız "/home/user/a_firma_yedekleri/" gibi belirleyebilirsiniz. Aksi durumda sadece "/" bir slash eğik çizgi girmeniz gerekir.
                                                             </td>
                                                         </tr>
                                                         <tr>
@@ -522,9 +564,9 @@ include('includes/sub_navbar.php');
                                                             <td colspan="3">&nbsp;</td>
                                                         </tr>
                                                         <tr>
-                                                            <td>Dizin Yolu:</td>
+                                                            <td>FTP iç Yolu:</td>
                                                             <td style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;">
-                                                                <input class="form-control" type="text" name="patch" value="<?php echo $genel_ayarlar['patch']; ?>">
+                                                                <input class="form-control" type="text" name="path" value="<?php echo $genel_ayarlar['path']; ?>">
                                                             </td>
                                                             <td colspan="3">&nbsp;</td>
                                                         </tr>
@@ -533,6 +575,157 @@ include('includes/sub_navbar.php');
                                                         <tr>
                                                             <td colspan="5" style="text-align:center;">
                                                                 <button type="submit" class="btn btn-success btn-sm"><span class="glyphicon glyphicon-repeat"></span> Değişiklikleri Kaydet </button> 
+                                                                <button type="reset" class="btn btn-warning btn-sm"><span class="glyphicon glyphicon-erase"></span> Sıfırla </button>
+                                                            </td>
+                                                        </tr>
+                                                    </tfoot>
+                                                </table>
+                                    </form>
+
+                </div><!-- / <div class="card-body p-0"> -->
+            </div><!-- / <div class="card"> -->
+        </div><!-- / <div class="col-sm-12"> -->
+        </div><!-- / <div class="row mb-2"> -->
+    </div><!-- / <div class="container-fluid"> -->
+    </section><!-- / <section class="content"> -->
+    <!-- Gövde İçerik Sonu -->
+
+    <!-- Gövde İçerik Başlangıcı -->
+    <section class="content">
+    <div class="container-fluid">
+        <div class="row mb-2">
+        <div class="col-sm-12">
+            <div class="card">
+                <div class="card-body p-0">
+
+                                    <form method="POST" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>">
+                                                <table class="table" style="min-width: 1000px;">
+                                                <colgroup span="5">
+                                                    <col style="width:25%"></col>
+                                                    <col style="width:25%"></col>
+                                                    <col style="width:5%"></col>
+                                                    <col style="width:10%"></col>
+                                                    <col style="width:10%"></col>
+                                                </colgroup>
+                                                    <thead>
+                                                        <tr class="bg-primary" style="line-height: .40;font-size: 1rem;">
+                                                            <th colspan="5" style="text-align: center;">Web Dizinlerin Yedeklenmesinde Kullanılacak Zip Arşivi Yöntemi</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr>
+                                                            <td colspan="5">
+                                                                Web dizinlerin zaman zaman yedeklenmesinde fayda olacağı için elle veya görev zamanlayıcı ile yedeklerken web dizinleri zip formatında sıkıştırarak yedeklemek gerekiyor.<br />
+                                                                Dizinleri zip formatında sıkıştırmak için iki yöntem bulunmaktadır bunlardan biri <b>PHP</b> kodu kullanarak Zip oluşturmak bu yöntem web sitenizin belleğini ve CPU kullanımı tüketeceği gibi yavaş sıkıştırma olacaktır.<br />
+                                                                Diğer ikinci yöntem ise <b>EXEC</b> fonksiyonu kullanımı bu fonksiyon bazı sunucular desteklemeyebilir, ancak destekleyen sunucular için bu fonksiyonun tercih edilmesini öneririz, çünkü bu fonksiyon sistem üzerinden kullanıldığı için hem çok hızlı sıkıştırma yapacağız için PHP zaman aşımı, bellek kullanımı ve CPU kullanımı yapmak<br />
+                                                                <b>EXEC</b> fonksiyonu sunucunuzda çalışıp çalışmadığını aşağıdaki buton ile test ederek sonuca göre sıkıştırma tercihini seçebilirsiniz.
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>PHP ile Zip Arşivi Oluştur:</td>
+                                                            <td style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;min-width: 200px;">
+                                                            <?php 
+                                                            if(isset($genel_ayarlar['zip_tercihi']) && $genel_ayarlar['zip_tercihi']==1){
+                                                                echo "<input type='radio' name='zip_tercihi' value='1' checked>";
+                                                            } else if(isset($genel_ayarlar['zip_tercihi']) && $genel_ayarlar['zip_tercihi']==2){
+                                                                echo "<input type='radio' name='zip_tercihi' value='1'>";
+                                                            }
+                                                            ?>
+                                                            </td>
+                                                            <td colspan="3">&nbsp;</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>EXEC ile Zip Arşivi Oluştur:</td>
+                                                            <td style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;">
+                                                            <?php 
+                                                            if(isset($genel_ayarlar['zip_tercihi']) && $genel_ayarlar['zip_tercihi']==2){
+                                                                echo "<input type='radio' name='zip_tercihi' value='2' checked>";
+                                                            } else if(isset($genel_ayarlar['zip_tercihi']) && $genel_ayarlar['zip_tercihi']==1){
+                                                                echo "<input type='radio' name='zip_tercihi' value='2'>";
+                                                            }
+                                                            ?>
+                                                            </td>
+                                                            <td colspan="3">&nbsp;</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>Sunucunuzda EXEC Fonksiyonu Testi Buradan Yapabilirsiniz:</td>
+                                                            <td style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;"><button type="button" id="execTestButton" class="btn btn-success btn-sm">EXEC Fonksiyonu Testi</button></td>
+                                                            <td colspan="3"><div id="messageContainer"></div></td>
+                                                        </tr>
+                                                    </tbody>
+                                                    <tfoot>
+                                                        <tr>
+                                                            <td colspan="5" style="text-align:center;">
+                                                                <button type="submit" class="btn btn-success btn-sm"><span class="glyphicon glyphicon-repeat"></span> Değişiklikleri Kaydet </button> 
+                                                                <button type="reset" class="btn btn-warning btn-sm"><span class="glyphicon glyphicon-erase"></span> Sıfırla </button>
+                                                            </td>
+                                                        </tr>
+                                                    </tfoot>
+                                                </table>
+                                    </form>
+
+                </div><!-- / <div class="card-body p-0"> -->
+            </div><!-- / <div class="card"> -->
+        </div><!-- / <div class="col-sm-12"> -->
+        </div><!-- / <div class="row mb-2"> -->
+    </div><!-- / <div class="container-fluid"> -->
+    </section><!-- / <section class="content"> -->
+    <!-- Gövde İçerik Sonu -->
+
+    <!-- Gövde İçerik Başlangıcı -->
+    <section class="content">
+    <div class="container-fluid">
+        <div class="row mb-2">
+        <div class="col-sm-12">
+            <div class="card">
+                <div class="card-body p-0">
+
+                                    <form method="POST" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>">
+                                                <table class="table" style="min-width: 1000px;">
+                                                <colgroup span="5">
+                                                    <col style="width:25%"></col>
+                                                    <col style="width:25%"></col>
+                                                    <col style="width:5%"></col>
+                                                    <col style="width:10%"></col>
+                                                    <col style="width:10%"></col>
+                                                </colgroup>
+                                                    <thead>
+                                                        <tr class="bg-primary" style="line-height: .40;font-size: 1rem;">
+                                                            <th colspan="5" style="text-align: center;">Zamanlanmış Görevlerde Kullanılan gorev.php dosyanın kilidini serbest bırakma</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr>
+                                                            <td colspan="5">
+                                                                Zamanlanmış görev aracılığıyla görevleri yerine getirmek için gorev.php dosyası çalıştırılır ve bu dosya ilk çalıştırıldığında kilitlenir ve görevlerin bitiminde tekrar kilidi serbest bırakılır.<br />
+                                                                Ancak, görevlerin yerine getirilmesi sırasında beklenmeyen hatalardan dolayı gorev.php dosyanın sonuna ulaşamadığından gorev.php dosyası kilitli kalabilir ve sonraki görevlerin yerine getirilmesi engellenmiş olur.<br />
+                                                                Böyle bir durumda aşağıdaki burada <span style='color: red;font-weight: bold;'>gorev.php dosyası kilitlidir.</span> Mesajını görürsünüz. Kilidi serbest bırakmak için kutuyu işaretleyerek formu göndermeniz yeterli olacaktır.<br />
+                                                                <b>NOT:</b> herhangi bir görev yerine getirilirken kilit görüneceğini unutmayın, normal çalışma sırasındaki kilidi serbest bırakmayınız.<br />
+                                                                <?php 
+                                                                // Kilit dosyasının yolu
+                                                                $lock_file = '/tmp/gorev.lock';
+
+                                                                // Eğer kilit dosyası varsa ve dosya halen var ise işlemi sonlandır
+                                                                if (file_exists($lock_file)) {
+                                                                    echo "<span style='color: red;font-weight: bold;'>gorev.php dosyası kilitlidir.</span>";
+                                                                }else{
+                                                                    echo "<span style='color: green;font-weight: bold;'>gorev.php dosyası kilitli DEĞİLDİR.</span>";
+                                                                }
+                                                                ?>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>gorev.php dosyanın kilidini serbest bırak:</td>
+                                                            <td style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;min-width: 200px;">
+                                                                <input type='checkbox' name='dosya_kilidi_ac' value='1'>
+                                                            </td>
+                                                            <td colspan="3">&nbsp;</td>
+                                                        </tr>
+                                                    </tbody>
+                                                    <tfoot>
+                                                        <tr>
+                                                            <td colspan="5" style="text-align:center;">
+                                                                <button type="submit" class="btn btn-success btn-sm"><span class="glyphicon glyphicon-repeat"></span> Dosya Kilidi Serbest Bırak </button> 
                                                                 <button type="reset" class="btn btn-warning btn-sm"><span class="glyphicon glyphicon-erase"></span> Sıfırla </button>
                                                             </td>
                                                         </tr>
@@ -561,3 +754,20 @@ include('includes/sub_navbar.php');
 <?php 
 include('includes/footer.php');
 ?>
+
+
+    <script>
+        document.getElementById('execTestButton').addEventListener('click', function() {
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', 'exec_test.php', true);
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    var response = JSON.parse(xhr.responseText);
+                    var messageContainer = document.getElementById('messageContainer');
+                    messageContainer.innerHTML = '<div style="padding: 1px 0px 1px 10px;" class="alert-' + response.status + '">' + response.message + '</div>';
+                }
+            };
+            xhr.send('exec_test=1');
+        });
+    </script>

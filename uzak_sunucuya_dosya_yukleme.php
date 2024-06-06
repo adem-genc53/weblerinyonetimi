@@ -1,7 +1,7 @@
 <?php 
 // Bismillahirrahmanirrahim
-session_start();
-require_once('includes/connect.php');
+require_once __DIR__ . '/includes/connect.php';
+include __DIR__ . '/google_drive_setup.php';
 require_once('check-login.php');
 require_once("includes/turkcegunler.php");
 
@@ -9,21 +9,6 @@ ob_start();
 ini_set('memory_limit', '-1');
 ignore_user_abort(true);
 set_time_limit(3600); //7200 saniye 120 dakikadır, 3600 1 saat
-
-if (!(PHP_VERSION_ID >= 80100)) {
-    exit("<div style='font-weight: bold;font-size: 16px;text-align:center;font-family: Arial, Helvetica, sans-serif;'>Google Drive Kütüphanesi En Düşük \">= 8.1.0\" PHP sürümünü gerektirir. Siz " . PHP_VERSION . " Çalıştırıyorsunuz.</div>");
-}
-
-if (!file_exists(AUTHCONFIGPATH)) {
-    die('Hata: AuthConfig dosyası bulunamadı.');
-}
-
-require_once __DIR__.'/plugins/google_drive/vendor/autoload.php';
-
-$client = new Google\Client();
-$client->setAuthConfig(AUTHCONFIGPATH);
-$client->addScope(Google\Service\Drive::DRIVE);
-$service = new Google\Service\Drive($client);
 
 if($_SERVER['REQUEST_METHOD'] == 'POST'){
     //echo '<pre>' . print_r($_POST, true) . '</pre>';
@@ -41,10 +26,8 @@ if(isset($_POST['googla_yukle']) && $_POST['googla_yukle'] == '1' && isset($_POS
 // Dosya mevcut mu kontrol ediyoruz. Mevcut ise ID sini alıyoruz
 function getFilesIdIfExists($parentId, $fileName) {
 
-    $client = new Google\Client();
-    $client->setAuthConfig(AUTHCONFIGPATH);
-    $client->addScope(Google\Service\Drive::DRIVE);
-    $service = new Google\Service\Drive($client);
+    $client = getClient();
+    $service = new \Google\Service\Drive($client);
 
     $query = "name='$fileName' and '$parentId' in parents";
     $results = $service->files->listFiles(['q' => $query, 'fields' => 'files(id)']);
@@ -65,10 +48,8 @@ function getFilesIdIfExists($parentId, $fileName) {
 // Bu fonksiyon, belirtilen isimde bir dizin varsa ID'sini döndürür.
 function getFolderIdIfExists($parentId, $folderName) {
 
-    $client = new Google\Client();
-    $client->setAuthConfig(AUTHCONFIGPATH);
-    $client->addScope(Google\Service\Drive::DRIVE);
-    $service = new Google\Service\Drive($client);
+    $client = getClient();
+    $service = new \Google\Service\Drive($client);
 
     $query = "mimeType='application/vnd.google-apps.folder' and name='$folderName' and '$parentId' in parents";
     $results = $service->files->listFiles(['q' => $query, 'fields' => 'files(id)']);
@@ -82,10 +63,8 @@ function getFolderIdIfExists($parentId, $folderName) {
 // Klasör ve tüm alt-klasörler ve dosyaları google drive a yükle
 function uploadFolder($parentId, $folderPath) {
 
-$client = new Google\Client();
-$client->setAuthConfig(AUTHCONFIGPATH);
-$client->addScope(Google\Service\Drive::DRIVE);
-$service = new Google\Service\Drive($client);
+    $client = getClient();
+    $service = new \Google\Service\Drive($client);
 
     $google_hedefadi = GOOGLE_HEDEF_ADI == 'root' ? '' : GOOGLE_HEDEF_ADI;
     $folderName = basename($folderPath);

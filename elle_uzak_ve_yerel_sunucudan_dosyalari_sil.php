@@ -1,7 +1,7 @@
 <?php 
 // Bismillahirrahmanirrahim
-session_start();
-require_once('includes/connect.php');
+require_once __DIR__ . '/includes/connect.php';
+include __DIR__ . '/google_drive_setup.php';
 require_once('check-login.php');
 require_once("includes/turkcegunler.php");
 
@@ -10,22 +10,8 @@ ini_set('memory_limit', '-1');
 ignore_user_abort(true);
 set_time_limit(3600); //7200 saniye 120 dakikadır, 3600 1 saat
 
-if (!(PHP_VERSION_ID >= 80100)) {
-    exit("<div style='font-weight: bold;font-size: 16px;text-align:center;font-family: Arial, Helvetica, sans-serif;'>Google Drive Kütüphanesi En Düşük \">= 8.1.0\" PHP sürümünü gerektirir. Siz " . PHP_VERSION . " Çalıştırıyorsunuz.</div>");
-}
 
-if (!file_exists(AUTHCONFIGPATH)) {
-    die('Hata: AuthConfig dosyası bulunamadı.');
-}
-
-require_once __DIR__.'/plugins/google_drive/vendor/autoload.php';
-
-$client = new Google\Client();
-$client->setAuthConfig(AUTHCONFIGPATH);
-$client->addScope(Google\Service\Drive::DRIVE);
-$service = new Google\Service\Drive($client);
-
-// Yerel alandan seçilen dizin ve
+// Yerel alandan seçilen dizin ve dosya silme kodu
 if(isset($_POST['yerelden_sil']) && $_POST['yerelden_sil'] == 1 && isset($_POST['yerel_den_secilen_dosya']) && !empty($_POST['yerel_den_secilen_dosya']))
 {
     function delete_directory($dir){
@@ -98,52 +84,133 @@ if(isset($_POST['googdan_sil']) && $_POST['googdan_sil'] == 1 && isset($_POST['g
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-if(isset($_POST['ftpden_sil']) && $_POST['ftpden_sil'] == 1 && isset($_POST['ftpden_kaynak_sil']) && !empty($_POST['ftpden_kaynak_sil']))
-{
-    $ftpden_kaynak_sil = ltrim(rtrim($_POST['ftpden_kaynak_sil'],'/'),'/');
+if (isset($_POST['ftpden_sil']) && $_POST['ftpden_sil'] == 1 && isset($_POST['ftp_den_secileni_sil']) && !empty($_POST['ftp_den_secileni_sil'])) {
+    
     $ftp_host = $genel_ayarlar['sunucu'];
     $ftp_user = $genel_ayarlar['username'];
     $ftp_pass = $genel_ayarlar['password'];
+    $ftp_path = $genel_ayarlar['path'];
 
-    $ftp = @ftp_ssl_connect($ftp_host) 
-        or die($ftp_host  . " sunucuya bağlanamadı"); 
+    // Başlangıçta değişkeni boş olarak tanımla
+    $ftp_den_silinecek_kaynak = '';
+    $ftp_hesabindaki_dizini_bosalt = false;
 
+    $ftp_den_secileni_sil = $_POST['ftp_den_secileni_sil'];
+
+    // FTP Hesap bilgileri ile DİZİN belirlenmedi ise ve / eğik çizgi varsa
+    if ($ftp_path === '/') {
+
+        $ftp_den_silinecek_kaynak .= "/"; // eğik / çizgiyi tekrar ekle
+
+    // FTP hesabında DİZİN var ve Ağaçtan Ev seçildi ise / eğik çizgi geliyor
+    }elseif($ftp_path != '/' && $ftp_den_secileni_sil == '/'){
+
+        // FTP hesabında DİZİN var ve AĞAÇ tan Ev seçilerek / eğik çizgi geldi
+        // Bu durumda FTP hesabındaki dizini boşaltacağız
+        $ftp_den_silinecek_kaynak .= "/".ltrim(rtrim($ftp_path, '/'), '/');
+        // Bu değişken true gönderek FTP hesab dizini silmesini engelleyecek
+        $ftp_hesabindaki_dizini_bosalt = true;
+
+    // FTP hesabında DİZİN var ve Ağaçtan DOSYA veya DİZİN seçildiz ise
+    }elseif($ftp_path !== '/' && $ftp_den_secileni_sil !== '/'){
+
+        // Ağaçta klasör veya dosya seçildi ise seçileni sil
+        $ftp_den_silinecek_kaynak .= "/".ltrim(rtrim($ftp_path, '/'), '/');
+
+    }
+
+    // Ağaçtan Ev seçili DEĞİL İSE
+    if ($ftp_den_secileni_sil !== '/') {
+
+        // Ağaçtan seçilen dosya veya klasörü sil
+        $ftp_den_silinecek_kaynak .= $ftp_den_secileni_sil;
+
+    }
+
+    // FTP bağlantısını kur
+    $ftp = @ftp_ssl_connect($ftp_host) or die($ftp_host . " sunucuya bağlanamadı");
     $ftp_login = ftp_login($ftp, $ftp_user, $ftp_pass);
     ftp_pasv($ftp, true);
-    if ((!$ftp) || (!$ftp_login)) 
-        die("FTP Bağlantısı Başarısız");
 
-    function deleteDirectoryRecursive($directory, $ftp) {
-        // Fonksiyonla gelen dosya ise siliyoruz, eğer dizin ise bir aşağı fonksiyona geçiyoruz
-        if (@ftp_delete($ftp, $directory)) {
-            return;
-            //echo "Silindi: ".$directory."<br>";
+    if (!$ftp || !$ftp_login) {
+        die("FTP Bağlantısı Başarısız");
+    }
+
+// Dizin içeriğini boşaltmak için yardımcı fonksiyon
+function emptyDirectory($directory, $ftp) {
+    if ($files = @ftp_nlist($ftp, $directory)) {
+        foreach ($files as $file) {
+            $haric = explode("/", $file);
+            if (end($haric) != '.' && end($haric) != '..') {
+                if (@ftp_delete($ftp, $file)) {
+                    continue;
+                } else {
+                    deleteDirectoryRecursive($file, $ftp);
+                    @ftp_rmdir($ftp, $file);
+                }
+            }
         }
-        // Burada dizini silmeye çalışıyoruz dizin içi boş değil ise devam ediyoruz ve dizin içindekilerini siliyoruz
-        if( !@ftp_rmdir($ftp, $directory) ) {
-            // Dizin içindeki dosyaları listeliyoruz
-            if ($files = @ftp_nlist ($ftp, $directory)) {
-                foreach ($files as $file){
-                    // Dizideki . ve .. ile dizinleri gösterenleri parçıyoruz ve dizideki son öğeyi alıyoruz
-                    $haric = explode("/", $file);
-                    // Satırlarında . ve .. olanları hariç tutuyoruz
-                    if(end($haric)!='.' && end($haric)!='..'){
-                        // fonsiyona tekrar gönderip en baştaki ftp_delete() ile dosyaları siliyoruz
-                        deleteDirectoryRecursive( $file, $ftp);
+    }
+}
+
+// Ana fonksiyon
+function deleteDirectoryRecursive($directory, $ftp) {
+    GLOBAL $ftp_path, $ftp_hesabindaki_dizini_bosalt;
+
+    // Fonksiyonla gelen dosya ise siliyoruz, eğer dizin ise bir aşağıya geçiyoruz
+    if (@ftp_delete($ftp, $directory)) {
+        return;
+        //echo "Silindi: ".$directory."<br>";
+    }
+    // Dizin içindeki dosyaları listeliyoruz
+    if ($files = @ftp_nlist($ftp, $directory)) {
+        foreach ($files as $file) {
+            $haric = explode("/", $file);
+            if (end($haric) != '.' && end($haric) != '..') {
+                // Fonksiyonla gelen dosya ise siliyoruz, eğer dizin ise bir aşağı fonksiyona geçiyoruz
+                if (@ftp_delete($ftp, $file)) {
+                    // Dosya silindi
+                    continue;
+                } else {
+                    // Dizin içeriğini silmek için tekrar fonksiyonu çağır
+                    deleteDirectoryRecursive($file, $ftp);
+
+                    // FTP Hesabında DİZİN belirlendi ise AND
+                    // basename($ftp_path) son dizin adi ile === basename($file) eşit ise AND
+                    // $ftp_hesabindaki_dizini_bosalt true ise FTP hesabındaki dizin içeriği boşaltılıyor demektir ve dizini silmeyi engelle
+                    if ($ftp_path !== '/' && basename($ftp_path) === basename($file) && $ftp_hesabindaki_dizini_bosalt) {
+                        // FTP Hesabındaki son dizin silinmesini önlüyoruz
+                    } else {
+                        @ftp_rmdir($ftp, $file);
                     }
                 }
             }
         }
-        // Dosyalar silinip dizin boş kaldığında dizinide siliyoruz
-        @ftp_rmdir($ftp, $directory);
+
+        // Ana dizin içeriği temizlendikten sonra eğer ana dizin $ftp_path değilse onu da sil
+        if ($directory !== $ftp_path) {
+            @ftp_rmdir($ftp, rtrim($directory,'/'));
+        }
     }
-
-if(!deleteDirectoryRecursive($ftpden_kaynak_sil, $ftp)){
-    echo json_encode(["li_sil_adi"=>basename($ftpden_kaynak_sil),"mesaj"=>"Dosya başarıyla silindi: ". basename($ftpden_kaynak_sil)]);
-}else{
-    echo json_encode(["li_sil_adi"=>'none',"mesaj"=>"Dosya bir hatadan dolayı silinemedi: ". basename($ftpden_kaynak_sil)]);
 }
 
+    // Dizin içeriğini silme işlemini çağır
+try {
+    deleteDirectoryRecursive($ftp_den_silinecek_kaynak, $ftp);
+
+    if($ftp_den_secileni_sil == '/'){
+        echo json_encode(["li_sil_adi"=>basename($ftp_den_silinecek_kaynak),"mesaj"=>"Tüm içerikler başarıyla silindi"]);
+    }else{
+        echo json_encode(["li_sil_adi"=>basename($ftp_den_silinecek_kaynak),"mesaj"=>"Dosya başarıyla silindi: ". basename($ftp_den_silinecek_kaynak)]);
+    }
+    
+} catch (Exception $e) {
+                //die($e->getMessage());
+    echo json_encode(["li_sil_adi"=>'none',"mesaj"=>"Dosya bir hatadan dolayı silinemedi: ". $e->getMessage()]);
 }
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    // FTP bağlantısını kapat
+    ftp_close($ftp);
+}
+
 ?>

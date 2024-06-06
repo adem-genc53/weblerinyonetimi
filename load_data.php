@@ -36,6 +36,11 @@ if($_POST['urun'] == "zamanlanmisgorev"){
     $search_keyword = " '%$search_keyword%' ";
     }
     }
+    if(!empty($_POST['bildirgoster'])){
+      $edit_id = " AND id = ".$_POST['bildirgoster']."";
+    }else{
+      $edit_id = "";
+    }
     
     $n = 9; // Kaç tane arama seçeneği var
     $search_params = array_fill($n, 0, $search_keyword);
@@ -54,6 +59,7 @@ if($_POST['urun'] == "zamanlanmisgorev"){
       gunluk_kayit LIKE '.$search_keyword.' OR
       dosya_adi LIKE '.$search_keyword.' OR
       gorev_adi LIKE '.$search_keyword.')
+      '.$edit_id.'
       ORDER BY id ASC ';
     
     $page = 1;
@@ -80,7 +86,6 @@ if($_POST['urun'] == "zamanlanmisgorev"){
   if($top_sayfa > 0)
   {
     $haftadizi = array(1,2,3,4,5,6,7);
-  $css = 0;
   foreach($result as $row)
   {
 
@@ -106,25 +111,23 @@ if($_POST['urun'] == "zamanlanmisgorev"){
       $gungun = "*";
     }
 
-      $class = ($css % 2) ? "alt1" : "alt2";
-
     $satirlar .= '
             <tr>
-              <td class="'.$class.'"><div class="smallfont">'.date_tr('d M Y, l, H:i', $row['sonraki_calisma']).'</div></td>
-              <td class="'.$class.'"><div class="smallfont">'.$hafta.'</div></td>
-              <td class="'.$class.'"><div class="smallfont">'.$row['gun'].'</div></td>
-              <td class="'.$class.'"><div class="smallfont">'.$row['saat'].'</div></td>
-              <td class="'.$class.'"><div class="smallfont">'.$row['dakika'].'</div></td>
-              <td class="'.$class.'"><div class="smallfont">'.$row['dosya_adi'].'</div></td>
-              <td class="'.$class.'"><div class="smallfont">'.$row['aktif'].'</div></td>
-              <td class="'.$class.'"><div class="smallfont">'.$row['gunluk_kayit'].'</div></td>
-              <td class="'.$class.'"><div class="smallfont">'.$row['gorev_adi'].'</div></td>
-              <td class="'.$class.'"><div class="smallfont"><a class="myButton link" href="?edit='.$row['id'].'#a">Düzelt</a></div></td>
-              <td class="'.$class.'"><div class="smallfont"><a class="myButton link" onclick=" GorevSil(\''.$row['id'].'\', \'zamanlanmisgorev\')">SİL</a></div></td>
+              <td><div class="smallfont">'.near_date($row['sonraki_calisma']).'</div></td>
+              <td><div class="smallfont">'.$hafta.'</div></td>
+              <td><div class="smallfont">'.$row['gun'].'</div></td>
+              <td><div class="smallfont">'.$row['saat'].'</div></td>
+              <td><div class="smallfont">'.$row['dakika'].'</div></td>
+              <td><div class="smallfont">'.$row['dosya_adi'].'</div></td>
+              <td><div class="smallfont">'.$row['aktif'].'</div></td>
+              <td><div class="smallfont">'.$row['gunluk_kayit'].'</div></td>
+              <td><div class="smallfont">'.$row['gorev_adi'].'</div></td>
+              <td style="text-align: center;"><div class="smallfont"><a href="?edit='.$row['id'].'#edit"><span title="Görevi düzenlemek için tıkla" class="glyphicon glyphicon-edit"></span></a></div></td>
+              <td style="text-align: center;"><div class="smallfont"><a href="#" style="cursor: pointer;"><span data-name="'.strip_tags($row['gorev_adi']).'" id="veri_sil_'.$row['id'].'" title="Görevi silmek için tıkla" class="glyphicon glyphicon-remove"></span></a></div></td>
+              <td style="text-align: center;" onclick="simdiCalistir(\''.$row['gorev_adi'].'\',\''.$row['id'].'\');"><a href="#" title="Bu görevi şimdi çalıştır"><i class="fas fa-running"></i></a></td>
             </tr>
     ';
 
-  $css++;
   }
     }
   else
@@ -132,7 +135,7 @@ if($_POST['urun'] == "zamanlanmisgorev"){
 
   $satirlar .= '
     <tr>
-      <td colspan="11"><div align="center"><h5>ARANAN veya KAYITLI GÖREV MEVCUT DEĞİL</h5></div></td>
+      <td colspan="12"><div align="center"><h5>ARANAN veya KAYITLI GÖREV MEVCUT DEĞİL</h5></div></td>
     </tr>
   ';
 

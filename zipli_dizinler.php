@@ -59,8 +59,8 @@ include('includes/sub_navbar.php');
                                 <p><b>üstüne yazma riski yok</b> mesajı, zip açılacağı klasör adında dizinde aynı klasörün olmadığını belirtiyor</p>
                                 <p><b>DİKKAT! Ana dizine açıyorsunuz!</b> mesajı, zip dosyanın içeriği ana dizinine açılacağını belirtiyor aynı isimli dosyalar olması durumunda üstüne yazılacaktır ve <b>kesinlikle tavsiye edilmez</b></p>
                                 <p><b>DİKKAT! Ana dizin yolu bozuldu</b> mesajı, ana dizin yolunun bozulduğunu belirtiyor, zip açılması sonucu yolun başlangıcı geçersiz ise bu scriptin içine açacaktır, eğer yolun başlangıcı geçerli ise geçerli olan yollardan devam ederek olmayan dizin ise oluşturarak açacaktır ve <b>kesinlikle tavsiye edilmez</b></p>
-                                <b>Veritabanı yedeklerin bulunduğu dizin: </b><span id="yol"><?php echo strtolower(htmlpath('./'.BACKUPDIR)); ?></span><br />
-                                <b>Aşağıdaki zipli dosyalar </b><span id="yol"><?php echo strtolower(htmlpath('./'.ZIPDIR)); ?></span> klasörden listeleniyor</p>
+                                <b>Veritabanı yedeklerin bulunduğu dizin: </b><span id="yol"><?php echo strtolower(htmlpath(BACKUPDIR)); ?></span><br />
+                                <b>Aşağıdaki zipli dosyalar </b><span id="yol"><?php echo strtolower(htmlpath(ZIPDIR)); ?></span> klasörden listeleniyor</p>
                             </div>
                             </div>
                         </div><!-- / <div class="card"> -->
@@ -83,16 +83,17 @@ include('includes/sub_navbar.php');
                             <br />Zİpli Dosyalar Yükleniyor...
                         </div>
                     <form name="teklifsil" id="gvUsers" method="POST" onsubmit="return false;" action="<?php echo $_SERVER['PHP_SELF']; ?>">
-                                    <table id="ziplistesi" class="table table-sm table-striped table-hover" style="min-width: 1000px;">
-                                        <colgroup span="4">
-                                            <col style="width:45%"></col>
-                                            <col style="width:15%"></col>
-                                            <col style="width:15%"></col>
-                                            <col style="width:15%"></col>
-                                            <col style="width:10%"></col>
-                                        </colgroup>
-                                    </table>
-                                    <input type="hidden" id="onceki" value="1">
+                            <table id="ziplistesi" class="table table-sm table-striped table-hover" style="min-width: 1000px;">
+                                <colgroup span="5">
+                                    <col style="width:45%"></col>
+                                    <col style="width:15%"></col>
+                                    <col style="width:10%"></col>
+                                    <col style="width:10%"></col>
+                                    <col style="width:10%"></col>
+                                    <col style="width:10%"></col>
+                                </colgroup>
+                            </table>
+                            <input type="hidden" id="onceki" value="1">
                         <div>
                             <div>
                                 <div style="text-align: center;padding: 0 15px 15px 0;">
@@ -112,8 +113,8 @@ include('includes/sub_navbar.php');
 
 
 
-        </div><!-- / <div class="content-wrapper"> -->
-        
+    </div><!-- / <div class="content-wrapper"> -->
+
 <script type='text/javascript'>
     var satir = '';
     var query = '';
@@ -367,7 +368,7 @@ function OK(x){
        data: str,
        success: function(veriler){       
 		   bekleme.kapat();
-       jw("b olumlu").baslik("Zipli Dosyalar Silme Sonucu").icerik(veriler).en(500).boy(10).kilitle().akilliKapatPasif().kapaninca(function(){ window.location.href='<?php echo $_SERVER['REQUEST_URI']; ?>' }).ac();
+       jw("b olumlu").baslik("Zipli Dosyalar Silme Sonucu").icerik(veriler).en(450).boy(10).kilitle().akilliKapatPasif().kapaninca(function(){ window.location.href='<?php echo $_SERVER['REQUEST_URI']; ?>' }).ac();
        }
       });             
      } //if(x==1){

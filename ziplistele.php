@@ -30,6 +30,7 @@ require_once("includes/turkcegunler.php");
         <th style="text-align:center;">ZIP Dosya Boyutu</th>
         <th style="text-align:center;">İçindeki Dosya Sayısı</th>
         <th style="text-align: center;">ZİP'ten Çıkar</th>
+        <th style="text-align: center;">Yedekleme Zamanı</th>
         <th style="text-align: center;">Sil</th>
     </tr>
 </thead>
@@ -68,13 +69,26 @@ function zip_dosya_sayisi($dosya){
 
   $toplam_dosya_boyutu = 0;
   $toplam_dosya_sayisi = 0;
-  $zipdosyalar_dizi = glob(ZIPDIR."*.zip");
+  $zipdosyalar_dizi = glob(ZIPDIR."*.{zip}",GLOB_BRACE);
   rsort($zipdosyalar_dizi);
   //echo '<pre>' . print_r(zip_dosya_sayisi('../webzipler/yerel-2023-11-20-00-40-42.zip'), true) . '</pre>';
     foreach ($zipdosyalar_dizi as $dosya) {
         $boyutu       = filesize($dosya);
         $sayisi       = zip_dosya_sayisi($dosya)[0];
         $klasoradi    = zip_dosya_sayisi($dosya)[1];
+
+        // Düzenli ifadeyi kullanarak tarih ve zaman bilgilerini ayıklamak
+        preg_match('/(\d{4})-(\d{2})-(\d{2})-(\d{2})-(\d{2})-(\d{2})/', basename($dosya), $matches);
+        // Ayıklanan bilgileri kontrol et
+        if ($matches) {
+            list(, $year, $month, $day, $hour, $minute, $second) = $matches;
+            
+            // Tarih ve zaman bilgilerini kullanarak bir DateTime nesnesi oluştur
+            $datetime = new DateTime("$year-$month-$day $hour:$minute:$second");
+            
+            // DateTime nesnesini Unix zaman damgasına dönüştür
+            $timestamp = $datetime->getTimestamp();
+        }
 
         // Zip dosyalar listelenirken açılacak klasör adı dizin varmı kontrolu
         if(file_exists(DIZINDIR.$klasoradi)){
@@ -88,6 +102,7 @@ function zip_dosya_sayisi($dosya){
         echo "  <td style='text-align: right; padding-right: 70px;'>".showSize($boyutu)."</td>\n";
         echo "  <td style='text-align: right; padding-right: 110px;'>".number_format($sayisi, 0, ',', '.')."</td>\n";
         echo "  <td style='text-align: center;'><span style='cursor: pointer; text-decoration: underline dotted;' onclick=\"zipcikar('$dosya','$klasoradi','$dizinvarmi');\" title='{$dosya} dosyayı ZIP'ten çıkarmak için tıklayın'>ZIP 'ten Çıkar</span></td>\n";
+        echo "  <td style='text-align: right;padding-right: 70px;'>".near_date($timestamp)."</td>";
         echo "  <td style='text-align: center;'><input type='checkbox' name='delete_ziplidizinler[]' value='".basename($dosya)."' title='Silmek için seç' onclick='javascript:renk(this);' /></td>\n";
         echo "</tr>\n";
 
@@ -106,6 +121,7 @@ function zip_dosya_sayisi($dosya){
         <td style='text-align: left;'>&nbsp</td>
         <td style='text-align: right; padding-right: 70px;'><b>Toplam: <?php echo showSize($toplam_dosya_boyutu); ?></b></td>
         <td style='text-align: right; padding-right: 110px;'><b>Toplam: <?php echo number_format($toplam_dosya_sayisi, 0, ',', '.'); ?> dosya</b></td>
+        <td style='text-align: left;'>&nbsp</td>
         <td style='text-align: right;'><b>Tümünü silmek için seçiniz:</b></td>
         <td style='text-align: center;'><input type="checkbox" onclick="javascript:tumunu_sec(this);" title="Tümünü silmek için seç" /></td>
     </tr>

@@ -13,7 +13,7 @@
 // Genel ayarlarda zaman dilimini ayarlamak içiin yerel zamanı göstermek içindir
 	$yerel_tarihi = date('Y-m-d, H:i:s');
 ######## Date&Time #############################################################
-
+// gmdate()
 function date_tr($f, $zt = 'now'){
 	$z = date("$f", $zt);
 	$donustur = array(
@@ -64,7 +64,7 @@ function date_tr($f, $zt = 'now'){
 
 function near_date($data)
 {
-$date = date_tr('Y-m-d H:i:s', $data);
+$date = date_tr('Y-m-d H:i', $data);
 	// 'yakın' tarihleri hesaplayalım
 	$y_d = date('Y-m-d', strtotime('-1 day'));
 	$c_d = date('Y-m-d');
@@ -80,8 +80,8 @@ $date = date_tr('Y-m-d H:i:s', $data);
 	
 	if(!isset($map[$d]))
 	{
-		// 'yakın' tarihlerden biri değil, orijinal değeri döndürelim
-		return date_tr('d M Y, l, H:i', $data); //$date;
+		// 'yakın' tarihlerden biri değilse, orijinal değeri döndürelim
+		return date_tr('d M Y, D, H:i', $data); //$date;
 	}
 	
 	// 'yakın' tarihlerden biri, 'yakın' tarih değerini döndürelim

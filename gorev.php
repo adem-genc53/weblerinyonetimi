@@ -1,647 +1,865 @@
 <?php 
 // Bismillahirrahmanirrahim
-require('includes/connect.php');
+require_once __DIR__ . '/includes/connect.php';
+
 ini_set('memory_limit', '-1');
 ignore_user_abort(true);
 set_time_limit(0);
-/*
-    header("Expires: Tue, 03 Jul 2001 06:00:00 GMT");
-    header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
-    header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
-    header("Cache-Control: post-check=0, pre-check=0", false);
-    header("Pragma: no-cache");
-    header("Connection: close");
-*/
-//require_once('check-login.php');
 require_once("includes/turkcegunler.php");
 
-        $haftadizi = array(1,2,3,4,5,6,7);
-        $haftanin_gunleri_array = array();
-        $output_array = array();
-        $sonraki_calisma = false;
-        $tablolar = array();
-        $yedeklenecek_tablolar = array();
+#########################################################################################################################
+// Geçici dizini dinamik olarak al
+$temp_dir = sys_get_temp_dir();
 
-        $simdi = time();
-/*
-		function SiradakidbSec($PDOdb, $databaseadi){
-        $select = $PDOdb->prepare('UPDATE veritabanlari SET selected=?, islemi_yapan=? WHERE db_name=?');
-		$select->execute([1,'gorev.php',$databaseadi]);
-		//return true;
-		}
+// Kilit dosyasının yolu
+$lock_file = $temp_dir . DIRECTORY_SEPARATOR . 'gorev.lock';
 
-
-		function SecilidbAdi($PDOdb){
-		$secilenveritabani = $PDOdb->prepare("SELECT * FROM veritabanlari WHERE selected =?");
-        $secilenveritabani->execute([1]);
-		$secilen_veritabani = $secilenveritabani->fetch();
-		return $secilen_veritabani['db_name'];
-		}
-*/
-
-    // zamanlama görevinde sonraki çalışma zamanı ile şimdi ki zamanı karşılaştırıp şimdiki zaman eşit veya geçiyor sa döngüyü çalıştır
-    $gorevler = $PDOdb->prepare("SELECT * FROM zamanlanmisgorev WHERE aktif =? AND sonraki_calisma <= ? ORDER BY id DESC");
-    $gorevler->execute(['Aktif', $simdi]);
-
-    while ($row = $gorevler->fetch()) {
-
-    set_time_limit(0);
+// Eğer kilit dosyası varsa ve dosya halen var ise işlemi sonlandır
+if (file_exists($lock_file)) {
+    // Hata günlüğüne yazmak isterseniz aşağıdaki satırı yorumdan çıkarabilirsiniz
+     //file_put_contents(KOKYOLU.'error.log', date('Y-m-d H:i:s') . " - Dosya kilitli iken tetiklendi.\n", FILE_APPEND);
     
-    $haftanin_gunleri_array = explode(",", $row['haftanin_gunu']);
+    // Kilit dosyası mevcut, başka bir işlem çalışıyor.
+    exit();
+}
 
-################################################################################
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-########### HAFTA HESAPLAMALARI ################################################          
+// Kilit dosyasını oluştur ve içine bir şeyler yaz (örn. locked)
+file_put_contents($lock_file, "locked");
 
-########### HAFTA HESAPLAMALARI BİTTİ ##########################################
-////////////////////////////////////////////////////////////////////////////////
+// Hata durumunda kilidi temizlemek için bir kapanış fonksiyonu tanımla
+register_shutdown_function(function() use ($lock_file) {
+    if (file_exists($lock_file)) {
+        unlink($lock_file);
+    }
+});
+#########################################################################################################################
+//echo '<pre>' . print_r($zip_google_dosya_adi_yolu, true) . '</pre>';
+#########################################################################################################################
+#########################################################################################################################
+try {
+#########################################################################################################################
+#########################################################################################################################
+    // FTP BAĞLANTI BİLGİLERİ
+    $ftp_server     = $genel_ayarlar['sunucu']; //ftp domain name
+    $ftp_username   = $genel_ayarlar['username']; //ftp user name 
+    $ftp_password   = $genel_ayarlar['password']; //ftp passowrd
+    $ftp_path       = $genel_ayarlar['path']; //ftp passowrd
+#########################################################################################################################
+// ÇALIŞTIRILACAK DOSYA URL KONTROLU VE TAM URL YE DÖNÜŞTÜRMEK
+function isFullUrl($kaynak_url) {
+    return filter_var($kaynak_url, FILTER_VALIDATE_URL) !== false;
+}
+function ensureFullUrl($kaynak_url) {
+    // Sunucunun mevcut scheme ve host bilgilerini alıyoruz
+    $defaultScheme = isset($_SERVER["HTTPS"]) ? 'https' : 'http';
+    $defaultHost = $_SERVER['SERVER_NAME'];
+
+    // URL başında http/https olup olmadığını kontrol ediyoruz
+    if (!preg_match('/^http(s)?:\/\//', $kaynak_url)) {
+        if (preg_match('/^www\./', $kaynak_url)) {
+            // 'www' ile başlıyorsa scheme ekliyoruz
+            $kaynak_url = $defaultScheme . '://' . $kaynak_url;
+        } else {
+            // Yerel dosya yoluysa hostname ve scheme ekliyoruz
+            $kaynak_url = $defaultScheme . '://' . $defaultHost . '/' . ltrim($kaynak_url, '/');
+        }
+    }
+    return $kaynak_url;
+}
+#########################################################################################################################
+  // file_put_contents(KOKYOLU.'error.log', date('Y-m-d H:i:s') . " - İnçlude alanıı.\n", FILE_APPEND);
+$gorevden = true; // CRON ZAMANLAYICI DOSYA İÇİNDE ETKİNLEŞTİRMEK İÇİNDİR
+
+require __DIR__ . '/cron_zamanlayici.php'; // sonraki çalışacak zamanı unix zaman damgası olarak verir
+require_once __DIR__ . '/backup.php'; // seçilen veritabanını yedekler
+require_once __DIR__ . '/zipyap.php'; // seçilen web dizini zip arşivi olarak oluşturur
+require_once __DIR__ . '/gorevle_uzak_ftp_yedekle.php'; // veritabanı veya zipli web dizin FTP hesabına yükler ve korunacak sayının dışındaki eski tarihilileri siler
+require_once __DIR__ . '/gorevle_uzak_google_yedekle.php'; // veritabanı veya zipli web dizin google dirive service hesabına yükler ve korunacak sayının dışındaki eski tarihilileri siler
+#########################################################################################################################
+// GÖREV ZAMANLAYICI SAYFASINDA OLUŞTURULAN GÖREVLERİ ELLE YÜRÜTÜLÜRKEN
+if(isset($_POST['elle_yurutme']) && $_POST['elle_yurutme'] == 1 && isset($_POST['gorevid']) && is_numeric($_POST['gorevid'])){
+    $gorevler = $PDOdb->prepare("SELECT * FROM zamanlanmisgorev WHERE id=? LIMIT 1");
+    $gorevler->execute([$_POST['gorevid']]);
+}else {
+    // zamanlama görevinde sonraki çalışma zamanı ile şimdi ki zamanı karşılaştırıp şimdiki zaman eşit veya geçiyor sa döngüyü çalıştır
+    $gorevler = $PDOdb->prepare("SELECT * FROM zamanlanmisgorev WHERE aktif =? AND sonraki_calisma <= ? ORDER BY id ASC");
+    $gorevler->execute(['Aktif', time()]);
+}
+
+$yedeklenecek_tablolar = [];
+$yedeklendi_mi = false;
+
+     // file_put_contents(KOKYOLU.'error.log', date('Y-m-d H:i:s') . " - While döngü üstünde.\n", FILE_APPEND);
+
+while ($row = $gorevler->fetch()) {
+
+     // file_put_contents(KOKYOLU.'error.log', date('Y-m-d H:i:s') . " - While döngü içinde.\n", FILE_APPEND);
+
+$yedeklenecek_tablolar = [];
+$calistirma_sonuc_mesaji[] = array();
+$yedeklendi_mi = false;
+
+    $dosya_tarihi                   = date('Y-m-d-H-i-s'); // date('Y-m-d-H-i-s', $row['sonraki_calisma']);
+    $starttime                      = microtime(true);
+    $id                             = $row['id'];
+    $gorev_adi                      = $row['gorev_adi'];
+    $kaynak_url                     = $row['dosya_adi'];
+    $sonraki_calisma                = $row['sonraki_calisma'];
+    $haftanin_gunu                  = explode(",", $row['haftanin_gunu']);
+    $gun                            = $row['gun'];
+    $saat                           = $row['saat'];
+    $dakika                         = $row['dakika'];
+    $aktif                          = $row['aktif'];
+    $gunluk_kayit                   = $row['gunluk_kayit'];
+    $yedekleme_gorevi               = $row['yedekleme_gorevi'];
+    $ftp_yedekle                    = $row['ftp_yedekle'];
+    $google_yedekle                 = $row['google_yedekle'];
+    $uzak_sunucu_ici_dizin_adi      = $row['uzak_sunucu_ici_dizin_adi'];
+    $google_sunucu_korunacak_yedek  = $row['google_sunucu_korunacak_yedek'];
+    $ftp_sunucu_korunacak_yedek     = $row['ftp_sunucu_korunacak_yedek'];
+    $secilen_yedekleme_oneki        = $row['secilen_yedekleme_oneki'];
+    $yerel_korunacak_yedek          = $row['yerel_korunacak_yedek'];
+    $gz                             = $row['gz'];
+    $dbbakim                        = $row['dbbakim'];
+    $dblock                         = $row['dblock'];
+    $combine                        = $row['combine'];
+    $elle                           = $row['elle'];
+    $veritabani_id                  = $row['secilen_yedekleme'];
+    $secilen_yedekleme              = $row['secilen_yedekleme'];
+    $ozel_onek                      = $row['ozel_onek'];
+    $isleniyor                      = $row['isleniyor'];
+    $grup                           = 1;
+    $yedekleyen                     = 1;
+#########################################################################################################################
+if($yedekleme_gorevi == '1' && $gz == '0' && $combine == '1'){ // veritabanı yedekleme
+    $silinecek_dosya_tipi = "2"; // .sql uzantılı dosya
+} elseif($yedekleme_gorevi == '1' && $gz == '1' && $combine == '1'){ // veritabanı yedekleme
+    $silinecek_dosya_tipi = "1"; // .gz uzantılı dosya
+} elseif($yedekleme_gorevi == '1' && $combine == '2'){ // veritabanı yedekleme
+    $silinecek_dosya_tipi = "4"; // klasör dosyası
+} elseif($yedekleme_gorevi == '1' && $gz == '1' && $combine == '3' && $elle == '2'){ // veritabanı yedekleme
+    $silinecek_dosya_tipi = "4"; // klasör dosyası
+} elseif($yedekleme_gorevi == '1' && $gz == '0' && $combine == '3' && $elle == '1'){ // veritabanı yedekleme
+    $silinecek_dosya_tipi = "2"; // .sql uzantılı dosya
+} elseif($yedekleme_gorevi == '1' && $gz == '1' && $combine == '3' && $elle == '1'){ // veritabanı yedekleme
+    $silinecek_dosya_tipi = "1"; // .gz uzantılı dosya
+} elseif ($yedekleme_gorevi == '2'){ // dizin yedekleme
+    $silinecek_dosya_tipi = "3";
+} elseif ($yedekleme_gorevi == '3'){ // diğer özel dosyaları çalıştırma
+    $silinecek_dosya_tipi = "";
+}
 /*
-* * * -  Şimdi güne, saate ve dakkaya arti 1 dakika ekle
-
-x * * -x gün geçti ise saat 00, dakika 00 arti 1 ay ertele
-x * * -x güne eşit ise "şimdiki saat ve dakika arti 1 dakika ekle
-x * * -x gün daha gelmedi ise x günü saat 00 dakika 00 kaydet
-
-x x * -x gün geçti ise x günü x saati dakika 00 1 ay ertele
-x x * -x güne eşit x saat geçti ise x günü x saati dakika 00 1 ay ertele
-x x * -x güne eşit x saate eşit ise x günü x saati ve şimdiki dakikaya 1 dakika ekle
-x x * -x güne eşit x saat daha gelmedi ise x günü x saati dakika 00 kaydet
-x x * -x gün daha gelmedi ise x gün x saat dakika 00 kaydet
-
-x x x -x gün geçti ise 1 ay ertele
-x x x -x güne eşit x saat eşit dakika eşit yada geçti ise 1 ay ertele
-x x x -x güne eşit x saat eşit dakika daha gelmedi ise aynen kaydet
-x x x -x güne eşit x saat daha gelmedi aynen kaydet
-x x x -x gün daha gelmedi aynen kaydet
-
-* * x -x dakika eşit yada geçti ise bugünün, bu saatine 1 saat ertle
-* * x -x dakika daha gelmedi ise bugün bu saate x dakika kaydet
-
-* x x -x saat geçti ise 1 gün ertele
-* x x -x saat eşit dakika eşit yada geçti ise 1 gün ertele
-* x x -x saat eşit dakika dakika daha gelmedi ise bugüne aynen kaydet
-* x x -x saat daha gelmedi ise bugüne aynen kaydet
-
-* x * -x saat eşit veya geçti ise bir gün erteler
-* x * -x saat daha gelmedi ise bugün, x saat ve 00 dakika kaydet
-
-x * x -x gün geçti ise 1 ay ertele
-x * x -x gün ve dakika eşit ise 1 saat ertele (saat 11'i geçmedi ise)
-x * x -x gün eşit ve dakika daha gelmedi ise aynen zamanı kaydet
-x * x -x gün daha gelmedi ise aynen kaydet 
+    $extension = [
+        '1' => '.gz',
+        '2' => '.sql',
+        '3' => '.zip',
+        '4' => ''
+    ];
 */
-////////////////////////////////////////////////////////////////////////////////
-########### HAFTASIZ ZAMANLARI HESAPLAMA #######################################
-
-if(isset($haftanin_gunleri_array)){
-        if(is_array($haftanin_gunleri_array) AND in_array('-1', $haftanin_gunleri_array)){
-        ## * * * ##
-        // Şimdi güne, saate ve dakkaya arti 1 dakika ekle
-        if($row['gun']<0 AND $row['saat']<0 AND $row['dakika']<0){
-
-        $sonraki_calisma = mktime(date('G'), date('i')+1, 0, date('n'), date('j'), date('Y'));
-
-        }
-################################################################################          
-        ## x * * ##
-        // x gün geçti ise saat 00, dakika 00 arti 1 ay ertele
-        if($row['gun']>-1 AND $row['gun'] < date('j') AND $row['saat']<0 AND $row['dakika']<0){
-
-        $gun = $row['gun'];
-        $sonraki_calisma = mktime(0, 0, 0, date('n')+1, $gun, date('Y'));
-                 
-        }
-        ## x * * ##
-        // x güne eşit ise "şimdiki saat ve dakika arti 1 dakika ekle
-        if($row['gun']>-1 AND $row['gun']==date('j') AND $row['saat']<0 AND $row['dakika']<0){
-
-        $gun = $row['gun'];
-        $sonraki_calisma = mktime(date('G'), date('i')+1, 0, $ay, $gun, date('Y'));
-
-        }          
-        ## x * * ##
-        // x gün daha gelmedi ise x günü saat 00 dakika 00 kaydet
-        if($row['gun']>-1 AND $row['gun'] > date('j') AND $row['saat']<0 AND $row['dakika']<0){
-
-        $gun = $row['gun'];
-        $sonraki_calisma = mktime(0, 0, 0, date('n'), $gun, date('Y')); 
-
-        }          
-################################################################################          
-        ## x x * ##
-        // x gün geçti ise x günü x saati dakika 00 1 ay ertele
-        if($row['gun']>-1 AND $row['gun'] < date('j') AND $row['saat']>-1 AND $row['dakika']<0){
-
-        $gun = $row['gun'];
-        $saat = $row['saat'];
-        $sonraki_calisma = mktime($saat, 0, 0, date('n')+1, $gun, date('Y'));
-
-        }          
-        ## x x * ##
-        // x güne eşit x saat geçti ise x günü x saati dakika 00 1 ay ertele
-        if($row['gun']>-1 AND $row['gun']==date('j') AND $row['saat']>-1 AND $row['saat'] < date('G') AND $row['dakika']<0){
-
-        $gun = $row['gun'];
-        $saat = $row['saat'];
-        $sonraki_calisma = mktime($saat, 0, 0, date('n')+1, $gun, date('Y'));
-
-        }          
-        ## x x * ##
-        // x güne eşit x saate eşit ise x günü x saati ve şimdiki dakikaya 1 dakika ekle
-        if($row['gun']>-1 AND $row['gun']==date('j') AND $row['saat']>-1 AND $row['saat']==date('G') AND $row['dakika']<0){
-
-        $gun = $row['gun'];
-        $saat = $row['saat'];
-        $sonraki_calisma = mktime($saat, date('i')+1, 0, date('n'), $gun, date('Y'));
-
-        }          
-        ## x x * ##
-        // x güne eşit x saat daha gelmedi ise x günü x saati dakika 00 kaydet
-        if($row['gun']>-1 AND $row['gun']==date('j') AND $row['saat']>-1 AND $row['saat'] > date('G') AND $row['dakika']<0){
-
-        $gun = $row['gun'];
-        $saat = $row['saat'];
-        $sonraki_calisma = mktime($saat, 0, 0, date('n'), $gun, date('Y'));
-
-        }          
-        ## x x * ##
-        // x gün daha gelmedi ise x gün x saat dakika 00 kaydet
-        if($row['gun']>-1 AND $row['gun'] > date('j') AND $row['saat']>-1 AND $row['dakika']<0){
-
-        $gun = $row['gun'];
-        $saat = $row['saat'];
-        $sonraki_calisma = mktime($saat, 0, 0, date('n'), $gun, date('Y'));
-
-        }
-################################################################################
-        ## x x x ##
-        // x gün geçti ise 1 ay ertele
-        if($row['gun']>-1 AND $row['gun'] < date('j') AND $row['saat']>-1 AND $row['dakika']>-1){
-
-        $gun = $row['gun'];
-        $saat = $row['saat'];
-        $dakika = $row['dakika'];
-        $sonraki_calisma = mktime($saat, $dakika, 0, date('n')+1, $gun, date('Y'));
-
-        }
-        ## x x x ##
-        // x güne eşit x saat eşit dakika eşit yada geçti ise 1 ay ertele
-        if($row['gun']>-1 AND $row['gun']==date('j') AND $row['saat']>-1 AND $row['saat']==date('G') AND $row['dakika']>-1 AND $row['dakika']<=date('i')){
-
-        $gun = $row['gun'];
-        $saat = $row['saat'];
-        $dakika = $row['dakika'];
-        $sonraki_calisma = mktime($saat, $dakika, 0, date('n')+1, $gun, date('Y'));
-
-        }
-        ## x x x ##
-        // x güne eşit x saat eşit dakika daha gelmedi ise aynen kaydet
-        if($row['gun']>-1 AND $row['gun']==date('j') AND $row['saat']>-1 AND $row['saat']==date('G') AND $row['dakika']>-1 AND $row['dakika'] > date('i')){
-
-        $gun = $row['gun'];
-        $saat = $row['saat'];
-        $dakika = $row['dakika'];
-        $sonraki_calisma = mktime($saat, $dakika, 0, date('n'), $gun, date('Y'));
-
-        }
-        ## x x x ##
-        // x güne eşit x saat daha gelmedi aynen kaydet
-        if($row['gun']>-1 AND $row['gun']==date('j') AND $row['saat']>-1 AND $row['saat'] > date('G') AND $row['dakika']>-1){
-
-        $gun = $row['gun'];
-        $saat = $row['saat'];
-        $dakika = $row['dakika'];
-        $sonraki_calisma = mktime($saat, $dakika, 0, date('n'), $gun, date('Y'));
-
-        }
-        ## x x x ##
-        // x gün daha gelmedi aynen kaydet
-        if($row['gun']>-1 AND $row['gun'] > date('j') AND $row['saat']>-1 AND $row['dakika']>-1){
-
-        $gun = $row['gun'];
-        $saat = $row['saat'];
-        $dakika = $row['dakika'];
-        $sonraki_calisma = mktime($saat, $dakika, 0, date('n'), $gun, date('Y'));
-
-        }
-################################################################################
-        ## * * x ##
-        // x dakika eşit yada geçti ise bugünün, bu saatine 1 saat ertle
-        if($row['gun']<0 AND $row['saat']<0 AND $row['dakika']>-1 AND $row['dakika'] <= date('i')){
-
-        $dakika = $row['dakika'];
-        $sonraki_calisma = mktime(date('G')+1, $dakika, 0, date('n'), date('j'), date('Y'));
-
-        }          
-        ## * * x ##
-        // x dakika daha gelmedi ise bugün bu saate x dakika kaydet
-        if($row['gun']<0 AND $row['saat']<0 AND $row['dakika']>-1 AND $row['dakika'] > date('i')){
-
-        $dakika = $row['dakika'];
-        $sonraki_calisma = mktime(date('G'), $dakika, 0, date('n'), date('j'), date('Y'));
-
-        }
-################################################################################
-        ## * x x ##
-        // x saat geçti ise 1 gün ertele
-        if($row['gun']<0 AND $row['saat']>-1 AND $row['saat'] < date('G') AND $row['dakika']>-1){
-
-        $saat = $row['saat'];
-        $dakika = $row['dakika'];
-        $sonraki_calisma = mktime($saat, $dakika, 0, date('n'), date('j')+1, date('Y'));
-
-        }          
-        ## * x x ##
-        // x saat eşit dakika eşit yada geçti ise 1 gün ertele
-        if($row['gun']<0 AND $row['saat']>-1 AND $row['saat']==date('G') AND $row['dakika']>-1 AND $row['dakika']<=date('i')){
-
-        $saat = $row['saat'];
-        $dakika = $row['dakika'];
-        $sonraki_calisma = mktime($saat, $dakika, 0, date('n'), date('j')+1, date('Y'));
-
-        }
-        ## * x x ##
-        // x saat eşit dakika dakika daha gelmedi ise bugüne aynen kaydet
-        if($row['gun']<0 AND $row['saat']>-1 AND $row['saat']==date('G') AND $row['dakika']>-1 AND $row['dakika'] > date('i')){
-
-        $saat = $row['saat'];
-        $dakika = $row['dakika']; 
-        $sonraki_calisma = mktime($saat, $dakika, 0, date('n'), date('j'), date('Y'));
-
-        }
-        ## * x x ##
-        // x saat daha gelmedi ise bugüne aynen kaydet
-        if($row['gun']<0 AND $row['saat']>-1 AND $row['saat'] > date('G') AND $row['dakika']>-1){
-
-        $saat = $row['saat'];
-        $dakika = $row['dakika'];
-        $sonraki_calisma = mktime($saat, $dakika, 0, date('n'), date('j'), date('Y'));
-
-        }
-################################################################################
-        ## * x * ##
-        // x saat eşit yada geçti ise bir gün ertele
-        if($row['gun']<0 AND $row['saat']>-1 AND $row['saat'] <= date('G') AND $row['dakika']<0){
-
-        $saat = $row['saat'];
-        $sonraki_calisma = mktime($saat, 0, 0, date('n'), date('j')+1, date('Y'));
-
-        }
-        // x saat eşit yada geçti ise bir gün ertele
-        if($row['gun']<0 AND $row['saat']>-1 AND $row['saat'] > date('G') AND $row['dakika']<0){
-
-        $saat = $row['saat'];
-        $sonraki_calisma = mktime($saat, 0, 0, date('n'), date('j'), date('Y'));
-
-        }
-################################################################################
-        ## x * ##
-        //x * x -x gün geçti ise 1 ay ertele
-        if($row['gun']>-1 AND $row['gun'] < date('j') AND $row['saat']<0 AND $row['dakika']>-1){
-
-        $gun = $row['gun'];
-        $dakika = $row['dakika'];
-        $sonraki_calisma = mktime(0, $dakika, 0, date('n')+1, $gun, date('Y'));
-
-        }
-        //x * x -x gün eşit ve dakika eşit yada geçti ise 1 saat ertele (saat 11'i geçmedi ise)
-        if($row['gun']>-1 AND $row['gun']==date('j') AND $row['saat']<0 AND $row['dakika']>-1 AND $row['dakika']<=date('i')){
-
-        $gun = $row['gun'];
-        $dakika = $row['dakika'];
-        $sonraki_calisma = mktime(date('G'), $dakika, 0, date('n'), $gun, date('Y'));
-
-        if(date('G')<=22 AND $row['dakika']<=59){
-          $artibirsaat=1;
-          $sonraki_calisma = mktime($saat, $dakika, 0, date('n'), $gun, date('Y'));
-        }
-        if(date('G')==23 AND $row['dakika']>=0){
-          $artibiray=1;
-          $sonraki_calisma = mktime($saat, $dakika, 0, date('n'), $gun, date('Y'));
-        }
-        }
-        //x * x -x gün eşit ve dakika daha gelmedi ise aynen zamanı kaydet
-        if($row['gun']>-1 AND $row['gun']==date('j') AND $row['saat']<0 AND $row['dakika']>-1 AND $row['dakika']>date('i')){
-
-        $gun = $row['gun'];
-        $dakika = $row['dakika'];
-        $sonraki_calisma = mktime(date('G'), $dakika, 0, date('n'), $gun, date('Y'));
-
-        }          
-        //x * x -x gün daha gelmedi ise aynen kaydet
-        if($row['gun']>-1 AND $row['gun'] > date('j') AND $row['saat']<0 AND $row['dakika']>-1){
-
-        $gun = $row['gun'];
-        $dakika = $row['dakika'];
-        $sonraki_calisma = mktime(0, $dakika, 0, date('n')+1, $gun, date('Y'));
-
-        }          
-                          
-        } // if(is_array($haftanin_gunleri_array) AND in_array('-1', $haftanin_gunleri_array)){
-        } // if(isset($haftanin_gunleri_array)){
-        
-########### HAFTASIZ ZAMANLARI HESAPLAMA #######################################
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-########### ÇALIŞMA ZAMANI UNIX DEĞERİ ALMA İŞLEMİ #############################
-################################################################################
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-/*                    ÇOKLU HAFTA GÜNLERİ HESAPLAMA                           */
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
+#########################################################################################################################
+#########################################################################################################################
+#########################################################################################################################
+########################################### CRON ZAMANLAYICI BAŞLANGICI #################################################
+#########################################################################################################################
+#########################################################################################################################
+#########################################################################################################################
+    // HAFTANIN GÜN(LERİ) SEÇİLİ İSE HAFTANIN GÜN(LERİ) İŞLEMLERİNE BAŞLA
 /*
-* * -Seçilen gün bugün ise şimdi saat ve şimdiki dakikaya artı 1 dakika ekle
-* * -SEÇILEN GÜN BUGÜN DEĞIL ISE SONRAKI GÜNE VE SAAT 00 DAKIKA 00 ERTELE
+    if (!in_array("-1", $haftanin_gunu)){
 
-x * -Seçilen gün bugün ise saat geçti ise SONRAKI GÜNE ve saat xx dakika 00 ertele
-x * -Seçilen gün bugün ise saat eşit ise bugüne saat xx şimdiki dakikaya artı 1 dakika ekle
-x * -Seçilen gün bugün ise saat henüz gelmedi ise bugüne saat xx dakika 00 ayarla
-x * -SEÇILEN GÜN BUGÜN DEĞIL ISE SONRAKI GÜNE VE SAAT XX DAKIKA 00 KAYDET
+        //$tarih->setTimezone(new DateTimeZone('UTC'));
+        $tarih = haftaKontrolu($bugun, $tarih, $haftanin_gunu, $gun, $saat, $dakika);
 
-x x -Seçilen gün bugün ise saat geçti ise SONRAKI GÜNE ve saat xx dakika xx ertele
-x x -Seçilen gün bugün ise saat eşit ise dakika eşit yada geçti ise SONRAKI GÜNE ve saat xx dakika xx ertele
-x x -Seçilen gün bugün ise saat eşit ise dakika henüz gelmedi ise bugüne ve saat xx dakika xx kaydet
-x x -Seçilen gün bugün ise saat henüz gelmedi ise bugüne ve saat xx dakika xx kaydet
-x x -SEÇILEN GÜN BUGÜN DEĞIL ISE SONRAKI GÜNE VE SAAT XX DAKIKA XX KAYDET
+    }else{ // HAFTANIN GÜNÜ -1 * YILDIZ SEÇİLİ İSE GÜN İŞLEMLERİNE BAŞLA
 
-* x -Seçilen gün bugün ise dakika eşit yada geçti ise şimdiki saat ve dakika xx artı 1 saat ertele
-* x -Seçilen gün bugün ise dakika henüz gelmedi ise şimdiki saat ve dakika xx kaydet
-* x -SEÇILEN GÜN BUGÜN DEĞIL ISE SONRAKI GÜNE VE SAAT 00 DAKIKA XX KAYDET
+        //$tarih->setTimezone(new DateTimeZone('UTC'));
+        $tarih = gunKontrolu($bugun, $tarih, $gun, $saat, $dakika);
+
+    }
+        $tarih->setTimezone(new DateTimeZone('Europe/Istanbul')); // UTC // Europe/Istanbul
+
+        $sonraki_calisma = $tarih->format('U');
 */
-########### HAFTA HESAPLAMALARI ################################################
-        if(isset($haftanin_gunleri_array)){
-        if(is_array($haftanin_gunleri_array) AND array_intersect($haftadizi, $haftanin_gunleri_array)){
-        $haftanin_gunleri = $haftanin_gunleri_array;
-        $gunsayisi = count($haftanin_gunleri);
-        $haftaninbugunu = date('N');
-        if(isset($haftanin_gunleri)){
-        // Dizide bugün varsa bugünü ver                    
-        if(in_array($haftaninbugunu,$haftanin_gunleri)){
-        $haftaningunu=date('N');
-        // Dizide bugün yoksa dizideki bugünden sonra gelen günü ver 
-        }elseif(!in_array($haftaninbugunu,$haftanin_gunleri)){
-        $number = $haftanin_gunleri_array;
-        sort($number);
-        $sourc = $haftaninbugunu;
-        $haftaningunu = $number[0];
-
-        foreach($number as $numbe) {
-        if($numbe > $sourc) {
-        $haftaningunu = $numbe;
-        break;
-        }
-        }          
-        
-        }
-////////////////////////////////////////////////////////////////////////////////
-        $numbers = $haftanin_gunleri_array;
-        sort($numbers);
-        $source = $haftaninbugunu;
-        $sonraki_gun = $numbers[0];
-
-        foreach($numbers as $number) {
-        if($number > $source) {
-        $sonraki_gun = $number;
-        break;
-        }
-        }
-
-             if($sonraki_gun=='1'){
-        $h_tarihi=date('d.m.Y', strtotime('noon monday')); // Pazartesi
-        }elseif($sonraki_gun=='2'){
-        $h_tarihi=date('d.m.Y', strtotime('noon tuesday')); // Salı
-        }elseif($sonraki_gun=='3'){
-        $h_tarihi=date('d.m.Y', strtotime('noon wednesday')); // Çarşamba
-        }elseif($sonraki_gun=='4'){
-        $h_tarihi=date('d.m.Y', strtotime('noon thursday')); // Perşembe
-        }elseif($sonraki_gun=='5'){
-        $h_tarihi=date('d.m.Y', strtotime('noon friday')); // Cuma
-        }elseif($sonraki_gun=='6'){
-        $h_tarihi=date('d.m.Y', strtotime('noon saturday')); // Cumartesi
-        }elseif($sonraki_gun=='7'){
-        $h_tarihi=date('d.m.Y', strtotime('noon sunday')); // Pazar
-        }          
-////////////////////////////////////////////////////////////////////////////////
-        }
-     
-################################################################################
-        if($haftaningunu=='1'){
-            $haftanintarihi=date('d.m.Y', strtotime('noon monday')); // Pazartesi
-        }elseif($haftaningunu=='2'){
-            $haftanintarihi=date('d.m.Y', strtotime('noon tuesday')); // Salı
-        }elseif($haftaningunu=='3'){
-            $haftanintarihi=date('d.m.Y', strtotime('noon wednesday')); // Çarşamba
-        }elseif($haftaningunu=='4'){
-            $haftanintarihi=date('d.m.Y', strtotime('noon thursday')); // Perşembe
-        }elseif($haftaningunu=='5'){
-            $haftanintarihi=date('d.m.Y', strtotime('noon friday')); // Cuma
-        }elseif($haftaningunu=='6'){
-            $haftanintarihi=date('d.m.Y', strtotime('noon saturday')); // Cumartesi
-        }elseif($haftaningunu=='7'){
-            $haftanintarihi=date('d.m.Y', strtotime('noon sunday')); // Pazar
-        }
-      
-        ## * * ##
-        // Seçilen gün bugün ise şimdi saat ve şimdiki dakikaya artı 1 dakika ekle          
-        if(date('N') == $haftaningunu AND $row['saat'] <0 AND $row['dakika'] <0){
-        $degisken = explode(".", $haftanintarihi);
-        $ay = $degisken[1];
-        $gun = $degisken[0];
-        $yil = $degisken[2];
-        $sonraki_calisma = mktime(date('G'), date('i')+1, 0, $ay, $gun, $yil);
-
-        //echo mktime($saat, $dakika+$artibirdakika, 0, $ay, $gun, $yil)."<br>";
-        //echo date_tr('d M Y, l, H:i', mktime($saat, $dakika+$artibirdakika, 0, $ay, $gun, $yil));       
-        }
-        ## x * ##
-        // x * -Seçilen gün bugün ise saat eşit ise bugüne saat xx şimdiki dakikaya artı 1 dakika ekle          
-        if(date('N')==$haftaningunu AND $row['saat']>-1 AND $row['dakika']<0 AND $row['saat']==date('G')){
-        $degisken=explode(".", $haftanintarihi);
-        $ay = $degisken[1];
-        $gun = $degisken[0];
-        $yil = $degisken[2];
-        $saat = $row['saat'];
-        $sonraki_calisma = mktime($saat, date('i')+1, 0, $ay, $gun, $yil);          
-        }
-        ## x * ##
-        // x * -Seçilen gün bugün ise saat henüz gelmedi ise bugüne saat xx dakika 00 ayarla          
-        if(date('N')==$haftaningunu AND $row['saat']>-1 AND $row['dakika']<0 AND $row['saat']>date('G')){
-        $degisken=explode(".", $haftanintarihi);
-        $ay = $degisken[1];
-        $gun = $degisken[0];
-        $yil = $degisken[2];
-        $saat = $row['saat'];
-        $sonraki_calisma = mktime($saat, 0, 0, $ay, $gun, $yil);          
-        }
-        
-        ## x x ##
-        // x x -Seçilen gün bugün ise saat eşit ise dakika henüz gelmedi ise bugüne ve saat xx dakika xx kaydet
-        if(date('N')==$haftaningunu AND $row['saat']>-1 AND $row['dakika']>-1 AND $row['saat']==date('G') AND $row['dakika']>date('i')){
-        $degisken=explode(".", $haftanintarihi);
-        $ay = $degisken[1];
-        $gun = $degisken[0];
-        $yil = $degisken[2];
-        $saat = $row['saat'];
-        $dakika = $row['dakika'];
-        $sonraki_calisma = mktime($saat, $dakika, 0, $ay, $gun, $yil);         
-        }
-        ## x x ##
-        // x x -Seçilen gün bugün ise saat henüz gelmedi ise bugüne ve saat xx dakika xx kaydet
-        if(date('N')==$haftaningunu AND $row['saat']>-1 AND $row['dakika']>-1 AND $row['saat']>date('G')){
-        $degisken=explode(".", $haftanintarihi);
-        $ay = $degisken[1];
-        $gun = $degisken[0];
-        $yil = $degisken[2];
-        $saat = $row['saat'];
-        $dakika = $row['dakika'];
-        $sonraki_calisma = mktime($saat, $dakika, 0, $ay, $gun, $yil);         
-        }
-        
-        ## * x ##
-        // * x -Seçilen gün bugün ise dakika eşit yada geçti ise şimdiki saat ve dakika xx artı 1 saat ertele
-        if(date('N')==$haftaningunu AND $row['saat']<0 AND $row['dakika']>-1 AND $row['dakika']<=date('i')){
-        $degisken=explode(".", $haftanintarihi);
-        $ay = $degisken[1];
-        $gun = $degisken[0];
-        $yil = $degisken[2];
-        $dakika = $row['dakika'];
-        $sonraki_calisma = mktime(date('G')+1, $dakika, 0, $ay, $gun, $yil);          
-        }
-        ## * x ##
-        // * x -Seçilen gün bugün ise dakika henüz gelmedi ise şimdiki saat ve dakika xx kaydet
-        if(date('N')==$haftaningunu AND $row['saat']<0 AND $row['dakika']>-1 AND $row['dakika']>date('i')){
-        $degisken=explode(".", $haftanintarihi);
-        $ay = $degisken[1];
-        $gun = $degisken[0];
-        $yil = $degisken[2];
-        $dakika = $row['dakika'];
-        $sonraki_calisma = mktime(date('G'), $dakika, 0, $ay, $gun, $yil);          
-        }                                                            
-## BUGÜN ANCAK SAAT VEYA DAKİKA EŞİT YADA GEÇTİ ##########          
-        ## x * ##
-        // x * -Seçilen gün bugün ve saat geçti ise SONRAKI GÜNE ve saat xx dakika 00 ertele          
-        if(date('N')==$haftaningunu AND $row['saat']>-1 AND $row['dakika']<0  AND $row['saat'] < date('G') AND $gunsayisi=='1'){
-        $degisken=explode(".", $haftanintarihi);
-        $ay = $degisken[1];
-        $gun = $degisken[0];
-        $yil = $degisken[2];
-        $saat = $row['saat'];
-        $sonraki_calisma = mktime($saat, 0, 0, $ay, $gun+7, $yil);
-
-        }elseif(date('N')==$haftaningunu AND $row['saat']>-1 AND $row['dakika']<0  AND $row['saat'] < date('G') AND $gunsayisi!='1'){
-
-        $degisken=explode(".", $h_tarihi);
-        $ay = $degisken[1];
-        $gun = $degisken[0];
-        $yil = $degisken[2];          
-        $saat = $row['saat'];
-        $sonraki_calisma = mktime($saat, 0, 0, $ay, $gun, $yil);                         
-        }           
-        ## x x ##
-        // x x -Seçilen gün bugün ise saat geçti ise SONRAKI GÜNE ve saat xx dakika xx ertele          
-        if(date('N')==$haftaningunu AND $row['saat']>-1 AND $row['dakika']>-1  AND $row['saat'] < date('G') AND $gunsayisi=='1'){
-        $degisken=explode(".", $haftanintarihi);
-        $ay = $degisken[1];
-        $gun = $degisken[0];
-        $yil = $degisken[2];
-        $saat = $row['saat'];
-        $dakika = $row['dakika'];
-        $sonraki_calisma = mktime($saat, $dakika, 0, $ay, $gun+7, $yil);
-
-        }elseif(date('N')==$haftaningunu AND $row['saat']>-1 AND $row['dakika']>-1  AND $row['saat'] < date('G') AND $gunsayisi!='1'){
-
-        $degisken=explode(".", $h_tarihi);
-        $ay = $degisken[1];
-        $gun = $degisken[0];
-        $yil = $degisken[2];          
-        $saat = $row['saat'];
-        $dakika = $row['dakika'];
-        $sonraki_calisma = mktime($saat, $dakika, 0, $ay, $gun, $yil);
-        }          
-        ## x x ##
-        // x x -Seçilen gün bugün ise saat eşit ise dakika eşit yada geçti ise SONRAKI GÜNE ve saat xx dakika xx ertele         
-        if(date('N')==$haftaningunu AND $row['saat']>-1 AND $row['dakika']>-1 AND $row['saat']==date('G') AND $row['dakika']<=date('i') AND $gunsayisi=='1'){
-        $degisken=explode(".", $haftanintarihi);
-        $ay = $degisken[1];
-        $gun = $degisken[0];
-        $yil = $degisken[2];
-        $saat = $row['saat'];
-        $dakika = $row['dakika'];
-        $sonraki_calisma = mktime($saat, $dakika, 0, $ay, $gun+7, $yil);
-
-        }elseif(date('N')==$haftaningunu AND $row['saat']>-1 AND $row['dakika']>-1 AND $row['saat']==date('G') AND $row['dakika']<=date('i') AND $gunsayisi!='1'){
-
-        $degisken=explode(".", $h_tarihi);
-        $ay = $degisken[1];
-        $gun = $degisken[0];
-        $yil = $degisken[2];          
-        $saat = $row['saat'];
-        $dakika = $row['dakika'];
-        $sonraki_calisma = mktime($saat, $dakika, 0, $ay, $gun, $yil);
-        }
-                            
-## BUGÜN DEĞİL İSE ###################          
-        ## * * ##
-        // * * -SEÇILEN GÜN BUGÜN DEĞIL ISE SONRAKI GÜNE VE SAAT 00 DAKIKA 00 ERTELE          
-        if(date('N')!=$haftaningunu AND $row['saat']<0 AND $row['dakika']<0){
-        $degisken=explode(".", $haftanintarihi);
-        $ay = $degisken[1];
-        $gun = $degisken[0];
-        $yil = $degisken[2];
-        $sonraki_calisma = mktime(0, 0, 0, $ay, $gun, $yil);          
-        }
-        ## x * ##
-        // x * -SEÇILEN GÜN BUGÜN DEĞIL ISE SONRAKI GÜNE VE SAAT XX DAKIKA 00 KAYDET          
-        if(date('N')!=$haftaningunu AND $row['saat']>-1 AND $row['dakika']<0){
-        $degisken=explode(".", $haftanintarihi);
-        $ay = $degisken[1];
-        $gun = $degisken[0];
-        $yil = $degisken[2];
-        $saat = $row['saat'];
-        $sonraki_calisma = mktime($saat, 0, 0, $ay, $gun, $yil);          
-        }                   
-        ## x x ##
-        // x x -SEÇILEN GÜN BUGÜN DEĞIL ISE SONRAKI GÜNE VE SAAT XX DAKIKA XX KAYDET         
-        if(date('N')!=$haftaningunu AND $row['saat']>-1 AND $row['dakika']>-1){
-        $degisken=explode(".", $haftanintarihi);
-        $ay = $degisken[1];
-        $gun = $degisken[0];
-        $yil = $degisken[2];
-        $saat = $row['saat'];
-        $dakika = $row['dakika'];
-        $sonraki_calisma = mktime($saat, $dakika, 0, $ay, $gun, $yil);
-        }
-        ## * x ##
-        // * x -SEÇILEN GÜN BUGÜN DEĞIL ISE SONRAKI GÜNE VE SAAT 00 DAKIKA XX KAYDET
-        if(date('N')!=$haftaningunu AND $row['saat']<0 AND $row['dakika']>-1){
-        $degisken=explode(".", $haftanintarihi);
-        $ay = $degisken[1];
-        $gun = $degisken[0];
-        $yil = $degisken[2];
-        $dakika = $row['dakika'];
-        $sonraki_calisma = mktime(0, $dakika, 0, $ay, $gun, $yil);
-        }                   
-        } // if(is_array($haftanin_gunleri_array) AND array_intersect($haftadizi, $haftanin_gunleri_array)){
-        } // if(isset($haftanin_gunleri_array)){
-
-        if(isset($sonraki_calisma)){
-             if(strlen((string) $sonraki_calisma) == 10){
-                $basarili = 1;
-              }else{
-                $basarili = 0;
-        }
-        }
+#########################################################################################################################
+#########################################################################################################################
+#########################################################################################################################
+########################################### CRON ZAMANLAYICI SONU #######################################################
+#########################################################################################################################
+#########################################################################################################################
+#########################################################################################################################
+//
+//
+//
+//
+//
+#########################################################################################################################
+#########################################################################################################################
 #########################################################################################################################
 ########################################### GÖREVLERİ YÜRÜTME BAŞLANGICI ################################################
 #########################################################################################################################
+#########################################################################################################################
+#########################################################################################################################
+//
+//
+//
+//
+#########################################################################################################################
+################################### ÇALIŞTIRILACAK DOSYALARIN URLSİNİ OLUŞTUR ###########################################
+#########################################################################################################################
+/*
+if (isFullUrl($kaynak_url)) {
+    // Bu zaten tam bir URL
+    $url = $kaynak_url;
+} else {
+    $fullUrl = ensureFullUrl($kaynak_url);
+    $url = $fullUrl;
+}
+*/
+#########################################################################################################################
+################################### ÇALIŞTIRILACAK DOSYALARIN URLSİNİ OLUŞTUR ###########################################
+#########################################################################################################################
 
-include("gorev_yurutucu.php");
+#########################################################################################################################
+################################### GÖREV VERİTABANI YEDEKLEME GÖREVİ BAŞLAMA ###########################################
+#########################################################################################################################
+// YEDEKLEME GÖREVİ 1 İSE VERİTABANI YEDEKLEMEDİR. SEÇİLEN YEDEKLEME YEDEKLENECEK VERİTABANI ID İÇERDİĞİ İÇİN NUMARA OLMALIDIR
+if(isset($row['yedekleme_gorevi']) && $row['yedekleme_gorevi'] == '1' && is_numeric($row['secilen_yedekleme'])){
+    // ÖNCE YEDEKLENECEK VERİTABANI BİLGİLERİNİ ALALIM
+    $default = $PDOdb->prepare("SELECT * FROM veritabanlari WHERE id=? LIMIT 1");
+    $default->execute([$row['secilen_yedekleme']]);
+    $varsayilan = $default->fetch(PDO::FETCH_ASSOC);
+    $db_name = $varsayilan['db_name'];
 
+    // YEDEKLENECEK VERİTABANINA BAĞLANTI KURALIM
+    $secilen = "mysql:host=".$varsayilan['database_host'].";dbname=".$varsayilan['db_name'].";charset=".CHARSET.";port=".PORT."";
+    try {
+    $PDOdbsecilen = new PDO($secilen, $hash->take($varsayilan['database_user']), $hash->take($varsayilan['database_password']), $options);
+    $PDOdbsecilen->exec("set names ".CHARSET);
+    $PDOdbsecilen->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    } catch (\PDOException $e) {
+        die($e->getMessage());
+    }
+#########################################################################################################################
+// OTOMATİK YEDEKLEME İLE ELLE SEÇİLEN TABLOLAR OLDUĞUNDA YEDEKLEME İŞLEMİ
+if( isset($row['tablolar']) && !empty($row['tablolar']) && $row['combine'] == '3' ) {
+
+    // ELLE SEÇİLEN TABLOLARI DİZİYE ALIYORUZ
+    $tablolar['tablolar'] = explode(",", $row['tablolar']);
+
+    foreach($tablolar['tablolar'] AS $table){
+
+        // BU SORGU İLE SIRADAKİ TABLONUN SON GÜNCELLEME TARİHİNİ ALIYORUZ
+        $guncellemezamani = $PDOdbsecilen->query("SELECT UPDATE_TIME, CREATE_TIME FROM INFORMATION_SCHEMA.TABLES WHERE table_name = '".$table."' ");
+        $guncelleme_zamani = $guncellemezamani->fetch(PDO::FETCH_ASSOC);
+
+        // EĞER TABLONUN SON GÜNCELLENME TARİHİ YOKSA now İLE ŞİMDİKİ TARİHİNİ ALIYORUZ
+        // TABLO YÜKLENDİKTEN SONRA VEYA HİÇ VERİ İŞLENMEDİĞİNDE SON GÜNCELLEME TARİHİ OLMAZ
+        $update_time = $guncelleme_zamani['UPDATE_TIME'] ?? 'now';
+
+        $dateTimeObj = new DateTime($update_time, new DateTimeZone($genel_ayarlar['secili_zaman_dilimi']));
+        // TABLONUN SON GÜNCELLEME TARİHİ now İLE EŞİT İSE
+        if($update_time == 'now'){
+            // TABLONUN SON GÜNCELLEME TARİHİ now ŞİMDİ OLARAK AYARLADIK VE 1 YIL GERİ ALIYORUZ Kİ 
+            // BU TABLO GÜNCELLENMEYEN TABLO OLARAK İŞARETLENSİN VE UNİX ZAMAN DAMGASI OLARAK ALIYORUZ
+            $update_time_unix = $dateTimeObj->modify('-1 year')->getTimestamp();
+        }else{
+            // TABLONUN SON GÜNCELLEME TARİHİNİ UNİX ZAMAN DAMGASI OLARAK ALIYORUZ
+            $update_time_unix = $dateTimeObj->getTimestamp();
+        }
+
+        // ŞİMDİ VERİ TABANI TABLOLARI ELLE SEÇİLİ İSE VE SONRAKİ ÇALIŞMA ZAMANINDAN TABLONUN SON GÜNCELLEME TARİHİ BÜYÜK İSE
+        // YANİ SONRAKİ ÇALIŞMA ZAMANINDAN SONRA TABLO GÜNCELLENDİ İSE YEDEKLEMEK İÇİN DİZİ İÇİNE ALIYORUZ 
+        if( ( $row['elle']>0 && $update_time_unix >= $row['sonraki_calisma'] ) ){
+            $yedeklenecek_tablolar[] = $table;
+        }
+    } // foreach($tablolar['tablolar'] AS $table){
+
+} // if( isset($row['tablolar']) && !empty($row['tablolar']) && $row['combine'] == '3' ) {
+
+#########################################################################################################################
+
+    // EĞER YUKARIDAN SONRAKİ ÇALIŞMA ZAMANINDAN SONRA GÜNCELLENEN TABLO HİÇ YOKSA GÜNLÜK KAYDI YAPMAYA GEREK YOK VE SONRAKİ ÇALIŞACAK ZAMANI GÜNCELLİYORUZ
+    if( isset($yedeklenecek_tablolar) && count($yedeklenecek_tablolar) == 0 && $row['combine'] == '3' ){
+
+        $calistirma_sonuc_mesaji[] = 'Tabloların Elle Seçili Olduğundan
+                                                <br><b>Çalışacağı Zaman</b>dan sonra hiçbir tabloda güncelleme olmadığı için yedeklemeye gerek yoktur.
+                                                <br>Eğer güncelleme olmadan da yedekleme yapmak istiyorsanız <b>Veritabanı Yedekle</b> sayfasından veya tabloları elle seçiminden çıkarın';
+        $yedeklendi_mi = false;
+    }else{
+        // Elle seçilen tablo yoksa tam yedekleme var demektir
+        $yedeklendi_mi = true;
+
+          // file_put_contents(KOKYOLU.'error.log', date('Y-m-d H:i:s') . " - Veritabanı yedekleme üstü\n", FILE_APPEND);
+
+        $veritabani_backup_yedekleme_sonucu = veritabaniYedekleme($PDOdbsecilen, $veritabani_id, $secilen_yedekleme_oneki, $combine, $elle, $grup, $dbbakim, $gz, $yedekleyen, $dblock, $db_name, $yedeklenecek_tablolar, $dosya_tarihi);
+
+          // file_put_contents(KOKYOLU.'error.log', date('Y-m-d H:i:s') . " - ". print_r($veritabani_backup_yedekleme_sonucu)."\n", FILE_APPEND);
+
+    } // else if(count($yedeklenecek_tablolar)==0){
+#############################################################################################################################
+// VERİTABANI YEDEKLEME YAPILMADI İSE $yedeklendi_mi = false; OLACAĞI İÇİN UZAK SUNUCULARA YÜKLEMEYİ YAPMAYACAKTIR
+if(!empty($veritabani_backup_yedekleme_sonucu) && in_array('Veritabanı Başarıyla Yedeklendi',$veritabani_backup_yedekleme_sonucu) && $yedeklendi_mi){
+
+    if(isset($_POST['elle_yurutme']) && $_POST['elle_yurutme'] == 1){
+        $calistirma_sonuc_mesaji[] = array("Görev Elle Yürütüldü");
+    }
+        $calistirma_sonuc_mesaji[] = $veritabani_backup_yedekleme_sonucu;
+
+#############################################################################################################################
+// EĞER FTP YEDEKLEME ETKİN İSE FTP SUNUCUSUNA YEDEKLE
+    if(isset($row['ftp_yedekle']) && $row['ftp_yedekle'] == 1){
+
+    if(!empty($veritabani_backup_yedekleme_sonucu['dosya_adi']) && strlen($veritabani_backup_yedekleme_sonucu['dosya_adi'])>10){
+
+        $veritabani_ftp_dosya_adi_yolu = $veritabani_backup_yedekleme_sonucu['dosya_adi'];
+        $veritabani_ftp_yedekleme_sonucu = uzakFTPsunucuyaYedekle($ftp_server, $ftp_username, $ftp_password, $ftp_path, $veritabani_ftp_dosya_adi_yolu, $yedekleme_gorevi, $uzak_sunucu_ici_dizin_adi, $ftp_sunucu_korunacak_yedek, $secilen_yedekleme_oneki);
+        // UZAK FTP YEDEKLEME BAŞARILI OLURSA KENDİ DOSYA İÇİNDE ESKİ FTP YEDEKLERİ SİLECEK
+        if(!empty($veritabani_ftp_yedekleme_sonucu) && in_array('FTP Sunucusuna Başarıyla Yüklendi',$veritabani_ftp_yedekleme_sonucu)){
+
+            $calistirma_sonuc_mesaji[] = $veritabani_ftp_yedekleme_sonucu;
+            unset($veritabani_ftp_dosya_adi_yolu);
+        }else{
+            $calistirma_sonuc_mesaji[] = $veritabani_ftp_yedekleme_sonucu;
+        }
+    } // if(!empty($veritabani_backup_yedekleme_sonucu['dosya_adi']) && strlen($veritabani_backup_yedekleme_sonucu['dosya_adi'])>10){
+    } // if(isset($row['ftp_yedekle']) && $row['ftp_yedekle'] == 1){
+#############################################################################################################################
+// EĞER GOOGLE YEDEKLEME ETKİN İSE GOOGLE DRIVE SUNUCUSUNA YEDEKLE
+    if(isset($row['google_yedekle']) && $row['google_yedekle'] == 1){
+
+    if(!empty($veritabani_backup_yedekleme_sonucu['dosya_adi']) && strlen($veritabani_backup_yedekleme_sonucu['dosya_adi'])>10){
+
+        $veritabani_google_dosya_adi_yolu = $veritabani_backup_yedekleme_sonucu['dosya_adi'];
+
+        $veritabani_google_yedekleme_sonucu = uzakGoogleSunucuyaYedekle( $veritabani_google_dosya_adi_yolu, $yedekleme_gorevi, $silinecek_dosya_tipi, $uzak_sunucu_ici_dizin_adi, $google_sunucu_korunacak_yedek, $secilen_yedekleme_oneki );
+        // UZAK GOOGLE YEDEKLEME BAŞARILI OLURSA KENDİ DOSYA İÇİNDE ESKİ GOOGLE YEDEKLERİ SİLECEK
+        if(!empty($veritabani_google_yedekleme_sonucu) && in_array('Google Drive Sunucusuna Başarıyla Yüklendi',$veritabani_google_yedekleme_sonucu)){
+            $calistirma_sonuc_mesaji[] = $veritabani_google_yedekleme_sonucu;
+            unset($veritabani_google_dosya_adi_yolu);
+        }else{
+            $calistirma_sonuc_mesaji[] = $veritabani_google_yedekleme_sonucu;
+        }
+    } // if(!empty($veritabani_backup_yedekleme_sonucu['dosya_adi']) && strlen($veritabani_backup_yedekleme_sonucu['dosya_adi'])>10){
+    } // if(isset($row['google_yedekle']) && $row['google_yedekle'] == 1){
+#############################################################################################################################
+
+} // if(isset($veritabani_backup_yedekleme_sonucu[]) && $veritabani_backup_yedekleme_sonucu[] == 'Veritabanı Başarıyla Yedeklendi' && $yedeklendi_mi){
+
+}else // if(isset($row['yedekleme_gorevi']) && $row['yedekleme_gorevi'] == '1' && is_numeric($row['secilen_yedekleme'])){
+#########################################################################################################################
+################################### GÖREV VERİTABANI YEDEKLEME GÖREVİ SONU ##############################################
+#########################################################################################################################
+//
+//
+//
+//
+//
+//
+#########################################################################################################################
+########################## GÖREV WEB DİZİNLERİ SIKIŞTIRIP YEDEKLEME GÖREVİ BAŞLAMA ######################################
+#########################################################################################################################
+// YEDEKLEME GÖREVİ 2 İSE WEB DİZİNLERİ YEDEKLEMEDİR. SEÇİLEN YEDEKLEME YEDEKLENECEK WEB DİZİN ADI İÇERDİĞİ İÇİN METİN OLMALIDIR
+if($row['yedekleme_gorevi'] == '2' && is_string($row['secilen_yedekleme']) && !is_null($row['secilen_yedekleme']) ){
+
+    $source = DIZINDIR . $secilen_yedekleme;
+    $destination = ZIPDIR . $secilen_yedekleme . "-" . $dosya_tarihi . '.zip';
+    $comment = $secilen_yedekleme;
+
+    //file_put_contents(KOKYOLU.'error.log', date('Y-m-d H:i:s') . " - Zip Fonksiyon Üstü.\n", FILE_APPEND);
+
+        if(isset($genel_ayarlar['zip_tercihi']) && $genel_ayarlar['zip_tercihi'] == 1){
+            $zipyap_sonucu = zipDataUsingZipArchive($source, $destination, $comment);
+        } else if(isset($genel_ayarlar['zip_tercihi']) && $genel_ayarlar['zip_tercihi'] == 2){
+            $zipyap_sonucu = zipDataUsingSystem($source, $destination, $comment);
+        }else{
+            $zipyap_sonucu = "";
+        }
+
+    //file_put_contents(KOKYOLU.'error.log', date('Y-m-d H:i:s') . " - Zip Fonksiyon Alt.".print_r($zipyap_sonucu)."\n", FILE_APPEND);
+
+    if(!empty($zipyap_sonucu) && in_array('Zip Arşivi Başarıyla Oluşturuldu',$zipyap_sonucu)){
+    $yedeklendi_mi = true;
+
+    if(isset($_POST['elle_yurutme']) && $_POST['elle_yurutme'] == 1){
+        $calistirma_sonuc_mesaji[] = array("Görev Elle Yürütüldü");
+    }
+        $calistirma_sonuc_mesaji[] = $zipyap_sonucu;
+#############################################################################################################################
+// EĞER FTP YEDEKLEME ETKİN İSE FTP SUNUCUSUNA YEDEKLE
+    if(isset($row['ftp_yedekle']) && $row['ftp_yedekle'] == 1){
+
+    if(!empty($zipyap_sonucu['dosya_adi']) && strlen($zipyap_sonucu['dosya_adi'])>10){
+
+        $zip_ftp_dosya_adi_yolu = $zipyap_sonucu['dosya_adi'];
+        $dizin_zip_ftp_yedekleme_sonucu = uzakFTPsunucuyaYedekle($ftp_server, $ftp_username, $ftp_password, $ftp_path, $zip_ftp_dosya_adi_yolu, $yedekleme_gorevi, $uzak_sunucu_ici_dizin_adi, $ftp_sunucu_korunacak_yedek, $secilen_yedekleme_oneki);
+        // UZAK FTP YEDEKLEME BAŞARILI OLURSA KENDİ DOSYA İÇİNDE ESKİ FTP YEDEKLERİ SİLECEK
+        if(!empty($dizin_zip_ftp_yedekleme_sonucu) && in_array('FTP Sunucusuna Başarıyla Yüklendi',$dizin_zip_ftp_yedekleme_sonucu)){
+
+            $calistirma_sonuc_mesaji[] = $dizin_zip_ftp_yedekleme_sonucu;
+            unset($zip_ftp_dosya_adi_yolu);
+        }else{
+            $calistirma_sonuc_mesaji[] = $dizin_zip_ftp_yedekleme_sonucu;
+        }
+    } // if(!empty($zipyap_sonucu['dosya_adi']) && strlen($zipyap_sonucu['dosya_adi'])>10){
+    } // if(isset($row['ftp_yedekle']) && $row['ftp_yedekle'] == 1){
+#############################################################################################################################
+// EĞER GOOGLE YEDEKLEME ETKİN İSE GOOGLE DRIVE SUNUCUSUNA YEDEKLE
+    
+    if(isset($row['google_yedekle']) && $row['google_yedekle'] == 1){
+
+    if(!empty($zipyap_sonucu['dosya_adi']) && strlen($zipyap_sonucu['dosya_adi'])>10){
+
+        $zip_google_dosya_adi_yolu = $zipyap_sonucu['dosya_adi'];
+        $dizin_zip_google_yedekleme_sonucu = uzakGoogleSunucuyaYedekle( $zip_google_dosya_adi_yolu, $yedekleme_gorevi, $silinecek_dosya_tipi, $uzak_sunucu_ici_dizin_adi, $google_sunucu_korunacak_yedek, $secilen_yedekleme_oneki );
+
+        // UZAK GOOGLE YEDEKLEME BAŞARILI OLURSA KENDİ DOSYA İÇİNDE ESKİ GOOGLE YEDEKLERİ SİLECEK
+        if(!empty($dizin_zip_google_yedekleme_sonucu) && in_array('Google Drive Sunucusuna Başarıyla Yüklendi',$dizin_zip_google_yedekleme_sonucu)){
+
+            $calistirma_sonuc_mesaji[] = $dizin_zip_google_yedekleme_sonucu;
+            unset($zip_google_dosya_adi_yolu);
+
+        }else{
+            $calistirma_sonuc_mesaji[] = $dizin_zip_google_yedekleme_sonucu;
+        }
+    } // if(!empty($zipyap_sonucu['dosya_adi']) && strlen($zipyap_sonucu['dosya_adi'])>10){
+    } // if(isset($row['google_yedekle']) && $row['google_yedekle'] == 1){
+#############################################################################################################################
+
+    } // if(isset($zipyap_sonucu[]) && $zipyap_sonucu[] == 'Zip Arşivi Başarıyla Oluşturuldu'){
+
+}else
+#########################################################################################################################
+############################ GÖREV WEB DİZİNLERİ SIKIŞTIRIP YEDEKLEME GÖREVİ SONU #######################################
+#########################################################################################################################
+//
+//
+//
+//
+//
+//
+#########################################################################################################################
+################################# GÖREV DİĞER SCRIPTLER İÇİN GÖREVİ BAŞLAMA #############################################
+#########################################################################################################################
+// YEDEKLEME GÖREVİ 3 İSE ÖZEL HAZIRLANAN SCRIPTLERİN ÇALIŞTIRILMASI İÇİNDİR
+if($row['yedekleme_gorevi'] == '3' && (empty($row['secilen_yedekleme']) || is_null($row['secilen_yedekleme'])) ){
+
+    if(isset($_POST['elle_yurutme']) && $_POST['elle_yurutme'] == 1){
+        $calistirma_sonuc_mesaji[] = array("Görev Elle Yürütüldü");
+    }
+
+require __DIR__ . '/' . $kaynak_url;
+
+    // Dosya adından namespace kısmını belirle
+    $basename = basename($kaynak_url, '.php');
+    $parts = explode('_', $basename);
+    $namespace = strtoupper($parts[0]);
+
+    // Fonksiyon adını belirle
+    $function_name = "\\$namespace\\ozelCalistirilacakDosya";
+    
+    // Fonksiyonun varlığını kontrol et
+    if (function_exists($function_name)) {
+        // Fonksiyonu çağır ve çıktıyı al
+        $ozel_dosya_calisma_sonucu = call_user_func($function_name, $PDOdb);
+/*
+        // Çıktıyı kullan (dizi olduğu için döngü ile yazdırıyoruz)
+        echo "Fonksiyon çıktısı:\n";
+        foreach ($ozel_dosya_calisma_sonucu as $sonuc) {
+            echo "- $sonuc\n";
+        }
+*/
+    } else {
+        //echo "$function_name fonksiyonu bulunamadı.\n";
+    }
+
+    if(!empty($ozel_dosya_calisma_sonucu) && in_array('Özel Dosya Başarıyla Çalıştırıldı',$ozel_dosya_calisma_sonucu)){
+        $yedeklendi_mi = true;
+        $ozel_dosya_calisma_sonucu = array_unique($ozel_dosya_calisma_sonucu);
+        // "Özel Dosya Başarıyla Çalıştırıldı" metni başka göstermek için önce diziden çıkarıyoruz sonra başına ekliyoruz
+        // Hedef değer
+        $hedef = "Özel Dosya Başarıyla Çalıştırıldı";
+        // Hedef değeri bul ve diziden çıkar
+        if(($anahtar = array_search($hedef, $ozel_dosya_calisma_sonucu)) !== false) {
+            unset($ozel_dosya_calisma_sonucu[$anahtar]);
+        }
+        // Hedef değeri dizinin başına ekle
+        array_unshift($ozel_dosya_calisma_sonucu, $hedef);
+        $calistirma_sonuc_mesaji[] = $ozel_dosya_calisma_sonucu;
+    }else{
+        $calistirma_sonuc_mesaji[] = $ozel_dosya_calisma_sonucu;
+    }
+/*    
+    foreach($ozel_dosya_calisma_sonucu AS $key => $value){
+        //if($key !==)
+        //$calistirma_sonuc_mesaji[] = $value;     
+    }
+    $dosya = fopen ("gorev_yeni.txt" , "a"); //dosya oluşturma işlemi 
+    $yaz = print_r($ozel_dosya_calisma_sonucu, true); // Yazmak istediginiz yazı 
+    fwrite($dosya,$yaz); fclose($dosya);
+*/
+}
+#########################################################################################################################
+################################### GÖREV DİĞER SCRIPTLER İÇİN GÖREVİ SONU ##############################################
+#########################################################################################################################
+//
+//
+//
+//
+//
+//
+#########################################################################################################################
+#########################################################################################################################
 #########################################################################################################################
 ########################################### GÖREVLERİ YÜRÜTME SONU ######################################################
 #########################################################################################################################
-        //unset($calistirma_sonuc_mesaji);
-        } // while ($row = $gorevler->fetch()) {
+#########################################################################################################################
+#########################################################################################################################
+//
+//
+//
+//
+//
+//
+#########################################################################################################################
+############################## GÖREV SONRASI VERİTABANI GÜNCELLEME BAŞLANGICI ###########################################
+#########################################################################################################################
+//Başarılı görev bir sonraki zamana güncelle
+if( !isset($_POST['elle_yurutme']) ){
+
+    if (!in_array("-1", $haftanin_gunu)){
+
+        //$tarih->setTimezone(new DateTimeZone('UTC'));
+        $tarih = haftaKontrolu($bugun, $tarih, $haftanin_gunu, $gun, $saat, $dakika);
+
+    }else{ // HAFTANIN GÜNÜ -1 * YILDIZ SEÇİLİ İSE GÜN İŞLEMLERİNE BAŞLA
+
+        //$tarih->setTimezone(new DateTimeZone('UTC'));
+        $tarih = gunKontrolu($bugun, $tarih, $gun, $saat, $dakika);
+
+    }
+        $tarih->setTimezone(new DateTimeZone('Europe/Istanbul')); // UTC // Europe/Istanbul
+
+        $sonraki_calisma = $tarih->format('U');
+
+    $sonuc = $PDOdb->prepare("UPDATE zamanlanmisgorev SET sonraki_calisma =?, isleniyor = 0 WHERE id =? ");
+    $sonuc->bindParam(1, $sonraki_calisma, PDO::PARAM_INT);
+    $sonuc->bindParam(2, $row['id'], PDO::PARAM_INT);
+    $sonuc->execute();
+    if($sonuc->rowCount() > 0){
+            //echo "Yedek Sonraki çalışma zamanı başarıyla güncellendi<br />";
+        $yedekleme_basarili = true;
+    }else{
+            //echo "Bir hatadan dolayı sonraki çalışma zamanı güncellenemedi<br />";
+        $yedekleme_basarili = false;
+    }
+}
+#########################################################################################################################
+// GÖREV ÇALIŞTIRMA SONRASI İŞLEM MESAJLARI YENİDEN DÜZENLEME
+// Dizi düzleştirme ve 'dosya_adi' anahtarını çıkarma fonksiyonu
+if (!function_exists('flatten_and_filter_array')) {
+function flatten_and_filter_array($array) {
+    $result = array();
+    foreach ($array as $item) {
+        if (is_array($item)) {
+            foreach ($item as $key => $value) {
+                if ($key !== 'dosya_adi') {
+                    if (is_array($value)) {
+                        $result = array_merge($result, flatten_and_filter_array($value));
+                    } else {
+                        $result[] = $value;
+                    }
+                }
+            }
+        } else {
+            $result[] = $item;
+        }
+    }
+    return $result;
+}
+}
+
+// Diziyi düzleştir ve 'dosya_adi' anahtarını çıkar
+$calistirma_sonuc_mesaji = flatten_and_filter_array($calistirma_sonuc_mesaji);
+
+// Boş değerleri çıkarın
+$calistirma_sonuc_mesaji = array_filter($calistirma_sonuc_mesaji, function($value) {
+    return !empty($value);
+});
+
+// Tekrar eden değerleri kaldırın
+$calistirma_sonuc_mesaji = array_unique($calistirma_sonuc_mesaji);
+
+//echo '<pre>' . print_r($calistirma_sonuc_mesaji, true) . '</pre>';
+
+$calistirmasonucmesaji = implode("<br>", $calistirma_sonuc_mesaji);
+#########################################################################################################################
+// GÜNLÜK KAYIT AKTİF İSE VE $yedeklendi_mi TRUE İSE GÜNLÜĞE YAZ
+if( $row['gunluk_kayit'] == 'Aktif' && $yedeklendi_mi ){
+
+    $calisma_zamani = time();
+    $endtime = microtime(true);
+    $duration = $endtime - $starttime;
+    $hours = floor($duration / 60 / 60);
+    $minutes = floor(($duration / 60) - ($hours * 60));
+    $seconds = floor($duration - ($hours * 60 * 60) - ($minutes * 60));
+    $milliseconds = ($duration - floor($duration)) * 1000;
+    $calisma_suresi = sprintf('%02d:%02d:%02d:%05.0f', $hours,$minutes,$seconds,$milliseconds);
+
+    $sonuc_yaz = $PDOdb->prepare("INSERT INTO zamanlanmisgorev_gunluk (calistirma_ciktisi, gorev_adi, calistirilan_dosya, calisma_zamani, calisma_suresi) values (:calistirma_ciktisi, :gorev_adi, :calistirilan_dosya, :calisma_zamani, :calisma_suresi)");
+    $sonuc_yaz->bindValue(':calistirma_ciktisi', $calistirmasonucmesaji);
+    $sonuc_yaz->bindParam(':gorev_adi', $gorev_adi);
+    $sonuc_yaz->bindParam(':calistirilan_dosya', $kaynak_url);
+    $sonuc_yaz->bindParam(':calisma_zamani', $calisma_zamani);
+    $sonuc_yaz->bindParam(':calisma_suresi', $calisma_suresi);
+    $sonuc_yaz->execute();
+
+    if(!empty($PDOdb->lastInsertId())){
+        if( !isset($_POST['elle_yurutme']) ){
+            unset($calistirma_sonuc_mesaji, $calistirma_sonuc_mesaji_filter, $calistirmasonucmesaji, $calisma_suresi, $calisma_zamani);
+        }
+        //echo "Yedek Başarılı sonuç günlüğe yazıldı<br />";
+    }else{
+        //echo "Bir hatadan dolayı başarılı sonuç günlüğe yazılamadı<br />";
+    }
+
+} // if($row['gunluk_kayit'] == 'Aktif'){
+#########################################################################################################################
+################################# GÖREV SONRASI VERİTABANI GÜNCELLEME SONU ##############################################
+#########################################################################################################################
+
+###################################################################################################
+// YERELDEN SİLİNECEK KLASÖR İSE KLASÖR SİLME FONKSİYONU
+###################################################################################################
+if($row['yerel_korunacak_yedek'] != '-1'){
+    if (!function_exists('delete_directory')){
+        // Klasörü silecek fonksiyon
+        function delete_directory($dir){
+            if(is_dir($dir)){
+                $files = new RecursiveIteratorIterator(
+                    new RecursiveDirectoryIterator($dir, RecursiveDirectoryIterator::SKIP_DOTS), RecursiveIteratorIterator::CHILD_FIRST
+                );
+                foreach($files as $file){
+                    if ($file->isDir()){
+                        rmdir($file->getRealPath());
+                    }else{
+                        unlink($file->getRealPath());
+                    }
+                }
+                // Seçilen dizinide silmek içindir. Yukarısı içeriği siler
+                rmdir($dir);
+            } // if(is_dir($dir)){
+        }
+    }
+###################################################################################################
+// YERELDEN DOSYALARI SİLME BÖLÜMÜ
+###################################################################################################
+    // Veritabanı yedekleme görevi
+    if($row['yedekleme_gorevi'] == 1){
+        $yol = BACKUPDIR."/";
+    // Web dizinlerin zipleme görevi
+    }elseif($row['yedekleme_gorevi'] == 2){
+        $yol = ZIPDIR;
+    // Kur güncelleme
+    }elseif($row['yedekleme_gorevi'] == 3){
+        $yol = "";
+    }
+
+        // Dizinde "secilen_yedekleme_oneki" ön ekine sahip dosyaları arayalım
+if(!empty($yol)){
+        // Burada sadece dizin arıyoruz
+        $dizinler = array_filter(scandir($yol), function($dizin) {
+            GLOBAL $row,$yol;
+            //return strpos($dizin, $row['secilen_yedekleme_oneki']) === 0 && is_dir($yol.$dizin); // Dizinin "secilen_yedekleme_oneki" ile başlayıp başlamadığını kontrol edelim
+            $secilen_yedekleme_oneki = $row['secilen_yedekleme_oneki'];
+            if (is_string($secilen_yedekleme_oneki)) {
+                return strpos($dizin, $secilen_yedekleme_oneki) === 0 && is_dir($yol.$dizin);
+            } else {
+                // İkinci parametre bir dize değilse, hata işleme yöntemi burada uygulanabilir.
+                return [];
+            }
+        });
+        // Burada dizin olmayan dosyaları arıyoruz
+        $dosyalar = array_filter(scandir($yol), function($dosya) {
+            GLOBAL $row,$yol;
+            //return strpos($dosya, $row['secilen_yedekleme_oneki']) === 0 && is_file($yol.$dosya); // Dosyanın "secilen_yedekleme_oneki" ile başlayıp başlamadığını kontrol edelim
+            $secilen_yedekleme_oneki = $row['secilen_yedekleme_oneki'];
+            if (is_string($secilen_yedekleme_oneki)) {
+                return strpos($dosya, $secilen_yedekleme_oneki) === 0 && is_file($yol.$dosya);
+            } else {
+                // İkinci parametre bir dize değilse, hata işleme yöntemi burada uygulanabilir.
+                return [];
+            }
+        });
+
+        // Dizinlerin son değiştirilme veya oluşturma zamanlarına göre sıralayalım
+        usort($dizinler, function($a, $b) use ($yol) {
+            return filemtime($yol . $b) - filemtime($yol . $a);
+        });
+        // Dosyaların son değiştirilme veya oluşturma zamanlarına göre sıralayalım
+        usort($dosyalar, function($c, $d) use ($yol) {
+            return filemtime($yol . $d) - filemtime($yol . $c);
+        });
+
+        //echo "<pre>" . print_r($dizinler, true) . "</pre>";
+        //echo "<pre>" . print_r($dosyalar, true) . "</pre>";
+    if (!function_exists('validateDate')){
+        function validateDate($date, $format = 'Y-m-d-H-i-s')
+        {
+            $d = DateTime::createFromFormat($format, $date);
+            return $d && $d->format($format) == $date;
+        }
+    }
+
+        // En yeni iki dosyayı saklayalım ve gerisini silelim
+    if(count($dizinler)>0){
+        while (count($dizinler) > $row['yerel_korunacak_yedek']) {
+            $silinendizin = array_pop($dizinler);
+                //echo "<b>Bu dizin:</b> ".$yol.$silinendizin."<br />";
+                $dizin_tarihi = substr($silinendizin, -19);
+                if(validateDate($dizin_tarihi)){
+                    delete_directory($yol.$silinendizin);
+                }
+        }
+    }
+    if(count($dosyalar)>0){
+        while (count($dosyalar) > $row['yerel_korunacak_yedek']) {
+                $silinendosya = array_pop($dosyalar);
+                //echo "<b>Bu dosya:</b> ".$yol.$silinendosya."<br />";
+                $dosya_tarihi = substr($silinendosya, strpos($silinendosya, $row['secilen_yedekleme_oneki']."-") + strlen($row['secilen_yedekleme_oneki']."-"), 19);
+                if(validateDate($dosya_tarihi)){
+                    unlink($yol.$silinendosya);
+                }
+        }
+    }
+}
+    } // if($row['yerel_korunacak_yedek'] != '-1'){
+###################################################################################################
+###################################################################################################
+
+if( isset($_POST['elle_yurutme']) ){
+    echo $calistirmasonucmesaji;
+}
+unset($id,
+$yerelden_secilen,
+$gorev_adi,
+$kaynak_url,
+$sonraki_calisma,
+$haftanin_gunu,
+$gun,
+$saat,
+$dakika,
+$aktif,
+$gunluk_kayit,
+$yedekleme_gorevi,
+$ftp_yedekle,
+$google_yedekle,
+$uzak_sunucu_ici_dizin_adi,
+$google_sunucu_korunacak_yedek,
+$ftp_sunucu_korunacak_yedek,
+$secilen_yedekleme_oneki,
+$yerel_korunacak_yedek,
+$gz,
+$dbbakim,
+$dblock,
+$combine,
+$elle,
+$veritabani_id,
+$secilen_yedekleme,
+$ozel_onek,
+$isleniyor,
+$grup,
+$yedekleyen,
+$sonraki_calisma,
+$db_name,
+$tablolar,
+$update_time,
+$update_time_unix,
+$veritabani_backup_yedekleme_sonucu,
+$veritabani_google_sil_sonucu,
+$calisma_zamani,
+$calisma_suresi,
+$dosya_tarihi,
+$zipyap_sonucu,
+$dizin_zip_ftp_yedekleme_sonucu,
+$dizin_zip_google_yedekleme_sonucu,
+$calistirmasonucmesaji,
+$PDOdbsecilen,
+$veritabani_ftp_yedekleme_sonucu,
+$veritabani_google_yedekleme_sonucu,
+$ozel_dosya_calisma_sonucu);
+$yedeklenecek_tablolar = array();
+$yedeklendi_mi = false;
+} // while ($row = $gorevler->fetch()) {
+unset($id,
+$gorev_adi,
+$kaynak_url,
+$sonraki_calisma,
+$haftanin_gunu,
+$bugun,
+$tarih,
+$gun,
+$saat,
+$dakika,
+$aktif,
+$gunluk_kayit,
+$yedekleme_gorevi,
+$ftp_yedekle,
+$google_yedekle,
+$uzak_sunucu_ici_dizin_adi,
+$google_sunucu_korunacak_yedek,
+$ftp_sunucu_korunacak_yedek,
+$secilen_yedekleme_oneki,
+$yerel_korunacak_yedek,
+$gz,
+$dbbakim,
+$dblock,
+$combine,
+$elle,
+$veritabani_id,
+$secilen_yedekleme,
+$ozel_onek,
+$isleniyor,
+$grup,
+$yedekleyen,
+$sonraki_calisma,
+$db_name,
+$tablolar,
+$update_time,
+$update_time_unix,
+$veritabani_backup_yedekleme_sonucu,
+$veritabani_google_sil_sonucu,
+$calisma_zamani,
+$calisma_suresi,
+$dosya_tarihi,
+$zipyap_sonucu,
+$dizin_zip_ftp_yedekleme_sonucu,
+$dizin_zip_google_yedekleme_sonucu,
+$calistirmasonucmesaji,
+$calistirma_sonuc_mesaji,
+$PDOdbsecilen,
+$yedeklenecek_tablolar,
+$yedeklendi_mi,
+$veritabani_ftp_yedekleme_sonucu,
+$veritabani_google_yedekleme_sonucu,
+$ozel_dosya_calisma_sonucu);
+
+// file_put_contents('/home/uzaysatc/webyonetimi.antenfiyati.com/test.log', date('Y-m-d H:i:s') . " - ENV: " . print_r($_ENV, true) . "\n", FILE_APPEND);
+// file_put_contents('/home/uzaysatc/webyonetimi.antenfiyati.com/test.log', date('Y-m-d H:i:s') . " - SERVER: " . print_r($_SERVER, true) . "\n", FILE_APPEND);
+
+    // İşlem tamamlandığında kilit dosyasını sil
+    if (file_exists($lock_file)) {
+        unlink($lock_file);
+    }
+} catch (Exception $e) {
+    // Hata yönetimi burada yapılabilir
+    error_log($e->getMessage());
+
+    // Hata oluştuğunda da kilit dosyasını sil
+    if (file_exists($lock_file)) {
+        unlink($lock_file);
+    }
+
+    // İsterseniz, kullanıcıya hata mesajı gösterin veya yönlendirin
+    // echo "Bir hata oluştu: " . $e->getMessage();
+}
 ?>

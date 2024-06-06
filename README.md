@@ -13,9 +13,9 @@ Bir veri tabanı oluşturun<br />
 
 Aşağıdaki alanlar açıklamaları okuyup kendinize göre değiştirin<br />
 
-    defined('BACKUPDIR')        or define('BACKUPDIR', '../DATABASEBACKUP');
-    defined("DIZINDIR")         or define("DIZINDIR", "../");
-    defined("ZIPDIR")           or define("ZIPDIR", "../WEBZIPLER/");
+    defined('BACKUPDIR')        or define('BACKUPDIR', '/home/user/DATABASEBACKUP');
+    defined("DIZINDIR")         or define("DIZINDIR", "/home/user/");
+    defined("ZIPDIR")           or define("ZIPDIR", "/home/user/WEBZIPLER/");
     defined("KOKYOLU")          or define("KOKYOLU", "/home/user/");
 
 Ben robot değilim etkinleştirmek için domain adınıza keyleri oluşturmanız gerekiyor<br />
@@ -28,16 +28,15 @@ Kendi sunucunuzda bir klasöre ftp hesabı oluşturun ve siteye login olduktan s
 Google Drive Servis Hesabı için aşağıdaki linki tıklayın `Servis Hesabı` oluşturun JSON dosyayı indirin<br />
 https://console.cloud.google.com/apis/dashboard<br />
 Indirdiğiniz JSON dosyayı `client_secrets.json` olarak yeniden adlandırın ve aşağıdaki konuma kopyalayın<br />
-`plugins/google_drive/client_json/client_secrets.json`<br />
+`/home/user/web_diziniz/plugins/google_drive/client_json/client_secrets.json`<br />
 
 `Veritabanı Ekle/Düzelt` alanından bu sitenin veri tabanı bilgilerini ekleyin ve diğer varsa sitelerinizin de veri tabanı bilgilerini ekleyin tabı aynı sunucuda olacak<br />
 `Görev Zamanlayıcı` alanından yeni görevler ekleyebilirsiniz xxxxxx veri tabanı şu zamanda yedekle ve FTP ye ve veya Google la yedekle seçenekleri kullanabilirsiniz<br />
 
 ## Önemli not:<br />
-Görevlerin çalışması için siteyi birileri ziyaret etmesi gerekiyor ki görev çalışsın<br />
-Örnek saat 10:00 da bir görev planladınız ama hiç kimse saat 10:00 da ziyaret etmedi ama 10:30 da ziyaret etti diyelim bu görev 10:00 yerine 10:30 da yerine getirecek<br />
-Eğer ben tam zamanında görevin çalışmasını istiyorum diyorsanız "hosting cPaneldeki" "Cron İşleri" alanında yeni bir oluşturup ister dakikada bir ister saatte iki kez ister saatte bir kez nasıl tercih ederseniz<br />
-Komut alanına `curl --silent https://alanadiniz.com/gorev.php` girip kaydedin planladığınız zamanlarda webyönetim siteniz tetiklenecek ve zamanında görevler yerine getirilecek<br />
+Görevlerin çalışması için siteyi birileri ziyaret etmesi gerekiyor ki görevler yerine getirilsin<br />
+Eğer ben tam zamanında görevin çalışmasını istiyorum diyorsanız "hosting cPaneldeki" "Cron İşleri" alanında yeni bir cron oluşturup dakikada bir kez seçiniz<br />
+Komut alanına `/usr/local/bin/php /home/user/alan_adiniz.com/gorev.php >/dev/null 2>&1` girip kaydedin planladığınız zamanlarda webyönetim siteniz tetiklenecek ve zamanında görevler yerine getirilecek<br />
 
 ## Not:<br />
 Veri tabanı bilgileri eklediğiniz veri tabanına kaydederken şifreliyor bu şifre için şifre anahtarı değiştirebilirsiniz<br />
@@ -50,5 +49,5 @@ Kullanıcı Adı: `admin@gmail.com`<br />
 Şifre: `123456`<br />
 
 ## Klasör yükleme ve İndirme<br />
-İçinde alt dizinler ve alt dosyalar içeren klasörü Google Derive' a yükleyebilirsiniz ve indirebilirsiniz.<br />
+İçinde alt dizinler ve alt dosyalar içeren klasörü Google Derive'a yükleyebilirsiniz ve indirebilirsiniz.<br />
 Tek tek dosyalarıda yükleyebilir ve indirebilirsiniz.
