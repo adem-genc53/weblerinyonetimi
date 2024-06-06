@@ -3,7 +3,7 @@
     {
         if(isset($_POST["g-recaptcha-response"])){
             $response = $_POST["g-recaptcha-response"];
-            $secret = "6Le6jL0UAAAAAOU4EEWIN-_95Fz01tF1Aoj103R7";
+            $secret = "xxxxxxxxxxxxxxxxxxxxxxxxx";
             $remoteip = $_SERVER["REMOTE_ADDR"];
             $captcha = file_get_contents("https://www.google.com/recaptcha/api/siteverify?secret=$secret&response=$response&remoteip=$remoteip");
 
