@@ -239,7 +239,7 @@ include('includes/header.php');
         </div>
 
         <div class="input-group mb-3">
-        <div class="g-recaptcha" data-sitekey="6Le6jL0UAAAAAGd8kRl9RSkMl82ERek090TOODEG"></div>
+        <div class="g-recaptcha" data-sitekey="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"></div>
         </div>
 
         <div class="row">
