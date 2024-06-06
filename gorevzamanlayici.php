@@ -516,6 +516,8 @@ include('includes/sub_navbar.php');
                                 </p>
                                 <p><strong>doviz_kurlar.php</strong> TCMB dan döviz kuru günceller
                                 </p>
+                                <p><strong>https://alan.com/dosya.php</strong> tam url ve GET parametre(isteğe bağlı) girip dosyayı çalıştırabilirsiniz. Sayfanızda bu <b>&lt;span style=&quot;display: none;&quot; id=&quot;tamurl&quot;&gt;sonuç mesajı&lt;/span&gt;</b> etiketi yerleştirip sonuç mesajı buradan alabilir ve günlüğe yazabilir.
+                                </p>
                                 <p>Eğer PHP kodu yazma bilginiz varsa kendize özel görevi yerine getirecek script yazabilirsiniz. Örnek <b>test_gorev.php</b> dosyaya bakınız.
                                 </p>
                                 <p>Buradan veritabanı yedekleme, web site dizin yedekleme, ve döviz kuru güncelleme görevleri ekleyebilir ve yönetebilirsiniz.
@@ -682,14 +684,14 @@ include('includes/sub_navbar.php');
 
     <tr>
         <td colspan="2">Görev Adı</td>
-        <td colspan="4" style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;"><input type="text" class="form-control" name="gorev_adi" id="gorev_adi" value="<?php echo $editrow['gorev_adi']; ?>" style="width:350px;" /></td>
+        <td colspan="4" style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;"><input type="text" class="form-control" name="gorev_adi" id="gorev_adi" value="<?php echo $editrow['gorev_adi']; ?>" /></td>
         <td colspan="2">Görevi tanımlayan kısa bir tanım giriniz</td>
     </tr>
 
     <tr>
-        <td colspan="2">Lokal yolu ve dosya adı veya tam URL</td>
-        <td colspan="4" style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;"><input type="text" class="form-control" name="dosya_adi" id="dosya_adi" value="<?php echo $editrow['dosya_adi']; ?>" style="width:350px;" /></td>
-        <td colspan="2">Görevde çalışıtırlacak yerel dosya veya uzak dosya için tam URL giriniz.</td>
+        <td colspan="2">Lokal yolu ve dosya adı veya tam URL. https://...</td>
+        <td colspan="4" style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;"><input type="text" class="form-control" name="dosya_adi" id="dosya_adi" value="<?php echo $editrow['dosya_adi']; ?>" /></td>
+        <td colspan="2">Görevde çalışıtırlacak yerel dosya veya uzak dosya için tam URL. https://domain.com/dosya.php</td>
     </tr>
 
     <tr>
@@ -1252,7 +1254,7 @@ include('includes/sub_navbar.php');
         <col style="width:5%"></col>
         <col style="width:5%"></col>
         <col style="width:5%"></col>
-        <col style="width:50%"></col>
+        <col style="width:60%"></col>
     </colgroup>
 <thead>
     <tr class="bg-primary" style="line-height: .40;font-size: 1rem;">
@@ -1266,14 +1268,14 @@ include('includes/sub_navbar.php');
 
     <tr>
         <td colspan="2">Görev Adı</td>
-        <td colspan="5" style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;"><input type="text" class="form-control" name="gorev_adi" id="gorev_adi" style="width:350px;" /></td>
-        <td>Görevi tanımlayan kısa bir tanım giriniz</td>
+        <td colspan="4" style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;"><input type="text" class="form-control" name="gorev_adi" id="gorev_adi" /></td>
+        <td colspan="2">Görevi tanımlayan kısa bir tanım giriniz</td>
     </tr>
 
     <tr>
-        <td colspan="2">Lokal yolu ve dosya adı veya tam URL</td>
-        <td colspan="5" style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;"><input type="text" class="form-control" name="dosya_adi" id="dosya_adi" style="width:350px;" /></td>
-        <td>Görevde çalışıtırlacak yerel dosya veya uzak dosya için tam URL giriniz.</td>
+        <td colspan="2">Lokal yolu ve dosya adı veya tam URL. https://...</td>
+        <td colspan="4" style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;"><input type="text" class="form-control" name="dosya_adi" id="dosya_adi" /></td>
+        <td colspan="2">Görevde çalışıtırlacak yerel dosya veya uzak dosya için tam URL. https://domain.com/dosya.php</td>
     </tr>
 
     <tr>

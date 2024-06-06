@@ -447,8 +447,64 @@ if($row['yedekleme_gorevi'] == '3' && (empty($row['secilen_yedekleme']) || is_nu
         $calistirma_sonuc_mesaji[] = array("Görev Elle Yürütüldü");
     }
 
-require __DIR__ . '/' . $kaynak_url;
 
+if(isFullUrl($kaynak_url)){
+
+/*
+    // POST verileri
+    $data = [
+        'key1' => 'value1',
+        'key2' => 'value2'
+    ];
+*/
+
+    // POST isteği için stream ayarları
+    $options = [
+        'http' => [
+            'method' => 'GET',
+            'header' => "Content-Type: application/x-www-form-urlencoded\r\n"
+            //'content' => http_build_query($data) // POST verileri
+        ]
+    ];
+
+    $context = stream_context_create($options);
+
+    // URL'ye POST isteği gönder ve yanıtı al
+    $response = file_get_contents($kaynak_url, false, $context);
+
+    if ($response === false) {
+        $calistirma_sonuc_mesaji[] = array("Bağlantı başarısız: ". $kaynak_url);
+        $error = error_get_last();
+        $calistirma_sonuc_mesaji[] = array("Hata mesajı: " . $error['message']);
+    } else {
+        // POST isteği başarılı, sunucudan gelen yanıtı al ve kontrol et
+        //echo "POST isteği başarılı. Sunucudan gelen yanıt:<br>";
+        //echo htmlspecialchars($response);
+
+        // Sunucudan gelen yanıtı bir DOM belgesine yükle
+        $dom = new DOMDocument();
+        @$dom->loadHTML($response);
+
+        // Belirli bir ID'ye sahip elementi bul
+        $element = $dom->getElementById('tamurl');
+
+        if ($element) {
+            // Element bulundu, içeriğini al ve görüntüle
+            $content = $element->textContent;
+            //echo "ID 'tamurl' içeriği: " . $content;
+            $yedeklendi_mi = true;
+            $calistirma_sonuc_mesaji[] = array($content);
+        } else {
+            // Element bulunamadı, başarılı bir mesaj görüntüle
+            //echo "ID 'tamurl' bulunamadı. Başarılı bir şekilde işlem yapıldı.";
+            $yedeklendi_mi = true;
+            $calistirma_sonuc_mesaji[] = array("Başarıyla Tam URL Çalıştırıldı.");
+        }
+    }
+
+}else{
+
+require __DIR__ . '/' . $kaynak_url;
     // Dosya adından namespace kısmını belirle
     $basename = basename($kaynak_url, '.php');
     $parts = explode('_', $basename);
@@ -488,15 +544,8 @@ require __DIR__ . '/' . $kaynak_url;
     }else{
         $calistirma_sonuc_mesaji[] = $ozel_dosya_calisma_sonucu;
     }
-/*    
-    foreach($ozel_dosya_calisma_sonucu AS $key => $value){
-        //if($key !==)
-        //$calistirma_sonuc_mesaji[] = $value;     
-    }
-    $dosya = fopen ("gorev_yeni.txt" , "a"); //dosya oluşturma işlemi 
-    $yaz = print_r($ozel_dosya_calisma_sonucu, true); // Yazmak istediginiz yazı 
-    fwrite($dosya,$yaz); fclose($dosya);
-*/
+
+}
 }
 #########################################################################################################################
 ################################### GÖREV DİĞER SCRIPTLER İÇİN GÖREVİ SONU ##############################################
@@ -843,8 +892,8 @@ $veritabani_ftp_yedekleme_sonucu,
 $veritabani_google_yedekleme_sonucu,
 $ozel_dosya_calisma_sonucu);
 
-// file_put_contents('/home/uzaysatc/webyonetimi.antenfiyati.com/test.log', date('Y-m-d H:i:s') . " - ENV: " . print_r($_ENV, true) . "\n", FILE_APPEND);
-// file_put_contents('/home/uzaysatc/webyonetimi.antenfiyati.com/test.log', date('Y-m-d H:i:s') . " - SERVER: " . print_r($_SERVER, true) . "\n", FILE_APPEND);
+// file_put_contents(KOKYOLU.'error.log', date('Y-m-d H:i:s') . " - ENV: " . print_r($_ENV, true) . "\n", FILE_APPEND);
+// file_put_contents(KOKYOLU.'error.log', date('Y-m-d H:i:s') . " - SERVER: " . print_r($_SERVER, true) . "\n", FILE_APPEND);
 
     // İşlem tamamlandığında kilit dosyasını sil
     if (file_exists($lock_file)) {
