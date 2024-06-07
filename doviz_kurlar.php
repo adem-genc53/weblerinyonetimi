@@ -39,11 +39,11 @@ function ozelCalistirilacakDosya($PDOdb) {
 
             if (is_array($kurlar) || is_object($kurlar)) {
                 foreach ($kurlar as $value) {
-                    $id = $value['id'];
-                    $doviz_cinsi = $value['doviz_cinsi'];
-                    $birime = $value['birime'];
-                    $tcmb_kur = $value['tcmb_kur'];
-                    $birimne = $value['birim'];
+                    $id             = $value['id'];
+                    $doviz_cinsi    = $value['doviz_cinsi'];
+                    $birime         = $value['birime'];
+                    $tcmb_kur       = $value['tcmb_kur'];
+                    $birimne        = $value['birim'];
 
                     $check->bindParam(1, $doviz_cinsi, \PDO::PARAM_STR);
                     $check->bindParam(2, $birime, \PDO::PARAM_STR);

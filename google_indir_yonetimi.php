@@ -91,9 +91,9 @@ include('includes/sub_navbar.php');
         echo ("<div style='font-weight: bold;font-size: 16px;text-align:center;font-family: Arial, Helvetica, sans-serif;'>Google Drive Kütüphanesi En Düşük \">= 8.1.0\" PHP sürümünü gerektirir. Siz " . PHP_VERSION . " Çalıştırıyorsunuz.</div>");
         $error = true;
     }
-    if(!file_exists(__DIR__.'/plugins/google_drive/client_json/client_secrets.json')){
-        echo ("<div style='font-weight: bold;font-size: 16px;text-align:center;font-family: Arial, Helvetica, sans-serif;'>Google Drive Hesap Bilgileri içeren \"client_secrets.json\" dosyası mevcut değil</div>");
-        $error = true;
+    if (!file_exists(AUTHCONFIGPATH)) {
+        echo 'Hata: AuthConfig dosyası bulunamadı.';
+        die('Hata: AuthConfig dosyası bulunamadı.');
     }
 
     if(!$error){

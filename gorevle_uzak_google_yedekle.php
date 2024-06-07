@@ -352,6 +352,7 @@ function getFolderIdByName($service, $folderName, $parentFolderId = null) {
     return count($response->files) > 0 ? $response->files[0]->id : null;
 }
 
+
 function main($sourcePath, $drivePath) {
     $client = getClient();
     $service = new \Google\Service\Drive($client);
@@ -360,9 +361,15 @@ function main($sourcePath, $drivePath) {
 
     //echo "Yükleme başlatılıyor. Kaynak yol: $sourcePath, Drive yolu: $drivePath\n";
 
-    // Drive iç yolu belirtilmişse, bu yolu oluştur
+    // Drive iç yolu belirtilmişse, bu yolu oluştur veya ID'yi kontrol et
     if ($drivePath) {
-        $parentFolderId = getFolderIdByPath($service, $drivePath);
+        if (isDriveId($drivePath)) {
+            // Drive ID ise, doğrudan kullan
+            $parentFolderId = $drivePath;
+        } else {
+            // Drive yolu ise, yolu oluştur
+            $parentFolderId = getFolderIdByPath($service, $drivePath);
+        }
         //echo "Drive yolu '$drivePath' için üst klasör ID: $parentFolderId\n";
     } else {
         $parentFolderId = $rootFolderId; // Drive iç yolu belirtilmemişse, dosyaları root klasörüne yükle
@@ -386,6 +393,12 @@ function main($sourcePath, $drivePath) {
 
     return "Yükleme başarılı";
 }
+
+function isDriveId($drivePath) {
+    // Google Drive ID'si genellikle 28-34 karakter uzunluğunda alfanümerik bir dizgedir
+    return preg_match('/^[a-zA-Z0-9_-]{28,34}$/', $drivePath);
+}
+
 
 if (!function_exists('uzakGoogleSunucuyaYedekle')) {
 function uzakGoogleSunucuyaYedekle( $dosya_adi_yolu, $yedekleme_gorevi, $silinecek_dosya_tipi, $uzak_sunucu_ici_dizin_adi, $google_sunucu_korunacak_yedek, $secilen_yedekleme_oneki ){
@@ -418,4 +431,29 @@ return array_merge($googleyulendimesaji,$googlesilmemesaji);
 
 } // function uzakGoogleSunucuyaYedekle($service, $dosya_adi_yolu, $uzak_sunucu_ici_dizin_adi){
 } // if (!function_exists('uzakGoogleSunucuyaYedekle')) {
+
+// Her yerel alandan googla yükleme kodu
+if(isset($_POST['googla_yukle']) && $_POST['googla_yukle'] == '1' && isset($_POST['yerel_den_secilen_dosya']) && !empty($_POST['yerel_den_secilen_dosya']) && isset($_POST['google_drive_dan_secilen_dosya_id']) && !empty($_POST['google_drive_dan_secilen_dosya_id']))
+{
+
+$dosya_adi_yolu = $_POST['yerel_den_secilen_dosya'];
+if($_POST['google_drive_dan_secilen_dosya_id'] == 'root'){
+    $uzak_sunucu_ici_dizin_id = "";
+}else{
+    $uzak_sunucu_ici_dizin_id = $_POST['google_drive_dan_secilen_dosya_id'];
+}
+
+
+// Kullanım
+try {
+    main($dosya_adi_yolu, $uzak_sunucu_ici_dizin_id);
+        echo "Google Drive Sunucusuna Başarıyla Yüklendi";
+
+} catch (\Google\Service\Exception $e) {
+    echo "Hata: " . $e->getMessage();
+} catch (Exception $e) {
+    echo "Hata: " . $e->getMessage();
+}
+
+}
 ?>

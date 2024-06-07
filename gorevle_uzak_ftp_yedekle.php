@@ -103,6 +103,8 @@ if (!function_exists('uzakFTPsunucuyaYedekle')) {
             $ftp_cikti_mesaji[] = "FTP Sunucusuna Yükleme BAŞARISIZ";
         }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
         // UZAK FTP BAŞARILI İSE ESKİ YEDEKLERİ SİLMEYE BAŞLA
         if ($ftpyedeklemebasarili && $ftp_sunucu_korunacak_yedek != '-1') {
             // ESKİ YEDEKLERİ SİLME FONKSİYONU
@@ -208,5 +210,30 @@ if (!function_exists('uzakFTPsunucuyaYedekle')) {
 
         return $ftp_cikti_mesaji;
     }
+}
+
+if(isset($_POST['ftpye_yukle']) && $_POST['ftpye_yukle'] == '1' && isset($_POST['yerel_den_secilen_dosya']) && !empty($_POST['yerel_den_secilen_dosya']) && isset($_POST['ftp_den_secilen_dosya']) && !empty($_POST['ftp_den_secilen_dosya']))
+{
+require_once __DIR__ . '/includes/connect.php';
+    // FTP BAĞLANTI BİLGİLERİ
+    $ftp_server     = $genel_ayarlar['sunucu']; //ftp domain name
+    $ftp_username   = $genel_ayarlar['username']; //ftp user name 
+    $ftp_password   = $genel_ayarlar['password']; //ftp passowrd
+    $ftp_path       = $genel_ayarlar['path']; //ftp passowrd
+
+    $dosya_adi_yolu                 = $_POST['yerel_den_secilen_dosya'];
+    $uzak_sunucu_ici_dizin_adi      = $_POST['ftp_den_secilen_dosya'];
+    $ftp_sunucu_korunacak_yedek     = '-1';
+    $secilen_yedekleme_oneki        = "";
+    $yedekleme_gorevi               = "";
+
+try {
+    uzakFTPsunucuyaYedekle($ftp_server, $ftp_username, $ftp_password, $ftp_path, $dosya_adi_yolu, $yedekleme_gorevi, $uzak_sunucu_ici_dizin_adi, $ftp_sunucu_korunacak_yedek, $secilen_yedekleme_oneki);
+    echo "FTP Sunucusuna Başarıyla Yüklendi: ". basename($dosya_adi_yolu);
+} catch (\Google\Service\Exception $e) {
+    echo "Hata: " . $e->getMessage();
+} catch (Exception $e) {
+    echo "Hata: " . $e->getMessage();
+}
 }
 ?>

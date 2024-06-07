@@ -219,7 +219,7 @@ include('includes/footer.php');
 
                 $.ajax({
                     type: "POST",
-                    url: "uzak_sunucuya_dosya_yukleme.php",
+                    url: "gorevle_uzak_ftp_yedekle.php",
                     data: { ftpye_yukle: 1, yerel_den_secilen_dosya: yerel_den_secilen_dosya, ftp_den_secilen_dosya: ftp_den_secilen_dosya },
                     success: function (msg) {
                         $(function () {

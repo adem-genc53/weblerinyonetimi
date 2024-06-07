@@ -59,10 +59,10 @@ include('includes/sub_navbar.php');
 
                             <div id="collapseOne" class="collapse" aria-labelledby="headingOne" data-parent="#accordion">
                             <div class="card-body">
-<p>Buradan veritabanı yedekler dizinden uzak Google Drive sunucuya veritabanı yedekleri elle yedekyebilirsiniz.
-</p>
-<p>İster tek dosya olarak ister dizin seçilerek içindeki tüm yedekleri uzak Google Drive hesabına elle yedekleyebilirsiniz
-</p>
+                                <p>Buradan veritabanı yedekler dizinden uzak Google Drive sunucuya veritabanı yedekleri elle yedekyebilirsiniz.
+                                </p>
+                                <p>İster tek dosya olarak ister dizin seçilerek içindeki tüm yedekleri uzak Google Drive hesabına elle yedekleyebilirsiniz
+                                </p>
                                 <b>Veritabanı yedeklerin bulunduğu dizin: </b><span id="yol"><?php echo strtolower(htmlpath(BACKUPDIR)); ?></span><br />
                                 <p><b>Web site zip yedeklerin bulunduğu dizin: </b><span id="yol"><?php echo strtolower(htmlpath(ZIPDIR)); ?></span></p>
                             </div>
@@ -88,9 +88,9 @@ include('includes/sub_navbar.php');
         echo ("<div style='font-weight: bold;font-size: 16px;text-align:center;font-family: Arial, Helvetica, sans-serif;'>Google Drive Kütüphanesi En Düşük \">= 8.1.0\" PHP sürümünü gerektirir. Siz " . PHP_VERSION . " Çalıştırıyorsunuz.</div>");
         $error = true;
     }
-    if(!file_exists(__DIR__.'/plugins/google_drive/client_json/client_secrets.json')){
-        echo ("<div style='font-weight: bold;font-size: 16px;text-align:center;font-family: Arial, Helvetica, sans-serif;'>Google Drive Hesap Bilgileri içeren \"client_secrets.json\" dosyası mevcut değil</div>");
-        $error = true;
+    if (!file_exists(AUTHCONFIGPATH)) {
+        echo 'Hata: AuthConfig dosyası bulunamadı.';
+        die('Hata: AuthConfig dosyası bulunamadı.');
     }
 
     if(!$error){
@@ -245,7 +245,7 @@ include('includes/footer.php');
 
                 $.ajax({
                     type: "POST",
-                    url: "uzak_sunucuya_dosya_yukleme.php",
+                    url: "gorevle_uzak_google_yedekle.php",
                     data: { googla_yukle: 1, yerel_den_secilen_dosya: yerel_den_secilen_dosya, google_drive_dan_secilen_dosya_id: google_drive_dan_secilen_dosya_id, google_drive_dan_secilen_dosya_adini_goster: google_drive_dan_secilen_dosya_adini_goster },
                     success: function (msg) {
                         $(function () {
