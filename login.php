@@ -84,7 +84,7 @@ class Login {
                     $this->errors[] = "Şifre alanı Zorunludur";
                 }
                 // CSRF Token Doğrulaması
-                if(isset($_POST['csrf_token'])){
+                if(isset($_POST['csrf_token']) && isset($_SESSION['csrf_token'])){
                     if($_POST['csrf_token'] === $_SESSION['csrf_token']){
                     }else{
                         $this->errors[] = "CSRF Token Doğrulamasında Sorun";
