@@ -47,7 +47,7 @@ if (secilenisec === '')
 }
 
 
-load_data(1, 15, kategori, bildirgoster, satir, firma, tarih, query);
+load_data(1, 25, kategori, bildirgoster, satir, firma, tarih, query);
 
 function load_data(page, per, kategori, bildirgoster, satir, firma, tarih, query = '') {
 

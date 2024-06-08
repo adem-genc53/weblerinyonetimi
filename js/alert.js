@@ -21,6 +21,11 @@ $("#eklebuton").click(function() {
     const element = document.getElementById("tbliste");
     element.scrollIntoView();
     $("#ekle").toggle();
+
+  // Tablo görünüyorsa yeni fonksiyonu çağır
+  if ($("#ekle").is(":visible")) {
+    $('#gorev_zamanlayici select').trigger('change');
+  }
 });
 
 function reply_click(clicked_id)

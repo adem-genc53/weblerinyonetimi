@@ -1,34 +1,24 @@
 <?php 
 // Bismillahirrahmanirrahim
-session_start();
 require_once('includes/connect.php');
 require_once('check-login.php');
 require_once("includes/turkcegunler.php");
-/*
-if(!empty($_SESSION['user_group'])){
-  $grup = $_SESSION['user_group'];
-  }else{
-    $grup = "";
-  }
-if($grup != 1){
-  header("Location: yonetici_gerekli.php");
-}
-*/
-$haftadizi = array();
-$haftadizi = array(1,2,3,4,5,6,7);
 
-// Gönderilen gün değeri
-$gun = isset($_POST['gun']) ? $_POST['gun'] : '-1';
-// Gönderilen saat değeri
-$saat = isset($_POST['saat']) ? $_POST['saat'] : '-1';
-// Gönderilen dakika değeri
-$dakika = isset($_POST['dakika']) ? $_POST['dakika'] : '-1';
-// Gönderilen haftanın değeri
-$haftanin_gunu = isset($_POST['haftanin_gunu']) ? $_POST['haftanin_gunu'] : [0=>-1];
+if($_SERVER['REQUEST_METHOD'] == 'POST' && (isset($_POST['gorev_ekle']) || isset($_POST['gorevi_duzelt']))){
 
 #########################################################################################################################
 ########################################### CRON ZAMANLAYICI BAŞLANGICI #################################################
 #########################################################################################################################
+
+    // Gönderilen gün değeri
+    $gun = isset($_POST['gun']) ? $_POST['gun'] : '-1';
+    // Gönderilen saat değeri
+    $saat = isset($_POST['saat']) ? $_POST['saat'] : '-1';
+    // Gönderilen dakika değeri
+    $dakika = isset($_POST['dakika']) ? $_POST['dakika'] : '-1';
+    // Gönderilen haftanın değeri
+    $haftanin_gunu = isset($_POST['haftanin_gunu']) ? $_POST['haftanin_gunu'] : [0=>-1];
+
 include("cron_zamanlayici.php");
 
     // HAFTANIN GÜN(LERİ) SEÇİLİ İSE HAFTANIN GÜN(LERİ) İŞLEMLERİNE BAŞLA
@@ -49,7 +39,6 @@ include("cron_zamanlayici.php");
 ########################################### CRON ZAMANLAYICI SONU #######################################################
 #########################################################################################################################
 
-    if($_SERVER['REQUEST_METHOD'] == 'POST' && (isset($_POST['gorev_ekle']) || isset($_POST['gorevi_duzelt']))){
         //echo '<pre>' . print_r($_POST, true) . '</pre>';
         //exit;
         // Ekleme ve güncelleme için
@@ -516,7 +505,7 @@ include('includes/sub_navbar.php');
                                 </p>
                                 <p><strong>doviz_kurlar.php</strong> TCMB dan döviz kuru günceller
                                 </p>
-                                <p><strong>https://alan.com/dosya.php</strong> tam url ve GET parametre(isteğe bağlı) girip dosyayı çalıştırabilirsiniz. Sayfanızda bu <b>&lt;span style=&quot;display: none;&quot; id=&quot;tamurl&quot;&gt;sonuç mesajı&lt;/span&gt;</b> etiketi yerleştirip sonuç mesajı buradan alabilir ve günlüğe yazabilir.
+                                <p><strong>https://alan.com/dosya.php</strong> tam url ve GET parametre(isteğe bağlı) girip dosyayı çalıştırabilirsiniz. Sayfanıza bu <b>&lt;span style=&quot;display: none;&quot; id=&quot;tamurl&quot;&gt;sonuç mesajı&lt;/span&gt;</b> etiketi yerleştirip sonuç mesajı buradan alabilir ve günlüğe yazabilir.
                                 </p>
                                 <p>Eğer PHP kodu yazma bilginiz varsa kendize özel görevi yerine getirecek script yazabilirsiniz. Örnek <b>test_gorev.php</b> dosyaya bakınız.
                                 </p>
@@ -640,6 +629,8 @@ include('includes/sub_navbar.php');
     if(isset($_GET['edit'])){
         if(!empty($veritabani_aktif)){
             echo '<script>jQuery(function($) { $("#veritabani_tablo").show(); $("#eklebuton").hide(); });</script>';
+            echo '<script>$("#gorev_zamanlayici select").trigger("change");</script>';
+            echo '<script>$("#haftanin_gunu").trigger("change");</script>';
         }
         if(!empty($secilen_tablolar)){
             echo '<script>jQuery(function($) { tablolariYukle(\''.$_SESSION['secili_secilen_yedekleme'].'\',\''.$secilen_tablolar.'\',\'TABLE_NAME ASC\');});</script>';
@@ -1672,26 +1663,26 @@ include('includes/sub_navbar.php');
 </tfoot>
 </table>
 
-                                <div id="showTablolarYedekler" style="display:none;margin-top: 0px;">
-                                <a name="tbliste" id="tbliste" style="scroll-margin-top: 50px;"></a>
-                                        <div style="text-align:center;border-top: 1px solid #dee2e6;padding:10px;color:red;">
-                                            <b>NOT:</b> "Çalışacağı Zaman"ından sonra değişiklik olmayan tablo(lar) yedeklenmeyecektir
-                                        </div>
-                                            <div id="loading" style='text-align: center;'>
-                                                <img src="images/ajax-loader.gif" alt="Yükleniyor..." />
-                                                <br />Veritabanı Tabloları Yükleniyor...
-                                            </div>
-                                                <table id="sortliste" class="table table-hover" style="min-width: 1000px;">
-                                                    <colgroup span="7">
-                                                        <col style="width:40%"></col>
-                                                        <col style="width:10%"></col>
-                                                        <col style="width:10%"></col>
-                                                        <col style="width:10%"></col>
-                                                        <col style="width:10%"></col>
-                                                        <col style="width:10%"></col>
-                                                        <col style="width:10%"></col>
-                                                    </colgroup>
-                                                </table>
+                <div id="showTablolarYedekler" style="display:none;margin-top: 0px;">
+                <a name="tbliste" id="tbliste" style="scroll-margin-top: 50px;"></a>
+                        <div style="text-align:center;border-top: 1px solid #dee2e6;padding:10px;color:red;">
+                            <b>NOT:</b> "Çalışacağı Zaman"ından sonra değişiklik olmayan tablo(lar) yedeklenmeyecektir
+                        </div>
+                            <div id="loading" style='text-align: center;'>
+                                <img src="images/ajax-loader.gif" alt="Yükleniyor..." />
+                                <br />Veritabanı Tabloları Yükleniyor...
+                            </div>
+                                <table id="sortliste" class="table table-hover" style="min-width: 1000px;">
+                                    <colgroup span="7">
+                                        <col style="width:40%"></col>
+                                        <col style="width:10%"></col>
+                                        <col style="width:10%"></col>
+                                        <col style="width:10%"></col>
+                                        <col style="width:10%"></col>
+                                        <col style="width:10%"></col>
+                                        <col style="width:10%"></col>
+                                    </colgroup>
+                                </table>
 
                                 <div style="text-align:center;border-top: 1px solid #dee2e6;padding-top:20px;">
                                     <div>
@@ -1795,7 +1786,7 @@ $(document).ready(function() {
     });
 
     // Sayfa yüklendiğinde bir kez tetikle
-    $('#gorev_zamanlayici select').trigger('change');
+    //$('#gorev_zamanlayici select').trigger('change');
 });
 </script>
 
@@ -1812,9 +1803,22 @@ $(document).ready(function() {
             }
         });
         // Sayfa yüklendiğinde bir kez tetikle
-        $('#haftanin_gunu').trigger('change');
+        //$('#haftanin_gunu').trigger('change');
     });
 </script>
+
+<?php    
+    if(isset($_GET['edit'])){
+?>
+<script type="text/javascript">
+    $(document).ready(function(){
+        $("#gorev_zamanlayici select").trigger("change");
+        $("#haftanin_gunu").trigger("change");
+    });
+</script>
+<?php 
+    }
+?>
 
 <script type="text/javascript">
 
@@ -2147,18 +2151,18 @@ function GorevSil(id, db_adi){
 
 function GorevEkle() {
 
-  var aktif                 = $("input[name='aktif']:checked").attr('value');
-  var gunluk_kayit          = $("input[name='gunluk_kayit']:checked").attr('value');
-  var gz                    = $("input[name='gz']:checked").attr('value');
-  var dbbakim               = $("input[name='dbbakim']:checked").attr('value');
-  var lock                  = $("input[name='dblock']:checked").attr('value');
-  var combine               = $("input[name='combine']:checked").attr('value');
-  var tablolar              = $('input[id=tablolar]:checked').length;
-  var elle                  = $("input[name='elle']:checked").attr('value');
-  var gorev_adi             = $('#gorev_adi').val();
-  var dosya_adi             = $('#dosya_adi').val();
-  var secilen_yedekleme_oneki      = $('#secilen_yedekleme_oneki').val();
-  var checkbox              = $("input[name='yedekleme_gorevi']").is(':checked');
+  var aktif                     = $("input[name='aktif']:checked").attr('value');
+  var gunluk_kayit              = $("input[name='gunluk_kayit']:checked").attr('value');
+  var gz                        = $("input[name='gz']:checked").attr('value');
+  var dbbakim                   = $("input[name='dbbakim']:checked").attr('value');
+  var lock                      = $("input[name='dblock']:checked").attr('value');
+  var combine                   = $("input[name='combine']:checked").attr('value');
+  var tablolar                  = $('input[id=tablolar]:checked').length;
+  var elle                      = $("input[name='elle']:checked").attr('value');
+  var gorev_adi                 = $('#gorev_adi').val();
+  var dosya_adi                 = $('#dosya_adi').val();
+  var secilen_yedekleme_oneki   = $('#secilen_yedekleme_oneki').val();
+  var checkbox                  = $("input[name='yedekleme_gorevi']").is(':checked');
   var secilen_yedekleme         = $('select[name="secilen_yedekleme"] option:selected').val();
 
   if(gorev_adi=="") {
