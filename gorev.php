@@ -356,13 +356,13 @@ if(!empty($veritabani_backup_yedekleme_sonucu) && in_array('Veritabanı Başarı
 //
 //
 #########################################################################################################################
-########################## GÖREV WEB DİZİNLERİ SIKIŞTIRIP YEDEKLEME GÖREVİ BAŞLAMA ######################################
+########################## GÖREV WEB DİZİNLERİ ZİP İLE SIKIŞTIRIP YEDEKLEME GÖREVİ BAŞLAMA ##############################
 #########################################################################################################################
 // YEDEKLEME GÖREVİ 2 İSE WEB DİZİNLERİ YEDEKLEMEDİR. SEÇİLEN YEDEKLEME YEDEKLENECEK WEB DİZİN ADI İÇERDİĞİ İÇİN METİN OLMALIDIR
 if($row['yedekleme_gorevi'] == '2' && is_string($row['secilen_yedekleme']) && !is_null($row['secilen_yedekleme']) ){
 
     $source = DIZINDIR . $secilen_yedekleme;
-    $destination = ZIPDIR . $secilen_yedekleme . "-" . $dosya_tarihi . '.zip';
+    $destination = ZIPDIR . $secilen_yedekleme_oneki . "-" . $dosya_tarihi . '.zip';
     $comment = $secilen_yedekleme;
 
     //file_put_contents(KOKYOLU.'error.log', date('Y-m-d H:i:s') . " - Zip Fonksiyon Üstü.\n", FILE_APPEND);
@@ -505,6 +505,7 @@ if(isFullUrl($kaynak_url)){
 }else{
 
 require __DIR__ . '/' . $kaynak_url;
+
     // Dosya adından namespace kısmını belirle
     $basename = basename($kaynak_url, '.php');
     $parts = explode('_', $basename);
