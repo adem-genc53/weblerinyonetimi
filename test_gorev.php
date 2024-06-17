@@ -18,7 +18,7 @@ namespace TEST;
         $sonuc[] = 'Güncellendi';
         $sonuc[] = 'Silindi';
         $sonuc[] = 'E-Posta Gönderildi';
-        $sonuc[] = 'Özel Dosya Başarıyla Çalıştırıldı';
+        $sonuc[] = 'Özel Dosya Başarıyla Çalıştırıldı'; // Bu metin başarılı sonuc mesajların içinde olması gerekir
         return $sonuc;
     }
 ?>

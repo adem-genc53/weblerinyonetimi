@@ -1482,7 +1482,8 @@ include('includes/sub_navbar.php');
                 <input class="form-check-input" type="checkbox" name="zip_dosya_adi_degistir" id="zip_dosya_adi_degistir" value="1" style="margin-right: 0;">
             </div>
         </td>
-        <td colspan="4" style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;"><input type="text" class="form-control" id="dizin_secilen_yedekleme_oneki" name="dizin_secilen_yedekleme_oneki" style="width:350px;" required disabled /></td>
+        <td colspan="4" style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;">
+            <input type="text" class="form-control" id="dizin_secilen_yedekleme_oneki" name="dizin_secilen_yedekleme_oneki" style="width:350px;" disabled required /></td>
         <td colspan="2"><input type="hidden" name="hide_dizin_secilen_yedekleme" id="hide_dizin_secilen_yedekleme">Yedeklenecek web dizin adıdır. Zip çıkarırken buradaki dizin adı ile çıkarılacaktır</td>
     </tr>
 

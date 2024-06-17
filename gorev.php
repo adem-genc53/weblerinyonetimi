@@ -506,6 +506,8 @@ if(isFullUrl($kaynak_url)){
 
 require __DIR__ . '/' . $kaynak_url;
 
+    $ozel_dosya_calisma_sonucu = array();
+
     // Dosya adından namespace kısmını belirle
     $basename = basename($kaynak_url, '.php');
     $parts = explode('_', $basename);
@@ -518,21 +520,15 @@ require __DIR__ . '/' . $kaynak_url;
     if (function_exists($function_name)) {
         // Fonksiyonu çağır ve çıktıyı al
         $ozel_dosya_calisma_sonucu = call_user_func($function_name, $PDOdb);
-/*
-        // Çıktıyı kullan (dizi olduğu için döngü ile yazdırıyoruz)
-        echo "Fonksiyon çıktısı:\n";
-        foreach ($ozel_dosya_calisma_sonucu as $sonuc) {
-            echo "- $sonuc\n";
-        }
-*/
+
     } else {
-        //echo "$function_name fonksiyonu bulunamadı.\n";
+        echo "<b>$function_name</b> fonksiyonu bulunamadı.<br />";
     }
 
     if(!empty($ozel_dosya_calisma_sonucu) && in_array('Özel Dosya Başarıyla Çalıştırıldı',$ozel_dosya_calisma_sonucu)){
         $yedeklendi_mi = true;
         $ozel_dosya_calisma_sonucu = array_unique($ozel_dosya_calisma_sonucu);
-        // "Özel Dosya Başarıyla Çalıştırıldı" metni başka göstermek için önce diziden çıkarıyoruz sonra başına ekliyoruz
+        // "Özel Dosya Başarıyla Çalıştırıldı" metni çıktıların en üstünde göstermek için önce diziden çıkarıyoruz sonra dizinin ilk sırasına ekliyoruz
         // Hedef değer
         $hedef = "Özel Dosya Başarıyla Çalıştırıldı";
         // Hedef değeri bul ve diziden çıkar

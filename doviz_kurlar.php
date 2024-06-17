@@ -8,7 +8,9 @@ require_once __DIR__ . '/plugins/doviz/vendor/autoload.php';
 use Teknomavi\Tcmb\Doviz;
 
 function ozelCalistirilacakDosya($PDOdb) {
+
     $doviz = new Doviz();
+
     // dolar start //  
     $dolar_alis = $doviz->kurAlis("USD", Doviz::TYPE_EFEKTIFALIS);
     $dolar_satis = $doviz->kurSatis("USD", Doviz::TYPE_EFEKTIFSATIS);
