@@ -470,12 +470,12 @@ if(isFullUrl($kaynak_url)){
     $context = stream_context_create($options);
 
     // URL'ye POST isteği gönder ve yanıtı al
-    $response = file_get_contents($kaynak_url, false, $context);
+    $response = @file_get_contents($kaynak_url, false, $context);
 
     if ($response === false) {
-        $calistirma_sonuc_mesaji[] = array("Bağlantı başarısız: ". $kaynak_url);
+        $calistirma_sonuc_mesaji[] = array("<b>Bağlantı başarısız:</b> ". $kaynak_url);
         $error = error_get_last();
-        $calistirma_sonuc_mesaji[] = array("Hata mesajı: " . $error['message']);
+        $calistirma_sonuc_mesaji[] = array("<b>Hata mesajı:</b> " . $error['message']);
     } else {
         // POST isteği başarılı, sunucudan gelen yanıtı al ve kontrol et
         //echo "POST isteği başarılı. Sunucudan gelen yanıt:<br>";
