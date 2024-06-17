@@ -1,6 +1,6 @@
 <?php 
 // Bismillahirrahmanirrahim
-
+//echo '<pre>' . print_r($_POST, true) . '</pre>';
 if (!function_exists('zipDataUsingZipArchive')) {
     function zipDataUsingZipArchive($source, $destination, $comment = '') {
         $zipsonuc = [];
@@ -173,7 +173,53 @@ if (!function_exists('zipDataUsingSystem')) {
 } // if (!function_exists('zipDataUsingSystem')) {
 
 
+/*
+Array
+(
+    [zipyap] => 1
+    [dizinadi] => bulut
+    [ziparsivadi] => bulut.zip
+    [dizindir] => D:/SUNUCU/www/projelerim/
+)
+*/
+if(isset($_POST['zipyap']) && $_POST['zipyap'] == 1){
 
+function dosyaAdiniAl($dosyaAdi) {
+    // Dosya adında .zip uzantısı var mı kontrol et
+    if (substr($dosyaAdi, -4) === '.zip') {
+        // .zip uzantısını kaldır
+        return substr($dosyaAdi, 0, -4);
+    }
+    // .zip uzantısı yoksa, dosya adını olduğu gibi döndür
+    return $dosyaAdi;
+}
 
+require_once('includes/connect.php');
+require_once("includes/turkcegunler.php");
+
+    $dosya_tarihi               = date('Y-m-d-H-i-s'); // date('Y-m-d-H-i-s', $row['sonraki_calisma']);
+    $secilen_yedekleme          = $_POST['dizinadi'];
+    $secilen_yedekleme_oneki    = dosyaAdiniAl($_POST['ziparsivadi']);
+
+    $source = DIZINDIR . $secilen_yedekleme;
+    $destination = ZIPDIR . $secilen_yedekleme_oneki . "-" . $dosya_tarihi . '.zip';
+    $comment = $secilen_yedekleme;
+
+    if(isset($genel_ayarlar['zip_tercihi']) && $genel_ayarlar['zip_tercihi'] == 1){
+        $zipyap_sonucu = zipDataUsingZipArchive($source, $destination, $comment);
+    } else if(isset($genel_ayarlar['zip_tercihi']) && $genel_ayarlar['zip_tercihi'] == 2){
+        $zipyap_sonucu = zipDataUsingSystem($source, $destination, $comment);
+    }else{
+        $zipyap_sonucu = "";
+    }
+    foreach($zipyap_sonucu AS $key => $value){
+        if($key == 'dosya_adi'){
+            echo "<b>Dosya Adı:</b> " . basename($value) . "<br />";
+        }else{
+            echo $value . "<br />";
+        }
+    }
+    //echo '<pre>' . print_r($zipyap_sonucu, true) . '</pre>';
+}
 
 ?>
