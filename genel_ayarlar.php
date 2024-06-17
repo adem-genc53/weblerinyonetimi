@@ -699,7 +699,7 @@ include('includes/sub_navbar.php');
                                                             <td colspan="5">
                                                                 Zamanlanmış görev aracılığıyla görevleri yerine getirmek için gorev.php dosyası çalıştırılır ve bu dosya ilk çalıştırıldığında kilitlenir ve görevlerin bitiminde tekrar kilidi serbest bırakılır.<br />
                                                                 Ancak, görevlerin yerine getirilmesi sırasında beklenmeyen hatalardan dolayı gorev.php dosyanın sonuna ulaşamadığından gorev.php dosyası kilitli kalabilir ve sonraki görevlerin yerine getirilmesi engellenmiş olur.<br />
-                                                                Böyle bir durumda aşağıdaki burada <span style='color: red;font-weight: bold;'>gorev.php dosyası kilitlidir.</span> Mesajını görürsünüz. Kilidi serbest bırakmak için kutuyu işaretleyerek formu göndermeniz yeterli olacaktır.<br />
+                                                                Böyle bir durumda aşağıda <span style='color: red;font-weight: bold;'>gorev.php dosyası kilitlidir.</span> Mesajını görürsünüz. Kilidi serbest bırakmak için kutuyu işaretleyerek formu göndermeniz yeterli olacaktır.<br />
                                                                 <b>NOT:</b> herhangi bir görev yerine getirilirken kilit görüneceğini unutmayın, normal çalışma sırasındaki kilidi serbest bırakmayınız.<br />
                                                                 <?php 
                                                                 // Kilit dosyasının yolu
