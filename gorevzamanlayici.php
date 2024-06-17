@@ -42,6 +42,7 @@ include("cron_zamanlayici.php");
         //echo '<pre>' . print_r($_POST, true) . '</pre>';
         //exit;
         // Ekleme ve güncelleme için
+        $haftadizi = array(1,2,3,4,5,6,7);
         if(is_array($_POST['haftanin_gunu']) AND array_intersect($haftadizi, $_POST['haftanin_gunu'])){$gun = '-1';}
         if(is_array($_POST['haftanin_gunu']) AND in_array('-1', $_POST['haftanin_gunu'])){$gun = $gun;}
         $gorev_adi                      = $_POST['gorev_adi'];
