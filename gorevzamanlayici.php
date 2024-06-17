@@ -4,6 +4,8 @@ require_once('includes/connect.php');
 require_once('check-login.php');
 require_once("includes/turkcegunler.php");
 
+$edit_secili_secilen_yedekleme = 0;
+
 if($_SERVER['REQUEST_METHOD'] == 'POST' && (isset($_POST['gorev_ekle']) || isset($_POST['gorevi_duzelt']))){
 
 #########################################################################################################################
@@ -402,9 +404,8 @@ include("cron_zamanlayici.php");
 
         $secilen_tablolar = $editrow['tablolar'];
 
-        unset($_SESSION['secili_secilen_yedekleme']);
         if(!empty($editrow['secilen_yedekleme'])){
-            $_SESSION['secili_secilen_yedekleme'] = $editrow['secilen_yedekleme'];
+            $edit_secili_secilen_yedekleme = $editrow['secilen_yedekleme'];
         }
 
     $gorevler = $PDOdb->prepare("SELECT * FROM zamanlanmisgorev WHERE id=? ");
@@ -634,7 +635,7 @@ include('includes/sub_navbar.php');
             echo '<script>$("#haftanin_gunu").trigger("change");</script>';
         }
         if(!empty($secilen_tablolar)){
-            echo '<script>jQuery(function($) { tablolariYukle(\''.$_SESSION['secili_secilen_yedekleme'].'\',\''.$secilen_tablolar.'\',\'TABLE_NAME ASC\');});</script>';
+            echo '<script>jQuery(function($) { tablolariYukle(\''.$edit_secili_secilen_yedekleme.'\',\''.$secilen_tablolar.'\',\'TABLE_NAME ASC\');});</script>';
         }
   ?>
 
@@ -1183,7 +1184,7 @@ include('includes/sub_navbar.php');
                                 <div id="showTablolarYedekler" style="display:none;margin-top: 0px;">
                                 <a name="tbliste" id="tbliste" style="scroll-margin-top: 50px;"></a>
                                         <div style="text-align:center;border-top: 1px solid #dee2e6;padding:10px;color:red;">&nbsp;&nbsp;
-                                            <b>NOT:</b> "Çalışacağı Zaman"ından sonra değişiklik olmayan tablo(lar) yedeklenmeyecektir
+                                            <b>NOT:</b> En son Çalışacağı Zamanından sonra değişiklik olmayan tablo(lar) yedeklenmeyecektir
                                         </div>
                                             <div id="loading" style='text-align: center;'>
                                                 <img src="images/ajax-loader.gif" alt="Yükleniyor..." />
@@ -1667,7 +1668,7 @@ include('includes/sub_navbar.php');
                 <div id="showTablolarYedekler" style="display:none;margin-top: 0px;">
                 <a name="tbliste" id="tbliste" style="scroll-margin-top: 50px;"></a>
                         <div style="text-align:center;border-top: 1px solid #dee2e6;padding:10px;color:red;">
-                            <b>NOT:</b> "Çalışacağı Zaman"ından sonra değişiklik olmayan tablo(lar) yedeklenmeyecektir
+                            <b>NOT:</b> En son Çalışacağı Zamanından sonra değişiklik olmayan tablo(lar) yedeklenmeyecektir
                         </div>
                             <div id="loading" style='text-align: center;'>
                                 <img src="images/ajax-loader.gif" alt="Yükleniyor..." />
@@ -2081,9 +2082,11 @@ function tablolariYukle(db_secildi, tablolar, sort) {
     if(db_secildi){
         var secilen_yedekleme = db_secildi;
     }else{
-        var secilen_yedekleme = "<?php echo isset($_SESSION['secili_secilen_yedekleme']) ? $_SESSION['secili_secilen_yedekleme'] : 0 ?>";
+        var secilen_yedekleme = "<?php echo $edit_secili_secilen_yedekleme; ?>";
     }
-    
+
+if(secilen_yedekleme>0){
+
     $("#loading").show();
     $('#showTablolarYedekler').show();
     $('#showTablolar').show();
@@ -2103,8 +2106,10 @@ function tablolariYukle(db_secildi, tablolar, sort) {
                     $("#loading").hide();
                     element.scrollIntoView();
 				}
-			});        
- 
+			});
+
+} // if(secilen_yedekleme>0){
+
     });
 }
     //});

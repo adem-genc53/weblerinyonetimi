@@ -7,8 +7,8 @@ if(session_status() == PHP_SESSION_NONE) {
 require_once('includes/connect.php');
 //require_once('check-login.php');
 require_once("includes/turkcegunler.php");
-//echo '<pre>' . print_r($_POST, true) . '</pre>';
-//exit;
+    //echo '<pre>' . print_r($_POST, true) . '</pre>';
+    //exit;
 
 //@error_reporting(E_ALL & ~E_NOTICE);
 //header('Content-Type: text/html; charset=utf-8');
@@ -21,8 +21,8 @@ require_once("includes/turkcegunler.php");
     // Ajax ile veritabanı ID geliyormu, geliyorsa hem değişkene hemde sessiona ata
     // Gelmiyorsa else den sesiiondan kullan
     // POST ile veritabanı id
-    if(isset($_POST['veritabani_id']) && !empty($_POST['veritabani_id'])){
-        $veritabani_id = $_POST['veritabani_id'];
+    if(isset($_POST['secilen_yedekleme']) && !empty($_POST['secilen_yedekleme'])){
+        $veritabani_id = $_POST['secilen_yedekleme'];
     }else{
         $veritabani_id = "";
     }
