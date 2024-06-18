@@ -291,7 +291,7 @@ if (!function_exists('veritabaniYedekleme')) {
                     $genel_bilgi .= "-- - {$table}: {$count} kayıt\n";
                 }
             }
-            $genel_bilgi .= "-- - SON\n";
+            //$genel_bilgi .= "-- - SON\n"; // INSERT sayıldığı için iptal edildi
 
             $genel_bilgi .= 
                 "\n\nSET SQL_MODE = '" . $sql_mode . "';\n" .
