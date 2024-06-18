@@ -168,6 +168,7 @@ function compareDatabases($backupData, $serverData) {
             <td colspan='3' style='text-align:center;background:#F0F1F9;'><b>Yedek Veritabanı: </b>".htmlspecialchars($backupData['dbname']) ."</td>
         </tr>";
 
+        sort($allTables);
         foreach ($allTables as $table) {
             $serverCount = $serverData['tables'][$table] ?? null;
             $backupCount = $backupData['tables'][$table] ?? null;
