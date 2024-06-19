@@ -240,7 +240,9 @@ if (!function_exists('veritabaniYedekleme')) {
                     appendInfoToFile($filePath, $finalSettingsString);
                     gzipFileChunked($filePath);
                 }else{
-                    appendInfoToFile($filePath, $finalSettingsString);
+                    if(count($tables) != 1){ // Eğer tek tablo seçili değil ise
+                        appendInfoToFile($filePath, $finalSettingsString);
+                    }
                 }
             }
 
@@ -273,7 +275,16 @@ if (!function_exists('veritabaniYedekleme')) {
             $initialSettingsString .= "\n";
             return $initialSettingsString;
 */
-            $sql_mode = empty($initialSettings['sql_mode']) ? 'NO_AUTO_VALUE_ON_ZERO' : $initialSettings['sql_mode'];
+            // SQL Mode ayarları
+            $sql_mode = 'NO_AUTO_VALUE_ON_ZERO'; // Varsayılan değer
+            if (!empty($initialSettings['sql_mode'])) {
+                $sql_mode = $initialSettings['sql_mode'];
+            }
+            // Time Zone ayarları
+            $time_zone = '+00:00'; // Varsayılan değer
+            if (!empty($initialSettings['time_zone']) && $initialSettings['time_zone'] != 'SYSTEM') {
+                $time_zone = $initialSettings['time_zone'];
+            }
             $genel_bilgi =
                 "\n-- WebSiteler Yönetimi Scripti\n" .
                 "-- WebSiteler Yönetimi Script Versiyonu: " . VERSIYON . "\n\n" .
@@ -296,7 +307,7 @@ if (!function_exists('veritabaniYedekleme')) {
             $genel_bilgi .= 
                 "\n\nSET SQL_MODE = '" . $sql_mode . "';\n" .
                 "START TRANSACTION;\n" .
-                "SET time_zone = '" . $initialSettings['time_zone'] . "';\n\n" .
+                "SET time_zone = '" . $time_zone . "';\n\n" .
 
                 "/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;\n" .
                 "/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;\n" .
