@@ -461,7 +461,7 @@ if(isFullUrl($kaynak_url)){
     // POST isteği için stream ayarları
     $options = [
         'http' => [
-            'method' => 'GET',
+            'method' => 'GET', // GET veya POST
             'header' => "Content-Type: application/x-www-form-urlencoded\r\n"
             //'content' => http_build_query($data) // POST verileri
         ]
@@ -522,7 +522,10 @@ require __DIR__ . '/' . $kaynak_url;
         $ozel_dosya_calisma_sonucu = call_user_func($function_name, $PDOdb);
 
     } else {
-        echo "<b>$function_name</b> fonksiyonu bulunamadı.<br />";
+        if(isset($_POST['elle_yurutme'])){
+            echo "<b>$function_name</b> fonksiyonu bulunamadı.<br /><br />Özel dosyanızın<br />namespace adı <b>$namespace</b><br />fonksiyon adı <b>function ozelCalistirilacakDosya(\$PDOdb){}</b><br /> olduğundan emin olunuz ve örnek <b>test_gorev.php</b> dosyaya bakınız.";
+            exit;
+        }
     }
 
     if(!empty($ozel_dosya_calisma_sonucu) && in_array('Özel Dosya Başarıyla Çalıştırıldı',$ozel_dosya_calisma_sonucu)){

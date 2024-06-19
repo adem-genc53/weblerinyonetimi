@@ -684,7 +684,7 @@ include('includes/sub_navbar.php');
     <tr>
         <td colspan="2">Lokal yolu ve dosya adı veya tam URL. https://...</td>
         <td colspan="4" style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;"><input type="text" class="form-control" name="dosya_adi" id="dosya_adi" value="<?php echo $editrow['dosya_adi']; ?>" /></td>
-        <td colspan="2">Görevde çalışıtırlacak yerel dosya veya uzak dosya için tam URL. https://domain.com/dosya.php</td>
+        <td colspan="2">Dahili dosya veya tam URL. https://domain.com/dosya.php<b>?key=value&key2=value2</b> GET isteğe bağlıdır</td>
     </tr>
 
     <tr>
@@ -1268,7 +1268,7 @@ include('includes/sub_navbar.php');
     <tr>
         <td colspan="2">Lokal yolu ve dosya adı veya tam URL. https://...</td>
         <td colspan="4" style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;"><input type="text" class="form-control" name="dosya_adi" id="dosya_adi" /></td>
-        <td colspan="2">Görevde çalışıtırlacak yerel dosya veya uzak dosya için tam URL. https://domain.com/dosya.php</td>
+        <td colspan="2">Dahili dosya veya tam URL. https://domain.com/dosya.php<b>?key=value&key2=value2</b> GET isteğe bağlıdır</td>
     </tr>
 
     <tr>
