@@ -575,7 +575,7 @@ include('includes/sub_navbar.php');
     $.ajax({
         type:'POST',
         url: "tabloliste.php",
-        data: { veritabani_id : veritabani_id, sort : sort},
+        data: { secilen_yedekleme : veritabani_id, sort : sort},
         success: function(msg){
             $('#sortliste').html(msg);
             $('#bekle-sort').fadeOut('');
