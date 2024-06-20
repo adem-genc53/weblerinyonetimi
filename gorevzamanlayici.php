@@ -2126,7 +2126,7 @@ $('input[name="combine"]').on('change', function() {
       .toggle(+this.value === 3 && this.checked);
 // trigger the change event, to show/hide the .business-fields element(s) on
 // page-load:
-}).change();
+}).change('input[name="combine"]');
 </script>
 
 <script type="text/javascript">
