@@ -240,39 +240,52 @@ if(isset($row['yedekleme_gorevi']) && $row['yedekleme_gorevi'] == '1' && is_nume
         die($e->getMessage());
     }
 #########################################################################################################################
-// OTOMATİK YEDEKLEME İLE ELLE SEÇİLEN TABLOLAR OLDUĞUNDA YEDEKLEME İŞLEMİ
+// OTOMATİK YEDEKLEME İLE ELLE SEÇİLEN VERİTABANINDAN GELEN VİRGÜLLE AYRILMIŞ TABLOLAR OLDUĞUNDA YEDEKLEME İŞLEMİ
 if( isset($row['tablolar']) && !empty($row['tablolar']) && $row['combine'] == '3' ) {
 
-    // ELLE SEÇİLEN TABLOLARI DİZİYE ALIYORUZ
-    $tablolar['tablolar'] = explode(",", $row['tablolar']);
+    function tablonunSonDegisikligi($PDOdbsecilen, $db_name, $table, $sonraki_calisma) {
+        try {
+            // Tablonun motor tipini ve son güncelleme zamanını sorgulama
+            $tablo_bilgisi = $PDOdbsecilen->query("SELECT ENGINE, UPDATE_TIME, CREATE_TIME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = '$db_name' AND TABLE_NAME = '$table'");
+            $tablo_bilgileri = $tablo_bilgisi->fetch(PDO::FETCH_ASSOC);
 
-    foreach($tablolar['tablolar'] AS $table){
+            $engine = $tablo_bilgileri['ENGINE'];
 
-        // BU SORGU İLE SIRADAKİ TABLONUN SON GÜNCELLEME TARİHİNİ ALIYORUZ
-        $guncellemezamani = $PDOdbsecilen->query("SELECT UPDATE_TIME, CREATE_TIME FROM INFORMATION_SCHEMA.TABLES WHERE table_name = '".$table."' ");
-        $guncelleme_zamani = $guncellemezamani->fetch(PDO::FETCH_ASSOC);
+            if ($engine == 'InnoDB') {
+                // InnoDB ise doğrudan yedekleme yap
+                return $table;
+            } else {
+                // Diğer motor tipleri için son güncelleme zamanını kontrol et
+                if ($tablo_bilgileri['UPDATE_TIME'] !== null) {
+                    $update_time = strtotime($tablo_bilgileri['UPDATE_TIME']);
+                } else {
+                    // Eğer UPDATE_TIME null ise, CREATE_TIME kullanın (tablo hiç güncellenmemişse)
+                    $update_time = strtotime($tablo_bilgileri['CREATE_TIME']);
+                }
 
-        // EĞER TABLONUN SON GÜNCELLENME TARİHİ YOKSA now İLE ŞİMDİKİ TARİHİNİ ALIYORUZ
-        // TABLO YÜKLENDİKTEN SONRA VEYA HİÇ VERİ İŞLENMEDİĞİNDE SON GÜNCELLEME TARİHİ OLMAZ
-        $update_time = $guncelleme_zamani['UPDATE_TIME'] ?? 'now';
-
-        $dateTimeObj = new DateTime($update_time, new DateTimeZone($genel_ayarlar['secili_zaman_dilimi']));
-        // TABLONUN SON GÜNCELLEME TARİHİ now İLE EŞİT İSE
-        if($update_time == 'now'){
-            // TABLONUN SON GÜNCELLEME TARİHİ now ŞİMDİ OLARAK AYARLADIK VE 1 YIL GERİ ALIYORUZ Kİ 
-            // BU TABLO GÜNCELLENMEYEN TABLO OLARAK İŞARETLENSİN VE UNİX ZAMAN DAMGASI OLARAK ALIYORUZ
-            $update_time_unix = $dateTimeObj->modify('-1 year')->getTimestamp();
-        }else{
-            // TABLONUN SON GÜNCELLEME TARİHİNİ UNİX ZAMAN DAMGASI OLARAK ALIYORUZ
-            $update_time_unix = $dateTimeObj->getTimestamp();
+                if ($update_time > $sonraki_calisma) {
+                    // Yedekleme işlemi yapılacak tabloyu döndür
+                    return $table;
+                } else {
+                    // Güncelleme olmadığı için yedekleme yapılacak tablo yok
+                    return null;
+                }
+            }
+        } catch (PDOException $e) {
+            // Hata oluştuğunda işlenebilir, şu an için yapılmamış
+            //echo "Bağlantı hatası: " . $e->getMessage();
+            return null;
         }
+    }
 
-        // ŞİMDİ VERİ TABANI TABLOLARI ELLE SEÇİLİ İSE VE SONRAKİ ÇALIŞMA ZAMANINDAN TABLONUN SON GÜNCELLEME TARİHİ BÜYÜK İSE
-        // YANİ SONRAKİ ÇALIŞMA ZAMANINDAN SONRA TABLO GÜNCELLENDİ İSE YEDEKLEMEK İÇİN DİZİ İÇİNE ALIYORUZ 
-        if( ( $row['elle']>0 && $update_time_unix >= $row['sonraki_calisma'] ) ){
-            $yedeklenecek_tablolar[] = $table;
+    // GÖREVLE VERİTABANINDAN GELEN VİRGÜLLE AYRILMIŞ TABLOLAR
+    $tables = explode(",", $row['tablolar']);
+    foreach ($tables as $table) {
+        if (tablonunSonDegisikligi($PDOdbsecilen, $db_name, trim($table), $sonraki_calisma)) {
+            $yedeklenecek_tablolar[] = trim($table);
         }
-    } // foreach($tablolar['tablolar'] AS $table){
+    }
+    
 
 } // if( isset($row['tablolar']) && !empty($row['tablolar']) && $row['combine'] == '3' ) {
 
@@ -291,7 +304,7 @@ if( isset($row['tablolar']) && !empty($row['tablolar']) && $row['combine'] == '3
 
           // file_put_contents(KOKYOLU.'error.log', date('Y-m-d H:i:s') . " - Veritabanı yedekleme üstü\n", FILE_APPEND);
 
-        $veritabani_backup_yedekleme_sonucu = veritabaniYedekleme($PDOdbsecilen, $veritabani_id, $secilen_yedekleme_oneki, $combine, $elle, $grup, $dbbakim, $gz, $yedekleyen, $dblock, $db_name, $yedeklenecek_tablolar, $dosya_tarihi);
+        $veritabani_backup_yedekleme_sonucu = veritabaniYedekleme($PDOdbsecilen, $veritabani_id, $secilen_yedekleme_oneki, $combine, $elle, $grup, $dbbakim, $gz, $yedekleyen, $dblock, $db_name, $yedeklenecek_tablolar, $dosya_tarihi, $sonraki_calisma, $db_name);
 
           // file_put_contents(KOKYOLU.'error.log', date('Y-m-d H:i:s') . " - ". print_r($veritabani_backup_yedekleme_sonucu)."\n", FILE_APPEND);
 
