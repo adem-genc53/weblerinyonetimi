@@ -88,13 +88,14 @@ if (!function_exists('veritabaniYedekleme')) {
     if (!function_exists('determineTablesToBackup')) {
         function determineTablesToBackup($PDOdbsecilen, $combine, $yedekleyen, $selectedTables) {
             if (empty($selectedTables) && ($combine == '1' || $combine == '2')) {
-                return $PDOdbsecilen->query("SHOW TABLES")->fetchAll(PDO::FETCH_COLUMN); // TÜM TABLOLAR
+                $backupTables = $PDOdbsecilen->query("SHOW TABLES")->fetchAll(PDO::FETCH_COLUMN); // TÜM TABLOLAR
             } elseif ($combine == '3' && $yedekleyen == '2') {
-                return $selectedTables; // ELLE YEDEKLEMEDE ELLE SEÇİLEN TABLOLAR
+                $backupTables = $selectedTables; // ELLE YEDEKLEMEDE ELLE SEÇİLEN TABLOLAR
             } elseif ($combine == '3' && $yedekleyen == '1') {
-                return is_array($selectedTables) ? $selectedTables : explode(',', $selectedTables); // GÖREVLE VERİTABANINDAN GELEN VİRGÜLLE AYRILMIŞ TABLOLAR
+                $backupTables = $selectedTables; // GÖREVLE VERİTABANINDAN GELEN VİRGÜLLE AYRILMIŞ DİZİ OLUŞTURULMUŞ TABLOLAR
             }
-            return [];
+            //file_put_contents(KOKYOLU.'error.log', date('Y-m-d H:i:s') . '<pre>' . print_r($tables, true) . '</pre>' . "\n", FILE_APPEND);
+            return $backupTables;
         }
     }
 
@@ -449,6 +450,8 @@ if (!function_exists('veritabaniYedekleme')) {
         // TABLOLARI BELİRLEME
         $tables = determineTablesToBackup($PDOdbsecilen, $combine, $yedekleyen, $yedeklenecek_tablolar);
 
+        //file_put_contents(KOKYOLU.'error.log', date('Y-m-d H:i:s') . '<pre>' . print_r($tables, true) . '</pre>' . "\n", FILE_APPEND);
+
         // VERİTABANI BAKIMI YAP
         if ($dbbakim == '1') {
             performDatabaseMaintenance($PDOdbsecilen, $tables, $dblock);
@@ -537,69 +540,5 @@ echo $calistirmasonucmesaji;
 ###################################################################################################################################################
 ###################################################################################################################################################
 ###################################################################################################################################################
-
-
-//echo '<pre>' . print_r($backup_yedekleme_sonucu, true) . '</pre>';
-/* 
-$backup_mesaji[] = "Veritabanı Başarıyla Yedeklendi";
-$backup_mesaji["dosya_adi"] = $filePath;
-*/
-
-
-/*
-İleri Seviye Yedekleme Teknikleri ve İyileştirmeler
-
-    Yedekleme İyileştirme ve Paralel İşlemler
-        İşlemci ve Bellek Kullanımı: Veritabanı yedekleme işlemi sırasında CPU ve bellek kullanımını izleyin. Bu sayede yedekleme işlemini optimize edebilirsiniz.
-        Paralel Yedekleme: Büyük veritabanlarını yedeklerken işlemleri paralel hale getirin. Özellikle veritabanı tablolarını paralel olarak yedeklemek zaman kazandırabilir.
-
-function backupTableParallel($tables) {
-    $processes = [];
-    foreach ($tables as $table) {
-        $pid = pcntl_fork();
-        if ($pid == -1) {
-            die('could not fork');
-        } else if ($pid) {
-            $processes[] = $pid;
-        } else {
-            backupTable($table);
-            exit(0);
-        }
-    }
-    foreach ($processes as $process) {
-        pcntl_waitpid($process, $status);
-    }
-}
-
-Veritabanı Bağlantı Yönetimi
-
-    PDO ile Veritabanı Bağlantısı: PDO'yu veritabanı bağlantısı için kullanmaya devam edin. Ancak, bağlantı işlemlerini optimize edin. Örneğin, birden fazla bağlantı açmak yerine tek bir bağlantıyı yeniden kullanın.
-
-function getPDOConnection($dsn, $username, $password) {
-    static $pdo = null;
-    if ($pdo === null) {
-        $pdo = new PDO($dsn, $username, $password);
-    }
-    return $pdo;
-}
-
-Yedekleme İşlemlerini Bölme
-
-    Parçalı Yedekleme: Büyük veritabanlarını küçük parçalara bölerek yedekleyin. Her tabloyu veya tablonun her bölümünü ayrı bir dosyaya yedekleyin.
-
-function backupTableInChunks($pdo, $table, $chunkSize = 1000) {
-    $offset = 0;
-    while (true) {
-        $query = $pdo->query("SELECT * FROM {$table} LIMIT $chunkSize OFFSET $offset");
-        $rows = $query->fetchAll(PDO::FETCH_ASSOC);
-        if (count($rows) == 0) {
-            break;
-        }
-        // Yedekleme işlemini gerçekleştir
-        backupRows($table, $rows);
-        $offset += $chunkSize;
-    }
-}
-*/
 
 ?>

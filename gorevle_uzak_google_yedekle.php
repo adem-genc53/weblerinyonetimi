@@ -405,8 +405,7 @@ function uzakGoogleSunucuyaYedekle( $dosya_adi_yolu, $yedekleme_gorevi, $silinec
 $googleyulendimesaji = [];
 $googlesilmemesaji = [];
 
-//file_put_contents(KOKYOLU.'error.log', date('Y-m-d H:i:s') . " - ".$dosya_adi_yolu."\n", FILE_APPEND);
-//file_put_contents(KOKYOLU.'error.log', date('Y-m-d H:i:s') . " - ".$uzak_sunucu_ici_dizin_adi."\n", FILE_APPEND);
+    //file_put_contents(KOKYOLU.'error.log', date('Y-m-d H:i:s') . '<pre>' . print_r($tables, true) . '</pre>' . "\n", FILE_APPEND);
     //$dosya_adi_yolu = 'DATABASEBACKUP/webyonetimi-deneme-2024-05-30-23-58-32';
 
 // Kullanım

@@ -17,7 +17,7 @@ $lock_file = $temp_dir . DIRECTORY_SEPARATOR . 'gorev.lock';
 // Eğer kilit dosyası varsa ve dosya halen var ise işlemi sonlandır
 if (file_exists($lock_file)) {
     // Hata günlüğüne yazmak isterseniz aşağıdaki satırı yorumdan çıkarabilirsiniz
-     //file_put_contents(KOKYOLU.'error.log', date('Y-m-d H:i:s') . " - Dosya kilitli iken tetiklendi.\n", FILE_APPEND);
+     //file_put_contents(KOKYOLU.'error.log', date('Y-m-d H:i:s') . '<pre>' . print_r($tables, true) . '</pre>' . "\n", FILE_APPEND);
     
     // Kilit dosyası mevcut, başka bir işlem çalışıyor.
     exit();
@@ -67,7 +67,7 @@ function ensureFullUrl($kaynak_url) {
     return $kaynak_url;
 }
 #########################################################################################################################
-  // file_put_contents(KOKYOLU.'error.log', date('Y-m-d H:i:s') . " - İnçlude alanıı.\n", FILE_APPEND);
+  // file_put_contents(KOKYOLU.'error.log', date('Y-m-d H:i:s') . '<pre>' . print_r($tables, true) . '</pre>' . "\n", FILE_APPEND);
 $gorevden = true; // CRON ZAMANLAYICI DOSYA İÇİNDE ETKİNLEŞTİRMEK İÇİNDİR
 
 require __DIR__ . '/cron_zamanlayici.php'; // sonraki çalışacak zamanı unix zaman damgası olarak verir
@@ -89,11 +89,11 @@ if(isset($_POST['elle_yurutme']) && $_POST['elle_yurutme'] == 1 && isset($_POST[
 $yedeklenecek_tablolar = [];
 $yedeklendi_mi = false;
 
-     // file_put_contents(KOKYOLU.'error.log', date('Y-m-d H:i:s') . " - While döngü üstünde.\n", FILE_APPEND);
+     // file_put_contents(KOKYOLU.'error.log', date('Y-m-d H:i:s') . '<pre>' . print_r($tables, true) . '</pre>' . "\n", FILE_APPEND);
 
 while ($row = $gorevler->fetch()) {
 
-     // file_put_contents(KOKYOLU.'error.log', date('Y-m-d H:i:s') . " - While döngü içinde.\n", FILE_APPEND);
+     // file_put_contents(KOKYOLU.'error.log', date('Y-m-d H:i:s') . '<pre>' . print_r($tables, true) . '</pre>' . "\n", FILE_APPEND);
 
 $yedeklenecek_tablolar = [];
 $calistirma_sonuc_mesaji[] = array();
@@ -285,7 +285,6 @@ if( isset($row['tablolar']) && !empty($row['tablolar']) && $row['combine'] == '3
             $yedeklenecek_tablolar[] = trim($table);
         }
     }
-    
 
 } // if( isset($row['tablolar']) && !empty($row['tablolar']) && $row['combine'] == '3' ) {
 
@@ -295,18 +294,18 @@ if( isset($row['tablolar']) && !empty($row['tablolar']) && $row['combine'] == '3
     if( isset($yedeklenecek_tablolar) && count($yedeklenecek_tablolar) == 0 && $row['combine'] == '3' ){
 
         $calistirma_sonuc_mesaji[] = 'Tabloların Elle Seçili Olduğundan
-                                                <br><b>Çalışacağı Zaman</b>dan sonra hiçbir tabloda güncelleme olmadığı için yedeklemeye gerek yoktur.
+                                                <br>Son <b>Çalışacağı Zaman</b>dan sonra hiçbir tabloda güncelleme olmadığı için yedeklemeye gerek yoktur.
                                                 <br>Eğer güncelleme olmadan da yedekleme yapmak istiyorsanız <b>Veritabanı Yedekle</b> sayfasından veya tabloları elle seçiminden çıkarın';
         $yedeklendi_mi = false;
     }else{
         // Elle seçilen tablo yoksa tam yedekleme var demektir
         $yedeklendi_mi = true;
 
-          // file_put_contents(KOKYOLU.'error.log', date('Y-m-d H:i:s') . " - Veritabanı yedekleme üstü\n", FILE_APPEND);
+          // file_put_contents(KOKYOLU.'error.log', date('Y-m-d H:i:s') . '<pre>' . print_r($tables, true) . '</pre>' . "\n", FILE_APPEND);
 
-        $veritabani_backup_yedekleme_sonucu = veritabaniYedekleme($PDOdbsecilen, $veritabani_id, $secilen_yedekleme_oneki, $combine, $elle, $grup, $dbbakim, $gz, $yedekleyen, $dblock, $db_name, $yedeklenecek_tablolar, $dosya_tarihi, $sonraki_calisma, $db_name);
+        $veritabani_backup_yedekleme_sonucu = veritabaniYedekleme($PDOdbsecilen, $veritabani_id, $secilen_yedekleme_oneki, $combine, $elle, $grup, $dbbakim, $gz, $yedekleyen, $dblock, $db_name, $yedeklenecek_tablolar, $dosya_tarihi);
 
-          // file_put_contents(KOKYOLU.'error.log', date('Y-m-d H:i:s') . " - ". print_r($veritabani_backup_yedekleme_sonucu)."\n", FILE_APPEND);
+          // file_put_contents(KOKYOLU.'error.log', date('Y-m-d H:i:s') . '<pre>' . print_r($tables, true) . '</pre>' . "\n", FILE_APPEND);
 
     } // else if(count($yedeklenecek_tablolar)==0){
 #############################################################################################################################
@@ -378,7 +377,7 @@ if($row['yedekleme_gorevi'] == '2' && is_string($row['secilen_yedekleme']) && !i
     $destination = ZIPDIR . $secilen_yedekleme_oneki . "-" . $dosya_tarihi . '.zip';
     $comment = $secilen_yedekleme;
 
-    //file_put_contents(KOKYOLU.'error.log', date('Y-m-d H:i:s') . " - Zip Fonksiyon Üstü.\n", FILE_APPEND);
+    //file_put_contents(KOKYOLU.'error.log', date('Y-m-d H:i:s') . '<pre>' . print_r($tables, true) . '</pre>' . "\n", FILE_APPEND);
 
         if(isset($genel_ayarlar['zip_tercihi']) && $genel_ayarlar['zip_tercihi'] == 1){
             $zipyap_sonucu = zipDataUsingZipArchive($source, $destination, $comment);
@@ -388,7 +387,7 @@ if($row['yedekleme_gorevi'] == '2' && is_string($row['secilen_yedekleme']) && !i
             $zipyap_sonucu = "";
         }
 
-    //file_put_contents(KOKYOLU.'error.log', date('Y-m-d H:i:s') . " - Zip Fonksiyon Alt.".print_r($zipyap_sonucu)."\n", FILE_APPEND);
+    //file_put_contents(KOKYOLU.'error.log', date('Y-m-d H:i:s') . '<pre>' . print_r($tables, true) . '</pre>' . "\n", FILE_APPEND);
 
     if(!empty($zipyap_sonucu) && in_array('Zip Arşivi Başarıyla Oluşturuldu',$zipyap_sonucu)){
     $yedeklendi_mi = true;
@@ -905,8 +904,7 @@ $veritabani_ftp_yedekleme_sonucu,
 $veritabani_google_yedekleme_sonucu,
 $ozel_dosya_calisma_sonucu);
 
-// file_put_contents(KOKYOLU.'error.log', date('Y-m-d H:i:s') . " - ENV: " . print_r($_ENV, true) . "\n", FILE_APPEND);
-// file_put_contents(KOKYOLU.'error.log', date('Y-m-d H:i:s') . " - SERVER: " . print_r($_SERVER, true) . "\n", FILE_APPEND);
+// file_put_contents(KOKYOLU.'error.log', date('Y-m-d H:i:s') . '<pre>' . print_r($tables, true) . '</pre>' . "\n", FILE_APPEND);
 
     // İşlem tamamlandığında kilit dosyasını sil
     if (file_exists($lock_file)) {
