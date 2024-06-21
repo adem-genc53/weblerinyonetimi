@@ -64,8 +64,10 @@ include("cron_zamanlayici.php");
         $elle                           = isset($_POST['elle']) ? $_POST['elle'] : '-1';
         if(isset($_POST['tablolar']) && is_array($_POST['tablolar'])){
         $tablolar                       = implode(",", $_POST['tablolar']);
+        $tablo_guncelmi_denetle         = isset($_POST['tablo_guncelmi_denetle']) ? $_POST['tablo_guncelmi_denetle'] : 0;
         }else{
         $tablolar                       = NULL;
+        $tablo_guncelmi_denetle         = 0;
         }
         $duzeltilecek_id                = isset($_POST['duzelt_id']) ? $_POST['duzelt_id'] : null;
         $ozel_onek                      = 0;
@@ -168,6 +170,7 @@ include("cron_zamanlayici.php");
         combine,
         elle,
         tablolar,
+        tablo_guncelmi_denetle,
         secilen_yedekleme,
         ozel_onek)
             VALUES (
@@ -194,6 +197,7 @@ include("cron_zamanlayici.php");
         :combine,
         :elle,
         :tablolar,
+        :tablo_guncelmi_denetle,
         :secilen_yedekleme,
         :ozel_onek)");
 
@@ -220,6 +224,7 @@ include("cron_zamanlayici.php");
             $ftvtk->bindValue(':combine', $combine, PDO::PARAM_INT);
             $ftvtk->bindValue(':elle', $elle, PDO::PARAM_INT);
             $ftvtk->bindValue(':tablolar', $tablolar, PDO::PARAM_STR);
+            $ftvtk->bindValue(':tablo_guncelmi_denetle', $tablo_guncelmi_denetle, PDO::PARAM_INT);
             $ftvtk->bindValue(':secilen_yedekleme', $secilen_yedekleme, PDO::PARAM_INT);
             $ftvtk->bindValue(':ozel_onek', $ozel_onek, PDO::PARAM_INT);
             $ftvtk->execute();
@@ -266,6 +271,7 @@ include("cron_zamanlayici.php");
         combine                         = :combine,
         elle                            = :elle,
         tablolar                        = :tablolar,
+        tablo_guncelmi_denetle          = :tablo_guncelmi_denetle,
         secilen_yedekleme               = :secilen_yedekleme,
         ozel_onek                       = :ozel_onek
         WHERE
@@ -294,6 +300,7 @@ include("cron_zamanlayici.php");
         $ftvtk->bindValue(':combine', $combine, PDO::PARAM_INT);
         $ftvtk->bindValue(':elle', $elle, PDO::PARAM_INT);
         $ftvtk->bindValue(':tablolar', $tablolar, PDO::PARAM_STR);
+        $ftvtk->bindValue(':tablo_guncelmi_denetle', $tablo_guncelmi_denetle, PDO::PARAM_INT);
         $ftvtk->bindValue(':secilen_yedekleme', $secilen_yedekleme, PDO::PARAM_INT);
         $ftvtk->bindValue(':ozel_onek', $ozel_onek, PDO::PARAM_INT);
         $ftvtk->bindValue(':id', $duzeltilecek_id, PDO::PARAM_INT);
@@ -636,6 +643,8 @@ include('includes/sub_navbar.php');
         }
         if(!empty($secilen_tablolar)){
             echo '<script>jQuery(function($) { tablolariYukle(\''.$edit_secili_secilen_yedekleme.'\',\''.$secilen_tablolar.'\',\'TABLE_NAME ASC\');});</script>';
+            //echo 'change(\'input[name="combine"]\');';
+            //echo '<script>tablolariYukle();</script>';
         }
   ?>
 
@@ -1158,13 +1167,13 @@ include('includes/sub_navbar.php');
         <td colspan="6">Bu seçenek ile veritabanında seçeceğiniz tabloları yedekler</td>
     </tr>
 
-    <tr class="uyeler">
+    <tr class="uyeler" style="display: none;">
         <td colspan="2">Klasöre Tablo Tablo Yedekle</td>
         <td><input type="radio" name="elle" value="2" <?php echo $elle_iki; ?> /></td>
         <td colspan="6">Bu seçenek bir klasör oluşturarak her tabloyu ayrı dosya olarak yedekler</td>
     </tr>
 
-    <tr class="uyeler">
+    <tr class="uyeler" style="display: none;">
         <td colspan="2">Birleştirerek Tek Dosya Olarak Yedekle</td>
         <td><input type="radio" name="elle" value="1" <?php echo $elle_bir; ?> /></td>
         <td colspan="6">Bu seçenek veritabanında seçilen tabloları tek dosya olarak yedekler</td>
@@ -1183,8 +1192,17 @@ include('includes/sub_navbar.php');
 
                                 <div id="showTablolarYedekler" style="display:none;margin-top: 0px;">
                                 <a name="tbliste" id="tbliste" style="scroll-margin-top: 50px;"></a>
-                                        <div style="text-align:center;border-top: 1px solid #dee2e6;padding:10px;color:red;">&nbsp;&nbsp;
-                                            <b>NOT:</b> En son Çalışacağı Zamanından sonra değişiklik olmayan tablo(lar) yedeklenmeyecektir
+                                        <div style="text-align:center;border-top: 1px solid #dee2e6;padding:10px;color:red;">
+                                            <b>NOT:</b> En son Çalışacağı Zamanından sonra değişiklik olmayan tablo(lar) yedeklenmeyecektir.
+                                            <br />
+                                            <?php 
+                                                if(isset($editrow['tablo_guncelmi_denetle']) && $editrow['tablo_guncelmi_denetle'] == 1){
+                                                    echo "<input type='checkbox' name='tablo_guncelmi_denetle' value='1' checked >";
+                                                }else{
+                                                    echo "<input type='checkbox' name='tablo_guncelmi_denetle' value='1'>";
+                                                }
+                                            ?>
+                                            Eğer tablo(lar) güncellenmezse bile yedeklemek istiyorsanız kutuyu seçiniz.
                                         </div>
                                             <div id="loading" style='text-align: center;'>
                                                 <img src="images/ajax-loader.gif" alt="Yükleniyor..." />
@@ -1643,13 +1661,13 @@ include('includes/sub_navbar.php');
         <td colspan="6">Bu seçenek veritabanında seçilen tabloları yedekler</td>
     </tr>
 
-    <tr class="uyeler">
+    <tr class="uyeler" style="display: none;">
         <td colspan="2">Klasöre Tablo Tablo Yedekle</td>
         <td><input type="radio" name="elle" value="2"></td>
         <td colspan="6">Bu seçenek bir klasör oluşturarak her tabloyu ayrı dosya olarak yedekler</td>
     </tr>
 
-    <tr class="uyeler">
+    <tr class="uyeler" style="display: none;">
         <td colspan="2">Birleştirerek Tek Dosya Olarak Yedekle</td>
         <td><input type="radio" name="elle" value="1"></td>
         <td colspan="6">Bu seçenek veritabanında seçilen tabloları tek dosya olarak yedekler</td>
@@ -1669,7 +1687,8 @@ include('includes/sub_navbar.php');
                 <div id="showTablolarYedekler" style="display:none;margin-top: 0px;">
                 <a name="tbliste" id="tbliste" style="scroll-margin-top: 50px;"></a>
                         <div style="text-align:center;border-top: 1px solid #dee2e6;padding:10px;color:red;">
-                            <b>NOT:</b> En son Çalışacağı Zamanından sonra değişiklik olmayan tablo(lar) yedeklenmeyecektir
+                            <b>NOT:</b> En son Çalışacağı Zamanından sonra değişiklik olmayan tablo(lar) yedeklenmeyecektir.
+                            <br /><input type="checkbox" name="tablo_guncelmi_denetle" value="1"> Eğer tablo(lar) güncellenmezse bile yedeklemek istiyorsanız kutuyu seçiniz.
                         </div>
                             <div id="loading" style='text-align: center;'>
                                 <img src="images/ajax-loader.gif" alt="Yükleniyor..." />
@@ -2067,6 +2086,12 @@ $(document).ready(function() {
         }
     });
 
+$('input[name="combine"]').on('change', function() {
+
+  $('.uyeler').toggle(+this.value === 3 && this.checked);
+
+});
+
 function tablolariYukle(db_secildi, tablolar, sort) {
 	$(document).ready(function() {
     const element = document.getElementById("tbliste");
@@ -2087,6 +2112,7 @@ function tablolariYukle(db_secildi, tablolar, sort) {
     }
 
 if(secilen_yedekleme>0){
+    $(".uyeler").show();
 
     $("#loading").show();
     $('#showTablolarYedekler').show();
@@ -2094,39 +2120,29 @@ if(secilen_yedekleme>0){
     $('#bekle-sort').fadeIn('');
     $("#sortliste").empty();
 
-			$.ajax({
-				url: "tabloliste.php",
-				type: "POST",
-				data: { tablolari_listele : 1, secilen_yedekleme : secilen_yedekleme, tablolar : tablolar, sort : sort },				
-				success: function(ilksayfa){
-                    //console.log(ilksayfa);
-					$("#sortliste").html(ilksayfa);
-                    $('#bekle-sort').fadeOut('');
-                    $('#gizle').fadeOut('');
-                    $("#yedekler-listesi").hide();
-                    $("#loading").hide();
-                    element.scrollIntoView();
-				}
-			});
+        $.ajax({
+            url: "tabloliste.php",
+            type: "POST",
+            data: { tablolari_listele : 1, secilen_yedekleme : secilen_yedekleme, tablolar : tablolar, sort : sort },
+            success: function(ilksayfa){
+                //console.log(ilksayfa);
+                $("#sortliste").html(ilksayfa);
+                $('#bekle-sort').fadeOut('');
+                $('#gizle').fadeOut('');
+                $("#yedekler-listesi").hide();
+                $("#loading").hide();
+                element.scrollIntoView();
+            }
+        });
+
+
 
 } // if(secilen_yedekleme>0){
 
-    });
-}
-    //});
+});
 
-    // select the relevant <input> elements, and using on() to bind a change event-handler:
-$('input[name="combine"]').on('change', function() {
-  // this, in the anonymous function, refers to the changed-<input>:
-  // select the element(s) you want to show/hide:
-  $('.uyeler')
-      // pass a Boolean to the method, if the numeric-value of the changed-<input>
-      // is exactly equal to 2 and that <input> is checked, the .business-fields
-      // will be shown:
-      .toggle(+this.value === 3 && this.checked);
-// trigger the change event, to show/hide the .business-fields element(s) on
-// page-load:
-}).change('input[name="combine"]');
+}
+
 </script>
 
 <script type="text/javascript">

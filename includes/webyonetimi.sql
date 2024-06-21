@@ -166,6 +166,7 @@ CREATE TABLE IF NOT EXISTS `zamanlanmisgorev` (
   `combine` int NOT NULL DEFAULT '-1',
   `elle` int NOT NULL DEFAULT '-1',
   `tablolar` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `tablo_guncelmi_denetle` int NOT NULL DEFAULT '0',
   `secilen_yedekleme` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `ozel_onek` int NOT NULL DEFAULT '0',
   `isleniyor` int NOT NULL DEFAULT '0',

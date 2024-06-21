@@ -278,13 +278,22 @@ if( isset($row['tablolar']) && !empty($row['tablolar']) && $row['combine'] == '3
         }
     }
 
-    // GÖREVLE VERİTABANINDAN GELEN VİRGÜLLE AYRILMIŞ TABLOLAR
-    $tables = explode(",", $row['tablolar']);
-    foreach ($tables as $table) {
-        if (tablonunSonDegisikligi($PDOdbsecilen, $db_name, trim($table), $sonraki_calisma)) {
-            $yedeklenecek_tablolar[] = trim($table);
+    if($row['tablo_guncelmi_denetle'] == 1){
+
+        $yedeklenecek_tablolar = explode(",", $row['tablolar']);
+
+    }else{
+
+        // GÖREVLE VERİTABANINDAN GELEN VİRGÜLLE AYRILMIŞ TABLOLAR
+        $tables = explode(",", $row['tablolar']);
+        foreach ($tables as $table) {
+            if (tablonunSonDegisikligi($PDOdbsecilen, $db_name, trim($table), $sonraki_calisma)) {
+                $yedeklenecek_tablolar[] = trim($table);
+            }
         }
+
     }
+
 
 } // if( isset($row['tablolar']) && !empty($row['tablolar']) && $row['combine'] == '3' ) {
 
