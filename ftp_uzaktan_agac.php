@@ -70,7 +70,7 @@ class FtpTreeView {
 
     private function getFtpContent() {
 
-        $full_path = "/".ltrim(rtrim($this->ftppath, '/'), '/');
+        $full_path = "/".trim($this->ftppath, '/');
 
         if ($this->ftp_path !== '/') {
             $full_path .= $this->ftp_path;

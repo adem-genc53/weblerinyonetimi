@@ -76,7 +76,7 @@ if (!function_exists('onAltDizinYolu')) {
     // Görevde ön dizin veya dizinler varsa alıp yukarıdaki fonksiyonlarla son dizin ID sini alıyoruz
     // Eğer dizin yoksa else ise root yani ana dizini listeliyoruz
     if(isset($uzak_sunucu_ici_dizin_adi) && !empty($uzak_sunucu_ici_dizin_adi)){
-        $ondizin = ltrim(rtrim($uzak_sunucu_ici_dizin_adi,'/'),'/');
+        $ondizin = trim($uzak_sunucu_ici_dizin_adi,'/');
         $root = 'root';
         $folderId = onDizinYolu($service, $ondizin, $root);
     }else{

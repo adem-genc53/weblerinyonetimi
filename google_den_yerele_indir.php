@@ -134,7 +134,7 @@ set_time_limit(3600); // 7200 saniye 120 dakikadır, 3600 1 saat
 
 if (isset($_POST['yerel_den_secilen_dosya']) && isset($_POST['google_drive_dan_secilen_dosya_id'])) {
     $yerel_hedef = rtrim($_POST['yerel_den_secilen_dosya'], '/');
-    $google_kaynak = ltrim(rtrim($_POST['google_drive_dan_secilen_dosya_adini_goster'], '/'), '/');
+    $google_kaynak = trim($_POST['google_drive_dan_secilen_dosya_adini_goster'], '/');
     $fileId = $_POST['google_drive_dan_secilen_dosya_id'];
 
     $downloader = new GoogleDriveDownloader($service, $client);

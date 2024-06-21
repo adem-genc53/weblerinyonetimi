@@ -48,7 +48,7 @@ if(isset($_POST['ftp_den_secilen_dosya']) && !empty($_POST['ftp_den_secilen_dosy
 
         // FTP hesabında DİZİN var ve AĞAÇ tan Ev seçilerek / eğik çizgi geldi
         // Bu durumda FTP hesabındaki dizini boşaltacağız
-        $ftp_secilen_kaynak_indir .= "/".ltrim(rtrim($ftp_path, '/'), '/');
+        $ftp_secilen_kaynak_indir .= "/".trim($ftp_path, '/');
         // Bu değişken true gönderek FTP hesab dizini silmesini engelleyecek
         $ftp_hesabindaki_dizini_bosalt = true;
 
@@ -56,7 +56,7 @@ if(isset($_POST['ftp_den_secilen_dosya']) && !empty($_POST['ftp_den_secilen_dosy
     }elseif($ftp_path !== '/' && $ftp_kaynak !== '/'){
 
         // Ağaçta klasör veya dosya seçildi ise seçileni sil
-        $ftp_secilen_kaynak_indir .= "/".ltrim(rtrim($ftp_path, '/'), '/');
+        $ftp_secilen_kaynak_indir .= "/".trim($ftp_path, '/');
 
     }
 
