@@ -77,6 +77,7 @@ function parseBackupFile($backupFile, $serverTableNames) {
             }
         }
 
+
         if (strpos($backupFile, '.gz') !== false) {
             gzclose($handle);
         } else {
@@ -136,7 +137,7 @@ function getDatabaseInfo($PDOdbsecilen, $dbname) {
 }
 
 function compareDatabases($backupData, $serverData) {
-    if ((htmlspecialchars($serverData['dbname']) == htmlspecialchars($backupData['dbname'])) || isset($_POST['yinede'])) {
+
         $allTables = array_unique(array_merge(array_keys($serverData['tables']), array_keys($backupData['tables'])));
 
         $html = '<table class="table table-bordered table-sm" style="min-width: 1000px;">
@@ -222,9 +223,7 @@ function compareDatabases($backupData, $serverData) {
 
         $html .= '</tbody></table>';
         return $html;
-    } else {
-        return '<p align="center">Karşılaştırmak için sunucudaki veritabanı ile yedek veritabanı aynı olması gerekir.</p><p align="center">Yinede karşılaştırmak istiyorsanız kutuyu işaretleyin.</p>';
-    }
+
 }
 
 // Yedek dosyasını oku
@@ -243,7 +242,18 @@ if ($backupData) {
     $serverData = getDatabaseInfo($PDOdbsecilen, $db_name);
 
     // Karşılaştırma ve sonuçları göster
-    echo compareDatabases($backupData, $serverData);
+    //echo '<pre>' . print_r($serverData, true) . '</pre>';
+    //echo '<pre>' . print_r($backupData, true) . '</pre>';
+
+    if ((isset($backupData['dbname']) && htmlspecialchars($serverData['dbname']) == htmlspecialchars($backupData['dbname'])) || isset($backupData['dbname']) && isset($_POST['yinede'])) {
+        echo compareDatabases($backupData, $serverData);
+    }else{
+        if(!isset($backupData['dbname'])){
+            echo '<p align="center">Yedek veri tabanı dosyasında veri tabanı adına ulaşılamadı.<br />Dosyanın veri tabanı yedek dosyası olduğundan ve bu script ile yedeklendiğinden emin olunuz.</p>';
+        }else{
+            echo '<p align="center">Karşılaştırmak için sunucudaki veritabanı ile yedek veritabanı aynı olması gerekir.</p><p align="center">Yinede karşılaştırmak istiyorsanız kutuyu işaretleyin.</p>';
+        }
+    }
 } else {
     echo 'Yedek dosyası veya klasörü seçilmedi.';
 }
