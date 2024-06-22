@@ -302,9 +302,10 @@ if( isset($row['tablolar']) && !empty($row['tablolar']) && $row['combine'] == '3
     // EĞER YUKARIDAN SONRAKİ ÇALIŞMA ZAMANINDAN SONRA GÜNCELLENEN TABLO HİÇ YOKSA GÜNLÜK KAYDI YAPMAYA GEREK YOK VE SONRAKİ ÇALIŞACAK ZAMANI GÜNCELLİYORUZ
     if( isset($yedeklenecek_tablolar) && count($yedeklenecek_tablolar) == 0 && $row['combine'] == '3' ){
 
-        $calistirma_sonuc_mesaji[] = 'Tabloların Elle Seçili Olduğundan
-                                                <br>Son <b>Çalışacağı Zaman</b>dan sonra hiçbir tabloda güncelleme olmadığı için yedeklemeye gerek yoktur.
-                                                <br>Eğer güncelleme olmadan da yedekleme yapmak istiyorsanız <b>Veritabanı Yedekle</b> sayfasından veya tabloları elle seçiminden çıkarın';
+        $calistirma_sonuc_mesaji[] = 
+            'Tabloların Elle Seçili Olduğundan
+            <br>Son <b>Çalışacağı Zaman</b>dan sonra hiçbir tabloda güncelleme olmadığı için yedeklemeye gerek yoktur.
+            <br>Eğer güncelleme olmadan da yedekleme yapmak istiyorsanız tablo listesinin üstündeki kutuyu işaretletin<br /> Veya <b>Veritabanı Yedekle</b> sayfasından veya tabloları elle seçiminden çıkarın';
         $yedeklendi_mi = false;
     }else{
         // Elle seçilen tablo yoksa tam yedekleme var demektir
@@ -921,7 +922,8 @@ $ozel_dosya_calisma_sonucu);
     }
 } catch (Exception $e) {
     // Hata yönetimi burada yapılabilir
-    error_log($e->getMessage());
+    //error_log($e->getMessage());
+    file_put_contents(KOKYOLU.'error.log', date('Y-m-d H:i:s') . '<pre>' . print_r($e->getMessage(), true) . '</pre>' . "\n", FILE_APPEND);
 
     // Hata oluştuğunda da kilit dosyasını sil
     if (file_exists($lock_file)) {

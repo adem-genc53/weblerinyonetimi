@@ -264,9 +264,9 @@ if (!function_exists('veritabaniYedekleme')) {
 /*
             // BELKİ BAŞKA ZAMAN KULLANIRIZ DİYE ŞİMDİLİK KALSIN
 
-            $initialSettingsString = "-- ----------------------------\n";
+            $initialSettingsString = "-- -------------------------------------------------------\n";
             $initialSettingsString .= "-- Veritabanı yedeği oluşturma başlangıç ayarları\n";
-            $initialSettingsString .= "-- ----------------------------\n";
+            $initialSettingsString .= "-- -------------------------------------------------------\n";
             $initialSettingsString .= "SET sql_mode = '" . $initialSettings['sql_mode'] . "';\n";
             $initialSettingsString .= "SET time_zone = '" . $initialSettings['time_zone'] . "';\n";
             $initialSettingsString .= "SET character_set_client = '" . $initialSettings['character_set_client'] . "';\n";
@@ -294,7 +294,7 @@ if (!function_exists('veritabaniYedekleme')) {
                 "-- MySQL Sunucu Sürümü: " . $initialSettings['mysql_sunucu_surumu'] . "\n" .
                 "-- PHP Sürümü: " . phpversion() . "\n" .
                 "-- Karakter Seti: " . $initialSettings['karakter_seti'] . "\n\n" . 
-                "-- Veritabanı Adı: " . $initialSettings['database_name'] . "\n" . 
+                "-- Veritabanı: `" . $initialSettings['database_name'] . "`\n" . 
                 "-- Tablolar:\n";
             // BAŞLANGIÇ BİLGİLERİNDE TABLO ADI VE VERİ SATIR SAYISI GÖSTERMEK İÇİNDİR
             foreach ($initialSettings['tables'] as $table) {
@@ -391,23 +391,23 @@ if (!function_exists('veritabaniYedekleme')) {
         // YEDEKLEME İÇERİĞİ OLUŞTURMA FONKSİYONU
     if (!function_exists('generateBackupContent')) {
         function generateBackupContent($tableStructure, $tableData, $table, $triggers) {
-            $content = "\n\n\n-- ---------------------------\n";
+            $content = "\n\n\n-- ------------------------------------------------------\n";
             $content .= "-- Tablo için tablo yapısı `" . $table . "`\n";
-            $content .= "-- ---------------------------\n";
+            $content .= "-- ------------------------------------------------------\n";
             $content .= "DROP TABLE IF EXISTS `" . $table . "`;\n";
             $content .= $tableStructure;
 
             if (!empty($tableData)) {
-                $content .= "\n\n-- ---------------------------\n";
+                $content .= "\n\n-- ------------------------------------------------------\n";
                 $content .= "-- Tablonun veri dökümü `" . $table . "`\n";
-                $content .= "-- ---------------------------\n";
+                $content .= "-- ------------------------------------------------------\n";
                 $content .= implode("\n", $tableData);
             }
 
             if (!empty($triggers)) {
-                $content .= "\n\n\n-- ---------------------------\n";
+                $content .= "\n\n\n-- ------------------------------------------------------\n";
                 $content .= "-- Tablo için Tetikleyiciler `" . $table . "`\n";
-                $content .= "-- ---------------------------\n";
+                $content .= "-- ------------------------------------------------------\n";
                 $content .= $triggers;
             }
 
@@ -506,7 +506,7 @@ set_time_limit(0);
     $yedeklenecek_tablolar      = isset($_POST['tablolar'])     ? $_POST['tablolar']    : [];
     $dosya_tarihi               = date_tr('Y-m-d-H-i-s', time());
 
-    $backup_yedekleme_sonucu = veritabaniYedekleme($PDOdbsecilen, $veritabani_id, $secilen_yedekleme_oneki, $combine, $elle, $grup, $dbbakim, $gz, $yedekleyen, $dblock, $db_name, $yedeklenecek_tablolar, $dosya_tarihi);
+    $backup_yedekleme_sonucu = veritabaniYedekleme($PDOdbsecilen, $veritabani_id, "yedekle-".$secilen_yedekleme_oneki, $combine, $elle, $grup, $dbbakim, $gz, $yedekleyen, $dblock, $db_name, $yedeklenecek_tablolar, $dosya_tarihi);
 
 if(!empty($backup_yedekleme_sonucu)){
 

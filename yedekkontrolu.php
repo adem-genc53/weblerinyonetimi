@@ -118,7 +118,8 @@ include('includes/sub_navbar.php');
                             <div class="card-body">
                                 <p>Buradan veritabanı yedeğinizin sorunsuz yedeklenip yedeklenmediğini kontrol edebilirsiniz.</p>
                                 <p>Aşağıdaki seçeneklerden <b>.gz</b> veya <b>.sql</b> uzantılı veritabanı yedeklerinizi seçerek kontrol edebilirsiniz.</p>
-                                <p>Sunucudan seçilen veritabanı tablo adlarını baz alarak yedek veritabanında önce tablo yapısına bakar sonra (INSERT INTO ...) veri satırlarını sayarak kaynak ile karşılaştırır</p>
+                                <p>Sunucudan seçilen veritabanı tablo adlarını baz alarak yedek veritabanında önce tablo yapısına bakar sonra <b>(INSERT INTO ...)</b> veri satırlarını sayarak kaynak ile karşılaştırır</p>
+                                <p>PhpMyAdmin ile yedekleme yaparken <b>Özel - tüm olası seçenekleri göster</b> alanından <b>Örnek: INSERT INTO tbl_adı VALUES (1,2,3)</b> seçeneği seçerek yapacağınız yedekleme kaynak ile karşılaştırabilir.</p>
                                 <p>Bu vesile ile hangi tabloların yedeklenip yedeklenmediğini ve hangi tabloların veri satırları eksik yedeklenip yedeklenmediğini görebilirsiniz.</p>
                                 <p><i class="fa fa-plus" aria-hidden="true" style="color:red;"></i> İkonu diğer veritabanında bu tablonun olmadığını gösterir.</p>
                                 <p><i class="fa fa-minus" aria-hidden="true" style="color:red;"></i> ikonu diğer veritabanında olan tablonun burada olmadığını gösterir.</p>

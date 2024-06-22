@@ -57,8 +57,9 @@ function parseBackupFile($backupFile, $serverTableNames) {
         }
 
         while (($line = (strpos($backupFile, '.gz') !== false) ? gzgets($handle) : fgets($handle)) !== false) {
-            if (strpos($line, '-- Veritabanı Adı:') !== false) {
-                $data['dbname'] = trim(str_replace('-- Veritabanı Adı:', '', $line));
+            if (strpos($line, '-- Veritabanı:') !== false) {
+                // Veritabanı adını grav tırnakları (`) işareti içinde almak için
+                $data['dbname'] = trim(str_replace(array('-- Veritabanı:', '`'), '', $line));
             }
             if (preg_match('/CREATE TABLE IF NOT EXISTS `([\w-]+)`/', $line, $matches)) {
                 $currentTable = $matches[1];
