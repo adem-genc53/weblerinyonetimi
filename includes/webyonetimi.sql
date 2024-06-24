@@ -140,7 +140,7 @@ CREATE TABLE IF NOT EXISTS `veritabanlari` (
 -- Tablo için tablo yapısı `zamanlanmisgorev`
 --
 
-DROP TABLE IF EXISTS zamanlanmisgorev;
+DROP TABLE IF EXISTS `zamanlanmisgorev`;
 CREATE TABLE IF NOT EXISTS `zamanlanmisgorev` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
   `gorev_adi` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
@@ -178,7 +178,7 @@ CREATE TABLE IF NOT EXISTS `zamanlanmisgorev` (
 -- Tablonun veri dökümü `zamanlanmisgorev`
 --
 
-INSERT INTO `zamanlanmisgorev` VALUES(1, 'deneme', 'test_gorev.php', 1714813140, '-1', '-1', '-1', '-1/2', 'Aktif', 'Aktif', 3, 0, 0, NULL, -1, -1, NULL, -1, -1, -1, -1, -1, -1, NULL, NULL, 0, 0);
+INSERT INTO `zamanlanmisgorev` VALUES(1, 'deneme', 'test_gorev.php', 1718799060, -1, -1, -1, '-1/2', 'Pasif', 'Aktif', 3, 0, 0, NULL, -1, -1, NULL, -1, -1, -1, -1, -1, -1, NULL, 0, NULL, 0, 0);
 
 --
 -- TABLO_ADI zamanlanmisgorev 1
@@ -191,7 +191,7 @@ INSERT INTO `zamanlanmisgorev` VALUES(1, 'deneme', 'test_gorev.php', 1714813140,
 DROP TABLE IF EXISTS `zamanlanmisgorev_gunluk`;
 CREATE TABLE IF NOT EXISTS `zamanlanmisgorev_gunluk` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `calistirma_ciktisi` varchar(1000) DEFAULT NULL,
+  `calistirma_ciktisi` varchar(500) DEFAULT NULL,
   `gorev_adi` varchar(50) NOT NULL,
   `calistirilan_dosya` varchar(50) DEFAULT NULL,
   `calisma_zamani` int DEFAULT NULL,

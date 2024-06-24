@@ -36,10 +36,14 @@ set_time_limit(0);
     $db_name = $varsayilan['db_name'];
 #########################################################################################################################################
 
-function parseBackupFile($backupFile, $serverTableNames) {
-    if (empty($backupFile)) { return null; }
+function parseBackupFile($backupFile, $serverDbName, $serverTableNames) {
+    if (empty($backupFile)) {
+        return null;
+    }
 
     $data = [];
+    $data['dbname'] = null;
+    $data['tables'] = array_fill_keys($serverTableNames, null);
 
     if (strpos($backupFile, '.gz') !== false) {
         $handle = gzopen($backupFile, 'r');
@@ -49,51 +53,43 @@ function parseBackupFile($backupFile, $serverTableNames) {
 
     if ($handle) {
         $currentTable = null;
-        $tableHasInsert = [];
-
-        // Sunucudaki tablo isimlerine göre başlangıçta hepsini NULL olarak ayarla
-        foreach ($serverTableNames as $table) {
-            $data['tables'][$table] = null;
-        }
+        $backupDbName = null;
 
         while (($line = (strpos($backupFile, '.gz') !== false) ? gzgets($handle) : fgets($handle)) !== false) {
             if (strpos($line, '-- Veritabanı:') !== false) {
-                // Veritabanı adını grav tırnakları (`) işareti içinde almak için
-                $data['dbname'] = trim(str_replace(array('-- Veritabanı:', '`'), '', $line));
+                $backupDbName = trim(str_replace(array('-- Veritabanı:', '`'), '', $line));
+                if ($backupDbName !== $serverDbName && !isset($_POST['yinede'])) {
+                    // Veritabanı adı eşleşmiyorsa işlemi bitir
+                    fclose($handle);
+                    return ['dbname'=>$backupDbName];
+                }
+                $data['dbname'] = $backupDbName;
             }
+
             if (preg_match('/CREATE TABLE IF NOT EXISTS `([\w-]+)`/', $line, $matches)) {
                 $currentTable = $matches[1];
                 if (in_array($currentTable, $serverTableNames)) {
                     $data['tables'][$currentTable] = 0; // Tablo yapısı mevcut, ancak veri satırı yok
+                } else {
+                    $currentTable = null; // Geçerli tablo sunucu tabloları arasında yoksa sıfırla
                 }
-                $tableHasInsert[$currentTable] = false;
             }
+
             if (preg_match('/INSERT INTO `([\w-]+)`/', $line, $matches)) {
                 $tableName = $matches[1];
-                if (in_array($tableName, $serverTableNames)) {
+                if ($currentTable === $tableName && in_array($tableName, $serverTableNames)) {
                     $data['tables'][$tableName]++;
-                    $tableHasInsert[$tableName] = true;
                 }
             }
         }
-
 
         if (strpos($backupFile, '.gz') !== false) {
             gzclose($handle);
         } else {
             fclose($handle);
         }
-/*
-        // Eğer tablo yapısı varsa ve veri satırı yoksa 0 olarak kalacak
-        // Eğer tablo yapısı ve veri satırı yoksa NULL olarak kalacak
-        foreach ($tableHasInsert as $table => $hasInsert) {
-            
-            if (!$hasInsert && $data['tables'][$table] === 0) {
-                $data['tables'][$table] = 0; // Tablo yapısı var ama satır yok
-            }
-        }
-        */
     }
+
     return $data;
 }
 
@@ -102,7 +98,7 @@ function parseBackupFolder($folderPath, $expectedDbName, $serverTableNames) {
 
     $files = array_merge(glob($folderPath . '/*.sql'), glob($folderPath . '/*.gz'));
     foreach ($files as $file) {
-        $fileData = parseBackupFile($file, $serverTableNames);
+        $fileData = parseBackupFile($file, $expectedDbName, $serverTableNames);
         if (isset($fileData['dbname']) && $fileData['dbname'] == $expectedDbName) {
             foreach ($fileData['tables'] as $table => $count) {
                 if (!isset($data['tables'][$table])) {
@@ -186,8 +182,9 @@ function compareDatabases($backupData, $serverData) {
                 $html .= '<tr class="table-warning">';
                     $html .= '<td style="padding-left: 0.5rem;">' . htmlspecialchars($table) . '</td>';
                     $html .= '<td style="text-align: right;">' . htmlspecialchars($serverCount) . '</td>';
-                    $html .= '<td style="text-align: center;padding-right: 0rem;"><i class="fa fa-exclamation-circle" aria-hidden="true" style="color:red;"></i></td>';
-                    $html .= '<td colspan="3">Bu tablo yedekte mevcut değil</td>';
+                    $html .= '<td style="text-align: center;padding-right: 0rem;"><i class="fa fa-plus" aria-hidden="true" style="color:red;"></i></td>';
+                    $html .= '<td colspan="2">Bu tablo yedekte mevcut değil</td>';
+                    $html .= '<td style="text-align: center;padding-right: 0rem;"><i class="fa fa-minus" aria-hidden="true" style="color:red;"></i></td>';
                 $html .= '</tr>';
             } elseif ($backupCount === 0 && $serverCount >0) { // Yedekte sadece tablo yapısı olan, veri satırı yok, ancak sunucuda veri satırı var
                 $html .= '<tr class="table-warning">';
@@ -231,7 +228,7 @@ $backupData = null;
 $serverTableNames = array_keys(getDatabaseInfo($PDOdbsecilen, $db_name)['tables']); // Sunucudaki tablo isimlerini al
 if (isset($_POST['sqlsec']) && !empty($_POST['sqlsec'])) {
     $backupFile = $_POST['sqlsec'];
-    $backupData = parseBackupFile($backupFile, $serverTableNames);
+    $backupData = parseBackupFile($backupFile, $db_name, $serverTableNames);
 } elseif (isset($_POST['klasorsec']) && !empty($_POST['klasorsec'])) {
     $folderPath = $_POST['klasorsec'];
     $backupData = parseBackupFolder($folderPath, $db_name, $serverTableNames);
@@ -249,7 +246,7 @@ if ($backupData) {
         echo compareDatabases($backupData, $serverData);
     }else{
         if(!isset($backupData['dbname'])){
-            echo '<p align="center">Yedek veri tabanı dosyasında veri tabanı adına ulaşılamadı.<br />Dosyanın veri tabanı yedek dosyası olduğundan ve bu script ile yedeklendiğinden emin olunuz.</p>';
+            echo '<p align="center">Yedek veri tabanı dosyasında veri tabanı adına ulaşılamadı.<br /><br />Dosyanın veri tabanı yedek dosyası olduğundan ve bu script ile yedeklendiğinden emin olunuz.</p>';
         }else{
             echo '<p align="center">Karşılaştırmak için sunucudaki veritabanı ile yedek veritabanı aynı olması gerekir.</p><p align="center">Yinede karşılaştırmak istiyorsanız kutuyu işaretleyin.</p>';
         }
