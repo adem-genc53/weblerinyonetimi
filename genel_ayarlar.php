@@ -568,14 +568,14 @@ include('includes/sub_navbar.php');
                                                         <tr>
                                                             <td>Kullanıcı Adı:</td>
                                                             <td style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;">
-                                                                <input class="form-control" type="text" name="username" placeholder="Kullanıcı adı değiştiriyorsanız yeni kullanıcı adı giriniz" />
+                                                                <input class="form-control" type="text" name="username" placeholder="Kullanıcı adı değiştiriyorsanız yeni kullanıcı adını giriniz" />
                                                             </td>
                                                             <td colspan="3">FTP Kullanıcı adı, şifreli kayıt edildiği için burada gösterilmez</td>
                                                         </tr>
                                                         <tr>
                                                             <td>Şifre:</td>
                                                             <td style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;">
-                                                                <input class="form-control" type="text" name="password" placeholder="Şifreyi değiştiriyorsanız yeni şifre girin" />
+                                                                <input class="form-control" type="text" name="password" placeholder="Şifreyi değiştiriyorsanız yeni şifreyi giriniz" />
                                                             </td>
                                                             <td colspan="3">FTP Şifresi, şifreli kayıt edildiği için burada gösterilmez</td>
                                                         </tr>
