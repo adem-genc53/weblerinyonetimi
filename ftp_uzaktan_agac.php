@@ -21,10 +21,11 @@ class FtpTreeView {
     private $ftp;
     private string $login_result;
     private $genel_ayarlar;
+    private $hash;
     private string $folder;
     private $dir; // Resource or false
 
-    function __construct(string $tiklanan_path, $genel_ayarlar) {
+    function __construct(string $tiklanan_path, $genel_ayarlar, $hash) {
         $this->ftpsunucu    = $genel_ayarlar['sunucu'];
         $this->ftpusername  = $hash->take($genel_ayarlar['username']);
         $this->ftppass      = $hash->take($genel_ayarlar['password']);
@@ -164,7 +165,7 @@ class FtpTreeView {
 // $genel_ayarlar değişkeni sınıf içinde FTP bağlantı bilgilerini almak içindir.
 // $_POST['dir'] ajax ilk yüklemede $ftp_$path yolun içeriğini ister. Ağaç içinde tıklanan klasöre $ftp_$path yoluda eklenir
 $tiklanan_path = urldecode($_POST['dir'] ?? ''); // Default to empty string if not set
-$tree = new FtpTreeView($tiklanan_path, $genel_ayarlar);
+$tree = new FtpTreeView($tiklanan_path, $genel_ayarlar, $hash);
 echo $tree->createTree();
 
  
