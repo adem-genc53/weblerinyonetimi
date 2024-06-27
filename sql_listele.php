@@ -1,49 +1,45 @@
 <?php 
 // Bismillahirrahmanirrahim
+require_once('includes/connect.php');
+require_once('check-login.php');
+require_once("includes/turkcegunler.php");
+################################################################################
+ini_set('memory_limit', '-1');
+ignore_user_abort(true);
+set_time_limit(0);
+    //sleep(5);
+    // echo '<pre>' . print_r($_POST, true) . '</pre>';
     header("Expires: Tue, 03 Jul 2001 06:00:00 GMT");
     header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
     header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
     header("Cache-Control: post-check=0, pre-check=0", false);
     header("Pragma: no-cache");
     header("Connection: close");
-
-session_start();
-ini_set('memory_limit', '-1');
-ignore_user_abort(true);
-set_time_limit(0);
-require_once('includes/connect.php');
-require_once('check-login.php');
-require_once("includes/turkcegunler.php");
-################################################################################
-    //sleep(5);
-    // echo '<pre>' . print_r($_POST, true) . '</pre>';
-
 ################################################################################
 
-        $post_sqlsec = isset($_POST['sqlsec']) ? $_POST['sqlsec'] : '';
-        $klasorsec = isset($_POST['klasorsec']) ? $_POST['klasorsec'] : '';
-        $dizin = BACKUPDIR;
-        $uzantilar = array("sql","gz"); //hangi uzantılar?
-        $gzuzanti = array("gz"); //hangi uzantı?
-        $sqluzanti = array("sql"); //hangi uzantı?
-        $database = 'Veritabanı: `';   // Veritabanı adı için yedek içinde aranacak kelime
-        $search = 'TABLO_ADI ';       // Tablo adı ve satır sayısı için yedek içinde aranacak kelime
-        $insert = 'INSERT INTO `';
-        $completed = 'COMPLETED SUCCESSFULLY'; // Başarılı yedeklendiğini göstermek için aranacak kelime
-        $manuel = 'MANUEL'; // Tablolar elle seçilerek yedeklendiğini göstermek için aranacak kelime
-        $found = false;
-        $bulundu = false;
-        $databasename = "";
-        $manuelbulundu = 0;
-  
-        function ext($text)  {
-        $text = strtolower(pathinfo($text, PATHINFO_EXTENSION));
-        return $text;  
-        }
-        function uzanti($text)  {
-        $text = strtolower(pathinfo($text, PATHINFO_EXTENSION));
-        return $text;  
-        } 
+    $post_sqlsec = isset($_POST['sqlsec']) ? $_POST['sqlsec'] : '';
+    $klasorsec = isset($_POST['klasorsec']) ? $_POST['klasorsec'] : '';
+    $dizin = BACKUPDIR;
+    $uzantilar = array("sql","gz"); //hangi uzantılar?
+    $gzuzanti = array("gz"); //hangi uzantı?
+    $sqluzanti = array("sql"); //hangi uzantı?
+    $database = 'Veritabanı: `';   // Veritabanı adı için yedek içinde aranacak kelime
+    $search = 'TABLO_ADI ';       // Tablo adı ve satır sayısı için yedek içinde aranacak kelime
+    $insert = 'INSERT INTO `';
+    $completed = 'COMPLETED SUCCESSFULLY'; // Başarılı yedeklendiğini göstermek için aranacak kelime
+    $found = false;
+    $bulundu = false;
+    $databasename = "";
+    $manuelbulundu = 0;
+
+    function ext($text)  {
+    $text = strtolower(pathinfo($text, PATHINFO_EXTENSION));
+    return $text;  
+    }
+    function uzanti($text)  {
+    $text = strtolower(pathinfo($text, PATHINFO_EXTENSION));
+    return $text;  
+    } 
 
    $yedektablo = array();
    $veritabitabloadi = array();

@@ -122,7 +122,7 @@ $db_connection_charset = $genel_ayarlar['secili_karakter_seti'];
 
 $filename           = '';     // Yüklenecek yedek dosyanın adını giriniz
 $ajax               = true;   // AJAX modu: web sitesi yenilenmeden içe aktarma yapılacaktır
-$linespersession    = 3000;   // Bir seferde içe aktarmada yürütülecek satır sayısı
+$linespersession    = 300;   // Bir seferde içe aktarmada yürütülecek satır sayısı
 $delaypersession    = 0;      // Her oturumdan sonra uyku süresini milisaniye cinsinden belirtebilirsiniz.
                               // Yalnızca JavaScript etkinleştirildiğinde çalışır. Sunucu taşmasını azaltmak için kullanın
 
@@ -145,7 +145,7 @@ $comment[]='/*!';                     // Veya diğer tescilli şeyleri dışarı
 
 // Ön sorgular: Her içe aktarma oturumunun başında yürütülecek SQL sorguları
 
-// $pre_query[]=' foreign_key_checks = 0 AYARLA';
+$pre_query[]='SET foreign_key_checks = 0';
 // $pre_query[]='İsterseniz buraya ek sorgular ekleyin';
 
 // Varsayılan sorgu sınırlayıcı: Satır sonundaki bu karakter, Bigdump'a bir SQL ifadesinin nerede bittiğini söyler
@@ -497,6 +497,7 @@ do_action ('script_runs');
 
 // Veritabanına bağlanın, karakter kümesini ayarlayın ve ön sorguları yürütün
 if (!$error && !TESTMODE) {
+
 /*
   if (mysqli_connect_error()) 
   { echo ("<p class='error'>".mysqli_connect_error()." nedeniyle veritabanı bağlantısı başarısız oldu.</p>\n");
@@ -509,16 +510,20 @@ if (!$error && !TESTMODE) {
       $PDOdbsecilen->query("SET NAMES $db_connection_charset");
     }
 
+
   if (!$error && isset ($pre_query) && sizeof ($pre_query)>0)
   { reset($pre_query);
+
     foreach ($pre_query as $pre_query_value)
-    {	if (!$PDOdbsecilen->query($pre_query_value))
-    	{ echo ("<p class='error'>Ön sorguda hata.</p>\n");
-      	echo ("<p>Query: ".trim(nl2br(htmlentities($pre_query_value)))."</p>\n");
-      	echo ("<p>MySQL: ".$PDOdbsecilen->error."</p>\n");
-      	$error=true;
-      	break;
+    {	
+      if (!$PDOdbsecilen->query($pre_query_value))
+        { echo ("<p class='error'>Ön sorguda hata.</p>\n");
+          echo ("<p>Query: ".trim(nl2br(htmlentities($pre_query_value)))."</p>\n");
+          echo ("<p>MySQL: ".$PDOdbsecilen->error."</p>\n");
+          $error=true;
+          break;
      }
+
     }
   }
 }
@@ -1169,6 +1174,10 @@ skin_open();
     echo ("<p class='centr'><a class='btn btn-success btn-sm' href='".$_SERVER["PHP_SELF"]."'><span class='glyphicon glyphicon-ok'></span> Başlama Sayfasına Geri Dön</a></p><br />");
 
 if (isset($PDOdbsecilen))
+// Yabancı keyleri etkinleştir
+if (!$PDOdbsecilen->query('SET GLOBAL FOREIGN_KEY_CHECKS=1')) {
+  die('Yabancı anahtar kontrolleri etkinleştirilmedi.');
+}
 if ($file && !$gzipmode) fclose($file);
 else if ($file && $gzipmode) gzclose($file);
 
@@ -1219,8 +1228,8 @@ if ($ajax && isset($_REQUEST['start']))
 {
   if (isset($_REQUEST['ajaxrequest'])) 
   {	ob_end_clean();
-	  create_xml_response();
-	  die;
+      create_xml_response();
+      die;
   } 
   else 
     create_ajax_script();	  
@@ -1248,8 +1257,8 @@ function do_action($tag)
 
 function add_action($tag, $function)
 {
-	global $plugin_actions;
-	$plugin_actions[$tag][] = $function;
+    global $plugin_actions;
+    $plugin_actions[$tag][] = $function;
 }
 
 // *******************************************************************************************
@@ -1259,61 +1268,61 @@ function add_action($tag, $function)
 function create_xml_response() 
 {
   global $linenumber, $foffset, $totalqueries, $curfilename, $delimiter,
-				 $lines_this, $lines_done, $lines_togo, $lines_tota,
-				 $queries_this, $queries_done, $queries_togo, $queries_tota,
-				 $bytes_this, $bytes_done, $bytes_togo, $bytes_tota,
-				 $kbytes_this, $kbytes_done, $kbytes_togo, $kbytes_tota,
-				 $mbytes_this, $mbytes_done, $mbytes_togo, $mbytes_tota,
-				 $pct_this, $pct_done, $pct_togo, $pct_tota,$pct_bar;
+                 $lines_this, $lines_done, $lines_togo, $lines_tota,
+                 $queries_this, $queries_done, $queries_togo, $queries_tota,
+                 $bytes_this, $bytes_done, $bytes_togo, $bytes_tota,
+                 $kbytes_this, $kbytes_done, $kbytes_togo, $kbytes_tota,
+                 $mbytes_this, $mbytes_done, $mbytes_togo, $mbytes_tota,
+                 $pct_this, $pct_done, $pct_togo, $pct_tota,$pct_bar;
 
-	header('Content-Type: application/xml');
-	header('Cache-Control: no-cache');
-	
-	echo '<?xml version="1.0" encoding="ISO-8859-1"?>';
-	echo "<root>";
+    header('Content-Type: application/xml');
+    header('Cache-Control: no-cache');
+    
+    echo '<?xml version="1.0" encoding="ISO-8859-1"?>';
+    echo "<root>";
 
 // veri - hesaplamalar için
 
-	echo "<linenumber>$linenumber</linenumber>";
-	echo "<foffset>$foffset</foffset>";
-	echo "<fn>$curfilename</fn>";
-	echo "<totalqueries>$totalqueries</totalqueries>";
-	echo "<delimiter>$delimiter</delimiter>";
+    echo "<linenumber>$linenumber</linenumber>";
+    echo "<foffset>$foffset</foffset>";
+    echo "<fn>$curfilename</fn>";
+    echo "<totalqueries>$totalqueries</totalqueries>";
+    echo "<delimiter>$delimiter</delimiter>";
 
 // sonuçlar - sayfa güncellemesi için
 
-	echo "<elem1>$lines_this</elem1>";
-	echo "<elem2>$lines_done</elem2>";
-	echo "<elem3>$lines_togo</elem3>";
-	echo "<elem4>$lines_tota</elem4>";
-	
-	echo "<elem5>$queries_this</elem5>";
-	echo "<elem6>$queries_done</elem6>";
-	echo "<elem7>$queries_togo</elem7>";
-	echo "<elem8>$queries_tota</elem8>";
-	
-	echo "<elem9>$bytes_this</elem9>";
-	echo "<elem10>$bytes_done</elem10>";
-	echo "<elem11>$bytes_togo</elem11>";
-	echo "<elem12>$bytes_tota</elem12>";
-			
-	echo "<elem13>$kbytes_this</elem13>";
-	echo "<elem14>$kbytes_done</elem14>";
-	echo "<elem15>$kbytes_togo</elem15>";
-	echo "<elem16>$kbytes_tota</elem16>";
-	
-	echo "<elem17>$mbytes_this</elem17>";
-	echo "<elem18>$mbytes_done</elem18>";
-	echo "<elem19>$mbytes_togo</elem19>";
-	echo "<elem20>$mbytes_tota</elem20>";
-	
-	echo "<elem21>$pct_this</elem21>";
-	echo "<elem22>$pct_done</elem22>";
-	echo "<elem23>$pct_togo</elem23>";
-	echo "<elem24>$pct_tota</elem24>";
-	echo "<elem_bar>".htmlentities($pct_bar)."</elem_bar>";
-				
-	echo "</root>";		
+    echo "<elem1>$lines_this</elem1>";
+    echo "<elem2>$lines_done</elem2>";
+    echo "<elem3>$lines_togo</elem3>";
+    echo "<elem4>$lines_tota</elem4>";
+    
+    echo "<elem5>$queries_this</elem5>";
+    echo "<elem6>$queries_done</elem6>";
+    echo "<elem7>$queries_togo</elem7>";
+    echo "<elem8>$queries_tota</elem8>";
+    
+    echo "<elem9>$bytes_this</elem9>";
+    echo "<elem10>$bytes_done</elem10>";
+    echo "<elem11>$bytes_togo</elem11>";
+    echo "<elem12>$bytes_tota</elem12>";
+            
+    echo "<elem13>$kbytes_this</elem13>";
+    echo "<elem14>$kbytes_done</elem14>";
+    echo "<elem15>$kbytes_togo</elem15>";
+    echo "<elem16>$kbytes_tota</elem16>";
+    
+    echo "<elem17>$mbytes_this</elem17>";
+    echo "<elem18>$mbytes_done</elem18>";
+    echo "<elem19>$mbytes_togo</elem19>";
+    echo "<elem20>$mbytes_tota</elem20>";
+    
+    echo "<elem21>$pct_this</elem21>";
+    echo "<elem22>$pct_done</elem22>";
+    echo "<elem23>$pct_togo</elem23>";
+    echo "<elem24>$pct_tota</elem24>";
+    echo "<elem_bar>".htmlentities($pct_bar)."</elem_bar>";
+                
+    echo "</root>";		
 }
 
 function create_ajax_script() 
@@ -1321,106 +1330,106 @@ function create_ajax_script()
   global $linenumber, $foffset, $totalqueries, $delaypersession, $curfilename, $delimiter;
 ?>
 
-	<script type="text/javascript" language="javascript">			
+    <script type="text/javascript" language="javascript">			
 
   // sonraki eylem url'sini oluşturur (yükleme sayfası veya XML yanıtı)
-	function get_url(linenumber,fn,foffset,totalqueries,delimiter) {
-		return "<?php echo $_SERVER['PHP_SELF'] ?>?start="+linenumber+"&fn="+fn+"&foffset="+foffset+"&totalqueries="+totalqueries+"&delimiter="+delimiter+"&ajaxrequest=true";
-	}
-	
-	// extracts text from XML element (itemname must be unique)
+    function get_url(linenumber,fn,foffset,totalqueries,delimiter) {
+        return "<?php echo $_SERVER['PHP_SELF'] ?>?start="+linenumber+"&fn="+fn+"&foffset="+foffset+"&totalqueries="+totalqueries+"&delimiter="+delimiter+"&ajaxrequest=true";
+    }
+    
+    // extracts text from XML element (itemname must be unique)
   // metni XML öğesinden çıkarır (öğe adı benzersiz olmalıdır)
-	function get_xml_data(itemname,xmld) {
-		return xmld.getElementsByTagName(itemname).item(0).firstChild.data;
-	}
-	
-	function makeRequest(url) {
-		http_request = false;
-		if (window.XMLHttpRequest) { 
-		// Mozilla etc.
-			http_request = new XMLHttpRequest();
-			if (http_request.overrideMimeType) {
-				http_request.overrideMimeType("text/xml");
-			}
-		} else if (window.ActiveXObject) { 
-		// IE
-			try {
-				http_request = new ActiveXObject("Msxml2.XMLHTTP");
-			} catch(e) {
-				try {
-					http_request = new ActiveXObject("Microsoft.XMLHTTP");
-				} catch(e) {}
-			}
-		}
-		if (!http_request) {
-				alert("Cannot create an XMLHTTP instance");
-				return false;
-		}
-		http_request.onreadystatechange = server_response;
-		http_request.open("GET", url, true);
-		http_request.send(null);
-	}
-	
-	function server_response() 
-	{
+    function get_xml_data(itemname,xmld) {
+        return xmld.getElementsByTagName(itemname).item(0).firstChild.data;
+    }
+    
+    function makeRequest(url) {
+        http_request = false;
+        if (window.XMLHttpRequest) { 
+        // Mozilla etc.
+            http_request = new XMLHttpRequest();
+            if (http_request.overrideMimeType) {
+                http_request.overrideMimeType("text/xml");
+            }
+        } else if (window.ActiveXObject) { 
+        // IE
+            try {
+                http_request = new ActiveXObject("Msxml2.XMLHTTP");
+            } catch(e) {
+                try {
+                    http_request = new ActiveXObject("Microsoft.XMLHTTP");
+                } catch(e) {}
+            }
+        }
+        if (!http_request) {
+                alert("Cannot create an XMLHTTP instance");
+                return false;
+        }
+        http_request.onreadystatechange = server_response;
+        http_request.open("GET", url, true);
+        http_request.send(null);
+    }
+    
+    function server_response() 
+    {
 
-	  // doğru yanıt bekleniyor
-	  if (http_request.readyState != 4)
-		return;
+      // doğru yanıt bekleniyor
+      if (http_request.readyState != 4)
+        return;
 
-	  if (http_request.status != 200) 
-	  {
-	    alert("Sayfa kullanılamıyor veya yanlış url!")
-	    return;
-	  }
-		
-		// r = xml yanıtı
-		var r = http_request.responseXML;
-		
-		//if received not XML but HTML with new page to show
+      if (http_request.status != 200) 
+      {
+        alert("Sayfa kullanılamıyor veya yanlış url!")
+        return;
+      }
+        
+        // r = xml yanıtı
+        var r = http_request.responseXML;
+        
+        //if received not XML but HTML with new page to show
     // XML değil, gösterilecek yeni sayfayla birlikte HTML alındıysa
-		if (!r || r.getElementsByTagName('root').length == 0) 
-		{	var text = http_request.responseText;
-			document.open();
-			document.write(text);		
-			document.close();	
-			return;		
-		}
-		
-		// " Şimdi işlenen satır başlangıcı:" güncelle
-		document.getElementsByClassName('suan_satir')[0].innerHTML = 
-			"Şuan işlenen satır başlangıcı: " + 
-			   r.getElementsByTagName('linenumber').item(0).firstChild.nodeValue;
-		
-		// tabloyu yeni değerlerle güncelle
-		for(i = 1; i <= 24; i++)
-			document.getElementById("bartablo").getElementsByTagName("td").item(i-1).firstChild.data = get_xml_data('elem'+i,r);
-		
-		// renk bar çubuğunu güncelle
-		document.getElementById("bartablo").getElementsByTagName("td").item(24).innerHTML = 
-			r.getElementsByTagName('elem_bar').item(0).firstChild.nodeValue;
-			 
-		// action url (XML response)
+        if (!r || r.getElementsByTagName('root').length == 0) 
+        {	var text = http_request.responseText;
+            document.open();
+            document.write(text);		
+            document.close();	
+            return;		
+        }
+        
+        // " Şimdi işlenen satır başlangıcı:" güncelle
+        document.getElementsByClassName('suan_satir')[0].innerHTML = 
+            "Şuan işlenen satır başlangıcı: " + 
+               r.getElementsByTagName('linenumber').item(0).firstChild.nodeValue;
+        
+        // tabloyu yeni değerlerle güncelle
+        for(i = 1; i <= 24; i++)
+            document.getElementById("bartablo").getElementsByTagName("td").item(i-1).firstChild.data = get_xml_data('elem'+i,r);
+        
+        // renk bar çubuğunu güncelle
+        document.getElementById("bartablo").getElementsByTagName("td").item(24).innerHTML = 
+            r.getElementsByTagName('elem_bar').item(0).firstChild.nodeValue;
+             
+        // action url (XML response)
     // eylem url'si (XML yanıtı)
-		url_request =  get_url(
-			get_xml_data('linenumber',r),
-			get_xml_data('fn',r),
-			get_xml_data('foffset',r),
-			get_xml_data('totalqueries',r),
-			get_xml_data('delimiter',r));
-		
-		// ask for XML response
+        url_request =  get_url(
+            get_xml_data('linenumber',r),
+            get_xml_data('fn',r),
+            get_xml_data('foffset',r),
+            get_xml_data('totalqueries',r),
+            get_xml_data('delimiter',r));
+        
+        // ask for XML response
     // XML yanıtı iste
-		window.setTimeout("makeRequest(url_request)",500+<?php echo $delaypersession; ?>);
-	}
+        window.setTimeout("makeRequest(url_request)",500+<?php echo $delaypersession; ?>);
+    }
 
-	// First Ajax request from initial page
+    // First Ajax request from initial page
   // İlk sayfadan ilk Ajax isteği
 
-	var http_request = false;
-	var url_request =  get_url(<?php echo ($linenumber.',"'.urlencode($curfilename).'",'.$foffset.','.$totalqueries.',"'.urlencode($delimiter).'"') ;?>);
-	window.setTimeout("makeRequest(url_request)",500+<?php echo $delaypersession; ?>);
-	</script>
+    var http_request = false;
+    var url_request =  get_url(<?php echo ($linenumber.',"'.urlencode($curfilename).'",'.$foffset.','.$totalqueries.',"'.urlencode($delimiter).'"') ;?>);
+    window.setTimeout("makeRequest(url_request)",500+<?php echo $delaypersession; ?>);
+    </script>
 
 <?php
 }

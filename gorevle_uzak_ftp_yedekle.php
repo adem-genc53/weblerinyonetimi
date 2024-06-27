@@ -217,8 +217,8 @@ if(isset($_POST['ftpye_yukle']) && $_POST['ftpye_yukle'] == '1' && isset($_POST[
 require_once __DIR__ . '/includes/connect.php';
     // FTP BAĞLANTI BİLGİLERİ
     $ftp_server     = $genel_ayarlar['sunucu']; //ftp domain name
-    $ftp_username   = $genel_ayarlar['username']; //ftp user name 
-    $ftp_password   = $genel_ayarlar['password']; //ftp passowrd
+    $ftp_username   = $hash->take($genel_ayarlar['username']); //ftp user name 
+    $ftp_password   = $hash->take($genel_ayarlar['password']); //ftp passowrd
     $ftp_path       = $genel_ayarlar['path']; //ftp passowrd
 
     $dosya_adi_yolu                 = $_POST['yerel_den_secilen_dosya'];

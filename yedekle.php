@@ -6,17 +6,6 @@ require_once('check-login.php');
 require_once("includes/turkcegunler.php");
 ##########################################################################################################
 
-    if(!empty($_SESSION["dizitablolar"])){
-        unset($_SESSION["dizitablolar"]);
-    }
-
-    // Yedeklenecek dizin yoksa oluştur
-    if(!file_exists(BACKUPDIR)){
-        if (!mkdir(BACKUPDIR, 0777, true)) {
-            die('Failed to create folder' .BACKUPDIR);
-        }
-    }
-
 ##########################################################################################################
 include('includes/header.php');
 include('includes/navigation.php');

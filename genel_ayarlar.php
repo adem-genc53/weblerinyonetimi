@@ -5,17 +5,6 @@ require_once('includes/connect.php');
 require_once('check-login.php');
 require_once("includes/turkcegunler.php");
 ##########################################################################################################
-    $dizin_array = [];
-    if(!empty($_SESSION["dizitablolar"])){
-        unset($_SESSION["dizitablolar"]);
-    }
-
-    // Yedeklenecek dizin yoksa oluştur
-    if(!file_exists(BACKUPDIR)){
-        if (!mkdir(BACKUPDIR, 0777, true)) {
-            die('Failed to create folder' .BACKUPDIR);
-        }
-    }
 
     //$dizin_array = array_map('basename', glob(DIZINDIR.'*', GLOB_ONLYDIR));
     //echo '<pre>' . print_r(array_map('basename', glob(DIZINDIR.'*', GLOB_ONLYDIR)), true) . '</pre>';
@@ -128,21 +117,48 @@ require_once("includes/turkcegunler.php");
     if(isset($_POST['sunucu'])){
         $sunucu     = $_POST['sunucu']      ?? null;
         $port       = $_POST['port']        ?? null;
-        $username   = $_POST['username']    ?? null;
-        $password   = $_POST['password']    ?? null;
+
+        if(isset($_POST['username']) && empty($_POST['username'])){
+        $ftpuser = "";
+        }else{
+        $username      = $hash->make(trim($_POST['username']));
+        $ftpuser = 'username=:username,';
+        }
+
+        if(isset($_POST['password']) && empty($_POST['password'])){
+        $ftppassword  = "";
+        }else{
+        $password  = $hash->make(trim($_POST['password']));
+        $ftppassword  = 'password=:password,';
+        }
+
         $path       = $_POST['path']       ?? "/";
 
     try {
     $sorgu = "UPDATE genel_ayarlar SET
-            sunucu=?,
-            port=?,
-            username=?,
-            password=?,
-            path=?
+            sunucu=:sunucu,
+            port=:port,
+            $ftpuser
+            $ftppassword
+            path=:path
             LIMIT 1 ";
 
                 $stmt= $PDOdb->prepare($sorgu);
-                $stmt->execute([$sunucu, $port, $username, $password, $path]);
+
+                $stmt->bindParam(':sunucu', $sunucu, PDO::PARAM_STR);
+                $stmt->bindParam(':port', $port, PDO::PARAM_INT);
+
+                if(isset($_POST['username']) && !empty($_POST['username'])){
+                $stmt->bindParam(':username', $username, PDO::PARAM_STR);
+                }
+
+                if(isset($_POST['password']) && !empty($_POST['password'])){
+                $stmt->bindParam(':password', $password, PDO::PARAM_STR);
+                }
+                $stmt->bindParam(':path', $path, PDO::PARAM_STR);
+
+                $stmt->execute();
+
             if ($stmt->rowCount() > 0) {
                 $messages[] = "FTP Bilgileri Başarıyla Güncellendi.";
                 header("Refresh: 2; url=".htmlspecialchars($_SERVER["PHP_SELF"])."?");
@@ -552,16 +568,16 @@ include('includes/sub_navbar.php');
                                                         <tr>
                                                             <td>Kullanıcı Adı:</td>
                                                             <td style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;">
-                                                                <input class="form-control" type="text" name="username" value="<?php echo $genel_ayarlar['username']; ?>">
+                                                                <input class="form-control" type="text" name="username" placeholder="Kullanıcı adı değiştiriyorsanız yeni kullanıcı adı giriniz" />
                                                             </td>
-                                                            <td colspan="3">&nbsp;</td>
+                                                            <td colspan="3">FTP Kullanıcı adı, şifreli kayıt edildiği için burada gösterilmez</td>
                                                         </tr>
                                                         <tr>
                                                             <td>Şifre:</td>
                                                             <td style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;">
-                                                                <input class="form-control" type="text" name="password" value="<?php echo $genel_ayarlar['password']; ?>">
+                                                                <input class="form-control" type="text" name="password" placeholder="Şifreyi değiştiriyorsanız yeni şifre girin" />
                                                             </td>
-                                                            <td colspan="3">&nbsp;</td>
+                                                            <td colspan="3">FTP Şifresi, şifreli kayıt edildiği için burada gösterilmez</td>
                                                         </tr>
                                                         <tr>
                                                             <td>FTP iç Yolu:</td>

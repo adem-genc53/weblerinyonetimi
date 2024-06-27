@@ -3,6 +3,20 @@
 require_once('includes/connect.php');
 require_once('check-login.php');
 require_once("includes/turkcegunler.php");
+//echo '<pre>' . print_r($_POST, true) . '</pre>';
+##########################################################################################################
+    if(isset( $_POST['veri_del'] ) ){
+        $sil = $PDOdb->prepare("DELETE FROM zamanlanmisgorev WHERE id = ?");
+
+            $sil->execute([$_POST['veri_del']]);
+            if($sil->rowCount()){
+                $messages[] = $_POST['veri_del']." ID nolu görev başarıyla silindi<br />";
+            }else{
+                $errors[] = $_POST['veri_del']." ID nolu görev bir hatadan dolayı silinemedi<br />";
+            }
+            header("Refresh: 2; url=".htmlspecialchars($_SERVER["PHP_SELF"])."?");
+    }
+##########################################################################################################
 
 $edit_secili_secilen_yedekleme = 0;
 
@@ -1732,6 +1746,7 @@ include('includes/sub_navbar.php');
     <input type="hidden" name="veri_del" id="veri_del">
 </form>
 <script>
+
     $(document).on('click', "[id^=veri_sil_]", function(){
         var id = $(this).attr('id');
         id = id.replace("veri_sil_",'');
@@ -1751,6 +1766,7 @@ include('includes/sub_navbar.php');
       }
 
     });
+
 </script>
 
         </div><!-- / <div class="content-wrapper"> -->
@@ -2143,31 +2159,6 @@ if(secilen_yedekleme>0){
 
 }
 
-</script>
-
-<script type="text/javascript">
-
-function GorevSil(id, db_adi){
-            $(function()
-              {
-                jw('b secim',sil_dur).baslik("Görev Silmeyi Onayla").icerik("Görevi silmek istediğinizden emin misiniz?<br /><br />Veri tabanını yedeklemediniz ise Silmenin geri dönüşü yoktur").en(450).kilitle().ac();
-              })
-              
-          function sil_dur(x){
-                if(x==1){
-                  var bekleme = jw("b bekle").baslik("Görev Siliniyor...").en(350).boy(120).kilitle().akilliKapatPasif().ac(); 
-                $.ajax({
-                type: "POST",
-                url: "kayitsil.php",
-                data: { "db_adi" : db_adi, "gorev_sil" : id },
-                success: function(veriler){
-                  bekleme.kapat();
-                  jw("b", function(){ window.location = "gorevzamanlayici.php"; }).baslik("Görev Silme Sonucu").icerik(veriler).en(350).boy(80).kilitle().akilliKapatPasif().ac();
-                }
-                });
-                }
-              }
-}
 </script>
 
 <script type="text/javascript">

@@ -41,8 +41,8 @@ try {
 #########################################################################################################################
     // FTP BAĞLANTI BİLGİLERİ
     $ftp_server     = $genel_ayarlar['sunucu']; //ftp domain name
-    $ftp_username   = $genel_ayarlar['username']; //ftp user name 
-    $ftp_password   = $genel_ayarlar['password']; //ftp passowrd
+    $ftp_username   = $hash->take($genel_ayarlar['username']); //ftp user name 
+    $ftp_password   = $hash->take($genel_ayarlar['password']); //ftp passowrd
     $ftp_path       = $genel_ayarlar['path']; //ftp passowrd
 #########################################################################################################################
 // ÇALIŞTIRILACAK DOSYA URL KONTROLU VE TAM URL YE DÖNÜŞTÜRMEK

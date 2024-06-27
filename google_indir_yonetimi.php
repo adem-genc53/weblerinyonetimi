@@ -8,16 +8,6 @@ ini_set('memory_limit', '-1');
 
 ##########################################################################################################
 
-    if(!empty($_SESSION["dizitablolar"])){
-        unset($_SESSION["dizitablolar"]);
-    }
-
-    // Yedeklenecek dizin yoksa oluştur
-    if(!file_exists(BACKUPDIR)){
-        if (!mkdir(BACKUPDIR, 0777, true)) {
-            die('Failed to create folder' .BACKUPDIR);
-        }
-    }
 ##########################################################################################################
 include('includes/header.php');
 include('includes/navigation.php');

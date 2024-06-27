@@ -149,8 +149,6 @@ require_once("includes/turkcegunler.php");
     $asagiokfree = "";
     }
 
-    $_SESSION["dizitablolar"] = [];
-
 ?>
     <colgroup span="7">
         <col style="width:28%"></col>

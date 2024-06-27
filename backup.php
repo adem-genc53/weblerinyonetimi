@@ -14,9 +14,17 @@ if (!function_exists('veritabaniYedekleme')) {
     if (!function_exists('getInitialSettings')) {
         function getInitialSettings($PDOdbsecilen) {
             $settings = [];
+            GLOBAL $genel_ayarlar;
 
-            $settings['sql_mode'] = $PDOdbsecilen->query("SELECT @@sql_mode")->fetchColumn();
-            $settings['time_zone'] = $PDOdbsecilen->query("SELECT @@time_zone")->fetchColumn();
+            // DateTime ve DateTimeZone kullanarak saat dilimi farkını hesaplayın
+            $dateTime = new DateTime('now', new DateTimeZone($genel_ayarlar['secili_zaman_dilimi']));
+            $offset = $dateTime->getOffset() / 3600; // Saat cinsinden farkı al
+
+            // Farkı + veya - işareti ile formatlayın
+            $formatted_offset = sprintf('%+03d:00', $offset);
+
+            $settings['sql_mode'] = $PDOdb->query("SELECT @@sql_mode")->fetchColumn();
+            $settings['time_zone'] = $formatted_offset; //$PDOdb->query("SELECT @@time_zone")->fetchColumn();
 
             // Eski karakter seti ayarlarını alın
             $settings['character_set_client'] = $PDOdbsecilen->query("SELECT @@character_set_client")->fetchColumn();
@@ -279,12 +287,12 @@ if (!function_exists('veritabaniYedekleme')) {
             // SQL Mode ayarları
             $sql_mode = 'NO_AUTO_VALUE_ON_ZERO'; // Varsayılan değer
             if (!empty($initialSettings['sql_mode'])) {
-                $sql_mode = $initialSettings['sql_mode'];
+                //$sql_mode = $initialSettings['sql_mode'];
             }
             // Time Zone ayarları
-            $time_zone = '+00:00'; // Varsayılan değer
+            $time_zone = ''.$initialSettings["time_zone"].''; // Varsayılan değer
             if (!empty($initialSettings['time_zone']) && $initialSettings['time_zone'] != 'SYSTEM') {
-                $time_zone = $initialSettings['time_zone'];
+                //$time_zone = $initialSettings['time_zone'];
             }
             $genel_bilgi =
                 "\n-- WebSiteler Yönetimi Scripti\n" .
@@ -334,7 +342,7 @@ if (!function_exists('veritabaniYedekleme')) {
         function getTableStructure($PDOdbsecilen, $table) {
             $quotedTable = '`' . str_replace('`', '``', $table) . '`'; // Tablo adını escape et
             $result = $PDOdbsecilen->query("SHOW CREATE TABLE {$quotedTable}")->fetch(PDO::FETCH_NUM);
-            $structure = str_replace('CREATE TABLE', 'CREATE TABLE IF NOT EXISTS', $result[1]) . ";\n";
+            $structure = str_replace('CREATE TABLE', 'CREATE TABLE IF NOT EXISTS', $result[1]) . ";";
             return $structure;
         }
     }
@@ -361,30 +369,45 @@ if (!function_exists('veritabaniYedekleme')) {
         function quoteOrNull($PDOdbsecilen, $value) {
             // Eğer değer null ise 'NULL' stringini döndür
             if ($value === null) {
-                return 'NULL';
-            }
+                $data = 'NULL';
+            }else
             // Eğer değer sayısal ise doğrudan döndür
-            if (is_numeric($value)) {
-                return $value;
-            }
+            if (is_int($value)) {
+                $data = $value;
+            }else{
             // Eğer değer ne null ne de sayısal ise PDO::quote fonksiyonunu kullan
-            return $PDOdbsecilen->quote($value);
+            $data = $PDOdbsecilen->quote($value);
+            }
+        return $data;
         }
     }
 
-        // TETİKLEYİCİLER TRIGGER ALMA FONKSİYONU
+    // TETİKLEYİCİLER TRIGGER ALMA FONKSİYONU
     if (!function_exists('getTriggers')) {
         function getTriggers($PDOdbsecilen, $table) {
-            $quotedTable = str_replace('`', '``', $table); // Tablo adını escape et
-            $triggers = '';
-            $triggersQuery = $PDOdbsecilen->query("SHOW TRIGGERS LIKE '" . $quotedTable . "'")->fetchAll(PDO::FETCH_ASSOC);
+            // Tablo adını manuel olarak escape et
+            $quotedTable = str_replace('`', '``', $table);
 
-            foreach ($triggersQuery as $trigger) {
-                $triggers .= 'DELIMITER $$' . "\n";
-                $triggers .= "CREATE TRIGGER " . $trigger['Trigger'] . " " . $trigger['Timing'] . " " . $trigger['Event'] . " ON `" . $trigger['Table'] . "` FOR EACH ROW\n" . $trigger['Statement'] . "\n";
-                $triggers .= 'DELIMITER ;' . "\n";
+            // Sorguda tablo adını kullanma
+            $triggersQuery = $PDOdbsecilen->query("SHOW TRIGGERS LIKE '$quotedTable'");
+            
+            $triggersResult = $triggersQuery->fetchAll(PDO::FETCH_ASSOC);
+            $delimiter = '$$';
+            $crlf = "\n";
+
+            $triggerQuery = '';
+
+            foreach ($triggersResult as $trigger) {
+
+                $triggerQuery .= 'DROP TRIGGER IF EXISTS `' . $trigger['Trigger'] . '`;' . $crlf;
+                $triggerQuery .= 'DELIMITER ' . $delimiter . $crlf;
+                $triggerQuery .= 'CREATE TRIGGER `' . $trigger['Trigger'] . '` '
+                    . $trigger['Timing'] . ' ' . $trigger['Event'] . ' ON `' . $trigger['Table'] . '` FOR EACH ROW ';
+                $triggerQuery .= $trigger['Statement'] . $crlf;
+                $triggerQuery .= $delimiter . $crlf;
+                $triggerQuery .= 'DELIMITER ;' . $crlf.$crlf;
             }
-        return $triggers;
+            return $triggerQuery;
         }
     }
 
