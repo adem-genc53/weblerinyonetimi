@@ -103,7 +103,7 @@ class Login {
                 }
             
                 if(empty($this->errors)){
-                    require_once('./includes/connect.php');
+                    require_once __DIR__ . '/includes/connect.php';
 
                     // Giriş Kullanıcı Bilgilerini Kontrol Edin
                     $sql = "SELECT * FROM uyeler WHERE ";
@@ -126,8 +126,8 @@ foreach ($_SESSION AS $key => $value){
     unset($_SESSION[$key]);
     }
 }
-                            require_once("includes/turkcegunler.php");
-                            $giris_zamani = strtotime(date_tr('Y-m-d H:i:s', time()));
+
+                            $giris_zamani = time();
 
                             session_regenerate_id();
                             $_SESSION['user_is_logged_in']          = true;
@@ -135,6 +135,22 @@ foreach ($_SESSION AS $key => $value){
                             $_SESSION['user_group']                 = $res['user_group'];
                             $_SESSION['user_email']                 = $res['user_email'];
                             $_SESSION['user_name']                  = $res['user_name'];
+
+                            if(isset($_POST['csrf_token']) && isset($_POST['remember_me'])){
+                                $beni_token = $_POST['csrf_token'];
+                                $userId = $res['user_id'];
+                                $expiry = time() + (86400 * 30); // 30 gün
+                                $defaultScheme = isset($_SERVER["HTTPS"]) ? 'https' : 'http';
+
+                                if($defaultScheme == 'https'){
+                                    setcookie('webyonetimi_beni', "$userId:$beni_token", $expiry, "/", "", true, true);
+                                }else{
+                                    setcookie('webyonetimi_beni', "$userId:$beni_token", $expiry, "/", "", false, true);
+                                }
+                                $stmt = $PDOdb->prepare("UPDATE uyeler SET remember_me_token = ?, token_expiry = FROM_UNIXTIME(?) WHERE user_id = ?");
+                                $stmt->execute([$beni_token, $expiry, $userId]);
+                            }
+
                             $_SESSION['last_login']                 = $giris_zamani;
 
                             //$date = new DateTime();
@@ -245,7 +261,7 @@ include('includes/header.php');
         <div class="row">
         <div class="col-8">
             <div class="icheck-primary">
-            <input type="checkbox" id="remember">
+            <input type="checkbox" id="remember" name="remember_me" value="1">
             <label for="remember">
                 Beni Hatırla
             </label>

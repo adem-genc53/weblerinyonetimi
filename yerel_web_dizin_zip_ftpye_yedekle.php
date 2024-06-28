@@ -1,9 +1,9 @@
 <?php 
 // Bismillahirrahmanirrahim
-session_start();
-require_once('includes/connect.php');
-require_once('check-login.php');
-require_once("includes/turkcegunler.php");
+require_once __DIR__ . '/includes/connect.php';
+require_once __DIR__ . '/check-login.php';
+require_once __DIR__ . '/includes/turkcegunler.php';
+
     if (!extension_loaded('ftp')) {
         exit("<div style='font-weight: bold;font-size: 16px;text-align:center;'>PHP.ini de FTP uzantısı etkinleştirilmedi.</div>");
     }

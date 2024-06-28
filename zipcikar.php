@@ -1,7 +1,5 @@
 <?php 
 // Bismillahirrahmanirrahim
-session_start();
-
 
 ini_set('memory_limit', '-1');
 ignore_user_abort(true);
@@ -10,8 +8,8 @@ set_time_limit(0);
 if (function_exists("date_default_timezone_set") && function_exists("date_default_timezone_get"))
   @date_default_timezone_set(@date_default_timezone_get());
 
-require_once('check-login.php');
-require_once("includes/turkcegunler.php");
+require_once __DIR__ . '/check-login.php';
+require_once __DIR__ . '/includes/turkcegunler.php';
 /*
 $dosya = fopen ("zipcikar.txt" , "a"); //dosya oluşturma işlemi 
 $yaz = "zip çıkar\n".print_r($_POST, true); // Yazmak istediginiz yazı 

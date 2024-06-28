@@ -215,6 +215,8 @@ if (!function_exists('uzakFTPsunucuyaYedekle')) {
 if(isset($_POST['ftpye_yukle']) && $_POST['ftpye_yukle'] == '1' && isset($_POST['yerel_den_secilen_dosya']) && !empty($_POST['yerel_den_secilen_dosya']) && isset($_POST['ftp_den_secilen_dosya']) && !empty($_POST['ftp_den_secilen_dosya']))
 {
 require_once __DIR__ . '/includes/connect.php';
+require_once(__DIR__ . '/hash.php');
+$hash = new Hash;
     // FTP BAĞLANTI BİLGİLERİ
     $ftp_server     = $genel_ayarlar['sunucu']; //ftp domain name
     $ftp_username   = $hash->take($genel_ayarlar['username']); //ftp user name 

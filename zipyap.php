@@ -194,8 +194,8 @@ function dosyaAdiniAl($dosyaAdi) {
     return $dosyaAdi;
 }
 
-require_once('includes/connect.php');
-require_once("includes/turkcegunler.php");
+require_once __DIR__ . '/includes/connect.php';
+require_once __DIR__ . '/includes/turkcegunler.php';
 
     $dosya_tarihi               = date('Y-m-d-H-i-s'); // date('Y-m-d-H-i-s', $row['sonraki_calisma']);
     $secilen_yedekleme          = $_POST['dizinadi'];

@@ -1,10 +1,9 @@
 <?php 
 // Bismillahirrahmanirrahim
-
 require_once __DIR__ . '/includes/connect.php';
 include __DIR__ . '/google_drive_setup.php';
-require_once('check-login.php');
-require_once("includes/turkcegunler.php");
+require_once __DIR__ . '/check-login.php';
+require_once __DIR__ . '/includes/turkcegunler.php';
 
 class GoogleDriveDownloader {
     private $service;

@@ -9,7 +9,7 @@
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
-SET time_zone = "+00:00";
+SET time_zone = "+03:00";
 
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
@@ -89,6 +89,8 @@ CREATE TABLE IF NOT EXISTS `uyeler` (
   `user_password_hash` char(60) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `user_email` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `user_group` int NOT NULL,
+  `remember_me_token` varchar(64) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `token_expiry` datetime DEFAULT NULL,
   `son_login` int NOT NULL DEFAULT '0',
   `last_login` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT '1',
   `login1` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
@@ -106,11 +108,10 @@ CREATE TABLE IF NOT EXISTS `uyeler` (
   UNIQUE KEY `email_user` (`user_email`)
 ) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Tablo döküm verisi `uyeler`
---
-
-INSERT INTO `uyeler` VALUES(1, 'Adem GENÇ', '$2y$10$E4K/b8wcmEoSSZoFgUgiKeXmk6Sw3MITiOlC7qCzcMJhPvBerQ226', 'admin@gmail.com', 1, 0, '3', '1700595910', '1700595962', '1700074637', '1700114269', '1700222286', '1700296908', '1700370388', '1700474059', '1700545440', '1700589538');
+-- ------------------------------------------------------
+-- Tablonun veri dökümü `uyeler`
+-- ------------------------------------------------------
+INSERT INTO `uyeler` VALUES(1, 'Adem GENÇ', '$2y$10$E4K/b8wcmEoSSZoFgUgiKeXmk6Sw3MITiOlC7qCzcMJhPvBerQ226', 'admin@gmail.com', 1, NULL, NULL, 0, '1', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 

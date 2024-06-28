@@ -1,9 +1,8 @@
 <?php 
 // Bismillahirrahmanirrahim
-session_start();
-require_once('includes/connect.php');
-require_once('check-login.php');
-require_once("includes/turkcegunler.php");
+require_once __DIR__ . '/includes/connect.php';
+require_once __DIR__ . '/check-login.php';
+require_once __DIR__ . '/includes/turkcegunler.php';
 ?>
  <thead>
     <tr class="bg-primary" style="text-align: center;line-height: 1.2;font-size: 1rem;">

@@ -1,9 +1,8 @@
 <?php 
 // Bismillahirrahmanirrahim
-session_start();
-require_once('includes/connect.php');
-require_once('check-login.php');
-require_once("includes/turkcegunler.php");
+require_once __DIR__ . '/includes/connect.php';
+require_once __DIR__ . '/check-login.php';
+require_once __DIR__ . '/includes/turkcegunler.php';
 
 ob_start();
 ini_set('memory_limit', '-1');

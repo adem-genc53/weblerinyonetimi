@@ -1,7 +1,7 @@
 <?php 
 // Bismillahirrahmanirrahim
-require_once('includes/connect.php');
-require_once('check-login.php');
+require_once __DIR__ . '/includes/connect.php';
+require_once __DIR__ . '/check-login.php';
     // echo '<pre>' . print_r($_GET, true) . '</pre>';
     // Açılacak klasör dizinde varmı yok mu kontrolu
     if(isset($_GET['dizin'])){

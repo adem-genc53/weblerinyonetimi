@@ -1,16 +1,11 @@
 <?php 
 // Bismillahirrahmanirrahim
-require_once('includes/connect.php');
-require_once('check-login.php');
-require_once("includes/turkcegunler.php");
+require_once __DIR__ . '/includes/connect.php';
+require_once __DIR__ . '/check-login.php';
+require_once __DIR__ . '/includes/turkcegunler.php';
+
 ##########################################################################################################
 $dizin = BACKUPDIR;
-    // Yedeklenecek dizin yoksa oluştur
-    if(!file_exists(BACKUPDIR)){
-        if (!mkdir(BACKUPDIR, 0777, true)) {
-            die('Failed to create folder' .BACKUPDIR);
-        }
-    }
 ###########################################################################################################################################
     // Select option için Dizinleri listeliyoruz
     $folder_arr = array();

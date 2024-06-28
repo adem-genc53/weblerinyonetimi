@@ -1,8 +1,8 @@
 <?php 
 // Bismillahirrahmanirrahim
-require_once('includes/connect.php');
-require_once('check-login.php');
-require_once("includes/turkcegunler.php");
+require_once __DIR__ . '/includes/connect.php';
+require_once __DIR__ . '/check-login.php';
+require_once __DIR__ . '/includes/turkcegunler.php';
 
 ############### GÖREV ZAMANLAMA YÖNETİMİ #######################################################################
 if($_POST['urun'] == "zamanlanmisgorev"){

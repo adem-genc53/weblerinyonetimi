@@ -1,8 +1,8 @@
 <?php 
 // Bismillahirrahmanirrahim
-require_once('includes/connect.php');
-require_once('check-login.php');
-require_once("includes/turkcegunler.php");
+require_once __DIR__ . '/includes/connect.php';
+require_once __DIR__ . '/check-login.php';
+require_once __DIR__ . '/includes/turkcegunler.php';
 ##########################################################################################################
 if(isset($_GET['sil']) == 1){
   unset($_SESSION['altdizin'],$_SESSION['folder'],$_SESSION['test']);

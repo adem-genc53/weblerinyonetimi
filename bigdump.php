@@ -1179,10 +1179,7 @@ skin_open();
     echo ("<p class='centr'><a class='btn btn-success btn-sm' href='".$_SERVER["PHP_SELF"]."'><span class='glyphicon glyphicon-ok'></span> Başlama Sayfasına Geri Dön</a></p><br />");
 
 if (isset($PDOdbsecilen))
-// Yabancı keyleri etkinleştir
-if (!$PDOdbsecilen->query('SET GLOBAL FOREIGN_KEY_CHECKS=1')) {
-  die('Yabancı anahtar kontrolleri etkinleştirilmedi.');
-}
+
 if ($file && !$gzipmode) fclose($file);
 else if ($file && $gzipmode) gzclose($file);
 

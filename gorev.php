@@ -1,12 +1,13 @@
 <?php 
 // Bismillahirrahmanirrahim
 require_once __DIR__ . '/includes/connect.php';
+require_once __DIR__ . '/includes/turkcegunler.php';
+require_once(__DIR__ . '/hash.php');
+$hash = new Hash;
 
 ini_set('memory_limit', '-1');
 ignore_user_abort(true);
 set_time_limit(0);
-require_once("includes/turkcegunler.php");
-
 #########################################################################################################################
 // Geçici dizini dinamik olarak al
 $temp_dir = sys_get_temp_dir();
@@ -38,6 +39,10 @@ register_shutdown_function(function() use ($lock_file) {
 #########################################################################################################################
 try {
 #########################################################################################################################
+    // BENİ HATIRLA TOKENİN SÜRESİ DOLANI TEMİZLE
+    $stmt = $PDOdb->prepare("DELETE FROM uyeler WHERE remember_me_token IS NOT NULL AND token_expiry < NOW()");
+    $stmt->execute();
+
 #########################################################################################################################
     // FTP BAĞLANTI BİLGİLERİ
     $ftp_server     = $genel_ayarlar['sunucu']; //ftp domain name

@@ -1,7 +1,7 @@
 <?php 
 // Bismillahirrahmanirrahim
 if(isset($_POST['ajaxtan'])){
-require_once("includes/turkcegunler.php");
+require_once __DIR__ . '/includes/turkcegunler.php';
     //echo '<pre>' . print_r($_POST, true) . '</pre>';
 // Gönderilen gün değeri
 $gun = isset($_POST['gun']) ? $_POST['gun'] : '-1';

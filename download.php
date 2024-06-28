@@ -1,11 +1,10 @@
 <?php
 // Bismillahirrahmanirrahim
-session_start();
-ini_set('memory_limit', '-1');
-require_once('includes/connect.php');
-//require_once('check-login.php');
-require_once("includes/turkcegunler.php");
 
+require_once __DIR__ . '/includes/connect.php';
+require_once __DIR__ . '/includes/turkcegunler.php';
+
+ini_set('memory_limit', '-1');
     if(isset($_GET['file']))
     {
     //dosya adını oku

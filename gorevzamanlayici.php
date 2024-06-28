@@ -1,8 +1,9 @@
 <?php 
 // Bismillahirrahmanirrahim
-require_once('includes/connect.php');
-require_once('check-login.php');
-require_once("includes/turkcegunler.php");
+require_once __DIR__ . '/includes/connect.php';
+require_once __DIR__ . '/check-login.php';
+require_once __DIR__ . '/includes/turkcegunler.php';
+
 //echo '<pre>' . print_r($_POST, true) . '</pre>';
 ##########################################################################################################
     if(isset( $_POST['veri_del'] ) ){
