@@ -9,13 +9,13 @@ class RememberMe {
         $this->pdo = $PDOdb;
     }
 
-    // COOKIE VARSA USER ID İLE TOKETİ AYIRIYORUZ
+    // COOKIE VARSA USER ID İLE TOKENİ AYIRIYORUZ
     public function checkRememberMe() {
-        if (isset($_COOKIE['webyonetimi_beni'])) {
-            list($userId, $token) = explode(':', $_COOKIE['webyonetimi_beni']);
+        if (isset($_COOKIE['beni_hatirla'])) {
+            list($userId, $token) = explode(':', $_COOKIE['beni_hatirla']);
+            // COOKIE DEKİ TOKEN İLE VERİTABANI TOKEN AYNI İSE
             if ($this->validateRememberMeToken($userId, $token)) {
-                //$_SESSION['user_id'] = $userId;
-                //$_SESSION['user_is_logged_in'] = true;
+                // KULLANICININ SESSION OTURUMU OLUŞTUR
                 $this->refreshUserSession($userId);
                 return true;
             } else {
@@ -48,17 +48,18 @@ class RememberMe {
             $_SESSION['user_name']          = $user['user_name'];
             $_SESSION['user_is_logged_in']  = true;
         } else {
+            // Geçersiz çerez olduğunda temizle
             $this->logout();
         }
     }
 
-    // COOKIE VE SESSION GEÇERLİ DEĞİL İSE COOKIE VE SESSION U TEMİZLEYİ LOGIN.PHP SAYFASINA YÖNLENDİRİYORUZ
+    // COOKIE VE SESSION GEÇERLİ DEĞİL İSE COOKIE VE SESSIONU TEMİZLEYİP LOGIN.PHP SAYFASINA YÖNLENDİRİYORUZ
     public function logout() {
         $defaultScheme = isset($_SERVER["HTTPS"]) ? 'https' : 'http';
         if($defaultScheme == 'https'){
-            setcookie('webyonetimi_beni', '', time() - 3600, "/", "", true, true);
+            setcookie('beni_hatirla', '', time() - 3600, "/", "", true, true);
         }else{
-            setcookie('webyonetimi_beni', '', time() - 3600, "/", "", false, true);
+            setcookie('beni_hatirla', '', time() - 3600, "/", "", false, true);
         }
         unset($_SESSION['user_id'], $_SESSION['user_group'], $_SESSION['user_email'], $_SESSION['user_name'], $_SESSION['user_is_logged_in']);
     }
@@ -77,78 +78,24 @@ class RememberMe {
 /************************************************************************************************************************************************* */
 
     // COOKIE MEVCUT İSE
-    if (isset($_COOKIE['webyonetimi_beni'])) {
+    if (isset($_COOKIE['beni_hatirla'])) {
 
         // FONKSİYONU ÇAĞIR VE COOKIE TOKENİN GEÇERLİ OLUP OLMADIĞINI KONTROL EDİYORUZ
         $rememberMe->checkRememberMe();
 
         // COOKIE MEVCUT DEĞİL ANCAK SESSION MEVCUT İSE 
-    } elseif (!isset($_COOKIE['webyonetimi_beni']) && $_SESSION['user_is_logged_in'] && $_SESSION['user_is_logged_in'] == true) {
+    } elseif (!isset($_COOKIE['beni_hatirla']) && $_SESSION['user_is_logged_in'] && $_SESSION['user_is_logged_in'] == true) {
         $userId = $_SESSION['user_id'] ?? null;
+        // KULLANICININ SESSION OTURUMU OLUŞTUR
         $rememberMe->refreshUserSession($userId);
 
         // COOKIE VE SESSION MEVCUT DEĞİL LOGIN.PHP SAYFASINA YÖNLENDİRİYORUZ
     } else {
-        // Kullanıcıyı giriş sayfasına yönlendir
+        // KULLANICIYI GİRİŞ SAYFASINA YÖNLENDİR
         header("Location: $site_url/login.php".$last_link);
         exit;
     }
 
 /************************************************************************************************************************************************* */
 
-/*
-    // Giriş yapan kullanıcı giriş kontrol edilecek alanlarda oturumlarından herhangi biri eşleşmiyorsa
-    // Tüm oturumları silerek tekrar login sayfasına yönlendirilecektir
-    // Bu ayrıca kullanıcı profilinde bilgileri değiştirdiğinde yeni bilgilerle oturum açmasını sağlayacaktır
-    if(isset($_SESSION['user_is_logged_in']) && $_SESSION['user_is_logged_in'] == '1'){
-        $sorgu = $PDOdbdb->prepare("SELECT * FROM uyeler WHERE user_id=? AND user_group=? AND user_email=? AND user_name=? ");
-        $sorgu->execute([$_SESSION['user_id'],$_SESSION['user_group'],$_SESSION['user_email'],$_SESSION['user_name']]);
-        $user_oku = $sorgu->fetch();
-            if($sorgu->rowCount() > 0){
-                $_SESSION['user_id']                      = $user_oku['user_id'];
-                $_SESSION['user_group']                   = $user_oku['user_group'];
-                $_SESSION['user_email']                 = $user_oku['user_email'];
-                $_SESSION['user_name']                      = $user_oku['user_name'];
-            }else{
-            unset($_SESSION['user_id'],
-                $_SESSION['user_group'],
-                $_SESSION['user_email'],
-                $_SESSION['user_name'],
-                $_SESSION['user_is_logged_in']);
-            }
-    }
-*/
-/*
-if(isset($_SESSION['user_is_logged_in']) && ($_SESSION['user_is_logged_in'] == true) ){
-	//header("location: /");
-}else{
-	// kullanıcıyı giriş sayfasına yönlendir
-	header("location: $site_url/login.php");
-	exit;
-}
-
-if(isset($_SESSION['user_id']) && !empty($_SESSION['user_id'])){
-	//header("location: /");
-}else{
-	// kullanıcıyı giriş sayfasına yönlendir
-	header("location: $site_url/login.php");
-	exit;
-}
-
-if(isset($_SESSION['last_login']) && !empty($_SESSION['last_login'])){
-	//header("location: /");
-}else{
-	// kullanıcıyı giriş sayfasına yönlendir
-	header("location: $site_url/login.php");
-	exit;
-}
-
-if(isset($_SESSION['user_email']) && !empty($_SESSION['user_email'])){
-	//header("location: /");
-}else{
-	// kullanıcıyı giriş sayfasına yönlendir
-	header("location: $site_url/login.php");
-	exit;
-}
-*/
 ?>

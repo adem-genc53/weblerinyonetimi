@@ -143,9 +143,9 @@ foreach ($_SESSION AS $key => $value){
                                 $defaultScheme = isset($_SERVER["HTTPS"]) ? 'https' : 'http';
 
                                 if($defaultScheme == 'https'){
-                                    setcookie('webyonetimi_beni', "$userId:$beni_token", $expiry, "/", "", true, true);
+                                    setcookie('beni_hatirla', "$userId:$beni_token", $expiry, "/", "", true, true);
                                 }else{
-                                    setcookie('webyonetimi_beni', "$userId:$beni_token", $expiry, "/", "", false, true);
+                                    setcookie('beni_hatirla', "$userId:$beni_token", $expiry, "/", "", false, true);
                                 }
                                 $stmt = $PDOdb->prepare("UPDATE uyeler SET remember_me_token = ?, token_expiry = FROM_UNIXTIME(?) WHERE user_id = ?");
                                 $stmt->execute([$beni_token, $expiry, $userId]);

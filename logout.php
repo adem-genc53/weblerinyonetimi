@@ -7,9 +7,9 @@ if(session_status() == PHP_SESSION_NONE && !headers_sent()) {
 
     $defaultScheme = isset($_SERVER["HTTPS"]) ? 'https' : 'http';
     if($defaultScheme == 'https'){
-        setcookie('webyonetimi_beni', '', time() - 3600, "/", "", true, true);
+        setcookie('beni_hatirla', '', time() - 3600, "/", "", true, true);
     }else{
-        setcookie('webyonetimi_beni', '', time() - 3600, "/", "", false, true);
+        setcookie('beni_hatirla', '', time() - 3600, "/", "", false, true);
     }
 
 $session = array("last_login","user_name","user_email","user_group","user_id","user_is_logged_in");
