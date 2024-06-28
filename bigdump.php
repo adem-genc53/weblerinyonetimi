@@ -1,8 +1,11 @@
 <?php 
 // Bismillahirrahmanirrahim
-require_once('includes/connect.php');
-require_once('check-login.php');
-require_once("includes/turkcegunler.php");
+require_once __DIR__ . '/includes/connect.php';
+require_once __DIR__ . '/check-login.php';
+require_once __DIR__ . '/includes/turkcegunler.php';
+require_once(__DIR__ . '/hash.php');
+$hash = new Hash;
+
 error_reporting(E_ALL);
 
 if(isset($_GET['do'])){
@@ -102,7 +105,8 @@ if(isset($_POST['veritabani_id']) && $_POST['veritabani_id'] > 0 || isset($_SESS
     $db_yok = true;
     $db_name = $varsayilan['db_name'];
 }else{
-    
+    $PDOdbsecilen = $PDOdb;
+    $db_name = DB_NAME;
 }
 #########################################################################################################################################
 if($db_yok){
@@ -505,6 +509,7 @@ if (!$error && !TESTMODE) {
     $error=true;
   }
 */
+
   if (!$error && $db_connection_charset!=='')
     if($db_yok){
       $PDOdbsecilen->query("SET NAMES $db_connection_charset");
