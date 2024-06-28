@@ -1,7 +1,9 @@
 <?php 
 // Bismillahirrahmanirrahim
-require_once('includes/connect.php');
-require_once("includes/turkcegunler.php");
+require_once __DIR__ . '/includes/connect.php';
+require_once __DIR__ . '/includes/turkcegunler.php';
+require_once(__DIR__ . '/hash.php');
+$hash = new Hash;
     //echo '<pre>' . print_r($_POST, true) . '</pre>';
     //exit;
 
@@ -23,7 +25,7 @@ if (!function_exists('veritabaniYedekleme')) {
             // Farkı + veya - işareti ile formatlayın
             $formatted_offset = sprintf('%+03d:00', $offset);
 
-            $settings['sql_mode'] = $PDOdb->query("SELECT @@sql_mode")->fetchColumn();
+            $settings['sql_mode'] = $PDOdbsecilen->query("SELECT @@sql_mode")->fetchColumn();
             $settings['time_zone'] = $formatted_offset; //$PDOdb->query("SELECT @@time_zone")->fetchColumn();
 
             // Eski karakter seti ayarlarını alın

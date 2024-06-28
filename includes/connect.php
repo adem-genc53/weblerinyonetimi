@@ -1,8 +1,9 @@
 <?php 
 // Bismillahirrahmanirrahim
-if (session_id() == '' && !headers_sent()) {
-session_start();
+if(session_status() == PHP_SESSION_NONE && !headers_sent()) {
+  session_start();
 }
+
 
 // Hata raporlamayı aç
 ini_set('display_errors', 1);
@@ -13,8 +14,6 @@ error_reporting(E_ALL);
 ini_set('log_errors', 1);
 ini_set('error_log', '/home/user/error.log'); // Bu yolu kendi sunucunuzdaki uygun bir yolla değiştirin
 
-    require(dirname(dirname(__FILE__))."/hash.php");
-    $hash = new Hash;
 
     defined('DB_USER')      or define('DB_USER', 'root');
     defined('DB_PASSWORD')  or define('DB_PASSWORD', '');
