@@ -84,7 +84,7 @@ class RememberMe {
         $rememberMe->checkRememberMe();
 
         // COOKIE MEVCUT DEĞİL ANCAK SESSION MEVCUT İSE 
-    } elseif (!isset($_COOKIE['beni_hatirla']) && $_SESSION['user_is_logged_in'] && $_SESSION['user_is_logged_in'] == true) {
+    } elseif (!isset($_COOKIE['beni_hatirla']) && isset($_SESSION['user_is_logged_in']) && $_SESSION['user_is_logged_in'] == true) {
         $userId = $_SESSION['user_id'] ?? null;
         // KULLANICININ SESSION OTURUMU OLUŞTUR
         $rememberMe->refreshUserSession($userId);
