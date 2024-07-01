@@ -40,7 +40,7 @@ register_shutdown_function(function() use ($lock_file) {
 try {
 #########################################################################################################################
     // BENİ HATIRLA TOKENİN SÜRESİ DOLANI TEMİZLE
-    $stmt = $PDOdb->prepare("UPDATE uyeler SET remember_me_token = NULL, token_expiry = NULL WHERE remember_me_token IS NOT NULL AND token_expiry < NOW()");
+    $stmt = $PDOdb->prepare("UPDATE uyeler SET remember_me_token = NULL, token_expiry = NULL WHERE remember_me_token IS NOT NULL AND token_expiry < time()");
     $stmt->execute();
 
 #########################################################################################################################

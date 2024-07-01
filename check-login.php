@@ -53,8 +53,9 @@ session_name(str_replace('.','_',$serverName)); // Bu oturum name oturum_guncell
 
 // COOKIE DEKİ TOKEN İLE VERİTABANI TOKEN AYNI MI KONTROL EDİYORUZ
     private function validateRememberMeToken($userId, $token): bool {
-        $stmt = $this->PDOdb->prepare("SELECT user_id FROM uyeler WHERE user_id = ? AND remember_me_token = ? AND token_expiry > NOW()");
-        $stmt->execute([$userId, $token]);
+        $newExpiry = time();
+        $stmt = $this->PDOdb->prepare(" SELECT user_id FROM uyeler WHERE user_id = ? AND remember_me_token = ? AND token_expiry > ? ");
+        $stmt->execute([$userId, $token, $newExpiry]);
         return $stmt->fetchColumn();
     }
 
@@ -75,7 +76,7 @@ session_name(str_replace('.','_',$serverName)); // Bu oturum name oturum_guncell
 
 // COOKIE TEOKENİ KULLANICI HESABINA KAYDET
     private function saveRememberMeTokenToDatabase($userId, $token, $expiry) {
-        $stmt = $this->PDOdb->prepare("UPDATE uyeler SET remember_me_token = ?, token_expiry = FROM_UNIXTIME(?) WHERE user_id = ?");
+        $stmt = $this->PDOdb->prepare("UPDATE uyeler SET remember_me_token = ?, token_expiry = ? WHERE user_id = ?");
         $stmt->execute([$token, $expiry, $userId]);
     }
 
@@ -190,12 +191,14 @@ session_name(str_replace('.','_',$serverName)); // Bu oturum name oturum_guncell
 
         // FONKSİYONU ÇAĞIR VE COOKIE TOKENİN GEÇERLİ OLUP OLMADIĞINI KONTROL EDİYORUZ
         $benihatirla->checkRememberMe();
+        header("Location: /");
 
         // COOKIE MEVCUT DEĞİL ANCAK SESSION MEVCUT İSE 
     } elseif (!isset($_COOKIE['beni_hatirla']) && isset($_SESSION['user_is_logged_in']) && $_SESSION['user_is_logged_in'] == true) {
         $userId = $_SESSION['user_id'] ?? null;
         // KULLANICININ SESSION OTURUMU OLUŞTUR
         $benihatirla->refreshUserSession($userId);
+        header("Location: /");
 
         // COOKIE VE SESSION MEVCUT DEĞİL LOGIN.PHP SAYFASINA YÖNLENDİRİYORUZ
     } elseif (!isset($_COOKIE['beni_hatirla']) && !isset($_SESSION['user_is_logged_in'])) {

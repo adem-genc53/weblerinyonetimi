@@ -79,7 +79,7 @@ session_name(str_replace('.','_',$serverName)); // Bu oturum name oturum_guncell
                         }else{
                             setcookie('beni_hatirla', "$userId:$beni_token", $expiry, "/", "", false, true);
                         }
-                        $stmt = $this->PDOdb->prepare("UPDATE uyeler SET remember_me_token = ?, token_expiry = FROM_UNIXTIME(?) WHERE user_id = ?");
+                        $stmt = $this->PDOdb->prepare("UPDATE uyeler SET remember_me_token = ?, token_expiry = ? WHERE user_id = ?");
                         $stmt->execute([$beni_token, $expiry, $userId]);
                     }
 
