@@ -108,25 +108,29 @@ ini_set('error_log', '/home/user/error.log'); // Bu yolu kendi sunucunuzdaki uyg
 /////////////////////////////////////////////////////////////////////////////////////////////////////
     // DEFINE de belirlenen dizin yoksa oluştur
 if(preg_match("/[a-zA-Z0-9_]/i", BACKUPDIR)){
-    if(!file_exists(BACKUPDIR)){
-        if (!mkdir(BACKUPDIR, 0777, true)) {
+    if(!is_dir(BACKUPDIR)){
+        if (!mkdir(BACKUPDIR, 0755, true)) {
             die('Klasörler oluşturulamadı.');
         }
     }
     // Dizinin içine kimse ulaşamasın diye .htaccess oluşturuyoruz ve içine 'deny from all' yazıyoruz
-    $file = new SplFileObject(BACKUPDIR . '/.htaccess', "w") ;
-    $file->fwrite('deny from all');
+    if(!file_exists(BACKUPDIR . '/.htaccess')){
+        $file = new SplFileObject(ZIPDIR . '/.htaccess', "w") ;
+        $file->fwrite('deny from all');
+    }
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 if(preg_match("/[a-zA-Z0-9_]/i", ZIPDIR)){
-    if(!file_exists(ZIPDIR)){
-        if (!mkdir(ZIPDIR, 0777, true)) {
+    if(!is_dir(ZIPDIR)){
+        if (!mkdir(ZIPDIR, 0755, true)) {
             die('Klasörler oluşturulamadı.');
         }
     }
     // Dizinin içine kimse ulaşamasın diye .htaccess oluşturuyoruz ve içine 'deny from all' yazıyoruz
-    $file = new SplFileObject(ZIPDIR . '/.htaccess', "w") ;
-    $file->fwrite('deny from all');
+    if(!file_exists(ZIPDIR . '/.htaccess')){
+        $file = new SplFileObject(ZIPDIR . '/.htaccess', "w") ;
+        $file->fwrite('deny from all');
+    }
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////
