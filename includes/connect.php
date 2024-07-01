@@ -2,16 +2,16 @@
 // Bismillahirrahmanirrahim
 if(session_status() == PHP_SESSION_NONE && !headers_sent()){
 // Oturum adını belirleyin
-if (isset($_SERVER['SERVER_NAME'])) {
-    $serverName = $_SERVER['SERVER_NAME'];
-} elseif (isset($_SERVER['HTTP_HOST'])) {
-    $serverName = $_SERVER['HTTP_HOST'];
-} elseif (getenv('SERVER_NAME') !== null) {
-    $serverName = getenv('SERVER_NAME');
+if (isset($_SERVER['SERVER_NAME']) && !is_int($_SERVER['SERVER_NAME']) && !empty($_SERVER['SERVER_NAME'])) {
+    $serverName = str_replace('.','_', $_SERVER['SERVER_NAME']);
+} elseif (isset($_SERVER['HTTP_HOST']) && !is_int($_SERVER['HTTP_HOST']) && !empty($_SERVER['HTTP_HOST'])) {
+    $serverName = str_replace('.','_', $_SERVER['HTTP_HOST']);
+} elseif (getenv('SERVER_NAME') !== null && !is_int(getenv('SERVER_NAME')) && !empty(getenv('SERVER_NAME'))) {
+    $serverName = str_replace('.','_', getenv('SERVER_NAME'));
 }else{
-    $serverName = "antenfiyati.com.tr";
+    $serverName = str_replace('.','_', 'antenfiyati');
 }
-session_name(str_replace('.','_',$serverName));
+session_name($serverName);
 // Oturumu başlatın
 session_start();
 }

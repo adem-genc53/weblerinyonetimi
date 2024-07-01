@@ -927,7 +927,6 @@ $ozel_dosya_calisma_sonucu);
     }
 } catch (Exception $e) {
     // Hata yönetimi burada yapılabilir
-    //error_log($e->getMessage());
     file_put_contents(KOKYOLU.'error.log', date('Y-m-d H:i:s') . '<pre>' . print_r($e->getMessage(), true) . '</pre>' . "\n", FILE_APPEND);
 
     // Hata oluştuğunda da kilit dosyasını sil
