@@ -1,7 +1,17 @@
 <?php
 if(session_status() == PHP_SESSION_NONE && !headers_sent()){
 // Oturum adını belirleyin
-session_name(str_replace('.','_',$_SERVER["SERVER_NAME"]));
+// Oturum adını belirleyin
+if (isset($_SERVER['SERVER_NAME'])) {
+    $serverName = $_SERVER['SERVER_NAME'];
+} elseif (isset($_SERVER['HTTP_HOST'])) {
+    $serverName = $_SERVER['HTTP_HOST'];
+} elseif (getenv('SERVER_NAME') !== null) {
+    $serverName = getenv('SERVER_NAME');
+}else{
+    $serverName = "webleryonetimi";
+}
+session_name(str_replace('.','_',$serverName));
 // Oturumu başlatın
 session_start();
 }

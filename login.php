@@ -14,7 +14,17 @@ class SecureLogin {
         // Oturumu başlat
         if(session_status() == PHP_SESSION_NONE && !headers_sent())
         {
-            session_name(str_replace('.','_',$_SERVER["SERVER_NAME"])); // Bu oturum name oturum_guncelle.php deki ile aynı olması gerekiyor
+            // Oturum adını belirleyin
+if (isset($_SERVER['SERVER_NAME'])) {
+    $serverName = $_SERVER['SERVER_NAME'];
+} elseif (isset($_SERVER['HTTP_HOST'])) {
+    $serverName = $_SERVER['HTTP_HOST'];
+} elseif (getenv('SERVER_NAME') !== null) {
+    $serverName = getenv('SERVER_NAME');
+}else{
+    $serverName = "webleryonetimi";
+}
+session_name(str_replace('.','_',$serverName)); // Bu oturum name oturum_guncelle.php deki ile aynı olması gerekiyor
             session_start();
             session_regenerate_id(true);
         }
@@ -276,7 +286,7 @@ include('includes/header.php');
         </div>
 
         <div class="input-group mb-3">
-        <div class="g-recaptcha" data-sitekey="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"></div>
+        <div class="g-recaptcha" data-sitekey="6Le6jL0UAAAAAGd8kRl9RSkMl82ERek090TOODEG"></div>
         </div>
 
         <div class="row">

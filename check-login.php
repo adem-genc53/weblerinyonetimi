@@ -14,7 +14,17 @@ class BeniHatirla {
         // Oturumu başlat
         if(session_status() == PHP_SESSION_NONE && !headers_sent())
         {
-            session_name(str_replace('.','_',$_SERVER["SERVER_NAME"])); // Bu oturum name oturum_guncelle.php deki ile aynı olması gerekiyor
+            // Oturum adını belirleyin
+if (isset($_SERVER['SERVER_NAME'])) {
+    $serverName = $_SERVER['SERVER_NAME'];
+} elseif (isset($_SERVER['HTTP_HOST'])) {
+    $serverName = $_SERVER['HTTP_HOST'];
+} elseif (getenv('SERVER_NAME') !== null) {
+    $serverName = getenv('SERVER_NAME');
+}else{
+    $serverName = "webleryonetimi";
+}
+session_name(str_replace('.','_',$serverName)); // Bu oturum name oturum_guncelle.php deki ile aynı olması gerekiyor
             session_start();
             session_regenerate_id(true);
         }
