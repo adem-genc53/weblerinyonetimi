@@ -101,7 +101,7 @@ session_name(str_replace('.','_',$serverName)); // Bu oturum name oturum_guncell
 
             // Kullanıcının ID'sini oturumdan alın
             $user_id = $_SESSION['user_id'];
-            $log_in_from = "Hatırla ile";
+            $log_in_from = "Beni Hatırla ile";
             $current_time = time(); // Unix zaman damgası
 
             // Son giriş zamanını kontrol etme
