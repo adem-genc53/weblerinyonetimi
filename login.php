@@ -188,7 +188,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
 
         require_once('./recaptcha.php');
-        $robotdegil = 1;
         if(empty($robotdegil)){
 
             $errors[] = '"Ben Robot Değilim" Kutuyu Seçmelisiniz.';
