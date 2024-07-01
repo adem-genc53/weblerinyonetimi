@@ -1,215 +1,237 @@
 <?php 
-// Bismillahirrahmanirrahim
-require_once('if-loggedin.php');
+require_once('./includes/connect.php');
 
-class Login {
+class SecureLogin {
+    private $PDOdb;
+    private $user_email;
+    private $password;
+    private $remember_me;
+    private $csrf_token;
 
-    private     $PDOdb                      = null;                     // veritabanı bağlantısı
-    private     $user_email                 = "";                       // user's name
-    private     $user_name   = "";
-    private     $ss_id                      = "";
-    private     $ss_code                    = "";
-    private     $password                   = "";
-    private     $confirm_password           = "";                       // kullanıcının karma ve gizli şifresi
-    private     $user_password_hash         = "";                       // kullanıcının karma tekrarlama ve gizli şifresi
-    private     $user_group                 = "";                       // kullanıcının grup ID
-    private     $user_is_logged_in          = false;                    // giriş durumu 
+    public function __construct(PDO $PDOdb, ) {
+        $this->PDOdb = $PDOdb;
 
-    public      $errors                     = array();                  // hata mesajlarının toplanması
-    public      $messages                   = array();                  // başarı / tarafsız mesajların toplanması
-    public      $on_icerik_oku_ust          = "";
-    public      $on_icerik_oku_orta         = "";
-    public      $on_icerik_oku_alt          = "";
-    public      $misafir_bayi_username      = "";
-    public      $misafir_bayi_password      = "";
-    public      $misafir_bayi_bilgileri_goster  = "";
-    public      $misafir_bayi_izni          = "";
-
-    public function __construct() {
-        
-        // session oluştur veya oku
-    if(!isset($_SESSION))
-    {
-    session_start();
-    }
-
-        // kullanıcı oturumu kapatmayı denediyse
-        if (isset($_POST["logout"])) {
-        
-            $this->doLogout();
-        
-        // kullanıcının sunucuda aktif bir oturumu varsa            
-        }elseif (!empty($_SESSION['user_email']) && ($_SESSION['user_is_logged_in'] == 1)) {
-        
-            $this->loginWithSessionData();                
-        
-        // kullanıcı bir giriş formu gönderdiyse
-        }elseif (isset($_POST["csrf_token"])) {
-        
-            $this->loginWithPostData();
-            
-        }elseif (isset($_POST['ss_code']) AND isset($_POST['ss_id'])){
-
-            $this->UserPasswordReset();
-
+        // Oturumu başlat
+        if(session_status() == PHP_SESSION_NONE && !headers_sent())
+        {
+            session_name(str_replace('.','_',$_SERVER["SERVER_NAME"])); // Bu oturum name oturum_guncelle.php deki ile aynı olması gerekiyor
+            session_start();
+            session_regenerate_id(true);
         }
 
-    } //public function __construct() {
+        // Oturum çalıntısı için CSRF koruması sağla
+        $this->setCSRFToken();
+    }
 
+    public function login(string $user_email, string $password, string $remember_me, string $csrf_token ): bool {
 
-        // Session(oturum) veri ile giriş
-        private function loginWithSessionData() {
-        
-            // giriş durumunu true olarak ayarlayın, çünkü bunu az önce kontrol ettik:
-            // !empty($_SESSION['user_email']) && ($_SESSION['user_logged_in'] == 1)
-            // when we called this method (in the constructor)
-            $this->user_is_logged_in = true;
-            
+        if(empty($user_email)){
+            $this->errors[] = "E-Posta alanı Zorunludur";
+            return false;
+        }else if(!filter_var($user_email, FILTER_VALIDATE_EMAIL)){
+            $this->errors[] = "E-Posta geçersiz";
+            return false;
+        }else if(empty($password)){
+            $this->errors[] = "Şifre alanı Zorunludur";
+            return false;
         }
 
-        private function loginWithPostData() {
-                
-            if(isset($_POST) & !empty($_POST)){
+            // Giriş Kullanıcı Bilgilerini Kontrol Edin
+            $sql = "SELECT * FROM uyeler ";
+            if(filter_var($user_email, FILTER_VALIDATE_EMAIL)){
+                $sql .= "WHERE user_email=?";
+            }
+            $result = $this->PDOdb->prepare($sql);
+            $result->execute(array($user_email));
+            $count = $result->rowCount();
+            $res = $result->fetch(PDO::FETCH_ASSOC);
+            if($count == 1){
+                // Girilen şifre ile veritabanındaki şifreyi karşılaştır
+                if(password_verify($password, $res['user_password_hash'])){
 
-                include("recaptcha.php");
-                if(empty($robotdegil)){
-                    $this->errors[] = '"Ben Robot Değilim" Kutuyu Seçmelisiniz.';
-                }
+                        session_destroy();
 
-                // PHP Form Doğrulamaları
-                if(empty(filter_input(INPUT_POST, 'user_email'))){ 
-                    $this->errors[] = "E-Posta alanı Zorunludur";
-                }
-                if(empty(filter_input(INPUT_POST, 'user_password'))){ 
-                    $this->errors[] = "Şifre alanı Zorunludur";
-                }
-                // CSRF Token Doğrulaması
-                if(isset($_POST['csrf_token']) && isset($_SESSION['csrf_token'])){
-                    if($_POST['csrf_token'] === $_SESSION['csrf_token']){
-                    }else{
-                        $this->errors[] = "CSRF Token Doğrulamasında Sorun";
+                        $_SESSION['user_is_logged_in']          = true;
+                        $_SESSION['user_id']                    = $res['user_id'];
+                        $_SESSION['user_group']                 = $res['user_group'];
+                        $_SESSION['user_email']                 = $res['user_email'];
+                        $_SESSION['user_name']                  = $res['user_name'];
+                        $_SESSION['start_time']                 = time();
+
+                    if(isset($csrf_token) && !empty($remember_me)){
+                        $beni_token = $csrf_token;
+                        $userId = $res['user_id'];
+                        $expiry = time() + (86400 * 30); // 30 gün
+                        $defaultScheme = isset($_SERVER["HTTPS"]) ? 'https' : 'http';
+
+                        if($defaultScheme == 'https'){
+                            setcookie('beni_hatirla', "$userId:$beni_token", $expiry, "/", "", true, true);
+                        }else{
+                            setcookie('beni_hatirla', "$userId:$beni_token", $expiry, "/", "", false, true);
+                        }
+                        $stmt = $this->PDOdb->prepare("UPDATE uyeler SET remember_me_token = ?, token_expiry = FROM_UNIXTIME(?) WHERE user_id = ?");
+                        $stmt->execute([$beni_token, $expiry, $userId]);
                     }
-                }
-                //CSRF Token Zaman Doğrulaması
-                $max_time = 60*60*24; // saniye içinde
-                if(isset($_SESSION['csrf_token_time']) && is_numeric($_SESSION['csrf_token_time'])){
-                    $token_time = $_SESSION['csrf_token_time'];
-                    if(($token_time + $max_time) >= time() ){
-                    }else{
-                        $this->errors[] = "CSRF Token Süresi Doldu";
-                        unset($_SESSION['csrf_token']);
-                        unset($_SESSION['csrf_token_time']);
-                    }
-                }
-            
-                if(empty($this->errors)){
-                    require_once __DIR__ . '/includes/connect.php';
 
-                    // Giriş Kullanıcı Bilgilerini Kontrol Edin
-                    $sql = "SELECT * FROM uyeler WHERE ";
-                    if(filter_var(filter_input(INPUT_POST, 'user_email'), FILTER_VALIDATE_EMAIL)){
-                        $sql .= "user_email=?";
-                    }
-                    $result = $PDOdb->prepare($sql);
-                    $result->execute(array(filter_input(INPUT_POST, 'user_email')));
-                    $count = $result->rowCount();
-                    $res = $result->fetch(PDO::FETCH_ASSOC);
-                    if($count == 1){
-                        // Girilen şifre ile veritabanındaki şifreyi karşılaştır
-                        if(password_verify($_POST['user_password'], $res['user_password_hash'])){
-                            
-                            // session id yeniden oluştur
-$session = array("last_login","user_name","user_email","user_group","user_id","user_is_logged_in","proje_son_kayit_id","proje");
+                        // Kullanıcının ID'sini oturumdan alın
+                        $user_id = $_SESSION['user_id'];
+                        $log_in_from = "Giriş ile";
+                        $current_time = time(); // Unix zaman damgası
+                        $logins_sql = "INSERT INTO user_logins (user_id, log_in_from, login_time) VALUES (:user_id, :log_in_from, :login_time)";
+                        $logins = $this->PDOdb->prepare($logins_sql);
+                        $logins->bindParam(':user_id', $user_id);
+                        $logins->bindParam(':log_in_from', $log_in_from);
+                        $logins->bindParam(':login_time', $current_time);
+                        $logins->execute();
 
-foreach ($_SESSION AS $key => $value){
-    if (in_array($key, $session)) {
-    unset($_SESSION[$key]);
+                        // Kullanıcının toplam giriş sayısını kontrol etme
+                        $count_sql = "SELECT COUNT(*) FROM user_logins WHERE user_id = :user_id";
+                        $count_stmt = $this->PDOdb->prepare($count_sql);
+                        $count_stmt->bindParam(':user_id', $user_id);
+                        $count_stmt->execute();
+                        $total_logins = $count_stmt->fetchColumn();
+
+                        // Eğer toplam giriş sayısı 10'dan büyükse eski kayıtları sil
+                    if ($total_logins > 10) {
+                        // Eski giriş kayıtlarını silmek için SQL sorgusu
+                        $delete_sql = "DELETE FROM user_logins WHERE user_id = :user_id AND id NOT IN (
+                            SELECT id FROM (
+                                SELECT id FROM user_logins WHERE user_id = :uid ORDER BY login_time DESC LIMIT 10
+                            ) as temp
+                        )";
+                        $delete = $this->PDOdb->prepare($delete_sql);
+                        $delete->bindParam(':user_id', $user_id);
+                        $delete->bindParam(':uid', $user_id);
+                        $delete->execute();
+                    }
+                        return true;
+                }else{
+                    $this->errors[] = "E-posta veya Şifre Hatalı";
+                }
+            }else{
+                $this->errors[] = "E-posta veya Şifre Hatalı";
+            }
+    return false;
     }
+
+    public function logout(): void {
+        // Tüm oturum değişkenlerini temizle
+        $defaultScheme = isset($_SERVER["HTTPS"]) ? 'https' : 'http';
+        if($defaultScheme == 'https'){
+            setcookie('beni_hatirla', '', time() - 3600, "/", "", true, true);
+        }else{
+            setcookie('beni_hatirla', '', time() - 3600, "/", "", false, true);
+        }
+
+        // Tüm oturum değişkenlerini temizle
+        $_SESSION = [];
+
+        // Oturumu sonlandır
+        session_destroy();
+    }
+
+    public function isLoggedIn(): bool {
+        // Oturumda kullanıcı kimliği var mı kontrol et
+        return isset($_SESSION['user_id']);
+    }
+
+    private function setCSRFToken(): void {
+        if (!isset($_SESSION['csrf_token'])) {
+            $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+        }
+    }
+
+    public function getCSRFToken(): string {
+        return $_SESSION['csrf_token'];
+    }
+
+    public function validateCSRFToken(string $token): bool {
+        return hash_equals($_SESSION['csrf_token'], $token);
+    }
+
+    public function getErrors(): array {
+        return $this->errors;
+    }
+
 }
 
-                            $giris_zamani = time();
+    // Sınıf örneğini oluştur
+    $secureLogin = new SecureLogin($PDOdb);
 
-                            session_regenerate_id();
-                            $_SESSION['user_is_logged_in']          = true;
-                            $_SESSION['user_id']                    = $res['user_id'];
-                            $_SESSION['user_group']                 = $res['user_group'];
-                            $_SESSION['user_email']                 = $res['user_email'];
-                            $_SESSION['user_name']                  = $res['user_name'];
+    // Oturum kontrolü yap
+    if ($secureLogin->isLoggedIn()) {
+                // Kullanıcı oturumda değilse, giriş sayfasına yönlendir
+                //header('Location: login.php');
+                //exit();
+        // Kullanıcı girişi başarılı ise son sayfasına yönlendir
+        if(isset($_GET['last']) && !empty($_GET['last'])){
+            header("location: ".$_GET['last']." ");
+        }else{
+            header("location: /");
+        }
+    }elseif (isset($_COOKIE['beni_hatirla'])) {
+        require_once("check-login.php");
+        if(isset($_GET['last']) && !empty($_GET['last'])){
+            header("location: ".$_GET['last']." ");
+        }else{
+            header("location: /");
+        }
+    }
 
-                            if(isset($_POST['csrf_token']) && isset($_POST['remember_me'])){
-                                $beni_token = $_POST['csrf_token'];
-                                $userId = $res['user_id'];
-                                $expiry = time() + (86400 * 30); // 30 gün
-                                $defaultScheme = isset($_SERVER["HTTPS"]) ? 'https' : 'http';
 
-                                if($defaultScheme == 'https'){
-                                    setcookie('beni_hatirla', "$userId:$beni_token", $expiry, "/", "", true, true);
-                                }else{
-                                    setcookie('beni_hatirla', "$userId:$beni_token", $expiry, "/", "", false, true);
-                                }
-                                $stmt = $PDOdb->prepare("UPDATE uyeler SET remember_me_token = ?, token_expiry = FROM_UNIXTIME(?) WHERE user_id = ?");
-                                $stmt->execute([$beni_token, $expiry, $userId]);
-                            }
+// Kullanıcı girişini kontrol etmek için
+$errors = [];
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // ÇIKIŞ POST GÖNDERİLDİĞİNDE OTURUMU SONLANDIRIR
+    if (isset($_POST["logout"])) {
+        $secureLogin->logout();
+    } else {
 
-                            $_SESSION['last_login']                 = $giris_zamani;
+        require_once('./recaptcha.php');
+        $robotdegil = 1;
+        if(empty($robotdegil)){
 
-                            //$date = new DateTime();
-                            //$TimeNow = $date->getTimestamp();
-                            $sonlogin = $res['last_login']; //değeri 1
-                            if($sonlogin == 11){ //indis 11 ise 1 olsun dedik
-                            $sonlogin = 1;
-                            }  
-                            $loginsutunu="login".$sonlogin; // login1
-                            $kaydet = $PDOdb->prepare("UPDATE uyeler SET $loginsutunu=? WHERE user_id=? ");
-                            $kaydet->execute([$giris_zamani, $res['user_id']]);
+            $errors[] = '"Ben Robot Değilim" Kutuyu Seçmelisiniz.';
 
-                            if($kaydet->rowCount() > 0){
-                            $sonlogin++; //son logini 1 arttırdık
-                            $guncelle = $PDOdb->prepare("UPDATE uyeler SET last_login=? WHERE user_id=? ");
-                            $guncelle->execute([$sonlogin, $res['user_id']]);
-                            }
-                            
-                            // Kullanıcı girişi başarılı x sayfaya yönlendir
-                            if(isset($_GET['last']) && !empty($_GET['last'])){
-                                header("location: ".$_GET['last']." ");
-                            }else{
-                                header("location: /");
-                            }
-                        
-                        }else{
-                            $this->errors[] = "E-posta veya Şifre Hatalı";
-                        }
-                    }else{
-                        $this->errors[] = "E-posta veya Şifre Hatalı";
-                    }
-                }
+        }else
+        if(empty(filter_input(INPUT_POST, 'user_email'))){
+
+            $errors[] = 'E-Posta alanı Zorunludur';
+
+        }else
+        if(!filter_var(filter_input(INPUT_POST, 'user_email'), FILTER_VALIDATE_EMAIL)){
+
+            $errors[] = 'E-Posta geçersiz';
+
+        }else
+        if(empty(filter_input(INPUT_POST, 'user_password'))){
+
+            $errors[] = 'Şifre alanı Zorunludur';
+
+        }else{
+
+            $user_email         = $_POST['user_email'];
+            $password           = $_POST['user_password'];
+            $remember_me        = $_POST['remember_me'] ?? "";
+            $csrf_token         = $_SESSION['csrf_token'];
+
+        // Kullanıcı giriş işlemini gerçekleştir
+        if ($secureLogin->login($user_email, $password, $remember_me, $csrf_token)) {
+            //echo "Giriş başarılı!";
+            $errors[] = 'Giriş başarılı!';
+            // Kullanıcı girişi başarılı ise son sayfasına yönlendir
+            if(isset($_GET['last']) && !empty($_GET['last'])){
+                header("location: ".$_GET['last']." ");
+            }else{
+                header("location: /");
             }
-
-        } // private function loginWithPostData() {
-
-
-        // Çıkış, oturumu sonlandırma
-
-    public function doLogout() {
-    session_start();
-    session_destroy();
-    header("location: login.php");
+        } else {
+            // Hata mesajlarını almak için:
+            $errors = $secureLogin->getErrors();
         }
-
-        public function isUserLoggedIn() {
-        
-            return $this->user_is_logged_in;
-        
-        }
-
-} //class Login {
-
-    $login = new Login();
-
-// 1. CSRF Token oluşturun
-$token = md5(uniqid(rand(), TRUE));
-$_SESSION['csrf_token'] = $token;
-$_SESSION['csrf_token_time'] = time();
+    }
+    }
+} // if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 ##########################################################################################################
 
@@ -223,16 +245,16 @@ include('includes/header.php');
     <div class="card-body login-card-body">
     <p class="login-box-msg">Giriş Yap</p>
         <?php
-            if($login->errors){
+            if(!empty($errors)){
                 echo "<div class='alert alert-danger'>";
-                foreach ($login->errors as $error) {
+                foreach ($errors as $error) {
                     echo "<span class='glyphicon glyphicon-remove'></span>&nbsp;".$error."<br>";
                 }
                 echo "</div>";
             }
         ?>
     <form role="form" method="post">
-        <input type="hidden" name="csrf_token" value="<?php echo $token; ?>">
+        <input type="hidden" name="csrf_token" value="<?php //echo $token; ?>">
         <div class="input-group mb-3">
         <input class="form-control" placeholder="E-POSTA ADRESİ" name="user_email" type="email" autofocus value="<?php if(isset($_POST['user_email'])){ echo $_POST['user_email']; } ?>" required />
         <div class="input-group-append">
@@ -255,7 +277,7 @@ include('includes/header.php');
         </div>
 
         <div class="input-group mb-3">
-        <div class="g-recaptcha" data-sitekey="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"></div>
+        <div class="g-recaptcha" data-sitekey="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"></div>
         </div>
 
         <div class="row">

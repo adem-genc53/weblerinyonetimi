@@ -324,7 +324,8 @@ include('includes/sub_navbar.php');
                                                 <col style="width:5%"></col>
                                                 <col style="width:45%"></col>
                                                 <col style="width:20%"></col>
-                                                <col style="width:20%"></col>
+                                                <col style="width:5%"></col>
+                                                <col style="width:15%"></col>
                                                 <col style="width:5%"></col>
                                                 <col style="width:5%"></col>
                                             </colgroup>
@@ -334,6 +335,7 @@ include('includes/sub_navbar.php');
                                                         <th>Adı Soyadı</th>
                                                         <th>E-Posta Adresi</th>
                                                         <th>Grup</th>
+                                                        <th>Son Girişler</th>
                                                         <th>Düzelt</th>
                                                         <th>Sil</th>
                                                     </tr>
