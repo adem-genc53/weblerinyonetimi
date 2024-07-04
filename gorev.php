@@ -40,8 +40,8 @@ register_shutdown_function(function() use ($lock_file) {
 try {
 #########################################################################################################################
     // BENİ HATIRLA TOKENİN SÜRESİ DOLANI TEMİZLE
-    $stmt = $PDOdb->prepare("UPDATE uyeler SET remember_me_token = NULL, token_expiry = NULL WHERE remember_me_token IS NOT NULL AND token_expiry < time()");
-    $stmt->execute();
+    $stmt = $PDOdb->prepare(" UPDATE uyeler SET remember_me_token = NULL, token_expiry = NULL WHERE remember_me_token IS NOT NULL AND token_expiry < ? ");
+    $stmt->execute([time()]);
 
 #########################################################################################################################
     // FTP BAĞLANTI BİLGİLERİ
@@ -50,26 +50,9 @@ try {
     $ftp_password   = $hash->take($genel_ayarlar['password']); //ftp passowrd
     $ftp_path       = $genel_ayarlar['path']; //ftp passowrd
 #########################################################################################################################
-// ÇALIŞTIRILACAK DOSYA URL KONTROLU VE TAM URL YE DÖNÜŞTÜRMEK
+// ÇALIŞTIRILACAK DOSYANIN URL OLUP OLMADIĞINI KONTROLUNU YAP
 function isFullUrl($kaynak_url) {
     return filter_var($kaynak_url, FILTER_VALIDATE_URL) !== false;
-}
-function ensureFullUrl($kaynak_url) {
-    // Sunucunun mevcut scheme ve host bilgilerini alıyoruz
-    $defaultScheme = isset($_SERVER["HTTPS"]) ? 'https' : 'http';
-    $defaultHost = $_SERVER['SERVER_NAME'];
-
-    // URL başında http/https olup olmadığını kontrol ediyoruz
-    if (!preg_match('/^http(s)?:\/\//', $kaynak_url)) {
-        if (preg_match('/^www\./', $kaynak_url)) {
-            // 'www' ile başlıyorsa scheme ekliyoruz
-            $kaynak_url = $defaultScheme . '://' . $kaynak_url;
-        } else {
-            // Yerel dosya yoluysa hostname ve scheme ekliyoruz
-            $kaynak_url = $defaultScheme . '://' . $defaultHost . '/' . ltrim($kaynak_url, '/');
-        }
-    }
-    return $kaynak_url;
 }
 #########################################################################################################################
   // file_put_contents(KOKYOLU.'error.log', date('Y-m-d H:i:s') . '<pre>' . print_r($tables, true) . '</pre>' . "\n", FILE_APPEND);
@@ -164,42 +147,6 @@ if($yedekleme_gorevi == '1' && $gz == '0' && $combine == '1'){ // veritabanı ye
 #########################################################################################################################
 #########################################################################################################################
 #########################################################################################################################
-########################################### CRON ZAMANLAYICI BAŞLANGICI #################################################
-#########################################################################################################################
-#########################################################################################################################
-#########################################################################################################################
-    // HAFTANIN GÜN(LERİ) SEÇİLİ İSE HAFTANIN GÜN(LERİ) İŞLEMLERİNE BAŞLA
-/*
-    if (!in_array("-1", $haftanin_gunu)){
-
-        //$tarih->setTimezone(new DateTimeZone('UTC'));
-        $tarih = haftaKontrolu($bugun, $tarih, $haftanin_gunu, $gun, $saat, $dakika);
-
-    }else{ // HAFTANIN GÜNÜ -1 * YILDIZ SEÇİLİ İSE GÜN İŞLEMLERİNE BAŞLA
-
-        //$tarih->setTimezone(new DateTimeZone('UTC'));
-        $tarih = gunKontrolu($bugun, $tarih, $gun, $saat, $dakika);
-
-    }
-        $tarih->setTimezone(new DateTimeZone('Europe/Istanbul')); // UTC // Europe/Istanbul
-
-        $sonraki_calisma = $tarih->format('U');
-*/
-#########################################################################################################################
-#########################################################################################################################
-#########################################################################################################################
-########################################### CRON ZAMANLAYICI SONU #######################################################
-#########################################################################################################################
-#########################################################################################################################
-#########################################################################################################################
-//
-//
-//
-//
-//
-#########################################################################################################################
-#########################################################################################################################
-#########################################################################################################################
 ########################################### GÖREVLERİ YÜRÜTME BAŞLANGICI ################################################
 #########################################################################################################################
 #########################################################################################################################
@@ -208,22 +155,6 @@ if($yedekleme_gorevi == '1' && $gz == '0' && $combine == '1'){ // veritabanı ye
 //
 //
 //
-#########################################################################################################################
-################################### ÇALIŞTIRILACAK DOSYALARIN URLSİNİ OLUŞTUR ###########################################
-#########################################################################################################################
-/*
-if (isFullUrl($kaynak_url)) {
-    // Bu zaten tam bir URL
-    $url = $kaynak_url;
-} else {
-    $fullUrl = ensureFullUrl($kaynak_url);
-    $url = $fullUrl;
-}
-*/
-#########################################################################################################################
-################################### ÇALIŞTIRILACAK DOSYALARIN URLSİNİ OLUŞTUR ###########################################
-#########################################################################################################################
-
 #########################################################################################################################
 ################################### GÖREV VERİTABANI YEDEKLEME GÖREVİ BAŞLAMA ###########################################
 #########################################################################################################################
@@ -264,7 +195,7 @@ if( isset($row['tablolar']) && !empty($row['tablolar']) && $row['combine'] == '3
                 if ($tablo_bilgileri['UPDATE_TIME'] !== null) {
                     $update_time = strtotime($tablo_bilgileri['UPDATE_TIME']);
                 } else {
-                    // Eğer UPDATE_TIME null ise, CREATE_TIME kullanın (tablo hiç güncellenmemişse)
+                    // Eğer UPDATE_TIME null ise, CREATE_TIME kullan (tablo hiç güncellenmemişse)
                     $update_time = strtotime($tablo_bilgileri['CREATE_TIME']);
                 }
 
@@ -283,11 +214,12 @@ if( isset($row['tablolar']) && !empty($row['tablolar']) && $row['combine'] == '3
         }
     }
 
+    // EĞER TABLO GÜNCELLENDİ Mİ DENETLEME DEVRE DIŞI İSE (DEĞER 1 DIR) SEÇİLEN TABLOLARI YEDEKLE
     if($row['tablo_guncelmi_denetle'] == 1){
 
         $yedeklenecek_tablolar = explode(",", $row['tablolar']);
 
-    }else{
+    }else{ // EĞER SON YEDEKLEME SONRASI GÜNCELLENEN TABLOLARI YEDEKLE İSE (DEĞER 0 DIR) FONKSİYON İLE GÜNCEL TABLOLARI VER
 
         // GÖREVLE VERİTABANINDAN GELEN VİRGÜLLE AYRILMIŞ TABLOLAR
         $tables = explode(",", $row['tablolar']);
@@ -474,8 +406,16 @@ if($row['yedekleme_gorevi'] == '3' && (empty($row['secilen_yedekleme']) || is_nu
         $calistirma_sonuc_mesaji[] = array("Görev Elle Yürütüldü");
     }
 
-
+// ÇALIŞTIRILACAK DOSYANIN URL OLUP OLMADIĞINI KONTROL EDİYORUZ
 if(isFullUrl($kaynak_url)){
+/**
+ * Görev zamanlayıcı alanından uzak URL girerken GET parametler eklenebilir.
+ * Eğer GET parametre yerine POST parametre kullanmak istiyorsanız 
+ * aşağıdaki POST verileri diziyi aktif edin ve örnekteki gibi key ve value değerleri girin.
+ * "'method' => 'POST'," bu alanı POST olarak değiştirin
+ * "'content' => http_build_query($data)" alanındaki başındaki // slachları kaldırın
+ * Artık uzak tam URL ye POST verileri gönderebilirsiniz
+ */
 
 /*
     // POST verileri

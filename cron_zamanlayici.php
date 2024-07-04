@@ -1,26 +1,24 @@
 <?php 
-// Bismillahirrahmanirrahim
 if(isset($_POST['ajaxtan'])){
-require_once __DIR__ . '/includes/turkcegunler.php';
-    //echo '<pre>' . print_r($_POST, true) . '</pre>';
-// Gönderilen gün değeri
-$gun = isset($_POST['gun']) ? $_POST['gun'] : '-1';
-// Gönderilen saat değeri
-$saat = isset($_POST['saat']) ? $_POST['saat'] : '-1';
-// Gönderilen dakika değeri
-$dakika = isset($_POST['dakika']) ? $_POST['dakika'] : '-1';
-// Gönderilen haftanın değeri
-$haftanin_gunu = isset($_POST['haftanin_gunu']) ? $_POST['haftanin_gunu'] : [0=>-1];
+require_once('includes/connect.php');
+    // // echo '<pre>' . print_r($_POST, true) . '</pre>';
+
+	// Gönderilen gün değeri
+	$gun = isset($_POST['gun']) ? $_POST['gun'] : '-1';
+	// Gönderilen saat değeri
+	$saat = isset($_POST['saat']) ? $_POST['saat'] : '-1';
+	// Gönderilen dakika değeri
+	$dakika = isset($_POST['dakika']) ? $_POST['dakika'] : '-1';
+	// Gönderilen haftanın değeri
+	$haftanin_gunu = isset($_POST['haftanin_gunu']) ? $_POST['haftanin_gunu'] : [0=>-1];
 }
 
-if((isset($gun) && isset($saat) && isset($dakika) && isset($haftanin_gunu)) || isset($gorevden)){
+if(isset($gun) && isset($saat) && isset($dakika) && isset($haftanin_gunu)){
+    // Şu anki tarihi ve saat bilgisini al
+    $bugun = new DateTime('now', new DateTimeZone(''.$genel_ayarlar['secili_zaman_dilimi'].''));
 
-// Şu anki tarihi ve saat bilgisini al
-$bugun = new DateTime();
-
-// Unix zaman damgasını depolamak için varsayılan tarih nesnesi oluştur
-$tarih = new DateTime();
-
+    // Unix zaman damgasını depolamak için varsayılan tarih nesnesi oluştur
+    $tarih = new DateTime('now', new DateTimeZone(''.$genel_ayarlar['secili_zaman_dilimi'].''));
 ##############################################################################################################################################################
 ##############################################################################################################################################################
 ##############################################################################################################################################################
@@ -28,52 +26,40 @@ $tarih = new DateTime();
 ##############################################################################################################################################################
 ##############################################################################################################################################################
 
-    function saatDakikaKontrolu($bugun, $tarih, $gun, $saat, $dakika, $gun_bugun_mu){
+    function saatDakikaKontrolu($bugun, $tarih, $saat, $dakika, $gun_bugun_mu){
 
-if ($saat == -1 && $dakika == -1) { // SAAT && DAKİKA * YILDIZ SEÇİLİ İSE
+        if(strpos($saat, '/') !== false && strpos($dakika, '/') == false){ // ÖZEL SAAT ARALIK SEÇİLİ İSE && ÖZEL DAKİKA ARALIK SEÇİLİ DEĞİL İSE
 
-                            if($gun_bugun_mu == 1){ // 1 gün bugün
-                                $tarih->setTime($bugun->format('H'), $bugun->format('i')+1, 0); // SAAT VE DAKİKA -1 * YILDIZ VE GÜN BUGÜN OLDUĞU İÇİN DAKİKA +1 AYARLIYORUZ
-                            }else if($gun_bugun_mu == 2){ // 2 gün bugün değil
-                                $tarih->setTime($bugun->format('H'), $bugun->format('i'), 0); // // SAAT VE DAKİKA -1 * YILDIZ VE GÜN BUGÜN OLMADIĞI İÇİN DAKİKA +1 GEREKLİ DEĞİLDİR
-                            }
-                            //echo "1 Saat ve Dakika Kontrol Bölümü<br>";
-
-} else if (strpos($saat, '/') !== false && strpos($dakika, '/') === false) { // ÖZEL SAAT ARALIK SEÇİLİ İSE && ÖZEL DAKİKA ARALIK SEÇİLİ DEĞİL İSE
-
-                        list($eksibir, $ozelsaat) = explode('/', $saat); // ÖZEL SAAT ARALIK DEĞERLERİ PARÇALA
+                            list($eksibir, $ozelsaat) = explode('/', $saat); // ÖZEL SAAT ARALIK DEĞERLERİ PARÇALA
 
                             if(strpos($ozelsaat, '.') !== false && $bugun->format('i') < 30){ // GEÇERLİ DAKİKA 30 DAN KÜÇÜK İSE
 
-                                $tarih->setTime($bugun->format('H'), 30, 0); // GEÇERLİ DAKİKA 30 DAN KÜÇÜK OLDUĞU İÇİN GEÇERLİ SAATİ VE DAKİKA 30 A AYARLIYORUZ
-                                //echo "2 Saat ve Dakika Kontrol Bölümü<br>";
+                                $tarih->setTime($bugun->format('H'), 30, 0); // SAATİ GEÇERLİ SAAT, DAKİKA İSE 30 OLARAK AYARLIYORUZ
+                                // echo "2.1 Saat ve Dakika Kontrol Bölümü<br>";
 
                             }else if(strpos($ozelsaat, '.') !== false && $bugun->format('i') > 30){ // GEÇERLİ DAKİKA 30 DAN BÜYÜK İSE
 
-                                $tarih->setTime($bugun->format('H')+1, 0, 0); // GEÇERLİ DAKİKA 30 U GEÇTİĞİ İÇİN BİR SONRAKİ SAAT VE DAKİKA 0 AYARLIYORUZ
-                                //echo "3 Saat ve Dakika Kontrol Bölümü<br>";
+                                $tarih->setTime($bugun->format('H'), 0, 0); // SAATİ 00, DAKİKAYI 00 OLARAK AYARLIYORUZ
+                                // echo "2.2 Saat ve Dakika Kontrol Bölümü<br>";
 
                             }else if($ozelsaat == 12){
-                                    //echo "4 Saat ve Dakika Kontrol Bölümü<br>";
+                                    // echo "2.3 Saat ve Dakika Kontrol Bölümü<br>";
                                     // ÖZEL SAAT ARALIĞINDAKİ */12 DEĞER GEÇERLİ SAAT ÜZERİNDEN DEĞİL GÜNDÜZ ÖĞLE 12:00 VE GEÇE 00:00 OLARAK AYARLIYORUZ 
-                                    if($bugun->format('H') >= 12){ // GEÇERLİ SAAT ÖĞLE 12 GEÇİYORSA
+                                    if($bugun->format('H') > 12){ // GEÇERLİ SAAT ÖĞLE 12 GEÇİYORSA
                                         $tarih->setTime(0, 0, 0); // ÖĞLE 12 GEÇTİĞİ İÇİN GECE 00:00 OLARAK AYARLIYORUZ
-                                        if($gun == $bugun->format('d') || $gun == -1){
-                                            $tarih->setDate($bugun->format('Y'), $bugun->format('m'), $bugun->format('d')+1); // GECE 00:00 OLDUĞUNDAN BİR SONRAKİ GÜNE AYARLANIYOR
-                                        }
                                     }else if($bugun->format('H') < 12){ // GEÇERLİ SAAT ÖĞLE 12 YE DAHA ZAMAN VARSA
                                         $tarih->setTime(12, 0, 0); // SAAT HENÜZ 12 OLMADIĞI İÇİN ÖĞLE 12:00 OLARAK AYARLIYORUZ
                                     }
-                            } elseif (strpos($ozelsaat, '.') == false) {
+                            }else{
                                 if($dakika == -1){
                                     $tarih->setTime($bugun->format('H')+$ozelsaat, $bugun->format('i'), 0); // DAKİKA -1 * SEÇİLİ OLDUĞUNDAN GEÇERLİ DAKİKA AYARLIYORUZ
                                 }else{
                                     $tarih->setTime($bugun->format('H')+$ozelsaat, $dakika, 0); // SEÇİLİ SAAT ARALIĞI KADAR SAATİ İLERİ ALIYORUZ & DAKİKA 0-59 ARASI SEÇİLİ OLDUĞUNDAN SEÇİLİ DAKİKA AYARLIYORUZ
                                 }
-                                //echo "5 Saat ve Dakika Kontrol Bölümü<br>";
+                                // echo "2.4 Saat ve Dakika Kontrol Bölümü<br>";
                             }
 
-} else if (strpos($saat, '/') === false && $saat == -1 && strpos($dakika, '/') !== false) { // SAAT ARALIĞI SEÇİLİ DEĞİL && DAKİKA ÖZEL ARALIK SEÇİLİ İSE
+        }else if(strpos($saat, '/') == false && $saat == -1 && strpos($dakika, '/') !== false){ // SAAT ARALIĞI SEÇİLİ DEĞİL && DAKİKA ÖZEL ARALIK SEÇİLİ İSE
 
                             list($eksibir, $ozeldakika) = explode('/', $dakika);
                             if($gun_bugun_mu == 1){ // 1 gün bugün
@@ -81,14 +67,23 @@ if ($saat == -1 && $dakika == -1) { // SAAT && DAKİKA * YILDIZ SEÇİLİ İSE
                             }else if($gun_bugun_mu == 2){ // 2 gün bugün değil
                                 $tarih->setTime($bugun->format('H'), $bugun->format('i'), 0); // SAAT -1, GÜN BUGÜN OLMADIĞI İÇİN GEÇERLİ DAKİKA AYARLIYORUZ
                             }
-                            //echo "6 Saat ve Dakika Kontrol Bölümü<br>";
+                            // echo "3 Saat ve Dakika Kontrol Bölümü<br>";
 
-} else if (strpos($saat, '/') === false && $saat != -1 && strpos($dakika, '/') === false && $dakika != -1) { // SAAT NORMAL SEÇİLİ && DAKİKA NORMAL SEÇİLİ İSE
+        }else if($saat == -1 && $dakika == -1){ // SAAT && DAKİKA * YILDIZ SEÇİLİ İSE
+
+                            if($gun_bugun_mu == 1){ // 1 gün bugün
+                                $tarih->setTime($bugun->format('H'), $bugun->format('i')+1, 0); // SAAT VE DAKİKA -1 * YILDIZ VE GÜN BUGÜN OLDUĞU İÇİN DAKİKA +1 AYARLIYORUZ
+                            }else if($gun_bugun_mu == 2){ // 2 gün bugün değil
+                                $tarih->setTime($bugun->format('H'), $bugun->format('i'), 0); // // SAAT VE DAKİKA -1 * YILDIZ VE GÜN BUGÜN OLMADIĞI İÇİN DAKİKA +1 GEREKLİ DEĞİLDİR
+                            }
+                            // echo "4 Saat ve Dakika Kontrol Bölümü<br>";
+
+        }else if(strpos($saat, '/') == false && $saat != -1 && $saat > -1 && strpos($dakika, '/') == false && $dakika != -1 && $dakika > -1){ // SAAT && DAKİKA NORMAL SEÇİLİ İSE
 
                             $tarih->setTime($saat, $dakika, 0); // SAAT VE DAKİKA NORMAL SEÇİLİ OLDUĞUNDAN SEÇİLİ SAAT VE DAKİKA AYARLIYORUZ
-                            //echo "7 Saat ve Dakika Kontrol Bölümü<br>";
+                            // echo "5 Saat ve Dakika Kontrol Bölümü<br>";
 
-} else if ($saat == -1 && $dakika != -1) { // SAAT * YILDIZ && DAKİKA NORMAL SEÇİLİ İSE
+        }else if($saat == -1 && strpos($dakika, '/') == false && $dakika != -1 && $dakika > -1){ // SAAT * YILDIZ && DAKİKA NORMAL SEÇİLİ İSE
 
                             if($gun_bugun_mu == 1){ // 1 gün bugün
                                 if($dakika > $bugun->format('i')){ // SEÇİLEN SAAT ŞİMDİKİ SAATTEN BÜYÜK
@@ -99,9 +94,9 @@ if ($saat == -1 && $dakika == -1) { // SAAT && DAKİKA * YILDIZ SEÇİLİ İSE
                             }else if($gun_bugun_mu == 2){ // 2 gün bugün değil
                                 $tarih->setTime($bugun->format('H'), $dakika, 0); // SONRAKİ GÜN OLDUĞUNDA SEÇİLEN DAKİKA VE GEÇERLİ SAAT AYARLIYORUZ
                             }
-                            //echo "8 Saat ve Dakika Kontrol Bölümü<br>";
+                            // echo "6 Saat ve Dakika Kontrol Bölümü<br>";
 
-} else if ($saat != -1 && $dakika == -1) { // SAAT NORMAL SEÇİLİ && DAKİKA * YILDIZ SEÇİLİ İSE
+        }else if(strpos($saat, '/') == false && $saat != -1 && $saat > -1 && $dakika == -1){ // SAAT NORMAL SEÇİLİ && DAKİKA * YILDIZ SEÇİLİ İSE
 
                             if($gun_bugun_mu == 1){ // 1 gün bugün
                                 if($saat > $bugun->format('H')){ // SEÇİLEN SAAT ŞİMDİKİ SAATTEN BÜYÜK
@@ -112,13 +107,48 @@ if ($saat == -1 && $dakika == -1) { // SAAT && DAKİKA * YILDIZ SEÇİLİ İSE
                             }else if($gun_bugun_mu == 2){ // 2 gün bugün değil
                                 $tarih->setTime($saat, $bugun->format('i'), 0); // SONRAKİ GÜN OLDUĞUNDA SEÇİLEN SAAT VE GEÇERLİ DAKİKA AYARLIYORUZ
                             }
-                            //echo "9 Saat ve Dakika Kontrol Bölümü<br>";
+                            // echo "7 Saat ve Dakika Kontrol Bölümü<br>";
 
-} else {
-    // Diğer durumlar
-            $tarih->setTime($bugun->format('H'), $bugun->format('i'), 0);
-            //echo "Saat ve dakika hiçbir koşul karşılamıyor";
-}
+        }else if(strpos($saat, '/') !== false && strpos($dakika, '/') !== false){ // ÖZEL SAAT VE DAKİKA ARALIĞI SEÇİLİ İSE
+
+                            list($eksibir, $ozelsaat) = explode('/', $saat); // ÖZEL SAAT ARALIK DEĞERLERİ PARÇALA
+
+                            if(strpos($ozelsaat, '.') !== false && $bugun->format('i') < 30){ // GEÇERLİ DAKİKA 30 DAN KÜÇÜK İSE
+
+                                $tarih->setTime($bugun->format('H'), 30, 0); // SAATİ GEÇERLİ SAAT, DAKİKA İSE 30 OLARAK AYARLIYORUZ
+                                // echo "8.1 Saat ve Dakika Kontrol Bölümü<br>";
+
+                            }else if(strpos($ozelsaat, '.') !== false && $bugun->format('i') > 30){ // GEÇERLİ DAKİKA 30 DAN BÜYÜK İSE
+
+                                $tarih->setTime($bugun->format('H'), 0, 0); // SAATİ 00, DAKİKAYI 00 OLARAK AYARLIYORUZ
+                                // echo "8.2 Saat ve Dakika Kontrol Bölümü<br>";
+
+                            }else if($ozelsaat == 12){
+                                    // echo "8.3 Saat ve Dakika Kontrol Bölümü<br>";
+                                    // ÖZEL SAAT ARALIĞINDAKİ */12 DEĞER GEÇERLİ SAAT ÜZERİNDEN DEĞİL GÜNDÜZ ÖĞLE 12:00 VE GEÇE 00:00 OLARAK AYARLIYORUZ 
+                                    if($bugun->format('H') > 12){ // GEÇERLİ SAAT ÖĞLE 12 GEÇİYORSA
+                                        $tarih->setTime(0, 0, 0); // ÖĞLE 12 GEÇTİĞİ İÇİN GECE 00:00 OLARAK AYARLIYORUZ
+                                    }else if($bugun->format('H') < 12){ // GEÇERLİ SAAT ÖĞLE 12 YE DAHA ZAMAN VARSA
+                                        $tarih->setTime(12, 0, 0); // SAAT HENÜZ 12 OLMADIĞI İÇİN ÖĞLE 12:00 OLARAK AYARLIYORUZ
+                                    }
+                            }else{
+                                    if($dakika == -1){
+                                        $tarih->setTime($bugun->format('H')+$ozelsaat, $bugun->format('i'), 0); // DAKİKA -1 * SEÇİLİ OLDUĞUNDAN GEÇERLİ DAKİKA AYARLIYORUZ
+                                    }else if(strpos($dakika, '/') == false && $dakika != -1 && $dakika > -1){
+                                        $tarih->setTime($bugun->format('H')+$ozelsaat, $dakika, 0); // SEÇİLİ SAAT ARALIĞI KADAR SAATİ İLERİ ALIYORUZ & DAKİKA 0-59 ARASI SEÇİLİ OLDUĞUNDAN SEÇİLİ DAKİKA AYARLIYORUZ
+                                    }else if(strpos($dakika, '/') !== false){
+                                        list($eksibir, $ozeldakika) = explode('/', $dakika);
+                                        if($gun_bugun_mu == 1){ // 1 gün bugün
+                                            $tarih->setTime($bugun->format('H'), $bugun->format('i')+$ozeldakika, 0); // SAAT -1, GÜN BUGÜN OLDUĞUNDA ÖZEL DAKİKA ARALIĞI KADAR DAKİKAYI İLERİ ALIYORUZ
+                                        }else if($gun_bugun_mu == 2){ // 2 gün bugün değil
+                                            $tarih->setTime($bugun->format('H'), $bugun->format('i'), 0); // SAAT -1, GÜN BUGÜN OLMADIĞI İÇİN GEÇERLİ DAKİKA AYARLIYORUZ
+                                        }
+                                    }
+                                // echo "8 Saat ve Dakika Kontrol Bölümü<br>";
+                            }
+
+            // echo "8 Özel saat ve dakika aralığı seçilidir. ancak hem saat aralığı hem dakika aralığı uygun değildir<br>";
+        }
 
     return $tarih;
     }
@@ -129,7 +159,7 @@ if ($saat == -1 && $dakika == -1) { // SAAT && DAKİKA * YILDIZ SEÇİLİ İSE
 ##############################################################################################################################################################
 ##############################################################################################################################################################
 ##############################################################################################################################################################
-    function haftaKontrolu($bugun, $tarih, $haftanin_gunu, $gun, $saat, $dakika) {
+    function haftaKontrolu($bugun, $tarih, $haftanin_gunu, $saat, $dakika) {
 
         $bugunun_gunu = $bugun->format('N');
         $bugunun_saati = $bugun->format('H');
@@ -154,7 +184,7 @@ if ($saat == -1 && $dakika == -1) { // SAAT && DAKİKA * YILDIZ SEÇİLİ İSE
         // AND Özel saat aralığı seçili DEĞİL
         // AND Seçilen saat 0-23 arası ise 
         // AND Seçilen saat bugünkü saatten KÜÇÜK İSE
-        || (in_array($bugunun_gunu, $haftanin_gunu) && (strpos($saat, '/') === false && $saat != -1 && $saat > -1 && $saat < $bugunun_saati
+        || (in_array($bugunun_gunu, $haftanin_gunu) && (strpos($saat, '/') == false && $saat != -1 && $saat > -1 && $saat < $bugunun_saati
 
         // 3. SEÇENEK KURALI------------(SEÇİLENİN İÇİNDE BUGÜN VARSA, SEÇİLEN SAAT İLE ŞİMDİKİ SAAT EŞİT İSE, SEÇİLEN DAKİKA ŞİMDİKİ DAKİKADAN KÜÇÜK VEYA EŞİT İSE SIRADAKİ HAFTANIN GÜNÜNÜ AYARLAR)
         // OR Seçilen hafta gün(leri) içinde BUGÜN MEVCUT İSE
@@ -163,11 +193,11 @@ if ($saat == -1 && $dakika == -1) { // SAAT && DAKİKA * YILDIZ SEÇİLİ İSE
         // AND seçilen saat bugünkü saat ile EŞİT İSE
         // AND seçilen dakika 0-59 arası ise
         // AND seçilen dakika bugünkü dakikadan küçük veya EŞİT İSE
-        || (in_array($bugunun_gunu, $haftanin_gunu) && strpos($saat, '/') === false && $saat != -1 && $saat > -1 && $saat == $bugunun_saati && $dakika != -1 && $dakika > -1 && $dakika <= $bugunun_dakikasi)))){
+        || (in_array($bugunun_gunu, $haftanin_gunu) && strpos($saat, '/') == false && $saat != -1 && $saat > -1 && $saat == $bugunun_saati && $dakika != -1 && $dakika > -1 && $dakika <= $bugunun_dakikasi)))){
 
             $tarih->modify("next ".$haftanin_isimleri[$h_gunu_ver]);
 
-            $tarih = saatDakikaKontrolu($bugun, $tarih, $gun, $saat, $dakika, 2); // 1 gün bugün, 2 gün bugün değil
+            $tarih = saatDakikaKontrolu($bugun, $tarih, $saat, $dakika, 2); // 1 gün bugün, 2 gün bugün değil
             // echo "1 Haftanın Günü: haftanın günü ayarlandı<br>";
             // Haftanın günü ayarlandığında saat ve dakika 00:00 sıfılandığı için tekrar geçerli saati ve dakikayı tanımlıyoruz
             //$tarih->setTime($bugun->format('H'), $bugun->format('i'));
@@ -175,7 +205,7 @@ if ($saat == -1 && $dakika == -1) { // SAAT && DAKİKA * YILDIZ SEÇİLİ İSE
         }else{
             // 4. SEÇENEK KURALI------------(SEÇİLEN İÇİNDE BUGÜN VAR, SAAT VEYA DAKİKA VEYA HER İKİSİ -1 * YILDIZ SEÇİLİ OLDUĞUNDAN, SEÇİLEN SAAT VE VEYA DAKİKA BÜYÜK İSE)
 
-            $tarih = saatDakikaKontrolu($bugun, $tarih, $gun, $saat, $dakika, 1); // 1 gün bugün, 2 gün bugün değil
+            $tarih = saatDakikaKontrolu($bugun, $tarih, $saat, $dakika, 1); // 1 gün bugün, 2 gün bugün değil
             // echo "2 Haftanın Günü: haftanın günü bugün olarak ayarlandı<br>";
         }
     return $tarih;
@@ -194,84 +224,141 @@ if ($saat == -1 && $dakika == -1) { // SAAT && DAKİKA * YILDIZ SEÇİLİ İSE
             list($eksibir, $ozelgun) = explode('/', $gun); // ÖZEL GÜN ARALIĞI */2 DEĞERİ PARÇALAYALIM
             $tarih->modify(+$ozelgun.' day'); // GÜN ARALIĞI DEĞERİ KADAR GÜNÜ İLERİ AYARLIYORUZ
 
-            $tarih = saatDakikaKontrolu($bugun, $tarih, $gun, $saat, $dakika, 2); // 1 gün bugün, 2 gün bugün değil
+            $tarih = saatDakikaKontrolu($bugun, $tarih, $saat, $dakika, 2); // 1 gün bugün, 2 gün bugün değil
             // echo "Gün aralığı seçeneği ile +{$ozelgun} gün olarak ayarlandı<br>";
 
 ##############################################################################################################################################################
 
-        }else if(strpos($gun, '/') === false && $gun != -1 && $gun > 0){ // NORMAL 1-31 GÜN DEĞERİ SEÇİLDİR
-
-//echo '}else if($gun != -1 && $gun > 0){<br>';
-
+        }else if($gun != -1 && $gun > 0){ // NORMAL 1-31 GÜN DEĞERİ SEÇİLDİR
+// echo '}else if($gun != -1 && $gun > 0){<br>';
 ##############################################################################################################################################################
 
-    if ($bugun->format('d') == $gun) { // SEÇİLEN GÜN İLE GEÇERLİ GÜN EŞİT İSE SAAT VE DAKİKA DİKKATE ALARAK İŞLEM YAPILACAK
+            // IF Seçilen gün bugün İSE
+            // AND Saat aralığı seçili DEĞİL İSE
+            // AND seçilen saat şimdiki saatten BÜYÜK İSE
+            // OR seçilen saat şimdiki saat ile EŞİT İSE
+            // AND Dakika aralığı seçili DEĞİL İSE
+            // AND seçilen dakika şimdiki dakikadan BÜYÜK veya EŞİT İSE
 
-            // SEÇİLEN SAAT BUGÜNKÜ SAATTEN KÜÇÜK OLDUĞUNDAN DAKİKA DİKKATE ALINMADAN SONRAKİ AYIN SEÇİLEN GÜNÜNE, SEÇİLEN SAATE VE SEÇİLEN DAKİKAYA AYARLA
-            if ($saat != -1 && $saat < $bugun->format('H')
-                // VEYA SEÇİLEN SAAT BUGÜNKÜ SAAT İLE EŞİT İSE VE SEÇİLEN DAKİKA BUGÜNKÜ DAKİKADAN EŞİT VEYA KÜÇÜK İSE SONRAKİ AYIN SEÇİLEN GÜNÜNE, SEÇİLEN SAATE VE SEÇİLEN DAKİKAYA AYARLA
-                || $saat != -1 && $saat == $bugun->format('H') && $dakika != -1 && $dakika <= $bugun->format('i')) {
+            // (SEÇİLEN ZAMANA DAHA VAKİT OLDUĞUNDAN BUGÜNÜ AYARLIYORUZ)
+            if($bugun->format('d') == $gun && strpos($saat, '/') == false && $saat != -1 && $saat > $bugun->format('H') || ($saat != -1 && $saat == $bugun->format('H') && strpos($dakika, '/') == false && $dakika != -1 && $dakika >= $bugun->format('i'))){
 
-            if (strpos($saat, '/') === false) {
-                $tarih->setDate($bugun->format('Y'), $bugun->format('m')+1, $gun);
-                $tarih = saatDakikaKontrolu($bugun, $tarih, $gun, $saat, $dakika, 2); // 1 gün bugün, 2 gün bugün değil
-
-                //echo "SEÇİLEN SAAT KÜÇÜK İSE, VEYA SEÇİLEN SAAT EŞİT VE SEÇİLEN DAKİKA EŞİT VEYA KÜÇÜK İSE SONRAKİ AYIN SEÇİLEN GÜNÜNE, SEÇİLEN SAATE VE SEÇİLEN DAKİKAYA AYARLANDI<br>";
-                
-            } else {
                 $tarih->setDate($bugun->format('Y'), $bugun->format('m'), $gun);
-                $tarih = saatDakikaKontrolu($bugun, $tarih, $gun, $saat, $dakika, 1); // 1 gün bugün, 2 gün bugün değil
 
-                //echo "GÜN BUGÜN SEÇİLEN SAAT ARALIĞI KADAR +SAAT AYARLANDI<br>";
-            }
+                $tarih = saatDakikaKontrolu($bugun, $tarih, $saat, $dakika, 1); // 1 gün bugün, 2 gün bugün değil
+                // echo "1 Gün bugün, Seçilen saat eşit veya büyüktür, Seçilen dakika eşit veya büyüktür. Seçilen gün, saat ve dakika ayarlandı.<br>";
 
-                // EĞER SEÇİLEN GEÇERLİ AYIN SON GÜNÜNDEN BÜYÜK SEÇİLİ İSE BU FAZLA GÜN SONRAKİ AYIN GÜNÜNE İLAVE EDİLİR VE SONRAKİ AYIN 1., VEYA 2., VEYA 3. GÜN OLARAK GÖRÜNÜR
-                // HALBUKİ BURADA ÖRNEK GÜN 31 SEÇİLİYOR İSE AY SONU SEÇİLİYOR ANLAMINA GELİR ANCAK GEÇERLİ AY 29 İLE ÇIKIYORSA BURADA ARTAN 2 GÜN SONRAKİ AYIN 2. GÜNÜNE AYARLANIR
-                // AŞAĞIDAKİ KURAL SEÇİLEN GÜN BU AYIN SON GÜNÜNDEN BÜYÜK OLDUĞUNDAN SONRAKİ AYA AYARLANACAĞI İÇİN -1 İLE AY'I GERİ ALIYORUZ VE AYIN GÜNÜNÜ (int)$bugun->format('t') DEĞİŞKEN İLE BELİRLEYEREK AYARLIYORUZ
-                if($gun > (int)$bugun->format('t')){
-                    $tarih->setDate($bugun->format('Y'), $bugun->format('m')-1, (int)$bugun->format('t'));
-                    //echo "1 SEÇİLEN GÜN BU AYIN SON GÜNÜNDEN BÜYÜK OLDUĞUNDA -1 İLE AY GERİ ALIYORUZ VE BU AYIN ".(int)$bugun->format('t').". GÜNÜNE AYARLANDI<br>";
+            // ELSE IF Seçilen gün bugün İSE
+            // AND Saat aralığı seçili DEĞİL İSE
+            // AND seçilen saat -1 İSE
+            // AND seçilen dakika -1 İSE
+
+            // (GÜN BUGÜN VE SEÇİLEN SAAT -1 SEÇİLEN DAKİKA -1 OLDUĞUNDAN BUGÜNÜ VE +1 OLARAK AYARLIYORUZ)
+            }else if($bugun->format('d') == $gun && strpos($saat, '/') == false && $saat == -1 && strpos($dakika, '/') == false && $dakika == -1){
+
+                $tarih->setDate($bugun->format('Y'), $bugun->format('m'), $gun);
+
+                $tarih = saatDakikaKontrolu($bugun, $tarih, $saat, $dakika, 1); // 1 gün bugün, 2 gün bugün değil
+                // echo "2 Gün bugün, Seçilen saat -1, Seçilen dakika -1. Seçilen gün, geçerli saat ve +1 dakika ayarlandı.<br>";
+
+            // ELSE IF Seçilen gün bugün İSE
+            // AND Saat aralığı seçili DEĞİL İSE
+            // AND seçilen saat şimdiki saatten KÜÇÜK İSE
+            // OR seçilen saat şimdiki saat ile EŞİT İSE
+            // AND Dakika aralığı seçili DEĞİL İSE
+            // AND seçilen dakika şimdiki dakikadan KÜÇÜK veya EŞİT İSE
+
+            // (SEÇİLEN GÜN BUGÜN İLE EŞİT ANCAK SAAT GEÇTİ VEYA SAAT EŞİT VE DAKİKA EŞİT VEYA GEÇTİĞİ İÇİN BİR SONRAKİ AYIN GÜNÜNE AYARLIYORUZ)
+            }else if($bugun->format('d') == $gun && strpos($saat, '/') == false && $saat != -1 && $saat < $bugun->format('H') || ($saat != -1 && $saat == $bugun->format('H') && strpos($dakika, '/') == false && $dakika != -1 && $dakika <= $bugun->format('i'))){
+
+                $tarih->setDate($bugun->format('Y'), $bugun->format('m')+1, $gun);
+                $tarih = saatDakikaKontrolu($bugun, $tarih, $saat, $dakika, 1); // 1 gün bugün, 2 gün bugün değil
+                // echo "3 Gün bugün, ancak saat veya dakika geçtiği için sonraki ayın gününe ayarlandı<br>";
+
+            // ELSE IF Seçilen gün bugünden KÜÇÜK İSE
+            // AND Saat aralığı seçili DEĞİL İSE
+            // AND Dakika aralığı seçili DEĞİL İSE
+            // (SEÇİLEN GÜN GEÇTİĞİ İÇİN BİR SONRAKİ AYIN BUGÜNÜ AYARLIYORUZ. GÜN GEÇTİĞİ İÇİN SAAT VE DAKİKA DİKKATE ALINMIYORUZ)
+            }else if($bugun->format('d') > $gun && strpos($saat, '/') == false && strpos($dakika, '/') == false){
+
+                $tarih->setDate($bugun->format('Y'), $bugun->format('m')+1, $gun);
+                $tarih = saatDakikaKontrolu($bugun, $tarih, $saat, $dakika, 2); // 1 gün bugün, 2 gün bugün değil
+                // echo "4 Gün bugün değil, gün geçtiği için sonraki ayın gününe ayarlandı<br>";
+
+            // ELSE IF Seçilen gün bugünden BÜYÜK İSE
+            // AND Saat aralığı seçili DEĞİL İSE
+            // AND Dakika aralığı seçili DEĞİL İSE
+            // (SEÇİLEN GÜN BUGÜNDEN BÜYÜK OLDUĞUNDAN BU AYIN SEÇİLEN GELECEK GÜNE AYARLIYORUZ. BU DURUMDA SAAT VE DAKİKA DİKKATE ALMIYORUZ)
+            }else if($bugun->format('d') < $gun && strpos($saat, '/') == false && strpos($dakika, '/') == false){
+
+                $ayin_son_gunu = (int)$bugun->format('t'); // Ayın son gününü al
+
+                // Seçilen güne daha zaman olduğundan bu ayın seçilen gününe ayarlıyoruz
+                $tarih->setDate($bugun->format('Y'), $bugun->format('m'), $gun);
+                $tarih = saatDakikaKontrolu($bugun, $tarih, $saat, $dakika, 2); // 1 gün bugün, 2 gün bugün değil
+                // echo "5 Seçilen güne daha zaman olduğundan bu ayın seçilen gününe ayarlıyoruz<br>";
+
+                // Örnek seçilen gün 31 ancak bu geçerli ay 31 den küçük sayıda çıkıyorsa otomatikman sonraki ayın gününe ayarlayacaktır
+                // Bu geçerli ayın son gününe ayarlamak için ayarlanan ay ile bugünün ayı eşit değil ise -1 ay ile geri alıp ayın son gününe ayarlıyoruz
+                if($bugun->format('m') != $tarih->format('m')){
+                    $tarih->setDate($tarih->format('Y'), $tarih->format('m')-1, $ayin_son_gunu);
+                    $tarih = saatDakikaKontrolu($bugun, $tarih, $saat, $dakika, 2); // 1 gün bugün, 2 gün bugün değil
+                    // echo "6 Gün bugün değil, seçilen gelecek gün bu ayın son gününden fazla olduğundan bu ayın {$ayin_son_gunu}. gününe ayrlıyoruz<br>";
+                }
+            
+            // ELSE IF Seçilen gün bugünden KÜÇÜK İSE
+            // AND Saat aralığı SEÇİLİ İSE
+            // AND Dakika aralığı seçili DEĞİL İSE
+            // (SEÇİLEN GÜN BUGÜNDEN KÜÇÜK OLDUĞUNDAN BİR SONRAKİ AYIN GÜNÜNE AYARLIYORUZ. VE SAAT ARALIĞI SEÇİLİDİR)
+            }else if($bugun->format('d') > $gun && strpos($saat, '/') !== false && strpos($dakika, '/') == false){
+
+                $tarih->setDate($bugun->format('Y'), $bugun->format('m')+1, $gun);
+                $tarih = saatDakikaKontrolu($bugun, $tarih, $saat, $dakika, 2); // 1 gün bugün, 2 gün bugün değil
+                // echo "7 Gün bugün değil, gün geçtiği için sonraki ayın gününe ayarlandı<br>";
+
+            // Seçilen gün bugünden BÜYÜK İSE
+            // AND Saat aralığı SEÇİLİ İSE
+            // AND Dakika aralığı seçili DEĞİL İSE
+            // (SEÇİLEN GÜN BUGÜNDEN BÜYÜK OLDUĞUNDAN SEÇİLEN GELENE GÜNE AYARLIYORUZ. VE SAAT ARALIĞI SEÇİLİDİR)
+            }else if($bugun->format('d') < $gun && strpos($saat, '/') !== false && strpos($dakika, '/') == false){
+
+                $ayin_son_gunu = (int)$bugun->format('t'); // Ayın son gününü al
+
+                // Seçilen güne daha zaman olduğunda bu ayın seçilen gününe ayarlıyoruz
+                $tarih->setDate($tarih->format('Y'), $tarih->format('m'), $gun);
+                $tarih = saatDakikaKontrolu($bugun, $tarih, $saat, $dakika, 1); // 1 gün bugün, 2 gün bugün değil
+                // echo "8 Seçilen güne daha zaman olduğunda bu ayın seçilen gününe ayarlıyoruz<br>";
+
+                // Örnek seçilen gün 31 ancak bu geçerli ay 31 den küçük sayıda çıkıyorsa otomatikman sonraki ayın gününe ayarlayacaktır
+                // Bu geçerli ayın son gününe ayarlamak için ayarlanan ay ile bugünün ayı eşit değil ise -1 ay ile geri alıp ayın son gününe ayarlıyoruz
+                if($bugun->format('m') != $tarih->format('m')){
+                    $tarih->setDate($bugun->format('Y'), $bugun->format('m')-1, $ayin_son_gunu);
+                    $tarih = saatDakikaKontrolu($bugun, $tarih, $saat, $dakika, 1); // 1 gün bugün, 2 gün bugün değil
+                    // echo "9 Gün bugün değil, seçilen gelecek gün bu ayın son gününden fazla olduğundan bu ayın {$ayin_son_gunu}. gününe ayrlıyoruz<br>";
                 }
 
-                // SEÇİLEN SAAT BUGÜNKÜ SAATTEN BÜYÜK OLDUĞUNDA SEÇİLEN GELECEK SAATE VE SEÇİLEN DAKİKAYA AYARLA
-            } elseif ($saat != -1 && $saat > $bugun->format('H')
-                // SEÇİLEN SAAT BUGÜNKÜ SAAT İLE EŞİT VE SEÇİLEN DAKİKA BUGÜNKÜ DAKİKADAN BÜYÜK OLDUĞUNDAN GELECEK DAKİKAYA AYARLA
-                || $saat != -1 && $saat == $bugun->format('H') && ($dakika != -1 && $dakika > $bugun->format('i') || $dakika == -1)
-                || ($saat == -1 && $dakika == -1)
-                || $saat == -1 && $dakika != -1) {
-            
-                $tarih->setDate($bugun->format('Y'), $bugun->format('m'), $gun);
-                $tarih = saatDakikaKontrolu($bugun, $tarih, $gun, $saat, $dakika, 1); // 1 gün bugün, 2 gün bugün değil
+            }else if($bugun->format('d') == $gun && strpos($saat, '/') !== false){
 
-                //echo "SEÇİLEN SAAT BÜYÜK İSE, <br>VEYA SEÇİLEN SAAT EŞİT VE SEÇİLEN DAKİKA BÜYÜK VEYA DAKİKA -1 İSE <br>VEYA SAAT VE DAKİKA -1 İSE VEYA SAAT -1 VE DAKİKA 0-59 SEÇİLİ İSE <br>GÜN BUGÜN, SEÇİLEN SAATE VE SEÇİLEN DAKİKAYA AYARLANDI<br>";
+                $tarih->setDate($tarih->format('Y'), $tarih->format('m'), $gun);
+                $tarih = saatDakikaKontrolu($bugun, $tarih, $saat, $dakika, 1); // 1 gün bugün, 2 gün bugün değil
+
+                // echo "10 <br>";
+
+            }else if($bugun->format('d') < $gun && strpos($saat, '/') !== false){
+
+                $tarih->setDate($tarih->format('Y'), $tarih->format('m'), $gun);
+                $tarih = saatDakikaKontrolu($bugun, $tarih, $saat, $dakika, 1); // 1 gün bugün, 2 gün bugün değil
+
+                // echo "11 <br>";
+
+            }else if($bugun->format('d') > $gun && strpos($saat, '/') !== false){
+
+                $tarih->setDate($tarih->format('Y'), $tarih->format('m'), $gun);
+                $tarih = saatDakikaKontrolu($bugun, $tarih, $saat, $dakika, 1); // 1 gün bugün, 2 gün bugün değil
+
+                // echo "12 <br>";
 
             }
-
-    // SEÇİLEN GÜN BUGÜNDEN KÜÇÜK OLDUĞUNDAN SONRAKİ AYIN GÜNÜNE AYARLA
-    } elseif ($bugun->format('d') > $gun) {
-
-        $tarih->setDate($bugun->format('Y'), $bugun->format('m')+1, $gun);
-        $tarih = saatDakikaKontrolu($bugun, $tarih, $gun, $saat, $dakika, 2); // 1 gün bugün, 2 gün bugün değil
-
-        //echo "SEÇİLEN GÜN BUGÜNDEN KÜÇÜK OLDUĞUNDAN SAAT VE DAKİKA DİKKATE ALINMADAN SONRAKİ AYIN GÜNÜNE AYARLANDI<br>";
-
-    // SEÇİLEN GÜN BUGÜNDEN BÜYÜK OLDUĞUNDAN BU AYIN SEÇİLEN GÜNÜNE AYARLA
-    } elseif ($bugun->format('d') < $gun) {
-
-        $tarih->setDate($bugun->format('Y'), $bugun->format('m'), $gun);
-        $tarih = saatDakikaKontrolu($bugun, $tarih, $gun, $saat, $dakika, 2); // 1 gün bugün, 2 gün bugün değil
-
-        //echo "SEÇİLEN GÜN BUGÜNDEN BÜYÜK OLDUĞUNDAN SAAT VE DAKİKA DİKKATE ALINMADAN BU AYIN SEÇİLEN GÜNÜNE AYARLANDI<br>";
-
-        // EĞER SEÇİLEN GEÇERLİ AYIN SON GÜNÜNDEN BÜYÜK SEÇİLİ İSE BU FAZLA GÜN SONRAKİ AYIN GÜNÜNE İLAVE EDİLİR VE SONRAKİ AYIN 1., VEYA 2., VEYA 3. GÜN OLARAK GÖRÜNÜR
-        // HALBUKİ BURADA ÖRNEK GÜN 31 SEÇİLİYOR İSE AY SONU SEÇİLİYOR ANLAMINA GELİR ANCAK GEÇERLİ AY 29 İLE ÇIKIYORSA BURADA ARTAN 2 GÜN SONRAKİ AYIN 2. GÜNÜNE AYARLANIR
-        // AŞAĞIDAKİ KURAL SEÇİLEN GÜN BU AYIN SON GÜNÜNDEN BÜYÜK OLDUĞUNDAN SONRAKİ AYA AYARLANACAĞI İÇİN -1 İLE AY'I GERİ ALIYORUZ VE AYIN GÜNÜNÜ (int)$bugun->format('t') DEĞİŞKEN İLE BELİRLEYEREK AYARLIYORUZ
-        if($gun > (int)$bugun->format('t')){
-            $tarih->setDate($tarih->format('Y'), $tarih->format('m')-1, (int)$bugun->format('t'));
-            //echo "2 SEÇİLEN GÜN BU AYIN SON GÜNÜNDEN BÜYÜK OLDUĞUNDA -1 İLE AY GERİ ALIYORUZ VE BU AYIN ".(int)$bugun->format('t').". GÜNÜNE AYARLANDI<br>";
-        }
-
-    }
 
 ##############################################################################################################################################################
 
@@ -279,117 +366,100 @@ if ($saat == -1 && $dakika == -1) { // SAAT && DAKİKA * YILDIZ SEÇİLİ İSE
 
 // echo '}else if($gun == -1){<br>';
 
-
-    // SAAT VE DAKİKA ARALIKLARI SEÇİL Mİ?
-    $saatCheck = strpos($saat, '/') === false; // sonuç 1, aralık seçili değildir
-    $dakikaCheck = strpos($dakika, '/') === false; // sonuç 1, aralık seçili değildir
-
-    // SAAT VE DAKİKA -1 SEÇİLİ İSE BUGÜNKÜ SAAT VE DAKİKAYI VER, DEĞİL İSE SEÇİLEN SAAT VE DAKİKAYI VER
-    $saatValue = $saat == -1 ? $bugun->format('H') : $saat;
-    $dakikaValue = $dakika == -1 ? $bugun->format('i') : $dakika;
-
-
-    // SAAT VE DAKİKA ARALIKLARI SEÇİLİ DEĞİLDİR
-    if ($saatCheck && $dakikaCheck) {
-        if ($saat == -1 && $dakika == -1) {
+        // IF saat aralığı SEÇİLİ DEĞİL İSE
+        // AND seçilen saat -1 DEĞİL İSE
+        // AND seçilen saat bugünkü saatten BÜYÜK İSE
+        // OR seçilen saat bugünkü saat ile EŞİT İSE
+        // AND dakikada aralığı seçili DEĞİL İSE
+        // AND dakika -1 seçili DEĞİL İSE
+        // AND secilen dakika bugünkü dakika ile EŞİT veya BÜYÜK İSE
+        // (GÜN BUGÜN, SEÇİLEN SAAT BÜYÜK İSE veya SAAT EŞİT İSE DAKİKA EŞİT VEYA BÜYÜK OLDUĞUNDAN GELECEK SAATE/DAKİKAYA AYARLIYORUZ)
+        if(strpos($saat, '/') == false && $saat != -1 && $bugun->format('H') < $saat || $bugun->format('H') == $saat && strpos($dakika, '/') == false && $dakika != -1 && $bugun->format('i') <= $dakika){
+##############################################################################################################################################################
 
             $tarih->setDate($bugun->format('Y'), $bugun->format('m'), $bugun->format('d'));
-            $tarih = saatDakikaKontrolu($bugun, $tarih, $gun, $saat, $dakika, 1); // 1 gün bugün, 2 gün bugün değil
-            //echo "GÜN BUGÜN AYARLA (HEPSİ -1 OLDUĞUNDAN HER GÜN, HER SAAT, HER DAKİKA AYARLANACAK)";
+            $tarih = saatDakikaKontrolu($bugun, $tarih, $saat, $dakika, 1); // 1 gün bugün, 2 gün bugün değil
+            // echo "13 Seçili gün -1, saat 0-23 seçili ve saat geçmedi, dakika  geçerli gün ayarlandı<br>";
 
-        } elseif ($saat != -1 && $saatValue == $bugun->format('H') && $dakika == -1) {
-
-            $tarih->setDate($bugun->format('Y'), $bugun->format('m'), $bugun->format('d'));
-            $tarih = saatDakikaKontrolu($bugun, $tarih, $gun, $saat, $dakika, 1); // 1 gün bugün, 2 gün bugün değil
-            //echo "GÜN BUGÜN AYARLA (SEÇİLEN SAAT BUGÜNKÜ SAAT İLE EŞİT VE DAKİKA -1 OLDUĞUNDAN BUGÜNÜ +1 DAKİKA AYARLANACAK)";
-
-        } elseif ($saat != -1 && $saatValue == $bugun->format('H') && $dakika != -1 && $dakikaValue <= $bugun->format('i')) {
+##############################################################################################################################################################
+        // ELSE IF saat aralığı SEÇİLİ DEĞİL İSE
+        // AND seçilen saat -1 DEĞİL İSE
+        // AND seçilen saat bugünkü saatten KÜÇÜK İSE
+        // OR seçilen saat bugünkü saat ile EŞİT İSE
+        // AND dakikada aralığı seçili DEĞİL İSE
+        // AND dakika -1 seçili DEĞİL İSE
+        // AND secilen dakika bugünkü dakika ile EŞİT veya KÜÇÜK İSE
+        // (GÜN BUGÜN, SEÇİLEN SAAT KÜÇÜK OLDUĞUNDAN, veya SAAT EŞİT İSE DAKİKA EŞİT VEYA KÜÇÜK OLDUĞUNDAN SONRAKİ GÜNE AYARLIYORUZ)
+        }else if(strpos($saat, '/') == false && $saat != -1 && $bugun->format('H') > $saat || $bugun->format('H') == $saat && strpos($dakika, '/') == false && $dakika != -1 && $bugun->format('i') >= $dakika){
+##############################################################################################################################################################
 
             $tarih->setDate($bugun->format('Y'), $bugun->format('m'), $bugun->format('d')+1);
-            $tarih = saatDakikaKontrolu($bugun, $tarih, $gun, $saat, $dakika, 2); // 1 gün bugün, 2 gün bugün değil
-            //echo "SONRAKİ GÜNE AYARLA (SEÇİLEN SAAT EŞİT VE SEÇİLEN DAKİKA BUGÜNKÜ DAKİKADAN KÜÇÜK VEYA EŞİT OLDUĞUNDAN SONRAKİ GÜNE AYARLANACAK)";
+            $tarih = saatDakikaKontrolu($bugun, $tarih, $saat, $dakika, 2); // 1 gün bugün, 2 gün bugün değil
+            // echo "14 Seçili gün -1, seçilen saat şimdiki saate göre geçtiği için +1 gün ayarlandı<br>";
 
-        } elseif ($saat != -1 && $saatValue == $bugun->format('H') && $dakika != -1 && $dakikaValue > $bugun->format('i')) {
+##############################################################################################################################################################
+        // ELSE IF saat aralığı SEÇİLİ DEĞİL İSE
+        // AND seçilen saat -1 DEĞİL İSE
+        // AND seçilen saat bugünkü saatten BÜYÜK İSE
+        // AND dakikada aralığı seçili DEĞİL İSE
+        // AND seçilen dakika -1 İSE
+        // (GÜN BUGÜN, SEÇİLEN SAAT GEÇERLİ SAATTEN BÜYÜK OLDUĞUNDAN GELECEK SAATE AYARLIYORUZ)
+        }else if(strpos($saat, '/') == false && $saat != -1 && $bugun->format('H') < $saat && strpos($dakika, '/') == false && $dakika == -1){
+##############################################################################################################################################################
 
-            $tarih->setDate($bugun->format('Y'), $bugun->format('m'), $bugun->format('d'));
-            $tarih = saatDakikaKontrolu($bugun, $tarih, $gun, $saat, $dakika, 1); // 1 gün bugün, 2 gün bugün değil
-            //echo "GÜN BUGÜN AYARLA (SEÇİLEN SAAT EŞİT VE SEÇİLEN DAKİKA BUGÜNKÜ DAKİKADAN BÜYÜK OLDUĞUNDAN BUGÜNE AYARLANACAK)";
+            $tarih->setDate($tarih->format('Y'), $tarih->format('m'), $tarih->format('d'));
+            $tarih = saatDakikaKontrolu($bugun, $tarih, $saat, $dakika, 1); // 1 gün bugün, 2 gün bugün değil
+            // echo "15 Seçili gün -1, saat 0-23 seçili ve saat geçmedi, dakika  geçerli gün ayarlandı<br>";
 
-        } elseif ($saat != -1 && $saatValue > $bugun->format('H')) {
-
-            $tarih->setDate($bugun->format('Y'), $bugun->format('m'), $bugun->format('d'));
-            $tarih = saatDakikaKontrolu($bugun, $tarih, $gun, $saat, $dakika, 1); // 1 gün bugün, 2 gün bugün değil
-            //echo "GÜN BUGÜN AYARLA (SEÇİLEN SAAT BUGÜNKÜ SAATTEN BÜYÜK OLDUĞUNDAN DAKİKA DİKKATE ALINMADAN BUGÜNE AYARLANACAK)";
-
-        } elseif ($saat != -1 && $saatValue < $bugun->format('H')) {
-
-            $tarih->setDate($bugun->format('Y'), $bugun->format('m'), $bugun->format('d')+1);
-            $tarih = saatDakikaKontrolu($bugun, $tarih, $gun, $saat, $dakika, 2); // 1 gün bugün, 2 gün bugün değil
-            //echo "SONRAKİ GÜNE AYARLA (SEÇİLEN SAAT BUGÜNKÜ SAATTEN KÜÇÜK OLDUĞUNDAN DAKİKA DİKKATE ALINMADAN SONRAKİ GÜNE AYARLANACAK)";
-
-        } elseif ($saat == -1 && $dakika != -1 && $dakikaValue > $bugun->format('i')) {
-
-            $tarih->setDate($bugun->format('Y'), $bugun->format('m'), $bugun->format('d'));
-            $tarih = saatDakikaKontrolu($bugun, $tarih, $gun, $saat, $dakika, 1); // 1 gün bugün, 2 gün bugün değil
-            //echo "GÜN BUGÜN AYARLA (HER SAAT VE SEÇİLEN DAKİKA BUGÜNKÜ DAKİKADAN BÜYÜK OLDUĞUNDAN SEÇİLEN DAKİKA AYARLANACAK)";
-
-        } elseif ($saat == -1 && $dakika != -1 && $dakikaValue <= $bugun->format('i')) {
-
-            $tarih->setDate($bugun->format('Y'), $bugun->format('m'), $bugun->format('d'));
-            $tarih = saatDakikaKontrolu($bugun, $tarih, $gun, $saat, $dakika, 1); // 1 gün bugün, 2 gün bugün değil
-            //echo "GÜN BUGÜN AYARLA (HER SAAT VE SEÇİLEN DAKİKA BUGÜNKÜ DAKİKADAN KÜÇÜK OLDUĞUNDAN SONRAKİ SAATE VE SEÇİLEN DAKİKA AYARLANACAK)";
-
-        } else {
-             echo "Diğer durumlar";
-        }
-
-    } elseif ($saatCheck && !$dakikaCheck) { // SAAT ARALIĞI SEÇİLİ DEĞİLDİR, && DAKİKA ARALIĞI SEÇİLİDİR
-        if ($saat == -1) {
-
-            $tarih->setDate($bugun->format('Y'), $bugun->format('m'), $bugun->format('d'));
-            $tarih = saatDakikaKontrolu($bugun, $tarih, $gun, $saat, $dakika, 1); // 1 gün bugün, 2 gün bugün değil
-            //echo "GÜN BUGÜN AYARLA (SEÇİLEN SAAT -1 VE SEÇİLEN DAKİKA ARALIĞI OLDUĞUNDAN DAKİKA ARALIĞI KADAR ARTIRILACAK VE BUGÜNE AYARLANACAK)";
-
-        } elseif ($saat != -1 && $saat > $bugun->format('H')) {
-
-            $tarih->setDate($bugun->format('Y'), $bugun->format('m'), $bugun->format('d'));
-            $tarih = saatDakikaKontrolu($bugun, $tarih, $gun, $saat, $dakika, 1); // 1 gün bugün, 2 gün bugün değil
-            //echo "GÜN BUGÜN AYARLA (SEÇİLEN SAAT BUGÜNKÜ SAATTEN BÜYÜK OLDUĞUNDAN İLERKİ SAATE AYARLANACAK)";
-
-        } elseif ($saat != -1 && $saat <= $bugun->format('H')) {
+##############################################################################################################################################################
+        // ELSE IF saat aralığı SEÇİLİ DEĞİL İSE
+        // AND seçilen saat -1 DEĞİL İSE
+        // AND seçilen saat bugünkü saatten KÜÇÜK veyaz EŞİT İSE
+        // AND dakikada aralığı seçili DEĞİL İSE
+        // AND seçilen dakika -1 İSE
+        // (GÜN BUGÜN, SEÇİLEN SAAT GEÇERLİ SAATTEN KÜÇÜK OLDUĞUNDAN BİR SONRAKİ AYARLIYORUZ)
+        }else if(strpos($saat, '/') == false && $saat != -1 && $bugun->format('H') >= $saat && strpos($dakika, '/') == false && $dakika == -1){
+##############################################################################################################################################################
 
             $tarih->setDate($bugun->format('Y'), $bugun->format('m'), $bugun->format('d')+1);
-            $tarih = saatDakikaKontrolu($bugun, $tarih, $gun, $saat, $dakika, 2); // 1 gün bugün, 2 gün bugün değil
-            //echo "SONRAKİ GÜNE AYARLA (SEÇİLEN SAAT BUGÜNKÜ SAATTEN KÜÇÜK VEYA EŞİT OLDUĞUNDAN SONRAKİ GÜNE AYARLANACAK)";
+            $tarih = saatDakikaKontrolu($bugun, $tarih, $saat, $dakika, 2); // 1 gün bugün, 2 gün bugün değil
+            // echo "16 Seçili gün -1, seçilen saat şimdiki saate göre geçtiği için +1 gün ayarlandı<br>";
 
-        } elseif ($saat != -1 && $saat == $bugun->format('H')) {
+##############################################################################################################################################################
+        // ELSE IF saat aralığı SEÇİLİ DEĞİL İSE
+        // AND seçilen saat -1 SEÇİLİ İSE
+        // AND dakikada aralığı seçili DEĞİL İSE
+        // AND seçilen dakika -1 İSE
+        // (GÜN BUGÜN, SAAT VE DAKİKA -1 * YILDIZ SEÇİLİ OLDUĞUNDAN HER SAAT HER DAKİKA AYARLIYORUZ)
+        }else if(strpos($saat, '/') == false && $saat == -1 && strpos($dakika, '/') == false && $dakika == -1){
+##############################################################################################################################################################
 
-            $tarih->setDate($bugun->format('Y'), $bugun->format('m'), $bugun->format('d'));
-            $tarih = saatDakikaKontrolu($bugun, $tarih, $gun, $saat, $dakika, 1); // 1 gün bugün, 2 gün bugün değil
-            //echo "GÜN BUGÜN AYARLA (SEÇİLEN SAAT BUGÜNKÜ SAAT İLE EŞİT OLDUĞUNDAN BUGÜNE AYARLANACAK)";
+            $tarih = saatDakikaKontrolu($bugun, $tarih, $saat, $dakika, 1); // 1 gün bugün, 2 gün bugün değil
+            // echo "17 Saat veya dakika aralığı seçili<br>";
 
+##############################################################################################################################################################
+        // ELSE IF saat aralığı SEÇİLİ DEĞİL İSE
+        // AND seçilen saat -1 SEÇİLİ İSE
+        // AND dakikada aralığı seçili DEĞİL İSE
+        // AND seçilen dakika -1 SEÇİLİ DEĞİL İSE
+        // (GÜN BUGÜN, SAAT HER SAATTE VE SEÇİLEN DAKİKA OLARAK AYARLIYORUZ)
+        }else if(strpos($saat, '/') == false && $saat == -1 && strpos($dakika, '/') == false && $dakika != -1){
+##############################################################################################################################################################
+
+            $tarih = saatDakikaKontrolu($bugun, $tarih, $saat, $dakika, 1); // 1 gün bugün, 2 gün bugün değil
+            // echo "18 Saat veya dakika aralığı seçili<br>";
+
+##############################################################################################################################################################
+        // ELSE IF saat aralığı SEÇİLİ İSE
+        // OR dakika aralığı SEÇİLİ İSE
+        }else if(strpos($saat, '/') !== false || strpos($dakika, '/') !== false){
+##############################################################################################################################################################
+
+            $tarih = saatDakikaKontrolu($bugun, $tarih, $saat, $dakika, 1); // 1 gün bugün, 2 gün bugün değil
+            // echo "19 Saat veya dakika aralığı seçili<br>";
         }
-    } elseif (!$saatCheck && $dakikaCheck) { // SAAT ARALIĞI SEÇİLİDİR, && DAKİKA ARALIĞI SEÇİLİ DEĞİLDİR
-        if ($dakika == -1) {
 
-            $tarih->setDate($bugun->format('Y'), $bugun->format('m'), $bugun->format('d'));
-            $tarih = saatDakikaKontrolu($bugun, $tarih, $gun, $saat, $dakika, 1); // 1 gün bugün, 2 gün bugün değil
-            //echo "SAAT ARALIĞI VE DAKİKA -1 SEÇİLİ, ANCAK SAAT ARALIĞI SEÇİLİ İKEN DAKİKA -1 SEÇİLMESİNE İZİN VERMİYORUZ ANCAK KURALIN BULUNMASINDA FAYDA VARDIR";
-
-        } elseif ($dakika != -1 && $dakika > -1) {
-
-            $tarih->setDate($bugun->format('Y'), $bugun->format('m'), $bugun->format('d'));
-            $tarih = saatDakikaKontrolu($bugun, $tarih, $gun, $saat, $dakika, 1); // 1 gün bugün, 2 gün bugün değil
-            //echo "GÜN BUGÜN AYARLA (SAAT ARALIĞI SEÇİLİ, DAKİKA 0-59 ARASI SEÇİLİ OLDUĞUNDAN SAAT ARALIĞI KADAR ARTIRILACAK VE SEÇİLEN DAKİKA AYARLANACAK)";
-
-        }
-    } elseif (!$saatCheck && !$dakikaCheck) { // SAAT VE DAKİKA ARALIKLARI SEÇİLİDİR
-
-            $tarih->setDate($bugun->format('Y'), $bugun->format('m'), $bugun->format('d'));
-            $tarih = saatDakikaKontrolu($bugun, $tarih, $gun, $saat, $dakika, 1); // 1 gün bugün, 2 gün bugün değil
-            //echo "SAAT VE DAKİKA ARALIKLARI SEÇİLİ. HER İKİSİNİN SEÇİLMESİNE İZİN VERMİYORUZ ANCAK KURALIN BULUNMASINDA FAYDA VARDIR";
-    }
-
+##############################################################################################################################################################
 
         } // }else if($gun == -1){
         return $tarih;
@@ -401,22 +471,29 @@ if ($saat == -1 && $dakika == -1) { // SAAT && DAKİKA * YILDIZ SEÇİLİ İSE
 ##############################################################################################################################################################
 ##############################################################################################################################################################
 ##############################################################################################################################################################
-if(isset($_POST['ajaxtan'])){
+
     // HAFTANIN GÜN(LERİ) SEÇİLİ İSE HAFTANIN GÜN(LERİ) İŞLEMLERİNE BAŞLA
     if (!in_array("-1", $haftanin_gunu)){
 
-        //$tarih->setTimezone(new DateTimeZone('UTC'));
-        $tarih = haftaKontrolu($bugun, $tarih, $haftanin_gunu, $gun, $saat, $dakika);
+        $tarih = haftaKontrolu($bugun, $tarih, $haftanin_gunu, $saat, $dakika);
 
     }else{ // HAFTANIN GÜNÜ -1 * YILDIZ SEÇİLİ İSE GÜN İŞLEMLERİNE BAŞLA
 
-        //$tarih->setTimezone(new DateTimeZone('UTC'));
         $tarih = gunKontrolu($bugun, $tarih, $gun, $saat, $dakika);
 
     }
-        $tarih->setTimezone(new DateTimeZone('Europe/Istanbul')); // UTC // Europe/Istanbul
 
-        echo date_tr('j F Y l, H:i', $tarih->format('U'));
+    if(isset($_POST['ajaxtan'])){
+
+        $unixtime = $tarih->setTimezone(new DateTimeZone('UTC'))->format('U');
+require_once("includes/turkcegunler.php");
+
+        echo date_tr('j F Y l, H:i', $unixtime);
+    }else{
+
+        // Unix zaman damgasını (timestamp) UTC olarak alma
+        $sonraki_calisma = $tarih->setTimezone(new DateTimeZone('UTC'))->format('U');
     }
 } // if(isset($gun) && isset($saat) && isset($dakika) && isset($haftanin_gunu)){
+
 ?>

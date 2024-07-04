@@ -381,7 +381,7 @@ include('includes/sub_navbar.php');
     });
 </script>
 
-<script type="text/javascript">  
+<script type="text/javascript">
     function renk(chkB){
     var IsChecked = chkB.checked;           
         if(IsChecked){
@@ -524,7 +524,7 @@ include('includes/sub_navbar.php');
                 type: "POST",
                 url: "backup.php",
                 data: str,
-                success: function(veriler){       
+                success: function(veriler){ 
                 bekleme.kapat();
                 jw("b olumlu").baslik("Veri Tabanı Yedekleme Sonucu").icerik(veriler).en(450).boy(10).kilitle().akilliKapatPasif().kapaninca(function(){ window.location.href=window.location.href }).ac();       
                 }

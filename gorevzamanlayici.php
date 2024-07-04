@@ -2,7 +2,7 @@
 // Bismillahirrahmanirrahim
 require_once __DIR__ . '/includes/connect.php';
 require_once __DIR__ . '/check-login.php';
-require_once __DIR__ . '/includes/turkcegunler.php';
+//require_once __DIR__ . '/includes/turkcegunler.php';
 
 //echo '<pre>' . print_r($_POST, true) . '</pre>';
 ##########################################################################################################
@@ -27,65 +27,51 @@ if($_SERVER['REQUEST_METHOD'] == 'POST' && (isset($_POST['gorev_ekle']) || isset
 ########################################### CRON ZAMANLAYICI BAŞLANGICI #################################################
 #########################################################################################################################
 
-    // Gönderilen gün değeri
-    $gun = isset($_POST['gun']) ? $_POST['gun'] : '-1';
-    // Gönderilen saat değeri
-    $saat = isset($_POST['saat']) ? $_POST['saat'] : '-1';
-    // Gönderilen dakika değeri
-    $dakika = isset($_POST['dakika']) ? $_POST['dakika'] : '-1';
-    // Gönderilen haftanın değeri
-    $haftanin_gunu = isset($_POST['haftanin_gunu']) ? $_POST['haftanin_gunu'] : [0=>-1];
+	// Gönderilen gün değeri
+	$gun = isset($_POST['gun']) ? $_POST['gun'] : '-1';
+	// Gönderilen saat değeri
+	$saat = isset($_POST['saat']) ? $_POST['saat'] : '-1';
+	// Gönderilen dakika değeri
+	$dakika = isset($_POST['dakika']) ? $_POST['dakika'] : '-1';
+	// Gönderilen haftanın değeri
+	$haftanin_gunu = isset($_POST['haftanin_gunu']) ? $_POST['haftanin_gunu'] : [0=>-1];
 
 include("cron_zamanlayici.php");
-
-    // HAFTANIN GÜN(LERİ) SEÇİLİ İSE HAFTANIN GÜN(LERİ) İŞLEMLERİNE BAŞLA
-    if (!in_array("-1", $haftanin_gunu)){
-
-        $tarih = haftaKontrolu($bugun, $tarih, $haftanin_gunu, $gun, $saat, $dakika);
-
-    }else{ // HAFTANIN GÜNÜ -1 * YILDIZ SEÇİLİ İSE GÜN İŞLEMLERİNE BAŞLA
-
-        $tarih = gunKontrolu($bugun, $tarih, $gun, $saat, $dakika);
-
-    }
-        $tarih->setTimezone(new DateTimeZone('UTC'));
-
-        $sonraki_calisma = $tarih->format('U');
 
 #########################################################################################################################
 ########################################### CRON ZAMANLAYICI SONU #######################################################
 #########################################################################################################################
 
-        //echo '<pre>' . print_r($_POST, true) . '</pre>';
-        //exit;
-        // Ekleme ve güncelleme için
-        $haftadizi = array(1,2,3,4,5,6,7);
-        if(is_array($_POST['haftanin_gunu']) AND array_intersect($haftadizi, $_POST['haftanin_gunu'])){$gun = '-1';}
-        if(is_array($_POST['haftanin_gunu']) AND in_array('-1', $_POST['haftanin_gunu'])){$gun = $gun;}
-        $gorev_adi                      = $_POST['gorev_adi'];
-        $dosya_adi                      = $_POST['dosya_adi'];
+    //echo '<pre>' . print_r($_POST, true) . '</pre>';
+    //exit;
+    // Ekleme ve güncelleme için
+    $haftadizi = array(1,2,3,4,5,6,7);
+    if(is_array($_POST['haftanin_gunu']) AND array_intersect($haftadizi, $_POST['haftanin_gunu'])){$gun = '-1';}
+    if(is_array($_POST['haftanin_gunu']) AND in_array('-1', $_POST['haftanin_gunu'])){$gun = $gun;}
+    $gorev_adi                      = $_POST['gorev_adi'];
+    $dosya_adi                      = $_POST['dosya_adi'];
 
-        $haftanin_gunu                  = implode(",", $_POST['haftanin_gunu']);
+    $haftanin_gunu                  = implode(",", $_POST['haftanin_gunu']);
 
-        $saat                           = $_POST['saat'];
-        $dakika                         = $_POST['dakika'];
-        $aktif                          = $_POST['aktif'];
-        $gunluk_kayit                   = $_POST['gunluk_kayit'];
+    $saat                           = $_POST['saat'];
+    $dakika                         = $_POST['dakika'];
+    $aktif                          = $_POST['aktif'];
+    $gunluk_kayit                   = $_POST['gunluk_kayit'];
 
-        $gz                             = isset($_POST['gz']) ? $_POST['gz'] : '-1';
-        $dbbakim                        = isset($_POST['dbbakim']) ? $_POST['dbbakim'] : '-1';
-        $dblock                         = isset($_POST['dblock']) ? $_POST['dblock'] : '-1';
-        $combine                        = isset($_POST['combine']) ? $_POST['combine'] : '-1';
-        $elle                           = isset($_POST['elle']) ? $_POST['elle'] : '-1';
-        if(isset($_POST['tablolar']) && is_array($_POST['tablolar'])){
-        $tablolar                       = implode(",", $_POST['tablolar']);
-        $tablo_guncelmi_denetle         = isset($_POST['tablo_guncelmi_denetle']) ? $_POST['tablo_guncelmi_denetle'] : 0;
-        }else{
-        $tablolar                       = NULL;
-        $tablo_guncelmi_denetle         = 0;
-        }
-        $duzeltilecek_id                = isset($_POST['duzelt_id']) ? $_POST['duzelt_id'] : null;
-        $ozel_onek                      = 0;
+    $gz                             = isset($_POST['gz']) ? $_POST['gz'] : '-1';
+    $dbbakim                        = isset($_POST['dbbakim']) ? $_POST['dbbakim'] : '-1';
+    $dblock                         = isset($_POST['dblock']) ? $_POST['dblock'] : '-1';
+    $combine                        = isset($_POST['combine']) ? $_POST['combine'] : '-1';
+    $elle                           = isset($_POST['elle']) ? $_POST['elle'] : '-1';
+    if(isset($_POST['tablolar']) && is_array($_POST['tablolar'])){
+    $tablolar                       = implode(",", $_POST['tablolar']);
+    $tablo_guncelmi_denetle         = isset($_POST['tablo_guncelmi_denetle']) ? $_POST['tablo_guncelmi_denetle'] : 0;
+    }else{
+    $tablolar                       = NULL;
+    $tablo_guncelmi_denetle         = 0;
+    }
+    $duzeltilecek_id                = isset($_POST['duzelt_id']) ? $_POST['duzelt_id'] : null;
+    $ozel_onek                      = 0;
 
     ###########################################################################################################################
     if(isset($_POST['gorev_nedir']) && $_POST['gorev_nedir'] == 1)
@@ -649,19 +635,19 @@ include('includes/sub_navbar.php');
 
 
   <!-- // ÜRÜNLERİ SAYFALAMA KODU  -->
-  <?php    
-    if(isset($_GET['edit'])){
-        if(!empty($veritabani_aktif)){
-            echo '<script>jQuery(function($) { $("#veritabani_tablo").show(); $("#eklebuton").hide(); });</script>';
-            echo '<script>$("#gorev_zamanlayici select").trigger("change");</script>';
-            echo '<script>$("#haftanin_gunu").trigger("change");</script>';
-        }
-        if(!empty($secilen_tablolar)){
-            echo '<script>jQuery(function($) { tablolariYukle(\''.$edit_secili_secilen_yedekleme.'\',\''.$secilen_tablolar.'\',\'TABLE_NAME ASC\');});</script>';
-            //echo 'change(\'input[name="combine"]\');';
-            //echo '<script>tablolariYukle();</script>';
-        }
-  ?>
+<?php    
+if(isset($_GET['edit'])){
+    if(!empty($veritabani_aktif)){
+        echo '<script>jQuery(function($) { $("#veritabani_tablo").show(); $("#eklebuton").hide(); });</script>';
+        echo '<script>$("#gorev_zamanlayici select").trigger("change");</script>';
+        echo '<script>$("#haftanin_gunu").trigger("change");</script>';
+    }
+    if(!empty($secilen_tablolar)){
+        echo '<script>jQuery(function($) { tablolariYukle(\''.$edit_secili_secilen_yedekleme.'\',\''.$secilen_tablolar.'\',\'TABLE_NAME ASC\');});</script>';
+        //echo 'change(\'input[name="combine"]\');';
+        //echo '<script>tablolariYukle();</script>';
+    }
+?>
 
     <!-- Gövde İçerik Başlangıcı -->
     <section class="content">
@@ -731,7 +717,7 @@ include('includes/sub_navbar.php');
     </tr>
 
     <tr>
-        <td colspan="4" style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;"><b>Zamanlanan zaman:</b> <span id="scheduledTime" style="font-weight: bold;color:red;"></span><br />Zamanlama seçeneklerine göre çalışacağı zaman örnekte gösteriliyor.<br />Formu gönderdiğinizde o anki geçerli zamana göre oluşturulacağı için değişebilir.</td>
+        <td colspan="4" style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;"><b>Çalışacak zaman:</b> <span id="scheduledTime" style="font-weight: bold;color:red;"></span><br />Zamanlama seçeneklerine göre çalışacağı zaman örnekte gösteriliyor.<br />Formu gönderdiğinizde o anki geçerli zamana göre oluşturulacağı için değişebilir.</td>
     </tr>
 
     <tr>
@@ -1322,7 +1308,7 @@ include('includes/sub_navbar.php');
     </tr>
 
     <tr>
-        <td colspan="4"><b>Zamanlanan zaman:</b> <span id="scheduledTime" style="font-weight: bold;color:red;"></span><br />Zamanlama seçeneklerine göre çalışacağı zaman örnekte gösteriliyor.<br />Formu gönderdiğinizde o anki geçerli zamana göre oluşturulacağı için değişebilir.</td>
+        <td colspan="4"><b>Çalışacak zaman:</b> <span id="scheduledTime" style="font-weight: bold;color:red;"></span><br />Zamanlama seçeneklerine göre çalışacağı zaman örnekte gösteriliyor.<br />Formu gönderdiğinizde o anki geçerli zamana göre oluşturulacağı için değişebilir.</td>
     </tr>
 
     <tr>
@@ -1820,12 +1806,12 @@ $(document).ready(function() {
         var additionalData = { ajaxtan: true }; // Harici post verisi
         formData = formData + '&' + $.param(additionalData); // Serialize edilen veriye ekleyin
         $.post('cron_zamanlayici.php', formData, function(data) { // cron_zamanlayici.php'ye POST gönder
-            $('#scheduledTime').text(data); // Dönen Unix zaman damgasını göster
+            $('#scheduledTime').text(data);
         });
     });
 
     // Sayfa yüklendiğinde bir kez tetikle
-    //$('#gorev_zamanlayici select').trigger('change');
+    $('#gorev_zamanlayici select').trigger('change');
 });
 </script>
 
@@ -1864,7 +1850,7 @@ $(document).ready(function() {
     function simdiCalistir(gorev_adi, runid){
             $(function()
               {
-                jw('b secim',gorev_dur).baslik("Görevi Elle Yürütme").icerik("Elle bu <u>"+ gorev_adi +"</u> görevi yürütmek istediğinizden emin misiniz<br />Bu görevde belirlenen tüm seçeneler uygulanacaktır.<br />Sonraki yürütme zamanı değiştirilmeyecektir").en(450).kilitle().ac();
+                jw('b secim',gorev_dur).baslik("Görevi Elle Yürütme").icerik("<u>"+ gorev_adi +"</u> görevi elle yürütmek istediğinizden emin misiniz<br />Bu görevde belirlenen tüm seçeneler uygulanacaktır.<br />Sonraki yürütme zamanı değiştirilmeyecektir").en(450).kilitle().ac();
               })
           function gorev_dur(x){
                 if(x==1){
@@ -1895,16 +1881,6 @@ $(document).ready(function() {
         $('input[name="dizin_secilen_yedekleme_oneki"]').val($.trim($('select[name="dizin_secilen_yedekleme"] option:selected').text()));
         $('input[name="hide_dizin_secilen_yedekleme"]').val($.trim($('select[name="dizin_secilen_yedekleme"] option:selected').text()));
     });
-/*
-    $("#zip_dosya_adi_degistir").change(function() {
-        if(this.checked) {
-            $("input[name='dizin_secilen_yedekleme_oneki']").prop('disabled', false);
-        }else{
-            $('input[name="dizin_secilen_yedekleme_oneki"]').val($.trim($("select[name='dizin_secilen_yedekleme'] option:selected").text()));
-            $("input[name='dizin_secilen_yedekleme_oneki']").prop('disabled', true);
-        }
-    });
-*/
 
     // DİZİN YEDEKLEMEDE KENDİ DİZİN ADI İLE ÖNEKİ YERİNE KUTUYU SEÇEREK ÖZEL ÖNEK BELİRLEME SEÇENEĞİ
     $("#zip_dosya_adi_degistir").change(function() {
@@ -1991,31 +1967,6 @@ $(document).ready(function() {
 <script type="text/javascript">
 
       $(document).ready(function(){
-/*
-var charsObject = {
-    'Ğ' : 'G',
-    'ğ' : 'g',
-    'Ü' : 'U',
-    'ü' : 'u',
-    'Ş' : 'S',
-    'ş' : 's',
-    'İ' : 'I',
-    'ı' : 'i',
-    'Ö' : 'O',
-    'ö' : 'o',
-    'Ç' : 'C',
-    'ç' : 'c',
-    ' ' : '_'
-};
-
-$("input[name*=Name]:not([name*=Main])").keyup(function(e){
-        var start = this.selectionStart, end = this.selectionEnd;
-        $(this).val($(this).val().replace(/[^]/g, function(char, key) {
-            return charsObject[char] || char;
-        }));
-        this.setSelectionRange(start, end);
-});
-*/
 
         $("input[name='veritabani_secilen_yedekleme_oneki']").on("keypress", function(event) {
               var englishAlphabetAndWhiteSpace = /[A-Za-z0-9-_.]/g;
