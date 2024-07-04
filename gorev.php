@@ -542,20 +542,25 @@ require __DIR__ . '/' . $kaynak_url;
 //Başarılı görev bir sonraki zamana güncelle
 if( !isset($_POST['elle_yurutme']) ){
 
+    // Şu anki tarihi ve saat bilgisini al
+    $bugun = new DateTime('now', new DateTimeZone(''.$genel_ayarlar['secili_zaman_dilimi'].''));
+
+    // Unix zaman damgasını depolamak için varsayılan tarih nesnesi oluştur
+    $tarih = new DateTime('now', new DateTimeZone(''.$genel_ayarlar['secili_zaman_dilimi'].''));
+
+    // HAFTANIN GÜN(LERİ) SEÇİLİ İSE HAFTANIN GÜN(LERİ) İŞLEMLERİNE BAŞLA
     if (!in_array("-1", $haftanin_gunu)){
 
-        //$tarih->setTimezone(new DateTimeZone('UTC'));
-        $tarih = haftaKontrolu($bugun, $tarih, $haftanin_gunu, $gun, $saat, $dakika);
+        $tarih = haftaKontrolu($bugun, $tarih, $haftanin_gunu, $saat, $dakika);
 
     }else{ // HAFTANIN GÜNÜ -1 * YILDIZ SEÇİLİ İSE GÜN İŞLEMLERİNE BAŞLA
 
-        //$tarih->setTimezone(new DateTimeZone('UTC'));
         $tarih = gunKontrolu($bugun, $tarih, $gun, $saat, $dakika);
 
     }
-        $tarih->setTimezone(new DateTimeZone('Europe/Istanbul')); // UTC // Europe/Istanbul
 
-        $sonraki_calisma = $tarih->format('U');
+    // Unix zaman damgasını (timestamp) UTC olarak alma
+    $sonraki_calisma = $tarih->setTimezone(new DateTimeZone('UTC'))->format('U');
 
     $sonuc = $PDOdb->prepare("UPDATE zamanlanmisgorev SET sonraki_calisma =?, isleniyor = 0 WHERE id =? ");
     $sonuc->bindParam(1, $sonraki_calisma, PDO::PARAM_INT);
