@@ -16,7 +16,7 @@ class Hash {
     public function __construct()
     {
         $this->method  = "rc4-hmac-md5";
-        $this->key     = '3h2cwpYJscKTGrbFiUveeWV3iMAdrzGf';
+        $this->key     = '3h2cwpYJscKTGrbFiUveeWM3iMAdrzGf';
         $this->options = 0;
         $this->iv      = "";
 

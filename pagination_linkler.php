@@ -14,8 +14,6 @@ $next_link = '';
 $page_link = '';
 $page_array = array();
 
-//echo $total_links;
-
 if($total_links > 4)
 {
   if($page < 5)
