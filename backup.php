@@ -531,7 +531,7 @@ set_time_limit(0);
     $yedeklenecek_tablolar      = isset($_POST['tablolar'])     ? $_POST['tablolar']    : [];
     $dosya_tarihi               = date_tr('Y-m-d-H-i-s', time());
 
-    $backup_yedekleme_sonucu = veritabaniYedekleme($PDOdbsecilen, $veritabani_id, "yedekle-".$secilen_yedekleme_oneki, $combine, $elle, $grup, $dbbakim, $gz, $yedekleyen, $dblock, $db_name, $yedeklenecek_tablolar, $dosya_tarihi);
+    $backup_yedekleme_sonucu = veritabaniYedekleme($PDOdbsecilen, $veritabani_id, $secilen_yedekleme_oneki, $combine, $elle, $grup, $dbbakim, $gz, $yedekleyen, $dblock, $db_name, $yedeklenecek_tablolar, $dosya_tarihi);
 
 if(!empty($backup_yedekleme_sonucu)){
 

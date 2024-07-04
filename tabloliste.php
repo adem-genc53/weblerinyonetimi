@@ -226,9 +226,9 @@ $hash = new Hash;
     <td style="nowrap:nowrap;padding:5px 10px 0px 0px;text-align:right;">
     <?php
     if (is_array($secilen_tablolar) AND in_array($table['TABLE_NAME'], $secilen_tablolar)) {
-    echo "<input type=\"checkbox\" class=\"tablolar\" id=\"tablolar\" checked=\"checked\" name=\"tablolar[]\" value=\"".$table['TABLE_NAME']."\" onclick=\"javascript:renk(this);\">";
+    echo "<input type=\"checkbox\" class=\"tablolar\" checked=\"checked\" name=\"tablolar[]\" value=\"".$table['TABLE_NAME']."\" onclick=\"javascript:renk(this);\">";
     }else{
-    echo "<input type=\"checkbox\" class=\"tablolar\" id=\"tablolar\" name=\"tablolar[]\" value=\"".$table['TABLE_NAME']."\" onclick=\"javascript:renk(this);\">";
+    echo "<input type=\"checkbox\" class=\"tablolar\" name=\"tablolar[]\" value=\"".$table['TABLE_NAME']."\" onclick=\"javascript:renk(this);\">";
     }
     ?>
     </td>

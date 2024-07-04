@@ -458,7 +458,7 @@ include('includes/sub_navbar.php');
         var lock = $("input[name='lock']:checked").attr('value');
         var bakim = $("input[name='bakim']:checked").attr('value');
         var combine = $("input[name='combine']:checked").attr('value');
-        var tablolar = $('input[id=tablolar]:checked').length;
+        var tablolar = $('input[class=tablolar]:checked').length;
         var elle = $("input[name='elle']:checked").attr('value');
 
         if(veritabani_id=="0") {
