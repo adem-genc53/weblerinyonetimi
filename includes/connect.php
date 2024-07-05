@@ -1,20 +1,41 @@
 <?php 
 // Bismillahirrahmanirrahim
-if(session_status() == PHP_SESSION_NONE && !headers_sent()){
-// Oturum adını belirleyin
-if (isset($_SERVER['SERVER_NAME']) && !is_int($_SERVER['SERVER_NAME']) && !empty($_SERVER['SERVER_NAME'])) {
-    $serverName = str_replace('.','_', $_SERVER['SERVER_NAME']);
-} elseif (isset($_SERVER['HTTP_HOST']) && !is_int($_SERVER['HTTP_HOST']) && !empty($_SERVER['HTTP_HOST'])) {
-    $serverName = str_replace('.','_', $_SERVER['HTTP_HOST']);
-} elseif (getenv('SERVER_NAME') !== null && !is_int(getenv('SERVER_NAME')) && !empty(getenv('SERVER_NAME'))) {
-    $serverName = str_replace('.','_', getenv('SERVER_NAME'));
-}else{
-    $serverName = str_replace('.','_', 'antenfiyati');
+if (session_status() == PHP_SESSION_NONE && !headers_sent()) {
+
+    // Session adı olarak alan adınızdır. Eğer aşağıdaki kodlar ile alan adınız alınamaz ise buraya gireceğiniz alan adınız kullanıcılacaktır
+    // Alan adındaki . noktaları _ alt tire ile değiştirin. Örnek: "alanadi.com.tr" yerine "alanadi_com_tr"
+    // Eğer buraya gerçek alan adınız değil farklı alan adı veya farklı isim girerseniz oturum açmada sorun yaşanacaktır
+    $serverName = 'webleryonetimi_com_tr'; 
+
+    // SERVER_NAME'ı kontrol et
+    if (isset($_SERVER['SERVER_NAME']) && !empty($_SERVER['SERVER_NAME'])) {
+        $serverName = $_SERVER['SERVER_NAME'];
+    }
+    // HTTP_HOST'ı kontrol et
+    elseif (isset($_SERVER['HTTP_HOST']) && !empty($_SERVER['HTTP_HOST'])) {
+        $serverName = $_SERVER['HTTP_HOST'];
+    }
+    // Çevresel değişkeni kontrol et (cron işleri için)
+    elseif (($envServerName = getenv('SERVER_NAME')) !== false && !empty($envServerName)) {
+        $serverName = $envServerName;
+    }
+
+    // Noktaları alt çizgiye çevir
+    $serverName = str_replace('.', '_', $serverName);
+
+    // Oturum adını belirleyin ve kontrol edin
+    if (!empty($serverName) && !is_numeric($serverName)) {
+        session_name($serverName);
+    } else {
+        // Hata durumunda varsayılan oturum adı kullanılır
+        // En üste belirlediğiniz alan adının aynısını buraya girin
+        session_name('webleryonetimi_com_tr');
+    }
+
+    // Oturumu başlatın
+    session_start();
 }
-session_name($serverName);
-// Oturumu başlatın
-session_start();
-}
+
 
 // Oturum kimliğini yenileme süresini belirleyin (örneğin 15 dakika)
 $regenerate_time = 15 * 60; // 15 dakika

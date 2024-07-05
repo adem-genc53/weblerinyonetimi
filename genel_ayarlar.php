@@ -209,6 +209,36 @@ $hash = new Hash;
     }
 ##########################################################################################################
 
+##########################################################################################################
+    if(isset($_POST['gorevi_calistir'])){
+        $gorevi_calistir = $_POST['gorevi_calistir'] ?? 1;
+
+    try {
+    $sorgu = "UPDATE genel_ayarlar SET
+            gorevi_calistir=?
+            LIMIT 1 ";
+
+                $stmt= $PDOdb->prepare($sorgu);
+                $stmt->execute([$gorevi_calistir]);
+            if ($stmt->rowCount() > 0) {
+                $messages[] = "ZİP Arşivleme Tercihi Başarıyla Güncellendi.";
+                header("Refresh: 2; url=".htmlspecialchars($_SERVER["PHP_SELF"])."?");
+            } else {
+                $errors[] = "ZİP Arşivleme Tercihi Bir Hatadan Dolayı Güncelleme Başarısız Oldu.<br />Hiçbir değişiklik yapmadan güncelleme yapıyor olabilirsiniz";
+            }
+        
+        } catch (PDOException $e) {
+            $existingkey = "Integrity constraint violation: 1062 Duplicate entry";
+            if (strpos($e->getMessage(), $existingkey) !== FALSE) {
+                $errors[] = "Güncellemeye çalıştığınız ZİP Arşivleme Tercihi veritabanında zaten kayıtlıdır";
+            } else {
+                throw $e;
+                $errors[] = $e->getMessage();
+            }
+        }
+    }
+##########################################################################################################
+
 if(isset($_POST['dosya_kilidi_ac'])){
     $lock_file = '/tmp/gorev.lock';
     if (file_exists($lock_file)) {
@@ -743,6 +773,98 @@ include('includes/sub_navbar.php');
                                                         <tr>
                                                             <td colspan="5" style="text-align:center;">
                                                                 <button type="submit" class="btn btn-success btn-sm"><span class="glyphicon glyphicon-repeat"></span> Dosya Kilidi Serbest Bırak </button> 
+                                                                <button type="reset" class="btn btn-warning btn-sm"><span class="glyphicon glyphicon-erase"></span> Sıfırla </button>
+                                                            </td>
+                                                        </tr>
+                                                    </tfoot>
+                                                </table>
+                                    </form>
+
+                </div><!-- / <div class="card-body p-0"> -->
+            </div><!-- / <div class="card"> -->
+        </div><!-- / <div class="col-sm-12"> -->
+        </div><!-- / <div class="row mb-2"> -->
+    </div><!-- / <div class="container-fluid"> -->
+    </section><!-- / <section class="content"> -->
+    <!-- Gövde İçerik Sonu -->
+
+    <!-- Gövde İçerik Başlangıcı -->
+    <section class="content">
+    <div class="container-fluid">
+        <div class="row mb-2">
+        <div class="col-sm-12">
+            <div class="card">
+                <div class="card-body p-0">
+
+                                    <form method="POST" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>">
+                                                <table class="table" style="min-width: 1000px;">
+                                                <colgroup span="5">
+                                                    <col style="width:25%"></col>
+                                                    <col style="width:25%"></col>
+                                                    <col style="width:5%"></col>
+                                                    <col style="width:10%"></col>
+                                                    <col style="width:10%"></col>
+                                                </colgroup>
+                                                    <thead>
+                                                        <tr class="bg-primary" style="line-height: .40;font-size: 1rem;">
+                                                            <th colspan="5" style="text-align: center;">Görevi Otomatik Çalıştırma Yöntemini Belirleme</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr>
+                                                            <td colspan="5">
+                                                                Zamanlanmış görevlerin yerine getirilmesi için <b>gorev.php</b> dosyanın çalıştırılması gerekir.<br />
+                                                                &nbsp;1. Yöntem, Plesk Panel & cPanel üzerinden Cron İşlerine komut ekleyerek <b>gorev.php</b> dosyanın çalıştırılmasıdır.<br />
+                                                                &nbsp;2. Yöntem, bu script içinde herhangi bir sayfa ziyaret edildiğinde ajax ile <b>gorev.php</b> dosyası tetiklerek çalıştırılmasıdır.<br />
+                                                                Bu seçeneklerden önerilen seçenek 1. seçenektir.<br />
+                                                                Cron işlerine komut ekleyip <b>gorev.php</b> dosyayı her dakika çalışacak şeklinde ayarladığınızda hem tüm görevlerin tam zamanında yerine getirilmesi sağlanmış olacağı gibi görevlerin yerine getirilirken web sitesi bundan etkilenmeden rahatça gezinebilir ve yapmak istediğiniz işleri kolaylıkla yapabilirsiniz.<br />
+                                                                Ancak, Ajax ile veya elle doğrudan <b>https://alanadi.com/gorev.php</b> url çalıştırıldığında görev işlemi bitene kadar sitede herhangi bir işlem yada sayfa değiştirilmez.
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>Görevi Cron İşleri İle Çalıştır:</td>
+                                                            <td style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;min-width: 200px;">
+                                                            <?php 
+                                                            if(isset($genel_ayarlar['gorevi_calistir']) && $genel_ayarlar['gorevi_calistir']==1){
+                                                                echo "<input type='radio' name='gorevi_calistir' value='1' checked>";
+                                                            } else {
+                                                                echo "<input type='radio' name='gorevi_calistir' value='1'>";
+                                                            }
+                                                            ?>
+                                                            </td>
+                                                            <td colspan="3">&nbsp;</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>Görevi Ajax İle Çalıştır:</td>
+                                                            <td style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;">
+                                                            <?php 
+                                                            if(isset($genel_ayarlar['gorevi_calistir']) && $genel_ayarlar['gorevi_calistir']==2){
+                                                                echo "<input type='radio' name='gorevi_calistir' value='2' checked>";
+                                                            } else {
+                                                                echo "<input type='radio' name='gorevi_calistir' value='2'>";
+                                                            }
+                                                            ?>
+                                                            </td>
+                                                            <td colspan="3">&nbsp;</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>Hiçbiri:</td>
+                                                            <td style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;">
+                                                            <?php 
+                                                            if(isset($genel_ayarlar['gorevi_calistir']) && $genel_ayarlar['gorevi_calistir']==3){
+                                                                echo "<input type='radio' name='gorevi_calistir' value='3' checked>";
+                                                            } else {
+                                                                echo "<input type='radio' name='gorevi_calistir' value='3'>";
+                                                            }
+                                                            ?>
+                                                            </td>
+                                                            <td colspan="3">&nbsp;</td>
+                                                        </tr>
+                                                    </tbody>
+                                                    <tfoot>
+                                                        <tr>
+                                                            <td colspan="5" style="text-align:center;">
+                                                                <button type="submit" class="btn btn-success btn-sm"><span class="glyphicon glyphicon-repeat"></span> Değişiklikleri Kaydet </button> 
                                                                 <button type="reset" class="btn btn-warning btn-sm"><span class="glyphicon glyphicon-erase"></span> Sıfırla </button>
                                                             </td>
                                                         </tr>
