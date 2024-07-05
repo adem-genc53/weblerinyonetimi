@@ -492,7 +492,7 @@ require_once("includes/turkcegunler.php");
         echo date_tr('j F Y l, H:i', $unixtime);
 }
 
-if($_SERVER['REQUEST_METHOD'] == 'POST' && (isset($_POST['gorev_ekle']) || isset($_POST['gorevi_duzelt']))){
+if((isset($_POST['gorev_ekle']) || isset($_POST['gorevi_duzelt']))){
 
 	// Gönderilen gün değeri
 	$gun = isset($_POST['gun']) ? $_POST['gun'] : '-1';
