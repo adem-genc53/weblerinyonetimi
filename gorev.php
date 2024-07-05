@@ -115,7 +115,6 @@ $yedeklendi_mi = false;
     $veritabani_id                  = $row['secilen_yedekleme'];
     $secilen_yedekleme              = $row['secilen_yedekleme'];
     $ozel_onek                      = $row['ozel_onek'];
-    $isleniyor                      = $row['isleniyor'];
     $grup                           = 1;
     $yedekleyen                     = 1;
 #########################################################################################################################
@@ -562,7 +561,7 @@ if( !isset($_POST['elle_yurutme']) ){
     // Unix zaman damgasını (timestamp) UTC olarak alma
     $sonraki_calisma = $tarih->setTimezone(new DateTimeZone('UTC'))->format('U');
 
-    $sonuc = $PDOdb->prepare("UPDATE zamanlanmisgorev SET sonraki_calisma =?, isleniyor = 0 WHERE id =? ");
+    $sonuc = $PDOdb->prepare("UPDATE zamanlanmisgorev SET sonraki_calisma =? WHERE id =? ");
     $sonuc->bindParam(1, $sonraki_calisma, PDO::PARAM_INT);
     $sonuc->bindParam(2, $row['id'], PDO::PARAM_INT);
     $sonuc->execute();
@@ -787,7 +786,6 @@ $elle,
 $veritabani_id,
 $secilen_yedekleme,
 $ozel_onek,
-$isleniyor,
 $grup,
 $yedekleyen,
 $sonraki_calisma,
@@ -839,7 +837,6 @@ $elle,
 $veritabani_id,
 $secilen_yedekleme,
 $ozel_onek,
-$isleniyor,
 $grup,
 $yedekleyen,
 $sonraki_calisma,
