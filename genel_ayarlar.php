@@ -832,7 +832,7 @@ include('includes/sub_navbar.php');
                                                             }
                                                             ?>
                                                             </td>
-                                                            <td colspan="3">&nbsp;</td>
+                                                            <td colspan="3">Eğer <b>Cron Job</b> alanına komut eklemiş iseniz</td>
                                                         </tr>
                                                         <tr>
                                                             <td>Görevi Ajax İle Çalıştır:</td>
@@ -845,20 +845,7 @@ include('includes/sub_navbar.php');
                                                             }
                                                             ?>
                                                             </td>
-                                                            <td colspan="3">&nbsp;</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td>Hiçbiri:</td>
-                                                            <td style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;">
-                                                            <?php 
-                                                            if(isset($genel_ayarlar['gorevi_calistir']) && $genel_ayarlar['gorevi_calistir']==3){
-                                                                echo "<input type='radio' name='gorevi_calistir' value='3' checked>";
-                                                            } else {
-                                                                echo "<input type='radio' name='gorevi_calistir' value='3'>";
-                                                            }
-                                                            ?>
-                                                            </td>
-                                                            <td colspan="3">&nbsp;</td>
+                                                            <td colspan="3">Ajax kodu mevcuttur</td>
                                                         </tr>
                                                     </tbody>
                                                     <tfoot>

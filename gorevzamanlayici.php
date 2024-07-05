@@ -1789,23 +1789,6 @@ option:disabled {
     });
 </script>
 
-<script type="text/javascript">
-$(document).ready(function() {
-    // Select alanı değiştiğinde
-    $('#haftanin_gunu, #gun, #saat, #dakika').change(function() {
-        var formData = $('#gorev_zamanlayici').serialize(); // Form verilerini al
-        var additionalData = { ajaxtan: true }; // Harici post verisi
-        formData = formData + '&' + $.param(additionalData); // Serialize edilen veriye ekleyin
-        $.post('cron_zamanlayici.php', formData, function(data) { // cron_zamanlayici.php'ye POST gönder
-            $('#scheduledTime').text(data);
-        });
-    });
-
-    // Sayfa yüklendiğinde bir kez tetikle
-    $('#gorev_zamanlayici select').trigger('change');
-});
-</script>
-
 <script>
     $(document).ready(function(){
         $('#haftanin_gunu').change(function(){
@@ -1835,6 +1818,23 @@ $(document).ready(function() {
 <?php 
     }
 ?>
+
+<script type="text/javascript">
+$(document).ready(function() {
+    // Select alanı değiştiğinde
+    $('#haftanin_gunu, #gun, #saat, #dakika').change(function() {
+        var formData = $('#gorev_zamanlayici').serialize(); // Form verilerini al
+        var additionalData = { ajaxtan: true }; // Harici post verisi
+        formData = formData + '&' + $.param(additionalData); // Serialize edilen veriye ekleyin
+        $.post('cron_zamanlayici.php', formData, function(data) { // cron_zamanlayici.php'ye POST gönder
+            $('#scheduledTime').text(data);
+        });
+    });
+
+    // Sayfa yüklendiğinde bir kez tetikle
+    $('#gorev_zamanlayici select').trigger('change');
+});
+</script>
 
 <script type="text/javascript">
 
