@@ -27,15 +27,6 @@ if($_SERVER['REQUEST_METHOD'] == 'POST' && (isset($_POST['gorev_ekle']) || isset
 ########################################### CRON ZAMANLAYICI BAŞLANGICI #################################################
 #########################################################################################################################
 
-	// Gönderilen gün değeri
-	$gun = isset($_POST['gun']) ? $_POST['gun'] : '-1';
-	// Gönderilen saat değeri
-	$saat = isset($_POST['saat']) ? $_POST['saat'] : '-1';
-	// Gönderilen dakika değeri
-	$dakika = isset($_POST['dakika']) ? $_POST['dakika'] : '-1';
-	// Gönderilen haftanın değeri
-	$haftanin_gunu = isset($_POST['haftanin_gunu']) ? $_POST['haftanin_gunu'] : [0=>-1];
-
 include("cron_zamanlayici.php");
 
 #########################################################################################################################

@@ -492,4 +492,36 @@ require_once("includes/turkcegunler.php");
         echo date_tr('j F Y l, H:i', $unixtime);
 }
 
+if($_SERVER['REQUEST_METHOD'] == 'POST' && (isset($_POST['gorev_ekle']) || isset($_POST['gorevi_duzelt']))){
+
+	// Gönderilen gün değeri
+	$gun = isset($_POST['gun']) ? $_POST['gun'] : '-1';
+	// Gönderilen saat değeri
+	$saat = isset($_POST['saat']) ? $_POST['saat'] : '-1';
+	// Gönderilen dakika değeri
+	$dakika = isset($_POST['dakika']) ? $_POST['dakika'] : '-1';
+	// Gönderilen haftanın değeri
+	$haftanin_gunu = isset($_POST['haftanin_gunu']) ? $_POST['haftanin_gunu'] : [0=>-1];
+
+    // Şu anki tarihi ve saat bilgisini al
+    $bugun = new DateTime('now', new DateTimeZone($genel_ayarlar['zaman_dilimi']));
+
+    // Unix zaman damgasını depolamak için varsayılan tarih nesnesi oluştur
+    $tarih = new DateTime('now', new DateTimeZone($genel_ayarlar['zaman_dilimi']));
+
+    // HAFTANIN GÜN(LERİ) SEÇİLİ İSE HAFTANIN GÜN(LERİ) İŞLEMLERİNE BAŞLA
+    if (!in_array("-1", $haftanin_gunu)){
+
+        $tarih = haftaKontrolu($bugun, $tarih, $haftanin_gunu, $saat, $dakika);
+
+    }else{ // HAFTANIN GÜNÜ -1 * YILDIZ SEÇİLİ İSE GÜN İŞLEMLERİNE BAŞLA
+
+        $tarih = gunKontrolu($bugun, $tarih, $gun, $saat, $dakika);
+
+    }
+
+    // Unix zaman damgasını (timestamp) UTC olarak alma
+    $sonraki_calisma = $tarih->setTimezone(new DateTimeZone('UTC'))->format('U');
+}
+
 ?>
