@@ -469,9 +469,10 @@ require_once('includes/connect.php');
 	$haftanin_gunu = isset($_POST['haftanin_gunu']) ? $_POST['haftanin_gunu'] : [0=>-1];
 
     // Şu anki tarihi ve saat bilgisini al
-    $bugun = new DateTime('now', new DateTimeZone(''.$genel_ayarlar['secili_zaman_dilimi'].''));
+    $bugun = new DateTime('now', new DateTimeZone($genel_ayarlar['zaman_dilimi']));
+
     // Unix zaman damgasını depolamak için varsayılan tarih nesnesi oluştur
-    $tarih = new DateTime('now', new DateTimeZone(''.$genel_ayarlar['secili_zaman_dilimi'].''));
+    $tarih = new DateTime('now', new DateTimeZone($genel_ayarlar['zaman_dilimi']));
 
     // HAFTANIN GÜN(LERİ) SEÇİLİ İSE HAFTANIN GÜN(LERİ) İŞLEMLERİNE BAŞLA
     if (!in_array("-1", $haftanin_gunu)){

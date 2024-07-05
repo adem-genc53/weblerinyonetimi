@@ -61,7 +61,7 @@ DROP TABLE IF EXISTS `genel_ayarlar`;
 CREATE TABLE IF NOT EXISTS `genel_ayarlar` (
   `id` int NOT NULL AUTO_INCREMENT,
   `zaman_dilimleri` json DEFAULT NULL,
-  `secili_zaman_dilimi` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'Europe/Istanbul',
+  `zaman_dilimi` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'Europe/Istanbul',
   `haric_dizinler` json DEFAULT NULL,
   `karakter_setleri` json DEFAULT NULL,
   `secili_karakter_seti` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'utf8mb4',

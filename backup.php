@@ -19,7 +19,7 @@ if (!function_exists('veritabaniYedekleme')) {
             GLOBAL $genel_ayarlar;
 
             // DateTime ve DateTimeZone kullanarak saat dilimi farkını hesaplayın
-            $dateTime = new DateTime('now', new DateTimeZone($genel_ayarlar['secili_zaman_dilimi']));
+            $dateTime = new DateTime('now', new DateTimeZone($genel_ayarlar['zaman_dilimi']));
             $offset = $dateTime->getOffset() / 3600; // Saat cinsinden farkı al
 
             // Farkı + veya - işareti ile formatlayın

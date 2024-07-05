@@ -60,7 +60,7 @@ $hash = new Hash;
 
     try {
     $sorgu = "UPDATE genel_ayarlar SET
-            secili_zaman_dilimi=?
+            zaman_dilimi=?
             LIMIT 1 ";
 
                 $stmt= $PDOdb->prepare($sorgu);
@@ -351,7 +351,7 @@ include('includes/sub_navbar.php');
                                                                     $bolgeler = json_decode($genel_ayarlar['zaman_dilimleri'], true);
                                                                     ksort($bolgeler);
                                                                     foreach($bolgeler AS $bolge => $bolge_adi){
-                                                                    if($genel_ayarlar['secili_zaman_dilimi'] == $bolge){
+                                                                    if($genel_ayarlar['zaman_dilimi'] == $bolge){
                                                                         echo "<option value='{$bolge}' selected>{$bolge_adi}</option>";
                                                                     }else{
                                                                         echo "<option value='{$bolge}'>{$bolge_adi}</option>";
