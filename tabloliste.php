@@ -266,6 +266,19 @@ $hash = new Hash;
 </tfoot>
 
 <script type="text/javascript">
+    $(".tablolar").change(function(){
+        var ischecked= $(this).is(':checked');
+        if(ischecked){
+            $(this).closest('tr').find("td").css('background', '#FFEB90');
+            $(this).closest('tr').find("td").css('borderBottom', 'thin solid');
+            $(this).closest('tr').find("td").css('color', '');
+        }else{
+            $(this).closest('tr').find("td").css('background', '');
+            $(this).closest('tr').find("td").css('borderBottom', '');
+            $(this).closest('tr').find("td").css('color', '');
+        }
+    });
+
     function tumunusec(spanChk){
         var IsChecked = spanChk.checked;
         var Chk = spanChk;

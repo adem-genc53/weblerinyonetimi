@@ -551,7 +551,7 @@ include('includes/sub_navbar.php');
     $('#onek').val( $('select[name="veritabani_id"] option:selected').text() );
 
     function tablolariYukle(tablolar, sort) {
-    const element = document.getElementById("tbliste");
+
     var veritabani_id = $('select[name="veritabani_id"]').val();
 
     $("#loading").show();
@@ -570,7 +570,15 @@ include('includes/sub_navbar.php');
             $('#gizle').fadeOut('');
             $("#yedekler-listesi").hide();
             $("#loading").hide();
-            element.scrollIntoView();
+
+            const element = document.getElementById("tbliste");
+            const offset = 20; // 50px üst boşluk
+            const elementPosition = element.getBoundingClientRect().top + window.pageYOffset - offset;
+            window.scrollTo({
+            top: elementPosition,
+            behavior: "smooth"
+            });
+
         }
     });   
     } 

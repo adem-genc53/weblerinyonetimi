@@ -1676,39 +1676,39 @@ if(isset($_GET['edit'])){
 </tfoot>
 </table>
 
-                <div id="showTablolarYedekler" style="display:none;margin-top: 0px;">
-                <a name="tbliste" id="tbliste" style="scroll-margin-top: 50px;"></a>
-                        <div style="text-align:center;border-top: 1px solid #dee2e6;padding:10px;color:red;">
-                            <b>NOT:</b> En son Çalışacağı Zamanından sonra değişiklik olmayan tablo(lar) yedeklenmeyecektir.
-                            <br /><input type="checkbox" name="tablo_guncelmi_denetle" value="1"> Eğer tablo(lar) güncellenmezse bile yedeklemek istiyorsanız kutuyu seçiniz.
+    <div id="showTablolarYedekler" style="display:none;margin-top: 0px;">
+<div id="tbliste"></div>
+            <div style="text-align:center;border-top: 1px solid #dee2e6;padding:10px;color:red;">
+                <b>NOT:</b> En son Çalışacağı Zamanından sonra değişiklik olmayan tablo(lar) yedeklenmeyecektir.
+                <br /><input type="checkbox" name="tablo_guncelmi_denetle" value="1"> Eğer tablo(lar) güncellenmezse bile yedeklemek istiyorsanız kutuyu seçiniz.
+            </div>
+                <div id="loading" style='text-align: center;'>
+                    <img src="images/ajax-loader.gif" alt="Yükleniyor..." />
+                    <br />Veritabanı Tabloları Yükleniyor...
+                </div>
+                    <table id="sortliste" class="table table-hover" style="min-width: 1000px;">
+                        <colgroup span="7">
+                            <col style="width:40%"></col>
+                            <col style="width:10%"></col>
+                            <col style="width:10%"></col>
+                            <col style="width:10%"></col>
+                            <col style="width:10%"></col>
+                            <col style="width:10%"></col>
+                            <col style="width:10%"></col>
+                        </colgroup>
+                    </table>
+
+                    <div style="text-align:center;border-top: 1px solid #dee2e6;padding-top:20px;">
+                        <div>
+                            <button type="submit" class="btn btn-success btn-sm" name="gorev_ekle" accesskey="s" onclick="return GorevEkle();" /><span class="glyphicon glyphicon-plus"></span> Yeni Görev Ekle </button>
+                            <button type="reset" class="btn btn-warning btn-sm" value="" accesskey="r" /><span class="glyphicon glyphicon-erase"></span> Sıfırla </button>
+                            <button type="submit" class="btn btn-danger btn-sm" value="" accesskey="s" onclick="return hide();" /><span class="glyphicon glyphicon-off"></span> Vazget </button>
                         </div>
-                            <div id="loading" style='text-align: center;'>
-                                <img src="images/ajax-loader.gif" alt="Yükleniyor..." />
-                                <br />Veritabanı Tabloları Yükleniyor...
-                            </div>
-                                <table id="sortliste" class="table table-hover" style="min-width: 1000px;">
-                                    <colgroup span="7">
-                                        <col style="width:40%"></col>
-                                        <col style="width:10%"></col>
-                                        <col style="width:10%"></col>
-                                        <col style="width:10%"></col>
-                                        <col style="width:10%"></col>
-                                        <col style="width:10%"></col>
-                                        <col style="width:10%"></col>
-                                    </colgroup>
-                                </table>
+                    </div>
+                    <br />
 
-                                <div style="text-align:center;border-top: 1px solid #dee2e6;padding-top:20px;">
-                                    <div>
-                                        <button type="submit" class="btn btn-success btn-sm" name="gorev_ekle" accesskey="s" onclick="return GorevEkle();" /><span class="glyphicon glyphicon-plus"></span> Yeni Görev Ekle </button>
-                                        <button type="reset" class="btn btn-warning btn-sm" value="" accesskey="r" /><span class="glyphicon glyphicon-erase"></span> Sıfırla </button>
-                                        <button type="submit" class="btn btn-danger btn-sm" value="" accesskey="s" onclick="return hide();" /><span class="glyphicon glyphicon-off"></span> Vazget </button>
-                                    </div>
-                                </div>
-                                <br />
-
-                                </div>
-                                <!-- /showTablolarYedekler -->
+                    </div>
+                    <!-- /showTablolarYedekler -->
 
   </form>
 
@@ -1723,31 +1723,31 @@ if(isset($_GET['edit'])){
 <form id="gonder" method="POST" action="<?php echo $_SERVER['PHP_SELF']; ?>">
     <input type="hidden" name="veri_del" id="veri_del">
 </form>
-<script>
 
+<script type='text/javascript'>
     $(document).on('click', "[id^=veri_sil_]", function(){
         var id = $(this).attr('id');
         id = id.replace("veri_sil_",'');
         $("#veri_del").val(id);
         var veri_adi = $(this).attr('data-name');
 
-      $(function()
+    $(function()
         {
         jw('b secim',sil_dur).baslik("Silmeyi Onayla").icerik("<b>" + veri_adi + "</b> görevi silmek istediğinizden emin misiniz?").en(450).kilitle().ac();
         })
-      return false;
+    return false;
 
-      function sil_dur(x){
+    function sil_dur(x){
         if(x==1){
             $("#gonder").submit();
         }
-      }
+    }
 
     });
-
 </script>
 
-        </div><!-- / <div class="content-wrapper"> -->
+</div><!-- / <div class="content-wrapper"> -->
+
 <script type='text/javascript'>
     var satir = 'zamanlanmisgorev';
     var query = '';
@@ -1767,13 +1767,13 @@ option:disabled {
    }
 </style>
 
-<script>
+<script type='text/javascript'>
     $(document).ready(function(){
         // SAAT seçeneğinin değişiklik olayı
         $('#saat').change(function(){
             var selectedSaat = $(this).val();
             if(selectedSaat.startsWith("-1/")){
-                // Eğer saat seçeneğinde ('Her Dakika hariç') 'Her...' ile başlayan bir seçenek seçildiyse, 
+                // Eğer saat seçeneğinde ('Her Dakika hariç') 'Her...' ile başlayan bir seçenek seçildiyse,
                 // DAKİKA seçeneğinindeki 'Her...' ile başlayan tüm seçenekleri devre dışı bırak
                 $('#dakika option[value^="-1"]').attr('selected',false);
                 $('#dakika option[value^="-1"]').prop('disabled', true);
@@ -1789,7 +1789,7 @@ option:disabled {
     });
 </script>
 
-<script>
+<script type='text/javascript'>
     $(document).ready(function(){
         $('#haftanin_gunu').change(function(){
             var selectedValue = $(this).val();
@@ -1820,44 +1820,43 @@ option:disabled {
 ?>
 
 <script type="text/javascript">
-$(document).ready(function() {
-    // Select alanı değiştiğinde
-    $('#haftanin_gunu, #gun, #saat, #dakika').change(function() {
-        var formData = $('#gorev_zamanlayici').serialize(); // Form verilerini al
-        var additionalData = { ajaxtan: true }; // Harici post verisi
-        formData = formData + '&' + $.param(additionalData); // Serialize edilen veriye ekleyin
-        $.post('cron_zamanlayici.php', formData, function(data) { // cron_zamanlayici.php'ye POST gönder
-            $('#scheduledTime').text(data);
+    $(document).ready(function() {
+        // Select alanı değiştiğinde
+        $('#haftanin_gunu, #gun, #saat, #dakika').change(function() {
+            var formData = $('#gorev_zamanlayici').serialize(); // Form verilerini al
+            var additionalData = { ajaxtan: true }; // Harici post verisi
+            formData = formData + '&' + $.param(additionalData); // Serialize edilen veriye ekleyin
+            $.post('cron_zamanlayici.php', formData, function(data) { // cron_zamanlayici.php'ye POST gönder
+                $('#scheduledTime').text(data);
+            });
         });
-    });
 
-    // Sayfa yüklendiğinde bir kez tetikle
-    $('#gorev_zamanlayici select').trigger('change');
-});
+        // Sayfa yüklendiğinde bir kez tetikle
+        $('#gorev_zamanlayici select').trigger('change');
+    });
 </script>
 
 <script type="text/javascript">
-
-    function simdiCalistir(gorev_adi, runid){
-            $(function()
-              {
-                jw('b secim',gorev_dur).baslik("Görevi Elle Yürütme").icerik("<u>"+ gorev_adi +"</u> görevi elle yürütmek istediğinizden emin misiniz<br />Bu görevde belirlenen tüm seçeneler uygulanacaktır.<br />Sonraki yürütme zamanı değiştirilmeyecektir").en(450).kilitle().ac();
-              })
-          function gorev_dur(x){
-                if(x==1){
-                  var bekleme = jw("b bekle").baslik("Görev yurutuluyor...").en(350).boy(120).kilitle().akilliKapatPasif().ac(); 
-                $.ajax({
-                type: "POST",
-                url: "gorev.php",
-                data: { "elle_yurutme" : 1, "gorevid" : runid },
-                success: function(veriler){
-                  bekleme.kapat();
-                  jw("b olumlu", function(){ window.location = "gorevzamanlayici.php"; }).baslik("Görevi Elle Yürütme Sonucu").icerik(veriler).en(450).boy(80).kilitle().akilliKapatPasif().ac();
-                }
-                });
-                }
-              }
+function simdiCalistir(gorev_adi, runid){
+    $(function()
+    {
+        jw('b secim',gorev_dur).baslik("Görevi Elle Yürütme").icerik("<u>"+ gorev_adi +"</u> görevi elle yürütmek istediğinizden emin misiniz<br />Bu görevde belirlenen tüm seçeneler uygulanacaktır.<br />Sonraki yürütme zamanı değiştirilmeyecektir").en(450).kilitle().ac();
+    })
+    function gorev_dur(x){
+        if(x==1){
+            var bekleme = jw("b bekle").baslik("Görev yurutuluyor...").en(350).boy(120).kilitle().akilliKapatPasif().ac(); 
+            $.ajax({
+            type: "POST",
+            url: "gorev.php",
+            data: { "elle_yurutme" : 1, "gorevid" : runid },
+            success: function(veriler){
+                bekleme.kapat();
+                jw("b olumlu", function(){ window.location = "gorevzamanlayici.php"; }).baslik("Görevi Elle Yürütme Sonucu").icerik(veriler).en(450).boy(80).kilitle().akilliKapatPasif().ac();
+            }
+            });
+        }
     }
+}
 
     $('select[name="veritabani_secilen_yedekleme"]').change(function(){
         $('input[name="veritabani_secilen_yedekleme_oneki"]').val($.trim($('select[name="veritabani_secilen_yedekleme"] option:selected').text()));
@@ -1956,32 +1955,34 @@ $(document).ready(function() {
 </script>
 
 <script type="text/javascript">
+$(document).ready(function(){
 
-      $(document).ready(function(){
+    $("input[name='veritabani_secilen_yedekleme_oneki']").on("keypress", function(event) {
+        var englishAlphabetAndWhiteSpace = /[A-Za-z0-9-_.]/g;
+        var key = String.fromCharCode(event.which);
+        if (event.keyCode == 8 || event.keyCode == 37 || event.keyCode == 39 || englishAlphabetAndWhiteSpace.test(key)) {
+            return true;
+        }
+        return false;
+    });
 
-        $("input[name='veritabani_secilen_yedekleme_oneki']").on("keypress", function(event) {
-              var englishAlphabetAndWhiteSpace = /[A-Za-z0-9-_.]/g;
-              var key = String.fromCharCode(event.which);
-              if (event.keyCode == 8 || event.keyCode == 37 || event.keyCode == 39 || englishAlphabetAndWhiteSpace.test(key)) {
-                  return true;
-              }
-              return false;
-          });
-          $("input[name='veritabani_secilen_yedekleme_oneki']").on("paste", function(e) {
-              //e.preventDefault(); // yapıştırmayı engelliyor
-          });
-        $("input[name='dizin_secilen_yedekleme_oneki']").on("keypress", function(event) {
-              var englishAlphabetAndWhiteSpace = /[A-Za-z0-9-_.]/g;
-              var key = String.fromCharCode(event.which);
-              if (event.keyCode == 8 || event.keyCode == 37 || event.keyCode == 39 || englishAlphabetAndWhiteSpace.test(key)) {
-                  return true;
-              }
-              return false;
-          });
-          $("input[name='dizin_secilen_yedekleme_oneki']").on("paste", function(e) {
-              e.preventDefault();
-          });
-      });
+    $("input[name='veritabani_secilen_yedekleme_oneki']").on("paste", function(e) {
+        //e.preventDefault(); // yapıştırmayı engelliyor
+    });
+
+    $("input[name='dizin_secilen_yedekleme_oneki']").on("keypress", function(event) {
+        var englishAlphabetAndWhiteSpace = /[A-Za-z0-9-_.]/g;
+        var key = String.fromCharCode(event.which);
+        if (event.keyCode == 8 || event.keyCode == 37 || event.keyCode == 39 || englishAlphabetAndWhiteSpace.test(key)) {
+            return true;
+        }
+        return false;
+    });
+
+    $("input[name='dizin_secilen_yedekleme_oneki']").on("paste", function(e) {
+        e.preventDefault();
+    });
+});
 </script>
 
 <script type="text/javascript">
@@ -2045,16 +2046,15 @@ $(document).ready(function() {
         }
     });
 
-$('input[name="combine"]').on('change', function() {
+    $('input[name="combine"]').on('change', function() {
 
-  $('.uyeler').toggle(+this.value === 3 && this.checked);
+        $('.uyeler').toggle(+this.value === 3 && this.checked);
 
-});
+    });
 
 function tablolariYukle(db_secildi, tablolar, sort) {
-	$(document).ready(function() {
-    const element = document.getElementById("tbliste");
-    element.scrollIntoView();
+    $(document).ready(function() {
+
     <?php 
     if(empty($secilen_tablolar)){
         echo 'var tablolar = ""; ';
@@ -2064,6 +2064,7 @@ function tablolariYukle(db_secildi, tablolar, sort) {
         echo "\n";
     }
     ?>
+    var db_secildi = $('select[name="veritabani_secilen_yedekleme"] option:selected').val();
     if(db_secildi){
         var secilen_yedekleme = db_secildi;
     }else{
@@ -2090,64 +2091,66 @@ if(secilen_yedekleme>0){
                 $('#gizle').fadeOut('');
                 $("#yedekler-listesi").hide();
                 $("#loading").hide();
-                element.scrollIntoView();
+
+                const element = document.getElementById("tbliste");
+                const offset = 20; // 50px üst boşluk
+                const elementPosition = element.getBoundingClientRect().top + window.pageYOffset - offset;
+                window.scrollTo({
+                top: elementPosition,
+                behavior: "smooth"
+                });
+
             }
         });
-
-
-
 } // if(secilen_yedekleme>0){
-
 });
-
 }
-
 </script>
 
 <script type="text/javascript">
 
 function GorevEkle() {
 
-  var aktif                     = $("input[name='aktif']:checked").attr('value');
-  var gunluk_kayit              = $("input[name='gunluk_kayit']:checked").attr('value');
-  var gz                        = $("input[name='gz']:checked").attr('value');
-  var dbbakim                   = $("input[name='dbbakim']:checked").attr('value');
-  var lock                      = $("input[name='dblock']:checked").attr('value');
-  var combine                   = $("input[name='combine']:checked").attr('value');
-  var tablolar                  = $('input[id=tablolar]:checked').length;
-  var elle                      = $("input[name='elle']:checked").attr('value');
-  var gorev_adi                 = $('#gorev_adi').val();
-  var dosya_adi                 = $('#dosya_adi').val();
-  var secilen_yedekleme_oneki   = $('#secilen_yedekleme_oneki').val();
-  var checkbox                  = $("input[name='yedekleme_gorevi']").is(':checked');
-  var secilen_yedekleme         = $('select[name="secilen_yedekleme"] option:selected').val();
+    var aktif                     = $("input[name='aktif']:checked").attr('value');
+    var gunluk_kayit              = $("input[name='gunluk_kayit']:checked").attr('value');
+    var gz                        = $("input[name='gz']:checked").attr('value');
+    var dbbakim                   = $("input[name='dbbakim']:checked").attr('value');
+    var lock                      = $("input[name='dblock']:checked").attr('value');
+    var combine                   = $("input[name='combine']:checked").attr('value');
+    var tablolar                  = $('input[id=tablolar]:checked').length;
+    var elle                      = $("input[name='elle']:checked").attr('value');
+    var gorev_adi                 = $('#gorev_adi').val();
+    var dosya_adi                 = $('#dosya_adi').val();
+    var secilen_yedekleme_oneki   = $('#secilen_yedekleme_oneki').val();
+    var checkbox                  = $("input[name='yedekleme_gorevi']").is(':checked');
+    var secilen_yedekleme         = $('select[name="secilen_yedekleme"] option:selected').val();
 
-  if(gorev_adi=="") {
-    $(function(){
-      jw("b olumsuz").baslik("Görev Adi Girmediniz").icerik("Görevi tanımlayan kısa bir görev adı giriniz").kilitle().en(350).boy(100).ac();
-    })
-    return false;
-  }
-  if(dosya_adi=="") {
-    $(function(){
-      jw("b olumsuz").baslik("Dosya Adi Girmediniz").icerik("Çalıştırılacak dosya adı giriniz").kilitle().en(350).boy(100).ac();
-    })
-    return false;
-  }
-  if(aktif==undefined) {
-    $(function(){
-      jw("b olumsuz").baslik("Yedekme Görevi Aktif/Pasif").icerik("Yedekleme görevi aktif veya pasif olacağını belirlemediniz").kilitle().en(350).boy(100).ac();
-    })
-    return false;
-  }
-  if(gunluk_kayit==undefined) {
-    $(function(){
-      jw("b olumsuz").baslik("Yedekme Görevi Günlüğü Kaydetme").icerik("Yedekleme görevi yerine getirdiğinde sonucu günlüğe kayit edip etmeyeceğini belirlemediniz").kilitle().en(350).boy(100).ac();
-    })
-    return false;
-  }
+    if(gorev_adi=="") {
+        $(function(){
+        jw("b olumsuz").baslik("Görev Adi Girmediniz").icerik("Görevi tanımlayan kısa bir görev adı giriniz").kilitle().en(350).boy(100).ac();
+        })
+        return false;
+    }
+    if(dosya_adi=="") {
+        $(function(){
+        jw("b olumsuz").baslik("Dosya Adi Girmediniz").icerik("Çalıştırılacak dosya adı giriniz").kilitle().en(350).boy(100).ac();
+        })
+        return false;
+    }
+    if(aktif==undefined) {
+        $(function(){
+        jw("b olumsuz").baslik("Yedekme Görevi Aktif/Pasif").icerik("Yedekleme görevi aktif veya pasif olacağını belirlemediniz").kilitle().en(350).boy(100).ac();
+        })
+        return false;
+    }
+    if(gunluk_kayit==undefined) {
+        $(function(){
+        jw("b olumsuz").baslik("Yedekme Görevi Günlüğü Kaydetme").icerik("Yedekleme görevi yerine getirdiğinde sonucu günlüğe kayit edip etmeyeceğini belirlemediniz").kilitle().en(350).boy(100).ac();
+        })
+        return false;
+    }
 
-  if(checkbox>0){
+    if(checkbox>0){
 
     if(secilen_yedekleme=="") {
         $(function(){
@@ -2155,70 +2158,69 @@ function GorevEkle() {
         })
         return false;
     }
-  if(secilen_yedekleme_oneki=="") {
-    $(function(){
-      jw("b olumsuz").baslik("Yedeğin Önekini Girmediniz!").icerik("Veritabanı yedeğin önekini yada yedeğin adını girmelisiniz").kilitle().en(350).boy(100).ac();
-    })
-    return false;
-  }
-  if(gz==undefined) {
-    $(function(){
-      jw("b olumsuz").baslik("Yedeği GZipleme Belirlemediniz!").icerik("Veritabanı yedeğin GZip ile sıkıştırılıp veya sıkıştırılmayacağını belirlemediniz").kilitle().en(350).boy(100).ac();
-    })
-    return false;
-  }
-  if(lock==undefined) {
-    $(function(){
-      jw("b olumsuz").baslik("Tabları Kilitleme Belirlemediniz!").icerik("Yedeklenmeden önce tabloların kilitlenip kilitlenmeyeceğini belirlemediniz").kilitle().en(350).boy(100).ac();
-    })
-    return false;
-  }
-  if(dbbakim==undefined) {
-    $(function(){
-      jw("b olumsuz").baslik("Tablolara Bakım Belirlemediniz!").icerik("Yedeklenmeden önce tablolara bakım belirlemediniz").kilitle().en(350).boy(100).ac();
-    })
-    return false;
-  }
-  if(combine==undefined) {
-    $(function(){
-      jw("b olumsuz").baslik("Yedekleme Seçeneği Belirlemediniz!").icerik("Veritabanı yedekleme seçeneği belirlemediniz").kilitle().en(350).boy(100).ac();
-    })
-    return false;
-  }
-  if (elle==undefined && combine==3) {
-    $(function(){
-      jw("b olumsuz").baslik("Seçilecek Tabloarın Yedekleme Biçimi Belirlemediniz!").icerik("Seçilecek tabloların yedekleme biçimini seçmediniz").kilitle().en(350).boy(100).ac();
-    })
-    return false;
-  }
-  if (tablolar < 1 && combine==3) {
-    $(function(){
-      jw("b olumsuz").baslik("Tabloları Belirlemediniz!").icerik("Yedeklemek istediğiniz tabloyu veya tabloları seçmediniz").kilitle().en(350).boy(100).ac();
-    })
-    return false;
+    if(secilen_yedekleme_oneki=="") {
+        $(function(){
+        jw("b olumsuz").baslik("Yedeğin Önekini Girmediniz!").icerik("Veritabanı yedeğin önekini yada yedeğin adını girmelisiniz").kilitle().en(350).boy(100).ac();
+        })
+        return false;
     }
-  }
+    if(gz==undefined) {
+        $(function(){
+        jw("b olumsuz").baslik("Yedeği GZipleme Belirlemediniz!").icerik("Veritabanı yedeğin GZip ile sıkıştırılıp veya sıkıştırılmayacağını belirlemediniz").kilitle().en(350).boy(100).ac();
+        })
+        return false;
+    }
+    if(lock==undefined) {
+        $(function(){
+        jw("b olumsuz").baslik("Tabları Kilitleme Belirlemediniz!").icerik("Yedeklenmeden önce tabloların kilitlenip kilitlenmeyeceğini belirlemediniz").kilitle().en(350).boy(100).ac();
+        })
+        return false;
+    }
+    if(dbbakim==undefined) {
+        $(function(){
+        jw("b olumsuz").baslik("Tablolara Bakım Belirlemediniz!").icerik("Yedeklenmeden önce tablolara bakım belirlemediniz").kilitle().en(350).boy(100).ac();
+        })
+        return false;
+    }
+    if(combine==undefined) {
+        $(function(){
+        jw("b olumsuz").baslik("Yedekleme Seçeneği Belirlemediniz!").icerik("Veritabanı yedekleme seçeneği belirlemediniz").kilitle().en(350).boy(100).ac();
+        })
+        return false;
+    }
+    if (elle==undefined && combine==3) {
+        $(function(){
+        jw("b olumsuz").baslik("Seçilecek Tabloarın Yedekleme Biçimi Belirlemediniz!").icerik("Seçilecek tabloların yedekleme biçimini seçmediniz").kilitle().en(350).boy(100).ac();
+        })
+        return false;
+    }
+    if (tablolar < 1 && combine==3) {
+        $(function(){
+        jw("b olumsuz").baslik("Tabloları Belirlemediniz!").icerik("Yedeklemek istediğiniz tabloyu veya tabloları seçmediniz").kilitle().en(350).boy(100).ac();
+        })
+        return false;
+        }
+    }
 
 }
-
 </script>
 
 <script type="text/javascript">
 function week_chck(obj){
-  var val=[];
-  for(var i=0;i<obj.options.length;i++){
-  if(obj.options[i].selected===true){val.push(obj.options[i].value);}
-  }
-    if(val.length>1 && val[0]=='-1'){
-      $(function(){
-        jw("b olumsuz").baslik("Yıldız ile beraber haftanın günleri seçilemez").icerik("Aynı zaman içinde <b style='font-size:18px;padding: 0 10px;vertical-align: bottom;'>&#9733;</b> yıldız ile beraber <b>haftanın gün(leri)</b> seçilemez!").kilitle().en(350).boy(100).ac();
-      })
-      for(var k=1;k<obj.options.length;k++){obj.options[k].selected=false;}
-      week_chck(obj);
+    var val=[];
+    for(var i=0;i<obj.options.length;i++){
+    if(obj.options[i].selected===true){val.push(obj.options[i].value);}
     }
+        if(val.length>1 && val[0]=='-1'){
+        $(function(){
+            jw("b olumsuz").baslik("Yıldız ile beraber haftanın günleri seçilemez").icerik("Aynı zaman içinde <b style='font-size:18px;padding: 0 10px;vertical-align: bottom;'>&#9733;</b> yıldız ile beraber <b>haftanın gün(leri)</b> seçilemez!").kilitle().en(350).boy(100).ac();
+        })
+        for(var k=1;k<obj.options.length;k++){obj.options[k].selected=false;}
+        week_chck(obj);
+        }
 }
 
-  window.onload=function(){
-    document.getElementById('haftanin_gunu').onchange=function(){week_chck(this);}
-  }
+    window.onload=function(){
+        document.getElementById('haftanin_gunu').onchange=function(){week_chck(this);}
+    }
 </script>

@@ -28,13 +28,13 @@
     <script src="js/alert.js"></script>
     <script src="js/pagination.js"></script>
 
+<?php if($genel_ayarlar['gorevi_calistir'] == 2 && basename($_SERVER['SCRIPT_NAME']) != 'gorevzamanlayici.php' && basename($_SERVER['SCRIPT_NAME']) != 'db_bilgileri.php'){ ?>
 <script type="text/javascript">
-<?php if(basename($_SERVER['SCRIPT_NAME']) != 'gorevzamanlayici.php' && basename($_SERVER['SCRIPT_NAME']) != 'db_bilgileri.php'){ ?>
     var xhr = new XMLHttpRequest();
     xhr.open("POST", "gorev.php", true);
     xhr.send();
-<?php } ?>
 </script>
+<?php } ?>
 
 </body>
 
