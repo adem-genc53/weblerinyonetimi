@@ -30,7 +30,7 @@ $hash = new Hash;
     {
     try {
     $sorgu = "UPDATE genel_ayarlar SET
-            secili_karakter_seti=?
+            karakter_seti=?
             LIMIT 1 ";
 
                 $stmt= $PDOdb->prepare($sorgu);
@@ -249,6 +249,76 @@ if(isset($_POST['dosya_kilidi_ac'])){
     }
 }
 
+##########################################################################################################
+
+$charsets = [
+    'armscii8' => 'ARMSCII-8 Armenian - armscii8_general_ci',
+    'ascii' => 'US ASCII - ascii_general_ci',
+    'big5' => 'Big5 Traditional Chinese - big5_chinese_ci',
+    'binary' => 'Binary pseudo charset - binary',
+    'cp1250' => 'Windows Central European - cp1250_general_ci',
+    'cp1251' => 'Windows Cyrillic - cp1251_general_ci',
+    'cp1256' => 'Windows Arabic - cp1256_general_ci',
+    'cp1257' => 'Windows Baltic - cp1257_general_ci',
+    'cp850' => 'DOS West European - cp850_general_ci',
+    'cp852' => 'DOS Central European - cp852_general_ci',
+    'cp866' => 'DOS Russian - cp866_general_ci',
+    'cp932' => 'SJIS for Windows Japanese - cp932_japanese_ci',
+    'dec8' => 'DEC West European - dec8_swedish_ci',
+    'eucjpms' => 'UJIS for Windows Japanese - eucjpms_japanese_ci',
+    'euckr' => 'EUC-KR Korean - euckr_korean_ci',
+    'gb18030' => 'China National Standard GB18030 - gb18030_chinese_ci',
+    'gb2312' => 'GB2312 Simplified Chinese - gb2312_chinese_ci',
+    'gbk' => 'GBK Simplified Chinese - gbk_chinese_ci',
+    'geostd8' => 'GEOSTD8 Georgian - geostd8_general_ci',
+    'greek' => 'ISO 8859-7 Greek - greek_general_ci',
+    'hebrew' => 'ISO 8859-8 Hebrew - hebrew_general_ci',
+    'hp8' => 'HP West European - hp8_english_ci',
+    'keybcs2' => 'DOS Kamenicky Czech-Slovak - keybcs2_general_ci',
+    'koi8r' => 'KOI8-R Relcom Russian - koi8r_general_ci',
+    'koi8u' => 'KOI8-U Ukrainian - koi8u_general_ci',
+    'latin1' => 'cp1252 West European - latin1_swedish_ci',
+    'latin2' => 'ISO 8859-2 Central European - latin2_general_ci',
+    'latin5' => 'ISO 8859-9 Turkish - latin5_turkish_ci',
+    'latin7' => 'ISO 8859-13 Baltic - latin7_general_ci',
+    'macce' => 'Mac Central European - macce_general_ci',
+    'macroman' => 'Mac West European - macroman_general_ci',
+    'sjis' => 'Shift-JIS Japanese - sjis_japanese_ci',
+    'swe7' => '7bit Swedish - swe7_swedish_ci',
+    'tis620' => 'TIS620 Thai - tis620_thai_ci',
+    'ucs2' => 'UCS-2 Unicode - ucs2_general_ci',
+    'ujis' => 'EUC-JP Japanese - ujis_japanese_ci',
+    'utf16' => 'UTF-16 Unicode - utf16_general_ci',
+    'utf16le' => 'UTF-16LE Unicode - utf16le_general_ci',
+    'utf32' => 'UTF-32 Unicode - utf32_general_ci',
+    'utf8mb3' => 'UTF-8 Unicode - utf8mb3_general_ci',
+    'utf8mb4' => 'UTF-8 Unicode - utf8mb4_0900_ai_ci'
+];
+##########################################################################################################
+$timezones = [
+    'UTC' => 'Eşgüdümlü Evrensel Zaman (UTC ±0)',
+    'Europe/Istanbul' => 'Türkiye Standart Zamanı (UTC +3)',
+    'America/New_York' => 'Doğu Standart Zamanı (UTC -5)',
+    'America/Chicago' => 'Merkezi Standart Zamanı (UTC -6)',
+    'America/Denver' => 'Dağ Standart Zamanı (UTC -7)',
+    'America/Los_Angeles' => 'Pasifik Standart Zamanı (UTC -8)',
+    'Asia/Tokyo' => 'Japonya Standart Zamanı (UTC +9)',
+    'Asia/Shanghai' => 'Çin Standart Zamanı (UTC +8)',
+    'Asia/Kolkata' => 'Hindistan Standart Zamanı (UTC +5:30)',
+    'Australia/Sydney' => 'Avustralya Doğu Standart Zamanı (UTC +10)',
+    'Europe/London' => 'Greenwich Ortalama Zamanı (UTC ±0)',
+    'Europe/Paris' => 'Orta Avrupa Zamanı (UTC +1)',
+    'Europe/Berlin' => 'Orta Avrupa Zamanı (UTC +1)',
+    'Europe/Moscow' => 'Moskova Standart Zamanı (UTC +3)',
+    'America/Sao_Paulo' => 'Brezilya Zamanı (UTC -3)',
+    'Africa/Johannesburg' => 'Güney Afrika Standart Zamanı (UTC +2)',
+    'Asia/Dubai' => 'Basra Körfezi Standart Zamanı (UTC +4)',
+    'Asia/Seoul' => 'Kore Standart Zamanı (UTC +9)',
+    'Asia/Bangkok' => 'Indochina Zamanı (UTC +7)',
+    'Pacific/Auckland' => 'Yeni Zelanda Standart Zamanı (UTC +12)'
+];
+##########################################################################################################
+
 include('includes/header.php');
 include('includes/navigation.php');
 include('includes/sub_navbar.php');
@@ -378,13 +448,11 @@ include('includes/sub_navbar.php');
                                                             <td style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;min-width: 200px;">
                                                                 <select name="zaman_dilimi" size="1" class="form-control">
                                                                 <?php 
-                                                                    $bolgeler = json_decode($genel_ayarlar['zaman_dilimleri'], true);
-                                                                    ksort($bolgeler);
-                                                                    foreach($bolgeler AS $bolge => $bolge_adi){
-                                                                    if($genel_ayarlar['zaman_dilimi'] == $bolge){
-                                                                        echo "<option value='{$bolge}' selected>{$bolge_adi}</option>";
+                                                                    foreach($timezones AS $key => $value){
+                                                                    if($genel_ayarlar['zaman_dilimi'] == $key){
+                                                                        echo "<option value='{$key}' selected>{$value}</option>";
                                                                     }else{
-                                                                        echo "<option value='{$bolge}'>{$bolge_adi}</option>";
+                                                                        echo "<option value='{$key}'>{$value}</option>";
                                                                     }
                                                                     }
                                                                 ?>
@@ -445,16 +513,13 @@ include('includes/sub_navbar.php');
                                                             <td style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;min-width: 200px;">
                                                         <select name="karakter_seti" class="form-control">
                                                         <?php 
-                                                        $karaktersetleri = json_decode($genel_ayarlar['karakter_setleri'], true);
-                                                        foreach($karaktersetleri AS $set => $karakterler){
-                                                            foreach($karakterler AS $key => $value){
-                                                                if($genel_ayarlar['secili_karakter_seti'] == $set){
-                                                                    echo "<option value='$set' selected>$key - $value</option>";
+                                                            foreach($charsets AS $key => $value){
+                                                                if($genel_ayarlar['karakter_seti'] == $key){
+                                                                    echo "<option value='$key' selected>$value</option>";
                                                                 }else{
-                                                                    echo "<option value='$set'>$key - $value</option>";
+                                                                    echo "<option value='$key'>$value</option>";
                                                                 }
                                                             }
-                                                        }
                                                         ?>
                                                         </select>
                                                             </td>
@@ -727,58 +792,58 @@ include('includes/sub_navbar.php');
             <div class="card">
                 <div class="card-body p-0">
 
-                                    <form method="POST" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>">
-                                                <table class="table" style="min-width: 1000px;">
-                                                <colgroup span="5">
-                                                    <col style="width:25%"></col>
-                                                    <col style="width:25%"></col>
-                                                    <col style="width:5%"></col>
-                                                    <col style="width:10%"></col>
-                                                    <col style="width:10%"></col>
-                                                </colgroup>
-                                                    <thead>
-                                                        <tr class="bg-primary" style="line-height: .40;font-size: 1rem;">
-                                                            <th colspan="5" style="text-align: center;">Zamanlanmış Görevlerde Kullanılan gorev.php dosyanın kilidini serbest bırakma</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        <tr>
-                                                            <td colspan="5">
-                                                                Zamanlanmış görev aracılığıyla görevleri yerine getirmek için gorev.php dosyası çalıştırılır ve bu dosya ilk çalıştırıldığında kilitlenir ve görevlerin bitiminde tekrar kilidi serbest bırakılır.<br />
-                                                                Ancak, görevlerin yerine getirilmesi sırasında beklenmeyen hatalardan dolayı gorev.php dosyanın sonuna ulaşamadığından gorev.php dosyası kilitli kalabilir ve sonraki görevlerin yerine getirilmesi engellenmiş olur.<br />
-                                                                Böyle bir durumda aşağıda <span style='color: red;font-weight: bold;'>gorev.php dosyası kilitlidir.</span> Mesajını görürsünüz. Kilidi serbest bırakmak için kutuyu işaretleyerek formu göndermeniz yeterli olacaktır.<br />
-                                                                <b>NOT:</b> herhangi bir görev yerine getirilirken kilit görüneceğini unutmayın, normal çalışma sırasındaki kilidi serbest bırakmayınız.<br />
-                                                                <?php 
-                                                                // Kilit dosyasının yolu
-                                                                $lock_file = '/tmp/gorev.lock';
+                <form method="POST" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>">
+                    <table class="table" style="min-width: 1000px;">
+                    <colgroup span="5">
+                        <col style="width:25%"></col>
+                        <col style="width:25%"></col>
+                        <col style="width:5%"></col>
+                        <col style="width:10%"></col>
+                        <col style="width:10%"></col>
+                    </colgroup>
+                        <thead>
+                            <tr class="bg-primary" style="line-height: .40;font-size: 1rem;">
+                                <th colspan="5" style="text-align: center;">Zamanlanmış Görevlerde Kullanılan gorev.php dosyanın kilidini serbest bırakma</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td colspan="5">
+                                    Zamanlanmış görev aracılığıyla görevleri yerine getirmek için gorev.php dosyası çalıştırılır ve bu dosya ilk çalıştırıldığında kilitlenir ve görevlerin bitiminde tekrar kilidi serbest bırakılır.<br />
+                                    Ancak, görevlerin yerine getirilmesi sırasında beklenmeyen hatalardan dolayı gorev.php dosyanın sonuna ulaşamadığından gorev.php dosyası kilitli kalabilir ve sonraki görevlerin yerine getirilmesi engellenmiş olur.<br />
+                                    Böyle bir durumda aşağıda <span style='color: red;font-weight: bold;'>gorev.php dosyası kilitlidir.</span> Mesajını görürsünüz. Kilidi serbest bırakmak için kutuyu işaretleyerek formu göndermeniz yeterli olacaktır.<br />
+                                    <b>NOT:</b> herhangi bir görev yerine getirilirken kilitli görüneceğini unutmayın, normal çalışma sırasındaki kilidi serbest bırakmayınız.<br />
+                                    <?php 
+                                    // Kilit dosyasının yolu
+                                    $lock_file = '/tmp/gorev.lock';
 
-                                                                // Eğer kilit dosyası varsa ve dosya halen var ise işlemi sonlandır
-                                                                if (file_exists($lock_file)) {
-                                                                    echo "<span style='color: red;font-weight: bold;'>gorev.php dosyası kilitlidir.</span>";
-                                                                }else{
-                                                                    echo "<span style='color: green;font-weight: bold;'>gorev.php dosyası kilitli DEĞİLDİR.</span>";
-                                                                }
-                                                                ?>
-                                                            </td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td>gorev.php dosyanın kilidini serbest bırak:</td>
-                                                            <td style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;min-width: 200px;">
-                                                                <input type='checkbox' name='dosya_kilidi_ac' value='1'>
-                                                            </td>
-                                                            <td colspan="3">&nbsp;</td>
-                                                        </tr>
-                                                    </tbody>
-                                                    <tfoot>
-                                                        <tr>
-                                                            <td colspan="5" style="text-align:center;">
-                                                                <button type="submit" class="btn btn-success btn-sm"><span class="glyphicon glyphicon-repeat"></span> Dosya Kilidi Serbest Bırak </button> 
-                                                                <button type="reset" class="btn btn-warning btn-sm"><span class="glyphicon glyphicon-erase"></span> Sıfırla </button>
-                                                            </td>
-                                                        </tr>
-                                                    </tfoot>
-                                                </table>
-                                    </form>
+                                    // Eğer kilit dosyası varsa ve dosya halen var ise işlemi sonlandır
+                                    if (file_exists($lock_file)) {
+                                        echo "<span style='color: red;font-weight: bold;'>gorev.php dosyası kilitlidir.</span>";
+                                    }else{
+                                        echo "<span style='color: green;font-weight: bold;'>gorev.php dosyası kilitli DEĞİLDİR.</span>";
+                                    }
+                                    ?>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>gorev.php dosyanın kilidini serbest bırak:</td>
+                                <td style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;min-width: 200px;">
+                                    <input type='checkbox' name='dosya_kilidi_ac' value='1'>
+                                </td>
+                                <td colspan="3">&nbsp;</td>
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="5" style="text-align:center;">
+                                    <button type="submit" class="btn btn-success btn-sm"><span class="glyphicon glyphicon-repeat"></span> Dosya Kilidi Serbest Bırak </button> 
+                                    <button type="reset" class="btn btn-warning btn-sm"><span class="glyphicon glyphicon-erase"></span> Sıfırla </button>
+                                </td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </form>
 
                 </div><!-- / <div class="card-body p-0"> -->
             </div><!-- / <div class="card"> -->
@@ -877,23 +942,23 @@ include('includes/sub_navbar.php');
     var tarih = '';
     var firma = '';
 </script>
+
+<script type='text/javascript'>
+    document.getElementById('execTestButton').addEventListener('click', function() {
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', 'exec_test.php', true);
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === 4 && xhr.status === 200) {
+                var response = JSON.parse(xhr.responseText);
+                var messageContainer = document.getElementById('messageContainer');
+                messageContainer.innerHTML = '<div style="padding: 1px 0px 1px 10px;" class="alert-' + response.status + '">' + response.message + '</div>';
+            }
+        };
+        xhr.send('exec_test=1');
+    });
+</script>
+
 <?php 
 include('includes/footer.php');
 ?>
-
-
-    <script>
-        document.getElementById('execTestButton').addEventListener('click', function() {
-            var xhr = new XMLHttpRequest();
-            xhr.open('POST', 'exec_test.php', true);
-            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-            xhr.onreadystatechange = function() {
-                if (xhr.readyState === 4 && xhr.status === 200) {
-                    var response = JSON.parse(xhr.responseText);
-                    var messageContainer = document.getElementById('messageContainer');
-                    messageContainer.innerHTML = '<div style="padding: 1px 0px 1px 10px;" class="alert-' + response.status + '">' + response.message + '</div>';
-                }
-            };
-            xhr.send('exec_test=1');
-        });
-    </script>

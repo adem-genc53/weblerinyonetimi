@@ -120,7 +120,7 @@ if($db_yok){
 // Tam liste için https://dev.mysql.com/doc/refman/5.0/en/charset-charsets.html adresine bakın.
 // Latin olmayan harflerle ilgili sorunlarınız varsa bunu değiştirin
 
-$db_connection_charset = $genel_ayarlar['secili_karakter_seti'];
+$db_connection_charset = $genel_ayarlar['karakter_seti'];
 
 // İSTEĞE BAĞLI AYARLAR
 
