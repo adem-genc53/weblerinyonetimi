@@ -340,7 +340,6 @@ var gif =
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-$(document).ready( function() {
 
 	$( '#yerel_dizin_agac' ).html( '<ul class="filetree start"><li class="wait" style="padding-left: 20px;">' + 'Yerel klasör ağacı oluşturuluyor...' + '<li></ul>' );
 	
@@ -397,19 +396,16 @@ $(document).ready( function() {
 	return false;
     }
 	});
-	
-});
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//$(document).ready( function() {
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	$('#google_drive_uzaktan_agac').html( '<ul class="filetree start"><li class="wait" style="padding-left: 20px;">' + 'Google Drive içerik ağacı oluşturuluyor...' + '<li></ul>' );
 	
-	getfilelist( $('#google_drive_uzaktan_agac') , 'root' );
+	getGooglefilelist( $('#google_drive_uzaktan_agac') , 'root' );
 	
-	function getfilelist( cont, root ) {
+	function getGooglefilelist( cont, root ) {
 
 		$( cont ).addClass( 'wait' );
 			
@@ -456,7 +452,7 @@ $(document).ready( function() {
 		if( entry.hasClass('folder_plus') || entry.hasClass('folder') || entry.hasClass('uzak_home') ) {
 			if( entry.hasClass('collapsed') ) {
 				entry.find('UL').remove();
-				getfilelist( entry, escape( $(this).attr('rel') ));
+				getGooglefilelist( entry, escape( $(this).attr('rel') ));
 				entry.removeClass('collapsed').addClass('expanded');
 			}
 			else {
@@ -475,89 +471,9 @@ $(document).ready( function() {
     }
 	});
 
-//});
-
-
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/*
-    function googleDriveSil() {
-        var google_drive_dan_secilen_dosya_id = $('#google_drive_dan_secilen_dosya_id').val();
-        var google_drive_dan_secilen_dosya_id_sil = $('#google_drive_dan_secilen_dosya_id_sil').val();
-
-        if( google_drive_dan_secilen_dosya_id == '' ){
-            $(function(){
-            jw("b olumsuz").baslik("Kaynak Seçilmedi").icerik("Google Drive'dan yedek silmek için bir kaynak seçmelisiniz").kilitle().en(350).boy(100).ac();
-            })
-            return false;
-        }
-
-            $(function()
-              {
-                jw('b secim',ftp_dur).baslik("Google Drive'dan Silmeyi Onayla").icerik("Google Drive'da seçilen yedek silmek istediğinizden emin misiniz?").en(450).kilitle().ac();
-              })
-              
-    function ftp_dur(x){
-        if(x==1){
-
-        var bekleme = jw("b bekle").baslik("Google Drive Hesabından Yedek(ler) siliniyor...").en(300).boy(10).kilitle().akilliKapatPasif().ac();
-
-    $.ajax({
-        type: "POST",
-        url: "elle_uzak_ve_yerel_sunucudan_dosyalari_sil.php",
-        data: { googdan_sil: 1, google_drive_dan_secilen_dosya_id : google_drive_dan_secilen_dosya_id, google_drive_dan_secilen_dosya_id_sil : google_drive_dan_secilen_dosya_id_sil },
-        success: function (veriler) {
-            bekleme.kapat();
-            jw("b olumlu").baslik("Google Drive'dan Silme Sonucu").icerik(veriler).en(500).boy(10).kilitle().akilliKapatPasif().kapaninca(function(){ deneme() }).ac(); 
-        }
-    });
-
-    }
-    }
-    }
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    function yerelOgeleriSil() {
-        var yerel_den_secilen_dosya = $('#yerel_den_secilen_dosya').val();
-
-        if( yerel_den_secilen_dosya == '' ){
-            $(function(){
-            jw("b olumsuz").baslik("Yerelden Seçilmedi").icerik("Yerelden dosya silmek için bir dosya seçmelisiniz").kilitle().en(350).boy(100).ac();
-            })
-            return false;
-        }
-
-            $(function()
-              {
-                jw('b secim',ftp_dur).baslik("Yerelden Silmeyi Onayla").icerik("Yerelden dosya silmek istediğinizden emin misiniz?").en(450).kilitle().ac();
-              })
-              
-    function ftp_dur(x){
-        if(x==1){
-
-    var pen = jw('d').baslik('Yerel Dosyaları Sil').en(750).boy(550).kucultPasif().acEfekt(2, 1000).kapatEfekt(2, 1000).ac();
-    pen.icerikTD.spin(gif);
-
-    $.ajax({
-        type: "POST",
-        url: "elle_uzak_ve_yerel_sunucudan_dosyalari_sil.php",
-        data: { yerelden_sil: 1, yerel_den_secilen_dosya: yerel_den_secilen_dosya },
-        success: function (msg) {
-        $(function () {
-            pen.icerik(msg);
-        })
-        }
-    });
-
-    }
-    }
-    }
-    */
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
 
 </script>
 <link rel="stylesheet" href="css/filetree.css" type="text/css" >

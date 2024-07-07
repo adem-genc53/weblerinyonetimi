@@ -8,7 +8,6 @@ require_once __DIR__ . '/includes/turkcegunler.php';
         exit("<div style='font-weight: bold;font-size: 16px;text-align:center;'>PHP.ini de FTP uzantısı etkinleştirilmedi.</div>");
     }
 
-
 include('includes/header.php');
 include('includes/navigation.php');
 include('includes/sub_navbar.php');
@@ -333,8 +332,6 @@ include('includes/footer.php');
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-$(document).ready( function() {
-
 	$( '#yerel_dizin_agac' ).html( '<ul class="filetree start"><li class="wait" style="padding-left: 20px;">' + 'Yerel klasör ağacı oluşturuluyor...' + '<li></ul>' );
 	
 	getfilelist( $('#yerel_dizin_agac') , '<?php echo ZIPDIR; ?>' );
@@ -390,20 +387,16 @@ $(document).ready( function() {
 	return false;
     }
 	});
-	
-});
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-$(document).ready( function() {
 
 	$( '#ftp_uzaktan_agac' ).html( '<ul class="filetree start"><li class="wait" style="padding-left: 20px;">' + 'FTP içerik ağacı oluşturuluyor...' + '<li></ul>' );
 	
-	getfilelist( $('#ftp_uzaktan_agac') , '/' );
+	getFtpfilelist( $('#ftp_uzaktan_agac') , '/' );
 	
-	function getfilelist( cont, root ) {
+	function getFtpfilelist( cont, root ) {
 	
 		$( cont ).addClass( 'wait' );
 			
@@ -449,7 +442,7 @@ $(document).ready( function() {
 			if( entry.hasClass('collapsed') ) {
 						
 				entry.find('UL').remove();
-				getfilelist( entry, escape( $(this).attr('rel') ));
+				getFtpfilelist( entry, escape( $(this).attr('rel') ));
 				entry.removeClass('collapsed').addClass('expanded');
 			}
 			else {
@@ -465,8 +458,6 @@ $(document).ready( function() {
 	return false;
     }
 	});
-	
-});
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

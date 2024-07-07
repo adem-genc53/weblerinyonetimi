@@ -14,7 +14,6 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
     //exit;
 }
 
-
 include('includes/header.php');
 include('includes/navigation.php');
 include('includes/sub_navbar.php');
@@ -361,7 +360,6 @@ include('includes/footer.php');
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-$(document).ready( function() {
 
 	$( '#yerel_dizin_agac' ).html( '<ul class="filetree start"><li class="wait" style="padding-left: 20px;">' + 'Yerel klasör ağacı oluşturuluyor...' + '<li></ul>' );
 	
@@ -418,15 +416,15 @@ $(document).ready( function() {
 	return false;
     }
 	});
-});
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	$('#google_drive_uzaktan_agac').html( '<ul class="filetree start"><li class="wait" style="padding-left: 20px;">' + 'Google Drive içerik ağacı oluşturuluyor...' + '<li></ul>' );
 	
-	getfilelist( $('#google_drive_uzaktan_agac') , 'root' );
+	getGooglefilelist( $('#google_drive_uzaktan_agac') , 'root' );
 	
-	function getfilelist( cont, root ) {
+	function getGooglefilelist( cont, root ) {
 
 		$( cont ).addClass( 'wait' );
 			
@@ -473,7 +471,7 @@ $(document).ready( function() {
 		if( entry.hasClass('folder_plus') || entry.hasClass('folder') || entry.hasClass('uzak_home') ) {
 			if( entry.hasClass('collapsed') ) {
 				entry.find('UL').remove();
-				getfilelist( entry, escape( $(this).attr('rel') ));
+				getGooglefilelist( entry, escape( $(this).attr('rel') ));
 				entry.removeClass('collapsed').addClass('expanded');
 			}
 			else {
