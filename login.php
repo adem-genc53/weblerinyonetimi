@@ -33,7 +33,7 @@ session_name(str_replace('.','_',$serverName)); // Bu oturum name oturum_guncell
         $this->setCSRFToken();
     }
 
-    public function login(string $user_email, string $password, string $remember_me, string $csrf_token ): bool {
+    public function login(string $user_email, string $password, $remember_me = null, string $csrf_token ): bool {
 
         if(empty($user_email)){
             $this->errors[] = "E-Posta alanı Zorunludur";
@@ -68,7 +68,7 @@ session_name(str_replace('.','_',$serverName)); // Bu oturum name oturum_guncell
                         $_SESSION['user_name']                  = $res['user_name'];
                         $_SESSION['start_time']                 = time();
 
-                    if(isset($csrf_token) && !empty($remember_me)){
+                    if(isset($csrf_token) && $remember_me !== null){
                         $beni_token = $csrf_token;
                         $userId = $res['user_id'];
                         $expiry = time() + (86400 * 30); // 30 gün
@@ -114,7 +114,7 @@ session_name(str_replace('.','_',$serverName)); // Bu oturum name oturum_guncell
                         $delete->bindParam(':uid', $user_id);
                         $delete->execute();
                     }
-                        return true;
+        return true;
                 }else{
                     $this->errors[] = "E-posta veya Şifre Hatalı";
                 }

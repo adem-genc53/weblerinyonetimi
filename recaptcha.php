@@ -14,7 +14,7 @@
             $robotdegil = true;
             }
             else {
-            $errors[] = '"Ben Robot Değilim" Kutuyu Seçmelisiniz.';
+            //$errors[] = '"Ben Robot Değilim" Kutuyu Seçmelisiniz.';
             }
         }
     }
