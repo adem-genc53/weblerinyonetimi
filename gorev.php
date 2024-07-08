@@ -8,6 +8,13 @@ $hash = new Hash;
 ini_set('memory_limit', '-1');
 ignore_user_abort(true);
 set_time_limit(0);
+
+#########################################################################################################################
+// Cron job tarafından çalıştırılmasını engellemek için PHP_SAPI kontrolü
+if (php_sapi_name() === 'cli' && $genel_ayarlar['gorevi_calistir'] !== 2) {
+    // Eğer CLI (komut satırı) ortamında çalıştırılıyorsa, sayfayı çalıştırmayı durdur
+    exit();
+}
 #########################################################################################################################
 // Geçici dizini dinamik olarak al
 $temp_dir = sys_get_temp_dir();

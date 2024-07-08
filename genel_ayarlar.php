@@ -294,7 +294,9 @@ $charsets = [
     'utf8mb3' => 'UTF-8 Unicode - utf8mb3_general_ci',
     'utf8mb4' => 'UTF-8 Unicode - utf8mb4_0900_ai_ci'
 ];
+
 ##########################################################################################################
+
 $timezones = [
     'UTC' => 'Eşgüdümlü Evrensel Zaman (UTC ±0)',
     'Europe/Istanbul' => 'Türkiye Standart Zamanı (UTC +3)',
@@ -317,6 +319,7 @@ $timezones = [
     'Asia/Bangkok' => 'Indochina Zamanı (UTC +7)',
     'Pacific/Auckland' => 'Yeni Zelanda Standart Zamanı (UTC +12)'
 ];
+
 ##########################################################################################################
 
 include('includes/header.php');
@@ -897,7 +900,7 @@ include('includes/sub_navbar.php');
                                                             }
                                                             ?>
                                                             </td>
-                                                            <td colspan="3">Eğer <b>Cron Job</b> alanına komut eklemiş iseniz</td>
+                                                            <td colspan="3">Eğer <b>Cron Job</b> alanına "<b>/usr/local/bin/php <?php echo $_SERVER['DOCUMENT_ROOT']; ?>/gorev.php</b>>/dev/null 2>&1" komutu eklemiş iseniz çalışır.</td>
                                                         </tr>
                                                         <tr>
                                                             <td>Görevi Ajax İle Çalıştır:</td>
@@ -911,6 +914,19 @@ include('includes/sub_navbar.php');
                                                             ?>
                                                             </td>
                                                             <td colspan="3">Ajax kodu mevcuttur</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>Görevi Ajax & Cron İle Çalıştır:</td>
+                                                            <td style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;">
+                                                            <?php 
+                                                            if(isset($genel_ayarlar['gorevi_calistir']) && $genel_ayarlar['gorevi_calistir']==3){
+                                                                echo "<input type='radio' name='gorevi_calistir' value='3' checked>";
+                                                            } else {
+                                                                echo "<input type='radio' name='gorevi_calistir' value='3'>";
+                                                            }
+                                                            ?>
+                                                            </td>
+                                                            <td colspan="3">&nbsp;</td>
                                                         </tr>
                                                     </tbody>
                                                     <tfoot>
