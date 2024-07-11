@@ -33,7 +33,7 @@ session_name(str_replace('.','_',$serverName)); // Bu oturum name oturum_guncell
         $this->setCSRFToken();
     }
 
-    public function login(string $user_email, string $password, $remember_me = null, string $csrf_token ): bool {
+    public function login(string $user_email, string $password, string $csrf_token, $remember_me = null ): bool {
 
         if(empty($user_email)){
             $this->errors[] = "E-Posta alanı Zorunludur";
@@ -225,7 +225,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $csrf_token         = $_SESSION['csrf_token'];
 
         // Kullanıcı giriş işlemini gerçekleştir
-        if ($secureLogin->login($user_email, $password, $remember_me, $csrf_token)) {
+        if ($secureLogin->login($user_email, $password, $csrf_token, $remember_me)) {
             //echo "Giriş başarılı!";
             $errors[] = 'Giriş başarılı!';
             // Kullanıcı girişi başarılı ise son sayfasına yönlendir
