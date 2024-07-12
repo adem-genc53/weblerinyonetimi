@@ -496,6 +496,12 @@ if($("#selectedFilePath2").val()!=='' || $("#selectedFilePath3").val()!=='' || $
     }
   });
 
+$("input[name='sadece']").click(function(){
+    $('#sql-listele').val("");
+    $("#sql-listele").hide();
+    $("#sql-listeleme-aktif").hide();
+    $('#veritabanikarsilastir').empty();
+});
 </script>
 
                 </div><!-- / <div class="card-body p-0"> -->
@@ -571,120 +577,4 @@ if($("#selectedFilePath2").val()!=='' || $("#selectedFilePath3").val()!=='' || $
 <?php 
 include('includes/footer.php');
 ?>
-<style>
-textarea {
-    /*
-    pointer-events: none;
-    height: 100%;
-    */
-/*display: none;*/
-/*visibility: hidden;*/
-}
-</style>
-<script type="text/javascript">
-/*
-$( document ).ready(function() {
 
-// Klasör seçiliyorsa diğerlerini sıfırla
-$('#klasorsec').change(function(){
-    $('#sqlsec').prop('selectedIndex',0);
-    $('#alt_dosya').prop('selectedIndex',0);
-    $('#veritabanikarsilastir').html();
-});
-// Dosya seçiliyorsa diğerlerini sıfırla
-$('#sqlsec').change(function(){
-    $('#klasorsec').prop('selectedIndex',0);
-    $('#alt_dosya').prop('selectedIndex',0);
-    $('#veritabanikarsilastir').html();
-});
-// Alt dosya seçiliyorsa diğerlerini sıfırla
-$('#alt_dosya').change(function(){
-    $('#klasorsec').prop('selectedIndex',0);
-    $('#sqlsec').prop('selectedIndex',0);
-    $('#veritabanikarsilastir').html();
-});
-// Veritabanı ID seçiliyorsa diğerlerini sıfırla
-$('#ekle_veritabani_id').change(function(){
-    $('#sqlsec').prop('selectedIndex',0);
-    $('#klasorsec').prop('selectedIndex',0);
-    $('#alt_dosya').prop('selectedIndex',0);
-    $('#veritabanikarsilastir').html();
-});
-
-
-$('#klasorsec, #sqlsec, #alt_dosya').change(function(){
-
-      var veritabani_id = $('select[name="veritabani_id"] option:selected').val();
-
-    if(veritabani_id=="0" && $("input[name='sadece']:checked").val()==1) {
-        $(function(){
-            jw("b olumsuz").baslik("Veritabanı Belirlemediniz!").icerik("Karşılaştıracağınız veritabanı seçmelisiniz").kilitle().en(400).boy(100).ac();
-        })
-        return false;
-    }
-
-if($( "#sqlsec option:selected" ).val()!=='' || $( "#klasorsec option:selected" ).val()!=='' || $( "#alt_dosya option:selected" ).val()!==''){
-
-    var str = 'grup=1';
-    var t = $('#f').serialize();
-    (t !='')? str += '&'+t :'';
-    if( $("input[name='sadece']:checked").val()==1 ){
-        $('#veritabanikarsilastir').empty();
-        $("#karsilastir").show();
-        $("#loading").show();    
-        xhr = $.ajax({
-        type: "POST",
-        url: "veritabanikarsilastir.php",
-        data: str,
-        success: function(veriler){
-        $("#loading").hide();
-        $("#veritabanikarsilastir").html(veriler);
-        }
-        });
-    } else if( $("input[name='sadece']:checked").val()==2 ){
-        $('#sql-listele').val("");
-        $("#sql-listeleme-aktif").show();
-        $("#sql-loading").show(); 
-        xhr = $.ajax({
-        type: "POST",
-        url: "sql_listele.php",
-        data: str,
-        success: function(sql){
-        $("#sql-loading").hide();
-        $("#sql-listele").show();
-        $("#sql-listele").val(sql);
-        }
-        });
-    }
-
-    }
-
-   });
-});
-*/
-/*
-$("input[name='sadece']").click(function(){
-    $('#sql-listele').val("");
-    $("#sql-listele").hide();
-    $("#sql-listeleme-aktif").hide();
-    $('#sqlsec,#klasorsec,#alt_dosya').prop('selectedIndex',0);
-    $('#veritabanikarsilastir').empty();
-});
-
-$('#yinede').on('change', function() {
-    $('#sqlsec,#klasorsec,#alt_dosya').prop('selectedIndex',0);
-    $('#veritabanikarsilastir').empty();
-    $('#sql-listele').val("");
-    $("#sql-listele").hide();
-    $("#sql-listeleme-aktif").hide();
-});
-
-$('#sqlsec,#klasorsec,#alt_dosya .sadece').on('change', function() {
-    if($( "#sqlsec option:selected" ).val()!=='' && $( "#klasorsec option:selected" ).val()!=='' && $( "#alt_dosya option:selected" ).val()!==''){
-        $('#veritabanikarsilastir').empty();
-    }
-    $('#sql-listele').val("");
-    $("#sql-listele").hide();
-});
-*/
-</script>
