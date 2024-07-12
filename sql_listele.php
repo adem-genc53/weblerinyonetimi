@@ -9,7 +9,8 @@ ini_set('memory_limit', '-1');
 ignore_user_abort(true);
 set_time_limit(0);
     //sleep(5);
-    // echo '<pre>' . print_r($_POST, true) . '</pre>';
+     //echo '<pre>' . print_r($_POST, true) . '</pre>';
+     //exit;
     header("Expires: Tue, 03 Jul 2001 06:00:00 GMT");
     header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
     header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
@@ -18,8 +19,13 @@ set_time_limit(0);
     header("Connection: close");
 ################################################################################
 
-    $post_sqlsec = isset($_POST['sqlsec']) ? $_POST['sqlsec'] : '';
     $klasorsec = isset($_POST['klasorsec']) ? $_POST['klasorsec'] : '';
+
+    if(isset($_POST['alt_dosya']) && is_file($_POST['alt_dosya'])){
+        $post_sqlsec = $_POST['alt_dosya'];
+    }else{
+        $post_sqlsec = isset($_POST['sqlsec']) ? $_POST['sqlsec'] : '';
+    }
     $dizin = BACKUPDIR;
     $uzantilar = array("sql","gz"); //hangi uzantılar?
     $gzuzanti = array("gz"); //hangi uzantı?

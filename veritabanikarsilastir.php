@@ -10,14 +10,14 @@ ini_set('memory_limit', '-1');
 ignore_user_abort(true);
 set_time_limit(0);
 
-//echo '<pre>' . print_r($_POST, true) . '</pre>';
-
+    //echo '<pre>' . print_r($_POST, true) . '</pre>';
+    //exit;
 #########################################################################################################################################
     // POST ile veritabanı id
     if(isset($_POST['veritabani_id']) && $_POST['veritabani_id'] > 0){
         $veritabani_id = $_POST['veritabani_id'];
     }else{
-        $veritabani_id = 0;
+        //$veritabani_id = 0;
     }
 #########################################################################################################################################
     // Seçilen veritabanı 
@@ -36,9 +36,11 @@ set_time_limit(0);
     }
 
     $db_name = $varsayilan['db_name'];
+
+#########################################################################################################################################
 #########################################################################################################################################
 
-function parseBackupFile($backupFile, $serverDbName, $serverTableNames) {
+function parseBackupFile($backupFile, $serverDbName, $serverTableNames, $yinede_karsılastir) {
     if (empty($backupFile)) {
         return null;
     }
@@ -60,15 +62,16 @@ function parseBackupFile($backupFile, $serverDbName, $serverTableNames) {
         while (($line = (strpos($backupFile, '.gz') !== false) ? gzgets($handle) : fgets($handle)) !== false) {
             if (strpos($line, '-- Veritabanı:') !== false) {
                 $backupDbName = trim(str_replace(array('-- Veritabanı:', '`'), '', $line));
-                if ($backupDbName !== $serverDbName && !isset($_POST['yinede'])) {
+                if ($backupDbName !== $serverDbName && $yinede_karsılastir == 0) {                    
                     // Veritabanı adı eşleşmiyorsa işlemi bitir
                     fclose($handle);
-                    return ['dbname'=>$backupDbName];
+                    return ['dbname' => $backupDbName];
                 }
+                $data['yedek_dbname'] = $backupDbName;
                 $data['dbname'] = $backupDbName;
             }
 
-            if (preg_match('/CREATE TABLE IF NOT EXISTS `([\w-]+)`/', $line, $matches)) {
+            if ( preg_match('/CREATE TABLE IF NOT EXISTS `([\w-]+)`/', $line, $matches) ) {
                 $currentTable = $matches[1];
                 if (in_array($currentTable, $serverTableNames)) {
                     $data['tables'][$currentTable] = 0; // Tablo yapısı mevcut, ancak veri satırı yok
@@ -77,7 +80,7 @@ function parseBackupFile($backupFile, $serverDbName, $serverTableNames) {
                 }
             }
 
-            if (preg_match('/INSERT INTO `([\w-]+)`/', $line, $matches)) {
+            if ( preg_match('/INSERT INTO `([\w-]+)`/', $line, $matches) ) {
                 $tableName = $matches[1];
                 if ($currentTable === $tableName && in_array($tableName, $serverTableNames)) {
                     $data['tables'][$tableName]++;
@@ -95,13 +98,16 @@ function parseBackupFile($backupFile, $serverDbName, $serverTableNames) {
     return $data;
 }
 
-function parseBackupFolder($folderPath, $expectedDbName, $serverTableNames) {
+function parseBackupFolder($folderPath, $expectedDbName, $serverTableNames, $yinede_karsılastir) {
     $data = ['dbname' => $expectedDbName, 'tables' => []];
 
-    $files = array_merge(glob($folderPath . '/*.sql'), glob($folderPath . '/*.gz'));
+    $files = array_merge(glob($folderPath . '*.sql'), glob($folderPath . '*.gz'));
+
     foreach ($files as $file) {
-        $fileData = parseBackupFile($file, $expectedDbName, $serverTableNames);
-        if (isset($fileData['dbname']) && $fileData['dbname'] == $expectedDbName) {
+        $fileData = parseBackupFile($file, $expectedDbName, $serverTableNames, $yinede_karsılastir);
+        $data['yedek_dbname'] = $fileData['dbname'];
+        
+        if (isset($fileData['dbname']) && $fileData['dbname'] == $expectedDbName || $yinede_karsılastir == 1) {
             foreach ($fileData['tables'] as $table => $count) {
                 if (!isset($data['tables'][$table])) {
                     $data['tables'][$table] = $count;
@@ -114,6 +120,12 @@ function parseBackupFolder($folderPath, $expectedDbName, $serverTableNames) {
                 }
             }
         }
+        
+    }
+
+    if(isset($data['tables']) && count($data['tables'])==0){
+        unset($data['dbname']);
+        $data['dbname'] = $fileData['dbname'];
     }
     return $data;
 }
@@ -141,11 +153,11 @@ function compareDatabases($backupData, $serverData) {
         $html = '<table class="table table-bordered table-sm" style="min-width: 1000px;">
         <colgroup span="7">
             <col style="width:40%"></col>
-            <col style="width:5%"></col>
+            <col style="width:6%"></col>
             <col style="width:2%"></col>
             <col style="width:6%"></col>
             <col style="width:40%"></col>
-            <col style="width:5%"></col>
+            <col style="width:6%"></col>
             <col style="width:2%"></col>
         </colgroup>
         <thead>
@@ -165,7 +177,7 @@ function compareDatabases($backupData, $serverData) {
         <tr>
             <td colspan='3' style='text-align:center;background:#F0F1F9;'><b>Kaynak Veritabanı: </b>".htmlspecialchars($serverData['dbname'])."</td>
             <td rowspan='".(count($allTables)+1)."' style='border-bottom: 1px solid white;display: table-cell; vertical-align: middle;text-align:center;'><img border='0' src='images/diff.png' width='48' height='45'></td>
-            <td colspan='3' style='text-align:center;background:#F0F1F9;'><b>Yedek Veritabanı: </b>".htmlspecialchars($backupData['dbname']) ."</td>
+            <td colspan='3' style='text-align:center;background:#F0F1F9;'><b>Yedek Veritabanı: </b>".htmlspecialchars($backupData['yedek_dbname']) ."</td>
         </tr>";
 
         sort($allTables);
@@ -227,13 +239,19 @@ function compareDatabases($backupData, $serverData) {
 
 // Yedek dosyasını oku
 $backupData = null;
+$yinede_karsılastir = isset($_POST['yinede']) ? $_POST['yinede'] : 0;
 $serverTableNames = array_keys(getDatabaseInfo($PDOdbsecilen, $db_name)['tables']); // Sunucudaki tablo isimlerini al
 if (isset($_POST['sqlsec']) && !empty($_POST['sqlsec'])) {
     $backupFile = $_POST['sqlsec'];
-    $backupData = parseBackupFile($backupFile, $db_name, $serverTableNames);
+    $backupData = parseBackupFile($backupFile, $db_name, $serverTableNames, $yinede_karsılastir);
 } elseif (isset($_POST['klasorsec']) && !empty($_POST['klasorsec'])) {
     $folderPath = $_POST['klasorsec'];
-    $backupData = parseBackupFolder($folderPath, $db_name, $serverTableNames);
+    $backupData = parseBackupFolder($folderPath, $db_name, $serverTableNames, $yinede_karsılastir);
+} elseif (isset($_POST['alt_dosya']) && !empty($_POST['alt_dosya'])) {
+    $altbackupFile = $_POST['alt_dosya'];
+    $backupData = parseBackupFile($altbackupFile, $db_name, $serverTableNames, $yinede_karsılastir);
+}else{
+
 }
 
 if ($backupData) {
@@ -241,10 +259,10 @@ if ($backupData) {
     $serverData = getDatabaseInfo($PDOdbsecilen, $db_name);
 
     // Karşılaştırma ve sonuçları göster
-    //echo '<pre>' . print_r($serverData, true) . '</pre>';
-    //echo '<pre>' . print_r($backupData, true) . '</pre>';
+    //echo "<pre>Sunucu\n" . print_r($serverData, true) . '</pre>';
+    //echo "<pre>Yedek\n" . print_r($backupData, true) . '</pre>';
 
-    if ((isset($backupData['dbname']) && htmlspecialchars($serverData['dbname']) == htmlspecialchars($backupData['dbname'])) || isset($backupData['dbname']) && isset($_POST['yinede'])) {
+    if ( ( isset($backupData['dbname']) && htmlspecialchars($serverData['dbname']) == htmlspecialchars($backupData['dbname']) ) || isset($backupData['dbname']) && isset($_POST['yinede'])) {
         echo compareDatabases($backupData, $serverData);
     }else{
         if(!isset($backupData['dbname'])){
@@ -256,5 +274,5 @@ if ($backupData) {
 } else {
     echo 'Yedek dosyası veya klasörü seçilmedi.';
 }
-
+unset($backupData,$altbackupFile,$folderPath,$backupFile)
 ?>

@@ -7,12 +7,55 @@ require_once __DIR__ . '/includes/turkcegunler.php';
 ##########################################################################################################
 $dizin = BACKUPDIR;
 ###########################################################################################################################################
+function listDirectoriesAndFiles($dir) {
+    $result = ['root_files' => []];
+    $iterator = new DirectoryIterator($dir);
+    foreach ($iterator as $fileinfo) {
+        if ($fileinfo->isDot()) continue;
+        if ($fileinfo->isDir()) {
+            $subdir = $fileinfo->getFilename();
+            $subdirPath = $dir . DIRECTORY_SEPARATOR . $subdir;
+            $result[$subdirPath] = [];  // Dizinler için entry oluşturma
+            $subIterator = new DirectoryIterator($subdirPath);
+            foreach ($subIterator as $subfileinfo) {
+                if ($subfileinfo->isFile() && preg_match('/\.sql$|\.sql\.gz$/', $subfileinfo->getFilename())) {
+                    $result[$subdirPath][] = $subdirPath . DIRECTORY_SEPARATOR . $subfileinfo->getFilename();
+                }
+            }
+        } elseif ($fileinfo->isFile() && preg_match('/\.sql$|\.sql\.gz$/', $fileinfo->getFilename())) {
+            $result['root_files'][] = $dir . DIRECTORY_SEPARATOR . $fileinfo->getFilename();
+        }
+    }
+    ksort($result);
+    return $result;
+}
+
+$baseDir = BACKUPDIR;
+$directoriesAndFiles = listDirectoriesAndFiles($baseDir);
+###########################################################################################################################################
     // Select option için Dizinleri listeliyoruz
     $folder_arr = array();
     $i = 0;
     foreach (new DirectoryIterator(BACKUPDIR) AS $file) {
         if ($file->isDir() && $file->getFilename() != '.' && $file->getFilename() != '..') {
           $folder_arr['3-'.$file->getCTime().'-'.$i] = $file->getFilename();
+
+                $ii = 0;
+                foreach (new DirectoryIterator(BACKUPDIR."/".$file->getFilename()) AS $file) {
+                    if ($file->isDir() && $file->getFilename() != '.' && $file->getFilename() != '..') {
+
+                    }else{
+                        if(pathinfo($file->getFilename(), PATHINFO_EXTENSION) == 'gz'){
+
+                            $folder_arr['1-'.$file->getCTime().'-'.$ii] = $file->getFilename(); // 1 yerine 2 olursa gzip dosyalar üste olur
+                        }elseif(pathinfo($file->getFilename(), PATHINFO_EXTENSION) == 'sql'){
+
+                            $folder_arr['1-'.$file->getCTime().'-'.$ii] = $file->getFilename();
+                        }
+                    }
+                $ii++;
+                }
+
         }
     $i++;
     }
@@ -20,21 +63,22 @@ $dizin = BACKUPDIR;
 ###########################################################################################################################################
     // Dizin içindeki dosya boyutunu hesaplama
     function dirSize($directory) {
-        $size = 0;
-        foreach(new RecursiveIteratorIterator(new RecursiveDirectoryIterator($directory)) as $file){
-            $size+=$file->getSize();
+        if(is_dir($directory)){
+            $size = 0;
+            foreach(new RecursiveIteratorIterator(new RecursiveDirectoryIterator($directory)) as $file){
+                $size+=$file->getSize();
+            }
+            return $size;
         }
-        return $size;
     }
 ###########################################################################################################################################
-    // Dizin içindeki dizin ve dosyaları listeliyoruz
+    // Backup Dizin içindeki alt-dizinleri ve dosyaları listeliyoruz
     $files_arr = array();
     $i = 0;
     foreach (new DirectoryIterator(BACKUPDIR) AS $file) {
 
         if ($file->isDir() && $file->getFilename() != '.' && $file->getFilename() != '..') {
 
-            //$files['3-'.$file->getCTime().'-'.$i] = $file->getFilename(); // dizinleri listeliyor
         }elseif ($file->isFile() && $file->getFilename() != '.htaccess') {
 
             if(pathinfo($file->getFilename(), PATHINFO_EXTENSION) == 'gz'){
@@ -69,6 +113,26 @@ $dizin = BACKUPDIR;
     }
 
 ###########################################################################################################################################
+function getIconByExtension($fileName) {
+    $extension = pathinfo($fileName, PATHINFO_EXTENSION);
+
+    // .sql.gz dosyalarını kontrol et
+    if (strtolower($extension) == 'gz' && substr($fileName, -7) == '.sql.gz') {
+        return '<img src="images/gzip.png" border="0">'; // SQL arşiv dosyası ikonu
+    }
+
+    // Normal dosya uzantısını kontrol et
+    switch (strtolower($extension)) {
+        case 'sql':
+            return '<img src="images/sql.png" border="0">'; // SQL dosyası ikonu
+        case 'gz':
+            return '<img src="images/gzip.png" border="0">'; // GZ dosyası ikonu
+        default:
+            return '📄'; // Genel dosya ikonu
+    }
+}
+###########################################################################################################################################
+
 include('includes/header.php');
 include('includes/navigation.php');
 include('includes/sub_navbar.php');
@@ -80,7 +144,7 @@ include('includes/sub_navbar.php');
                 <div class="container-fluid">
                     <div class="row mb-2">
                         <div class="col-sm-6">
-                            <h1 class="m-0">Yedeklenen Veri Tabanı Kaynak İle Karşılaştır</h1>
+                            <h1 class="m-0">Yedeklenen Veri Tabanı Kaynakğa Göre Karşılaştır</h1>
                         </div><!-- / <div class="col-sm-6"> -->
                         <div class="col-sm-6">
                             <ol class="breadcrumb float-sm-right">
@@ -146,79 +210,165 @@ include('includes/sub_navbar.php');
             <div class="card">
                 <div class="card-body p-0">
 
+                    <?php 
+                    //echo '<pre>' . print_r($directoriesAndFiles, true) . '</pre>';
+                    //echo '<pre>' . print_r($alt_dizin_dosyalari, true) . '</pre>';
+                    ?>
+
         <form id="f">
             <table class="table" style="min-width: 1000px;">
                 <colgroup span="2">
                     <col style="width:13%"></col>
-                    <col style="width:85%"></col>
+                    <col style="width:40%"></col>
+                    <col style="width:45%"></col>
                 </colgroup>
             <thead>
                 <tr class="bg-primary">
-                    <th colspan="2" style="text-align: center;line-height: .30;font-size: 1rem;"><u>SQL</u> veya <u>GZ</u> Uzantılı Yedek Veri Tabanı Kaynak Veri Tabanı ile Karşılaştır</th>
+                    <th colspan="3" style="text-align: center;line-height: .30;font-size: 1rem;"><u>SQL</u> veya <u>GZ</u> Uzantılı Yedek Veri Tabanı Kaynakğa Göre Karşılaştır</th>
                 </tr>
             </thead>
             <tbody>
                 <tr>
                     <td><b>Sadece</b></td>
-                    <td><span style="padding-right:20px;">Karşılaştır: <input class="sadece" type="radio" name="sadece" value="1" checked></span> <span style="padding:0 20px;">İçeriği Listele: <input class="sadece" type="radio" name="sadece" value="2"></span>Büyük boyutlu yedeğin içeriği listelerken tarayıcının kilitlenebileceğini unutmayın</td>
+                    <td colspan="2"><span style="padding-right:20px;">Karşılaştır: <input class="sadece" type="radio" name="sadece" value="1" checked></span> <span style="padding:0 20px;">İçeriği Listele: <input class="sadece" type="radio" name="sadece" value="2"></span>Büyük boyutlu yedeğin içeriği listelerken tarayıcının kilitlenebileceğini unutmayın</td>
                 </tr>
                 <tr>
                     <td>Veritabanı Seç</td>
                     <td style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;">
-                    <select class="form-control" name="veritabani_id" id="ekle_veritabani_id" size="1" style="width:550px;">
-                        <option value="0">&nbsp;</option>
-                        <?php 
-                            foreach($veritabanlari_arr AS $id => $veritabani){
-                                if(isset($_POST['veritabani_id']) && $_POST['veritabani_id'] == $id){
-                                    echo "<option value='{$id}' selected>{$veritabani}</option>\n";
-                                }else{
-                                    echo "<option value='{$id}'>{$veritabani}</option>\n";
-                                }
-                            }
-                        ?>
-                    </select>
+
+<button class="btn btn-secondary dropdown-toggle d-flex justify-content-between align-items-center" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false" style="width:550px;">
+<span id="selectedFileName1">İşlem Yapacağınız Veritabanı Seçin</span>
+<span class="dropdown-toggle-icon"></span>
+</button>
+
+<ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1" style="width:550px;">
+<div class="modal-scrollbar">
+<?php 
+    foreach($veritabanlari_arr AS $id => $veritabani){
+        echo '
+        <li><a class="dropdown-item" href="#" data-file-path="'.$id.'" data-file-name="'.$veritabani.'" data-size="Klasör">
+        <span class="icon"><img style="width:20px;height:20px;" border="0" src="images/pngegg.png"></span>
+        <span class="file-name">'.$veritabani.'</span>
+        </a></li>
+        ';
+    }
+?>
+</div>
+</ul>
+<input type="hidden" name="veritabani_id" id="selectedFilePath1">
+
                     </td>
+                    <td>&nbsp;</td>
                 </tr>
                 <tr>
                     <td style="text-align:right;"><img style="width:40px;height:20px;" border="0" src="images/mysqlwinrar.png"></td>
                     <td style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;">
-                    <select size="1" name="sqlsec" id="sqlsec" class="form-control" style="width:550px;">
-                        <?php
-                            echo "<option value=''>&nbsp;</option>";
-                            foreach($files_arr AS $key => $value){
-                                echo "<option value='{$dizin}/{$value}'>{$value}";
-                                echo "&nbsp&nbsp&nbsp-&nbsp&nbsp&nbsp".showSize(filesize($dizin."/".$value));
-                                echo "</option>";
-                            }
-                        ?>      
-                    </select>
+
+<button class="btn btn-secondary dropdown-toggle d-flex justify-content-between align-items-center" data-default-text="Veritabanı Yedek Dosyayı Seçin" type="button" id="dropdownMenuButton2" data-bs-toggle="dropdown" aria-expanded="false" style="width:550px;">
+<span id="selectedFileName2">Veritabanı Yedek Dosyayı Seçin</span>
+<span class="dropdown-toggle-icon"></span>
+</button>
+
+<ul class="dropdown-menu" aria-labelledby="dropdownMenuButton2" style="width:550px;">
+<div class="modal-scrollbar">
+<?php 
+foreach($directoriesAndFiles AS $key => $klasor_dosya_arr){
+    if($key == 'root_files'){
+    foreach($klasor_dosya_arr AS $value){
+        echo '
+        <li><a class="dropdown-item" href="#" data-file-path="'.$value.'" data-file-name="'.basename($value).'" data-size="Klasör">
+        <span class="icon">'.getIconByExtension($value).'</span>
+        <span class="file-name">'.basename($value).'</span>
+        <span class="badge bg-primary rounded-pill">'.showSize(filesize($value)).'</span>
+        </a></li>
+        ';
+    }
+    }
+}
+?>
+</div>
+</ul>
+<input type="hidden" name="sqlsec" id="selectedFilePath2">
                     </td>
+                    <td>&nbsp;</td>
                 </tr>
                 <tr>
                     <td>&nbsp;</td>
-                    <td><b>YADA</b> <img style="width:20px;height:20px;" border="0" src="images/folder.png">klasör içindeki veritabanı tabloları karşılaştır</td>
-                </tr> 
+                    <td><b>YADA</b> <img style="width:20px;height:20px;" border="0" src="images/folder.png">klasör içindeki veritabanı tabloları karşılaştır veya içeriğini görüntüle</td>
+                    <td>&nbsp;</td>
+                </tr>
                 <tr>
                     <td style="text-align:right;"><img style="width:20px;height:20px;" border="0" src="images/folder.png"></td>
                     <td style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;">
-                    <select size="1" name="klasorsec" id="klasorsec" class="form-control" style="width:550px;">
-                        <?php
-                            echo "<option value=''>&nbsp;</option>";
-                            foreach($folder_arr AS $key => $value){
-                                echo "<option value='{$dizin}/{$value}'>{$value}";
-                                echo "&nbsp&nbsp&nbsp-&nbsp&nbsp&nbsp".showSize(dirSize($dizin."/".$value));
-                                echo "</option>";
-                            }
-                        ?>      
-                    </select>
+
+<button class="btn btn-secondary dropdown-toggle d-flex justify-content-between align-items-center" data-default-text="Veritabanı Yedek Klasör Seçin" type="button" id="dropdownMenuButton3" data-bs-toggle="dropdown" aria-expanded="false" style="width:550px;">
+<span id="selectedFileName3">Veritabanı Yedek Klasör Seçin</span>
+<span class="dropdown-toggle-icon"></span>
+</button>
+
+<ul class="dropdown-menu" aria-labelledby="dropdownMenuButton3" style="width:550px;">
+<div class="modal-scrollbar">
+<?php 
+    foreach($directoriesAndFiles AS $key => $value){
+        if($key != 'root_files'){
+        echo '
+            <li><a class="dropdown-item" href="#" data-file-path="'.$key.'/" data-file-name="'.basename($key).'" data-size="Klasör">
+            <span class="icon"><img style="width:20px;height:20px;" border="0" src="images/folder.png"></span>
+            <span class="file-name">'.basename($key).'</span>
+            <span class="badge bg-primary rounded-pill">'.showSize(dirSize($key)).'</span>
+            </a></li>
+        ';
+        }
+    }
+?>
+</div>
+</ul>
+<input type="hidden" name="klasorsec" id="selectedFilePath3">
+
                     </td>
+                    <td>Klasörlerin içindeki tüm tabloları görüntülemek veya karşılaştırmak için burayı kullanın</td>
+                </tr>
+
+                <tr>
+                    <td style="text-align:right;"><img style="width:20px;height:20px;" border="0" src="images/folder_files.png"></td>
+                    <td style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;">
+
+<button class="btn btn-secondary dropdown-toggle d-flex justify-content-between align-items-center" data-default-text="İçeriğini Görüntülemek İçin Bir Tablo Seçin" type="button" id="dropdownMenuButton4" data-bs-toggle="dropdown" aria-expanded="false" style="width:550px;">
+<span id="selectedFileName4">İçeriğini Görüntülemek İçin Bir Tablo Seçin</span>
+<span class="dropdown-toggle-icon"></span>
+</button>
+
+<ul class="dropdown-menu" aria-labelledby="dropdownMenuButton4" style="width:550px;">
+<div class="modal-scrollbar">
+<?php 
+    foreach($directoriesAndFiles AS $key => $klasor_dosya_arr){
+        if($key != 'root_files'){
+        echo '<li><h6 class="dropdown-header" style="text-align: left;"><span class="icon"><img style="width:20px;height:20px;" border="0" src="images/folder.png"> </span>'.basename($key).'</h6></li>';
+            foreach($klasor_dosya_arr AS $value){
+                echo '
+                <li><a class="dropdown-item" href="#" data-file-path="'.$value.'" data-file-name="'.basename($value).'" data-size="Klasör">
+                <span class="icon  dosya_adi">'.getIconByExtension($value).'</span>
+                <span class="file-name">'.basename($value).'</span>
+                <span class="badge bg-primary rounded-pill">'.showSize(filesize($value)).'</span>
+                </a></li>
+                ';
+            }
+        }
+    }
+?>
+</div>
+</ul>
+<input type="hidden" name="alt_dosya" id="selectedFilePath4">
+
+                    </td>
+                    <td>Klasörlerin içindeki tablolardan birinin içeriğini görüntülemek için burayı kullanın</td>
                 </tr>
                 <tr>
-                    <td style="text-align:right;"><input type="checkbox" name="yinede" id="yinede"></td>
-                    <td>Veritabanı adı aynı olmasada yinede karşılaştır (<u>aynı veritabanı ancak isimleri farklı ise bu seçeneği kullanın</u>)</td>
+                    <td style="text-align:right;"><input type="checkbox" name="yinede" id="yinede" value="1"></td>
+                    <td colspan="2">Veritabanı adı aynı olmasada yinede karşılaştır (<u>aynı veritabanı ancak isimleri farklı ise bu seçeneği kullanın</u>)</td>
                 </tr>
                 <tr id="karsilastir" style='display:none;'>
-                    <td colspan="2">
+                    <td colspan="3">
                             <div id="loading" style='text-align: center;'>
                                 <img src="images/ajax-loader.gif" alt="Yükleniyor..." />
                                 <br />Veritabanı Karşılaştırmaya Hazırlanıyor...
@@ -229,6 +379,124 @@ include('includes/sub_navbar.php');
             </body>                     
             </table>
         </form>
+
+
+
+<style>
+    .dropdown-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .dropdown-item .file-name {
+        flex: 1;
+    }
+    .dropdown-item .badge {
+        margin-left: 1rem;
+        white-space: nowrap;
+        font-size: 95%;
+    }
+    .dropdown-item .icon {
+        margin-right: 0.5rem;
+    }
+    .dropdown-toggle {
+        text-align: left;
+        width: 100%;
+    }
+    .dropdown-toggle::after {
+        margin-left: auto; /* Sağ tarafa hizalar */
+    }
+    .dosya_adi {
+        margin-left: 20px; /* Dosya adlarına girinti ekler */
+    }
+</style>
+
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+  $(document).ready(function() {
+    $('.dropdown-item').on('click', function(event) {
+        event.preventDefault();
+
+        const filePath = $(this).data('file-path');
+        const fileName = $(this).data('file-name');
+        const $dropdownMenu = $(this).closest('.dropdown-menu');
+        const $dropdownButton = $dropdownMenu.prev('.dropdown-toggle');
+        const $selectedFileName = $dropdownButton.find('#selectedFileName' + $dropdownButton.attr('id').slice(-1));
+        const $selectedFilePath = $('#selectedFilePath' + $dropdownButton.attr('id').slice(-1));
+
+        // Seçili dosya adını ve dosya yolunu güncelle
+        $selectedFileName.text(fileName);
+        $selectedFilePath.val(filePath);
+
+      // Buton rengini değiştir
+      $dropdownButton.removeClass('btn-secondary').addClass('btn-primary');
+
+      // Diğer dropdownları sıfırla, ancak dropdownMenuButton4 hariç
+      $('.dropdown-toggle').not($dropdownButton).not('#dropdownMenuButton1').each(function() {
+        const defaultText = $(this).attr('data-default-text');
+        $(this).find('span:first').text(defaultText);
+        const inputId = 'selectedFilePath' + $(this).attr('id').slice(-1);
+        $('#' + inputId).val('');
+
+        // Buton rengini sıfırla
+        $(this).removeClass('btn-primary').addClass('btn-secondary');
+      });
+
+
+if($("#selectedFilePath2").val()!=='' || $("#selectedFilePath3").val()!=='' || $("#selectedFilePath4").val()!==''){
+
+      var veritabani_id = $('#selectedFilePath1').val();
+
+    if(veritabani_id==="" && $("input[name='sadece']:checked").val()==1) {
+        $(function(){
+            jw("b olumsuz").baslik("Veritabanı Belirlemediniz!").icerik("Karşılaştıracağınız veritabanı seçmelisiniz").kilitle().en(400).boy(100).ac();
+        })
+        return false;
+    }
+
+    var str = 'grup=1';
+    var t = $('#f').serialize();
+    (t !='')? str += '&'+t :'';
+
+    if( $("input[name='sadece']:checked").val()==1){
+        $('#veritabanikarsilastir').empty();
+        $("#karsilastir").show();
+        $("#loading").show();    
+        xhr = $.ajax({
+        type: "POST",
+        url: "veritabanikarsilastir.php",
+        data: str,
+        success: function(veriler){
+        $("#loading").hide();
+        $("#veritabanikarsilastir").html(veriler);
+        }
+        });
+    } else if( $("input[name='sadece']:checked").val()==2){
+        $('#sql-listele').val("");
+        $("#sql-listeleme-aktif").show();
+        $("#sql-loading").show(); 
+        xhr = $.ajax({
+        type: "POST",
+        url: "sql_listele.php",
+        data: str,
+        success: function(sql){
+        $("#sql-loading").hide();
+        $("#sql-listele").show();
+        $("#sql-listele").val(sql);
+        }
+        });
+    }
+}
+    });
+    // Sabit butonun rengini ilk durumda ayarla
+    if ($('#selectedFilePath1').val()) {
+      $('#dropdownMenuButton1').removeClass('btn-secondary').addClass('btn-primary');
+    }
+  });
+
+</script>
 
                 </div><!-- / <div class="card-body p-0"> -->
             </div><!-- / <div class="card"> -->
@@ -280,7 +548,7 @@ include('includes/sub_navbar.php');
     </div>
 
     <span style="padding-left: 10px;">Sadece önizleme, düzenleme yok</span>
-    <code-input required id="sql-listele" class="line-numbers" style="width:101%;height:1000px;display:none-;" lang="sql" placeholder="Biraz SQL yazın!" template="code-input"></code-input>
+    <code-input required id="sql-listele" class="line-numbers" style="width:101%;height:1000px;display:none-;" lang="sql" placeholder="Yükleniyor Lütfen bekleyin...!" template="code-input"></code-input>
 
                 </div><!-- / <div class="card-body p-0"> -->
             </div><!-- / <div class="card"> -->
@@ -314,96 +582,109 @@ textarea {
 }
 </style>
 <script type="text/javascript">
+/*
 $( document ).ready(function() {
 
+// Klasör seçiliyorsa diğerlerini sıfırla
 $('#klasorsec').change(function(){
+    $('#sqlsec').prop('selectedIndex',0);
+    $('#alt_dosya').prop('selectedIndex',0);
+    $('#veritabanikarsilastir').html();
+});
+// Dosya seçiliyorsa diğerlerini sıfırla
+$('#sqlsec').change(function(){
+    $('#klasorsec').prop('selectedIndex',0);
+    $('#alt_dosya').prop('selectedIndex',0);
+    $('#veritabanikarsilastir').html();
+});
+// Alt dosya seçiliyorsa diğerlerini sıfırla
+$('#alt_dosya').change(function(){
+    $('#klasorsec').prop('selectedIndex',0);
     $('#sqlsec').prop('selectedIndex',0);
     $('#veritabanikarsilastir').html();
 });
-
-$('#sqlsec').change(function(){
-    $('#klasorsec').prop('selectedIndex',0);
-    $('#veritabanikarsilastir').html();
-});
-
+// Veritabanı ID seçiliyorsa diğerlerini sıfırla
 $('#ekle_veritabani_id').change(function(){
     $('#sqlsec').prop('selectedIndex',0);
     $('#klasorsec').prop('selectedIndex',0);
+    $('#alt_dosya').prop('selectedIndex',0);
     $('#veritabanikarsilastir').html();
 });
 
 
-$('#klasorsec, #sqlsec').change(function(){
+$('#klasorsec, #sqlsec, #alt_dosya').change(function(){
+
       var veritabani_id = $('select[name="veritabani_id"] option:selected').val();
 
-    if(veritabani_id=="0") {
+    if(veritabani_id=="0" && $("input[name='sadece']:checked").val()==1) {
         $(function(){
             jw("b olumsuz").baslik("Veritabanı Belirlemediniz!").icerik("Karşılaştıracağınız veritabanı seçmelisiniz").kilitle().en(400).boy(100).ac();
         })
         return false;
     }
 
-if($( "#sqlsec option:selected" ).val()!=='' || $( "#klasorsec option:selected" ).val()!==''){
+if($( "#sqlsec option:selected" ).val()!=='' || $( "#klasorsec option:selected" ).val()!=='' || $( "#alt_dosya option:selected" ).val()!==''){
 
     var str = 'grup=1';
     var t = $('#f').serialize();
     (t !='')? str += '&'+t :'';
-if( $("input:radio:checked").val()==1 ){
-    $('#veritabanikarsilastir').empty();
-    $("#karsilastir").show();
-    $("#loading").show();    
-    xhr = $.ajax({
-       type: "POST",
-       url: "veritabanikarsilastir.php",
-       data: str,
-       success: function(veriler){
-       $("#loading").hide();
-       $("#veritabanikarsilastir").html(veriler);
-       }
-      });
-    } else
-    if( $("input:radio:checked").val()==2 ){
+    if( $("input[name='sadece']:checked").val()==1 ){
+        $('#veritabanikarsilastir').empty();
+        $("#karsilastir").show();
+        $("#loading").show();    
+        xhr = $.ajax({
+        type: "POST",
+        url: "veritabanikarsilastir.php",
+        data: str,
+        success: function(veriler){
+        $("#loading").hide();
+        $("#veritabanikarsilastir").html(veriler);
+        }
+        });
+    } else if( $("input[name='sadece']:checked").val()==2 ){
         $('#sql-listele').val("");
         $("#sql-listeleme-aktif").show();
         $("#sql-loading").show(); 
-    xhr = $.ajax({
-       type: "POST",
-       url: "sql_listele.php",
-       data: str,
-       success: function(sql){
-       $("#sql-loading").hide();
-       $("#sql-listele").show();
-       $("#sql-listele").val(sql);
-       }
-      });
-    } // if($("input[name='sadece']:checked").val()==1)
+        xhr = $.ajax({
+        type: "POST",
+        url: "sql_listele.php",
+        data: str,
+        success: function(sql){
+        $("#sql-loading").hide();
+        $("#sql-listele").show();
+        $("#sql-listele").val(sql);
+        }
+        });
+    }
 
     }
+
    });
 });
-
+*/
+/*
 $("input[name='sadece']").click(function(){
     $('#sql-listele').val("");
     $("#sql-listele").hide();
     $("#sql-listeleme-aktif").hide();
-    $('#sqlsec,#klasorsec').prop('selectedIndex',0);
+    $('#sqlsec,#klasorsec,#alt_dosya').prop('selectedIndex',0);
     $('#veritabanikarsilastir').empty();
 });
 
 $('#yinede').on('change', function() {
-    $('#sqlsec,#klasorsec').prop('selectedIndex',0);
+    $('#sqlsec,#klasorsec,#alt_dosya').prop('selectedIndex',0);
     $('#veritabanikarsilastir').empty();
     $('#sql-listele').val("");
     $("#sql-listele").hide();
     $("#sql-listeleme-aktif").hide();
 });
 
-$('#sqlsec,#klasorsec .sadece').on('change', function() {
-    if($( "#sqlsec option:selected" ).val()!=='' && $( "#klasorsec option:selected" ).val()!==''){
+$('#sqlsec,#klasorsec,#alt_dosya .sadece').on('change', function() {
+    if($( "#sqlsec option:selected" ).val()!=='' && $( "#klasorsec option:selected" ).val()!=='' && $( "#alt_dosya option:selected" ).val()!==''){
         $('#veritabanikarsilastir').empty();
     }
     $('#sql-listele').val("");
     $("#sql-listele").hide();
 });
-
+*/
 </script>
