@@ -4,8 +4,6 @@ require_once __DIR__ . '/includes/connect.php';
 require_once __DIR__ . '/check-login.php';
 require_once __DIR__ . '/includes/turkcegunler.php';
 
-##########################################################################################################
-$dizin = BACKUPDIR;
 ###########################################################################################################################################
 function listDirectoriesAndFiles($dir) {
     $result = ['root_files' => []];
@@ -30,36 +28,9 @@ function listDirectoriesAndFiles($dir) {
     return $result;
 }
 
-$baseDir = BACKUPDIR;
-$directoriesAndFiles = listDirectoriesAndFiles($baseDir);
+$directoriesAndFiles = listDirectoriesAndFiles(BACKUPDIR);
 ###########################################################################################################################################
-    // Select option için Dizinleri listeliyoruz
-    $folder_arr = array();
-    $i = 0;
-    foreach (new DirectoryIterator(BACKUPDIR) AS $file) {
-        if ($file->isDir() && $file->getFilename() != '.' && $file->getFilename() != '..') {
-          $folder_arr['3-'.$file->getCTime().'-'.$i] = $file->getFilename();
 
-                $ii = 0;
-                foreach (new DirectoryIterator(BACKUPDIR."/".$file->getFilename()) AS $file) {
-                    if ($file->isDir() && $file->getFilename() != '.' && $file->getFilename() != '..') {
-
-                    }else{
-                        if(pathinfo($file->getFilename(), PATHINFO_EXTENSION) == 'gz'){
-
-                            $folder_arr['1-'.$file->getCTime().'-'.$ii] = $file->getFilename(); // 1 yerine 2 olursa gzip dosyalar üste olur
-                        }elseif(pathinfo($file->getFilename(), PATHINFO_EXTENSION) == 'sql'){
-
-                            $folder_arr['1-'.$file->getCTime().'-'.$ii] = $file->getFilename();
-                        }
-                    }
-                $ii++;
-                }
-
-        }
-    $i++;
-    }
-    krsort($folder_arr);
 ###########################################################################################################################################
     // Dizin içindeki dosya boyutunu hesaplama
     function dirSize($directory) {
@@ -72,27 +43,7 @@ $directoriesAndFiles = listDirectoriesAndFiles($baseDir);
         }
     }
 ###########################################################################################################################################
-    // Backup Dizin içindeki alt-dizinleri ve dosyaları listeliyoruz
-    $files_arr = array();
-    $i = 0;
-    foreach (new DirectoryIterator(BACKUPDIR) AS $file) {
 
-        if ($file->isDir() && $file->getFilename() != '.' && $file->getFilename() != '..') {
-
-        }elseif ($file->isFile() && $file->getFilename() != '.htaccess') {
-
-            if(pathinfo($file->getFilename(), PATHINFO_EXTENSION) == 'gz'){
-
-                $files_arr['1-'.$file->getCTime().'-'.$i] = $file->getFilename(); // 1 yerine 2 olursa gzip dosyalar üste olur
-            }elseif(pathinfo($file->getFilename(), PATHINFO_EXTENSION) == 'sql'){
-
-                $files_arr['1-'.$file->getCTime().'-'.$i] = $file->getFilename();
-            }
-            
-        }
-    $i++;
-    }
-    krsort($files_arr);
 ###########################################################################################################################################
     // Dosya boyutunu dönüştürme
     function showSize($size_in_bytes) {
@@ -404,7 +355,7 @@ foreach($directoriesAndFiles AS $key => $klasor_dosya_arr){
         width: 100%;
     }
     .dropdown-toggle::after {
-        margin-left: auto; /* Sağ tarafa hizalar */
+        margin-left: auto; /* Select ikonu sağ tarafa hizalar */
     }
     .dosya_adi {
         margin-left: 20px; /* Dosya adlarına girinti ekler */
