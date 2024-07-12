@@ -529,7 +529,7 @@ include('includes/sub_navbar.php');
                                 <b>Veritabanı yedeklerin bulunduğu dizin: </b><span id="yol"><?php echo strtolower(htmlpath(BACKUPDIR)); ?></span><br />
                                 <p><b>Web site zip yedeklerin bulunduğu dizin: </b><span id="yol"><?php echo strtolower(htmlpath(ZIPDIR)); ?></span></p>
 
-                                <p><strong>NOT:</strong> Eğer cPanel > Cron'dan bu "<u>/usr/local/bin/php /home/user/alan_adiniz.com/gorev.php >/dev/null 2>&1</u>" komutu ekleyip dakika başı çalışmasını ayarlarsanız web sitenizde belirleyeceğiniz tüm görevler tam zamanında çalışacaktır.</p>
+                                <p><strong>NOT:</strong> Eğer <b>Cron Job</b> alanına "<b>/usr/local/bin/php <?php echo $_SERVER['DOCUMENT_ROOT']; ?>/gorev.php</b>>/dev/null 2>&1" komutu ekleyip dakika başı çalışmasını ayarlarsanız web sitenizde belirleyeceğiniz tüm görevler tam zamanında çalışacaktır.</p>
                             </div>
                             </div>
                         </div><!-- / <div class="card"> -->
