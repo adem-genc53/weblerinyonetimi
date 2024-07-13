@@ -343,9 +343,4 @@ $(document).ready(function () {
     }
     });
 </script>
-<script type="text/javascript">
-    var xhr = new XMLHttpRequest();
-    xhr.open("POST", "gorev.php", true);
-    xhr.send();
-</script>
 <script src="https://www.google.com/recaptcha/api.js" async defer></script>
