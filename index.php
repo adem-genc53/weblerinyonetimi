@@ -84,8 +84,6 @@ include('includes/sub_navbar.php');
                                 <br />
                                 ----<strong>WEBSITE_ZIP_YEDEKLER</strong> (bu scriptin yedekleyeceği web site klasörlerin zip dosyaların depolanacağı klasörüdür)
                                 </p>
-                                <p>Bu scriptte yedekleme yolları &quot;<strong>../VERITABANI_YEDEKLERI</strong>&quot;, &quot;<strong>../WEBSITE_ZIP_YEDEKLER</strong>&quot; şeklinde belirlemeniz yeterli olacaktır.
-                                </p>
                                 <p>&nbsp;
                                 </p>
                                 <p><strong>ZAMANLANMIŞ GÖREVLERİN TAM ZAMANINDA NASIL ÇALIŞIR?</strong>
