@@ -263,7 +263,7 @@ function zipcikar(zipadi, dizinadi, dizinvarmi) {
         var anadizinbozuldumu = dizinyolu.match(yol);
         showResult(dizinyolu)
 
-        var englishAlphabetAndWhiteSpace = /[A-Za-z0-9-_/]/g;
+        var englishAlphabetAndWhiteSpace = /[.A-Za-z0-9-_/]/g;
         var key = String.fromCharCode(event.which);
             if (event.keyCode == 8 || event.keyCode == 37 || event.keyCode == 39 || englishAlphabetAndWhiteSpace.test(key)) {
                 return true;
