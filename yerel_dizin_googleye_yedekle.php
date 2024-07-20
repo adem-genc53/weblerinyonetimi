@@ -235,8 +235,9 @@ include('includes/footer.php');
         function ftp_dur(x) {
             if (x == 1) {
 
-                var pen = jw('d').baslik("Google Drive'a yedekleme").en(750).boy(550).kucultPasif().acEfekt(2, 1000).kapatEfekt(2, 1000).ac();
-                pen.icerikTD.spin(gif);
+                //var pen = jw('d').baslik("Google Drive'a yedekleme").en(750).boy(550).kucultPasif().acEfekt(2, 1000).kapatEfekt(2, 1000).ac();
+                //pen.icerikTD.spin(gif);
+                var bekleme = jw("b bekle").baslik("Google Drive'a yedekleniyor...").en(300).boy(10).kilitle().akilliKapatPasif().ac();
 
                 $.ajax({
                     type: "POST",
@@ -244,7 +245,9 @@ include('includes/footer.php');
                     data: { googla_yukle: 1, yerel_den_secilen_dosya: yerel_den_secilen_dosya, google_drive_dan_secilen_dosya_id: google_drive_dan_secilen_dosya_id, google_drive_dan_secilen_dosya_adini_goster: google_drive_dan_secilen_dosya_adini_goster },
                     success: function (msg) {
                         $(function () {
-                            pen.icerik(msg);
+                            //pen.icerik(msg);
+                            bekleme.kapat();
+                            var pen = jw('d').baslik('Google Drive\'a yedekleme Sonucu').icerik(msg).en(750).boy(550).kucultPasif().acEfekt(2, 1000).kapatEfekt(2, 1000).ac();
                         })
                     }
                 });

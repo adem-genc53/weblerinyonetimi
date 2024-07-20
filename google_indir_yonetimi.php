@@ -211,14 +211,15 @@ var gif =
 
         $(function()
             {
-            jw('b secim',ftp_dur).baslik("Google Drive'dan İndirmeyi Onayla").icerik("Google Drive'da seçilen yedek<br />Yerel bölümde seçilen alana<br />indirmek istediğinizden emin misiniz?").en(450).kilitle().ac();
+            jw('b secim',dur).baslik("Google Drive'dan İndirmeyi Onayla").icerik("Google Drive'da seçilen yedek<br />Yerel bölümde seçilen alana<br />indirmek istediğinizden emin misiniz?").en(450).kilitle().ac();
             })
               
-        function ftp_dur(x){
+        function dur(x){
             if(x==1){
 
-        var pen = jw('d').baslik('Google Drive Hesabından Yedekleri İndir').en(750).boy(550).kucultPasif().acEfekt(2, 1000).kapatEfekt(2, 1000).ac();
-        pen.icerikTD.spin(gif);
+        //var pen = jw('d').baslik('Google Drive Hesabından Yedekleri İndir').en(750).boy(550).kucultPasif().acEfekt(2, 1000).kapatEfekt(2, 1000).ac();
+        //pen.icerikTD.spin(gif);
+        var bekleme = jw("b bekle").baslik("Google Drive Hesabından Yedekler İndiriliyor...").en(300).boy(10).kilitle().akilliKapatPasif().ac();
 
             $.ajax({
                 type: "POST",
@@ -226,7 +227,8 @@ var gif =
                 data: { google_drive_dan_secilen_dosya_id: google_drive_dan_secilen_dosya_id, yerel_den_secilen_dosya: yerel_den_secilen_dosya, google_drive_dan_secilen_dosya_adini_goster: google_drive_dan_secilen_dosya_adini_goster },
                 success: function (msg) {
                 $(function () {
-                    pen.icerik(msg);
+                    bekleme.kapat();
+                    var pen = jw('d').baslik('Google Drive Hesabından Yedekleri İndirme Sonucu').icerik(msg).en(750).boy(550).kucultPasif().acEfekt(2, 1000).kapatEfekt(2, 1000).ac();
                 })
                 }
             });

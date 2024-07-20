@@ -195,14 +195,15 @@ var gif =
 
             $(function()
               {
-                jw('b secim',ftp_dur).baslik("FTP'den İndirmeyi Onayla").icerik("Uzak FTP'de seçilen yedek<br />Yerel bölümde seçilen alana<br />indirmek istediğinizden emin misiniz?").en(450).kilitle().ac();
+                jw('b secim',dur).baslik("FTP'den İndirmeyi Onayla").icerik("Uzak FTP'de seçilen yedek<br />Yerel bölümde seçilen alana<br />indirmek istediğinizden emin misiniz?").en(450).kilitle().ac();
               })
               
-    function ftp_dur(x){
+    function dur(x){
         if(x==1){
 
-        var pen = jw('d').baslik('Uzak FTP Hesabından Yedekleri İndir').en(750).boy(550).kucultPasif().acEfekt(2, 1000).kapatEfekt(2, 1000).ac();
-        pen.icerikTD.spin(gif);
+        //var pen = jw('d').baslik('Uzak FTP Hesabından Yedekleri İndir').en(750).boy(550).kucultPasif().acEfekt(2, 1000).kapatEfekt(2, 1000).ac();
+        //pen.icerikTD.spin(gif);
+        var bekleme = jw("b bekle").baslik("Uzak FTP Hesabından Yedekler İndiriliyor...").en(300).boy(10).kilitle().akilliKapatPasif().ac();
 
         $.ajax({
             type: "POST",
@@ -210,7 +211,9 @@ var gif =
             data: { ftp_den_secilen_dosya: ftp_den_secilen_dosya, yerel_den_secilen_dosya: yerel_den_secilen_dosya },
             success: function (msg) {
             $(function () {
-                pen.icerik(msg);
+                //pen.icerik(msg);
+                bekleme.kapat();
+                var pen = jw('d').baslik('Uzak FTP Hesabından Yedekleri İndirme Sonucu').icerik(msg).en(750).boy(550).kucultPasif().acEfekt(2, 1000).kapatEfekt(2, 1000).ac();
             })
             }
         });

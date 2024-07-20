@@ -1,48 +1,48 @@
 <?php 
 // Bismillahirrahmanirrahim
-/*
-* A "Reversible" password encryption routine by Sinan Eldem
-* www.sinaneldem.com.tr
-* V. 1.3
-* 24.02.2013 21:02
-*/
+
 class Hash {
 
-    protected $key;     
-    protected $method;   
-    protected $options; 
-    protected $iv;   
+    protected $key;       // Şifreleme anahtarı
+    protected $method;    // Şifreleme yöntemi
+    protected $options;   // Şifreleme seçenekleri
+    protected $iv;        // Başlangıç vektörü (Initialization Vector)
 
     public function __construct()
     {
-        $this->method  = "rc4-hmac-md5";
+        // Şifreleme yöntemi olarak AES-256-CBC kullanılıyor
+        $this->method  = "aes-256-cbc";
+        
+        // Şifreleme anahtarı
         $this->key     = '3h2cwpYJscKTGrbFiUveeWM3iMAdrzGf';
+        
+        // Şifreleme seçenekleri (bu örnekte 0 olarak ayarlanmış)
         $this->options = 0;
-        $this->iv      = "";
+        
+        // Başlangıç vektörü, anahtarın SHA-256 hash'inin ilk 16 karakteri kullanılarak oluşturuluyor
+        $this->iv      = substr(hash('sha256', $this->key), 0, 16);
 
-        /*
-        if(!function_exists('mcrypt_create_iv'))
-        {
-            exit('<strong>HASH Error:</strong> Sınıf çalışması için Mcrypt kütüphanesine ihtiyaç duyar.');
-        }       
-
-        if(version_compare(PHP_VERSION, '5.3.0') === -1)
-        {
-            exit('<strong>HASH Error:</strong> Sınıf en azından PHP 5.3.0\'a ihtiyaç duyuyor.');
+        // OpenSSL şifreleme fonksiyonlarının mevcut olup olmadığını kontrol et
+        if (!function_exists('openssl_encrypt')) {
+            exit('<strong>HASH Hatası:</strong> Sınıf çalışması için OpenSSL kütüphanesine ihtiyaç duyar.');
         }
-        */
     }
 
+    // Şifreleme fonksiyonu
     public function make($password, $key = FALSE)
     {
+        // Veriyi şifreleyip döndürüyor
         return trim(openssl_encrypt($password, $this->method, $this->key($key), $this->options, $this->iv));
     }
 
+    // Şifre çözme fonksiyonu
     public function take($protected, $key = FALSE)
     {
+        // Şifreli veriyi çözerek döndürüyor
         return trim(openssl_decrypt($protected, $this->method, $this->key($key), $this->options, $this->iv));
     }
 
+    // Anahtar fonksiyonu (Eğer anahtar uzunluğu 32 karakter değilse, varsayılan anahtarı kullan)
     public function key($key)
     {
         return strlen($key) == 32 ? $key : $this->key;

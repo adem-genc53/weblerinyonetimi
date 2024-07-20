@@ -27,8 +27,6 @@ include('includes/sub_navbar.php');
                 </div><!-- / <div class="container-fluid"> -->
             </div><!-- / <div class="content-header"> -->
 
-
-
     <!-- Bilgilendirme Satırı Başlangıcı -->
     <section class="content">
     <div class="container-fluid">
@@ -171,29 +169,7 @@ function renk(chkB){
 </script>
 
 <script>
-/*
-$(function(){
-    //$("#call").on("click", function(){
-        var makeJsonpCall = function(){
-            return $.ajax({
-                type: "POST",
-                url: "zipcikar.php", grup: "1", zipdosya: "../2023-08-29-11-22-44-album.muttafi.com.zip", dizinyolu: "-album.muttafi.com", 
-                dataType: "jsonp"
-            });
-        };
-        var handler = function(data){
-            if (data === "timeout") {
-                console.log("a timeout occured, forwarding your request");
-                makeJsonpCall().done(handler);
-                return;
-            }else{
-                console.log("request completed");
-            }
-        };
-        makeJsonpCall().done(handler);
-    //});
-});
-*/           
+          
 function zipcikar(zipadi, dizinadi, dizinvarmi) {
     
     $(document).ready(function () {
@@ -270,22 +246,9 @@ function zipcikar(zipadi, dizinadi, dizinvarmi) {
             }
             return false;
     });
-/*
-    $(document).on("keyup input", "#yenidizinyolu", function(event) {
-        var dizinyolu = document.getElementById('yenidizinyolu').value;
-        var yol = "<?php //echo ZIPDIR; ?>";
-        var anadizinbozuldumu = dizinyolu.match(yol);
-        showResult(dizinyolu)
-    });
-*/
+
 function showResult(str) {
-/*
-  if (str.length==0) {
-    document.getElementById("dizinvarmi").innerHTML="";
-    //document.getElementById("dizinvarmi").style.border="0px";
-    return;
-  }
-*/
+
   var xmlhttp=new XMLHttpRequest();
   xmlhttp.onreadystatechange=function() {
     if (this.readyState==4 && this.status==200) {
