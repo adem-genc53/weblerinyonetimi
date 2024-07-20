@@ -3,15 +3,13 @@
 require_once __DIR__ . '/includes/connect.php';
 require_once __DIR__ . '/check-login.php';
 require_once __DIR__ . '/includes/turkcegunler.php';
-require_once(__DIR__ . '/hash.php');
+require_once __DIR__ . '/hash.php';
 $hash = new Hash;
 ##########################################################################################################
     // Kayıtlı veri tabanı listeleme için
     $stmt = $PDOdb->prepare("SELECT * FROM veritabanlari");
     $stmt->execute();
     //echo '<pre>' . print_r($_POST, true) . '</pre>';
-    //require 'hash.php';
-    //$hash = new Hash;
 ##########################################################################################################
 $errors = [];
     // Veritabanı bilgileri silmek

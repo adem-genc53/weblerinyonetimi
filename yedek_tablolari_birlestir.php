@@ -1,4 +1,4 @@
-<?php 
+<?php
 // Bismillahirrahmanirrahim
 require_once __DIR__ . '/includes/connect.php';
 require_once __DIR__ . '/check-login.php';
@@ -14,16 +14,18 @@ set_time_limit(0);
      //exit;
 ################################################################################
 
-    if(isset($_POST['alt_dosya']) && is_file($_POST['alt_dosya'])){
-        $path = $_POST['alt_dosya'];
-    }elseif(isset($_POST['klasorsec']) && is_dir($_POST['klasorsec'])){
-        $path = $_POST['klasorsec'];
-    }else{
-        $path = isset($_POST['sqlsec']) ? $_POST['sqlsec'] : '';
-    }
+// İşlenecek dosya veya dizin yolu ve kaydet parametresi
 
-// Fonksiyon: Dosya içeriğini oku ve ekrana yazdır
-function readAndPrintFile($filePath, $isLastFile) {
+$path = BACKUPDIR.'/'.$_POST['folder'] ?? '';
+$save = true;
+
+// Hedef dosya adı ve yolu (birleştirilecek SQL dosyası için)
+$outputFileName = 'BIRLESTIRILDI-'.$_POST['folder'].'.sql';
+
+$outputFilePath = BACKUPDIR.'/'.$outputFileName;
+
+// Fonksiyon: Dosya içeriğini oku ve birleştir
+function getFileContent($filePath) {
     if (preg_match('/\.sql\.gz$/i', $filePath)) {
         // .sql.gz dosyasını aç ve içeriğini oku
         $fileContent = gzfile($filePath);
@@ -32,19 +34,9 @@ function readAndPrintFile($filePath, $isLastFile) {
         // .sql dosyasını aç ve içeriğini oku
         $fileContent = file_get_contents($filePath);
     }
-
-    // İçeriği ekrana yazdır
-    echo $fileContent;
-
-    // Son tablo değilse ayrıcı satırları ekle
-    if (!$isLastFile) {
-        echo "\n/************************************************************************************/\n";
-        echo "/*************************** SONRAKİ TABLONUN BAŞLANGICI ****************************/\n";
-        echo "/************************************************************************************/\n";
-    }
+    return $fileContent;
 }
 
-// Belirtilen yol bir dizin mi?
 if (is_dir($path)) {
     // Dizin içindeki tüm dosyaları al
     $files = array_diff(scandir($path), array('..', '.'));
@@ -54,18 +46,22 @@ if (is_dir($path)) {
         return preg_match('/\.sql(\.gz)?$/i', $file) && is_file($path . DIRECTORY_SEPARATOR . $file);
     });
 
-    $totalFiles = count($sqlFiles);
-    $currentFileIndex = 0;
-
+    $mergedContent = '';
     foreach ($sqlFiles as $file) {
-        $currentFileIndex++;
         $filePath = $path . DIRECTORY_SEPARATOR . $file;
-        $isLastFile = ($currentFileIndex === $totalFiles);
-        readAndPrintFile($filePath, $isLastFile);
+        $mergedContent .= getFileContent($filePath) . "\n";
     }
-} elseif (is_file($path)) {
-    // Belirtilen yol tek bir dosya ise
-    readAndPrintFile($path, true);
+
+    if ($save) {
+        // Birleştirilmiş içeriği UTF-8 olarak encode et ve dosyaya kaydet
+        $mergedContent = mb_convert_encoding($mergedContent, 'UTF-8', 'auto');
+        file_put_contents($outputFilePath, $mergedContent);
+        echo "Dosya başarıyla birleştirilerek kaydedildi: $outputFileName";
+    } else {
+        // İçeriği ekrana yazdır
+        //echo $mergedContent;
+    }
+
 } else {
     echo "Belirtilen yol geçerli bir dosya veya dizin değil.";
 }

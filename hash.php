@@ -14,7 +14,7 @@ class Hash {
         $this->method  = "aes-256-cbc";
         
         // Şifreleme anahtarı
-        $this->key     = '3h2cwpYJscKTGrbFiUveeWM3iMAdrzGf';
+        $this->key     = 'C2jNZ2--#xZ3bFa!LQ8E&OGzM&m*%z-1';
         
         // Şifreleme seçenekleri (bu örnekte 0 olarak ayarlanmış)
         $this->options = 0;

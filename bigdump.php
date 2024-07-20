@@ -91,7 +91,6 @@ if(isset($_POST['veritabani_id']) && $_POST['veritabani_id'] > 0 || isset($_SESS
     $default->execute([$veritabani_id]);
     $varsayilan = $default->fetch(PDO::FETCH_ASSOC);
 
-    
 
     // Seçilen veritabanı varsa bağlantı oluşturuyoruz
     $secilen = "mysql:host=".$varsayilan['database_host'].";dbname=".$varsayilan['db_name'].";charset=".CHARSET.";port=".PORT."";
@@ -104,6 +103,7 @@ if(isset($_POST['veritabani_id']) && $_POST['veritabani_id'] > 0 || isset($_SESS
     }
     $db_yok = true;
     $db_name = $varsayilan['db_name'];
+
 }else{
     $PDOdbsecilen = $PDOdb;
     $db_name = DB_NAME;
@@ -438,6 +438,11 @@ div tt {
               </select>
             </td>
             <td>Eğer veri tabnının tümünü geri yüklemek yerine belirli tabloları ayrı ayrı geri yüklemek istiyorsanız burada bir klasör seçin</td>
+        </tr>
+        <tr>
+          <td>Seçili dizindeki tabloları birleştir</td>
+          <td><button type="button" id="merge" class="btn btn-success btn-sm" title="Seçili Dizindeki Tabloları Birleştir"><i class='fas fa-object-ungroup'></i> Seçili Dizindeki Tabloları Birleştir </button></td>
+          <td>Eğer Al-Dizindeki tüm tabloları geri yüklemek istiyorsunuz ancak tek tek tabloları yüklemek yerine önce birleştir sonra birleştirilen dosyayı geri yükle</td>
         </tr>
 <?php } ?>
 
@@ -1478,6 +1483,27 @@ function create_ajax_script()
           }
     }
     return false;
-    }); 
+    });
+
+$('#merge').click(function( e ){
+  var folder = $('select[name="folder"] option:selected').val();
+      if(!folder) {
+        $(function(){
+            jw("b olumsuz").baslik("Önce Alt-Dizin Seçiniz!").icerik("Birleştirmek istediğiniz bir Alt-Dizin seçmelisiniz").kilitle().en(400).boy(100).ac();
+        })
+        return false;
+    }
+var bekleme = jw("b bekle").baslik("Veri Tabanı Birleştiriliyor...").en(350).boy(10).kilitle().akilliKapatPasif().ac();
+    $.ajax({
+        type:'POST',
+        url: "yedek_tablolari_birlestir.php",
+        data: { folder : folder},
+        success: function(msg){
+                bekleme.kapat();
+                jw("b olumlu").baslik("Veri Tabanı Birleştirme Sonucu").icerik(msg).en(450).boy(10).kilitle().akilliKapatPasif().kapaninca(function(){ window.location.href=window.location.href; <?php unset($_SESSION['folder']) ?> }).ac();     
+        }
+    });
+
+});
 </script>
 
