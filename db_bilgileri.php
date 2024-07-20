@@ -183,8 +183,8 @@ include('includes/sub_navbar.php');
                     </div><!-- / <div class="row mb-2"> -->
                 </div><!-- / <div class="container-fluid"> -->
             </div><!-- / <div class="content-header"> -->
-
 <?php 
+
             if($_SERVER['REQUEST_METHOD'] == 'POST'){
                 //echo '<pre>' . print_r($_POST, true) . '</pre>';
             }
@@ -207,7 +207,6 @@ include('includes/sub_navbar.php');
                     echo "</div>";
             }
 ?>
-
     <!-- Bilgilendirme Satırı Başlangıcı -->
     <section class="content">
     <div class="container-fluid">
