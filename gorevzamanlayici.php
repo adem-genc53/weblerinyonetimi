@@ -419,7 +419,22 @@ include("cron_zamanlayici.php");
 ###########################################################################################################################
 
     $web_dizinler = [];
-    $dizinler_arr = json_decode($genel_ayarlar['haric_dizinler'], true);
+
+    $haric_dizinler_json = $genel_ayarlar['haric_dizinler'];
+
+    // JSON verisi null veya boş mu kontrol edin
+    if (is_null($haric_dizinler_json) || $haric_dizinler_json === '') {
+        $dizinler_arr = []; // Boş dizi olarak ayarlayın
+    } else {
+        // JSON verisini decode edin
+        $dizinler_arr = json_decode($haric_dizinler_json, true);
+        
+        // Decode işlemi başarısız olduysa boş dizi olarak ayarlayın
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            $dizinler_arr = [];
+        }
+    }
+
     $total_size = 0;
     $total_files = 0;
     $dizinler_dizi = array_filter(glob(DIZINDIR.'*'), 'is_dir');

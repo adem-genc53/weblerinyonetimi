@@ -579,7 +579,22 @@ include('includes/sub_navbar.php');
                             <tr>
                                 <td colspan="5" style="min-width: 200px;">
                                 <?php 
-                                    $gizli_dizinler = json_decode($genel_ayarlar['haric_dizinler'], true);
+
+                                    $haric_dizinler_json = $genel_ayarlar['haric_dizinler'];
+
+                                    // JSON verisi null veya boş mu kontrol edin
+                                    if (is_null($haric_dizinler_json) || $haric_dizinler_json === '') {
+                                        $gizli_dizinler = []; // Boş dizi olarak ayarlayın
+                                    } else {
+                                        // JSON verisini decode edin
+                                        $gizli_dizinler = json_decode($haric_dizinler_json, true);
+                                        
+                                        // Decode işlemi başarısız olduysa boş dizi olarak ayarlayın
+                                        if (json_last_error() !== JSON_ERROR_NONE) {
+                                            $gizli_dizinler = [];
+                                        }
+                                    }
+
                                     foreach($dizin_array AS $dizin){
                                         if(in_array($dizin, $gizli_dizinler)){
                                             //echo "<input type='checkbox' name='dizinler[]' value='{$dizin}' checked> {$dizin}\n<br />";

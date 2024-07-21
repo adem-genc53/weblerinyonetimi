@@ -3,20 +3,20 @@
 -- WebSiteler Yönetimi Script Versiyonu: 2.0.1
 
 -- Anamakine: webyonetimi
--- Yedekleme Zamanı: 2024-07-01 12:09:42
--- MySQL Sunucu Sürümü: 8.1.0
--- PHP Sürümü: 8.1.25
+-- Yedekleme Zamanı: 2024-07-21 20:27:36
+-- MySQL Sunucu Sürümü: 8.3.0
+-- PHP Sürümü: 8.1.28
 -- Karakter Seti: utf8mb4
 
--- Veritabanı: `webyonetimi`
+-- Veritabanı: `github_webyonetimi`
 -- Tablolar:
 -- - dovizkuru: 3 kayıt
 -- - genel_ayarlar: 1 kayıt
--- - user_logins: 0 kayıt
+-- - user_logins: 10 kayıt
 -- - uyeler: 1 kayıt
 -- - veritabanlari: 0 kayıt
 -- - zamanlanmisgorev: 1 kayıt
--- - zamanlanmisgorev_gunluk: 0 kayıt
+-- - zamanlanmisgorev_gunluk: 1 kayıt
 
 
 SET SQL_MODE = 'NO_AUTO_VALUE_ON_ZERO';
@@ -76,7 +76,8 @@ CREATE TABLE IF NOT EXISTS `genel_ayarlar` (
 -- ------------------------------------------------------
 -- Tablonun veri dökümü `genel_ayarlar`
 -- ------------------------------------------------------
-INSERT INTO `genel_ayarlar` VALUES(1, 'Europe/Istanbul', '[\"webyonetimi\"]', 'utf8mb4', 'ftp.domainadiniz.com', 21, 'ftpdeneme@domainadiniz.com', 'xxxxxxxxxx', '/', 1, 2);
+INSERT INTO `genel_ayarlar` VALUES(1, 'Europe/Istanbul', NULL, 'utf8mb4', NULL, 21, NULL, NULL, '/', 1, 1);
+
 
 -- ------------------------------------------------------
 -- Tablo için tablo yapısı `user_logins`
@@ -86,15 +87,10 @@ CREATE TABLE IF NOT EXISTS `user_logins` (
   `id` int NOT NULL AUTO_INCREMENT,
   `user_id` int NOT NULL,
   `login_time` bigint NOT NULL,
-  `log_in_from` varchar(16) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `log_in_from` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `user_id` (`user_id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- ------------------------------------------------------
--- Tablonun veri dökümü `user_logins`
--- ------------------------------------------------------
-
 
 
 -- ------------------------------------------------------
@@ -107,8 +103,8 @@ CREATE TABLE IF NOT EXISTS `uyeler` (
   `user_password_hash` char(60) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `user_email` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `user_group` int NOT NULL,
-  `remember_me_token` varchar(64) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `token_expiry` bigint DEFAULT NULL,
+  `remember_me_token` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `token_expiry` datetime DEFAULT NULL,
   PRIMARY KEY (`user_id`),
   UNIQUE KEY `user_name` (`user_name`),
   UNIQUE KEY `email_user` (`user_email`)
@@ -117,7 +113,7 @@ CREATE TABLE IF NOT EXISTS `uyeler` (
 -- ------------------------------------------------------
 -- Tablonun veri dökümü `uyeler`
 -- ------------------------------------------------------
-INSERT INTO `uyeler` VALUES(1, 'Adem GENÇ', '$2y$10$E4K/b8wcmEoSSZoFgUgiKeXmk6Sw3MITiOlC7qCzcMJhPvBerQ226', 'admin@gmail.com', 1, null, 0);
+INSERT INTO `uyeler` VALUES(1, 'Adem GENÇ', '$2y$10$uY/PW6S17AXp0s/xvu73qusf52qkOUrdueLkXvqjHdXXYhhaZuhgi', 'admin@gmail.com', 1, '92f1da530840599237728ea5df547f39bc8f5946865817d6f28743d868e3879f', '0000-00-00 00:00:00');
 
 
 -- ------------------------------------------------------
@@ -129,8 +125,8 @@ CREATE TABLE IF NOT EXISTS `veritabanlari` (
   `website_name` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `database_host` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `db_name` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `database_user` varchar(344) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `database_password` varchar(344) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `database_user` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `database_password` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `selected` int NOT NULL DEFAULT '0',
   `islem` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `islemi_yapan` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
@@ -189,18 +185,19 @@ INSERT INTO `zamanlanmisgorev` VALUES(1, 'deneme', 'test_gorev.php', 1718799060,
 DROP TABLE IF EXISTS `zamanlanmisgorev_gunluk`;
 CREATE TABLE IF NOT EXISTS `zamanlanmisgorev_gunluk` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `calistirma_ciktisi` varchar(500) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `gorev_adi` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
-  `calistirilan_dosya` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `calistirma_ciktisi` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `gorev_adi` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `calistirilan_dosya` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `calisma_zamani` int DEFAULT NULL,
-  `calisma_suresi` varchar(20) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `calisma_suresi` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `veritabani_yedekle` int NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- ------------------------------------------------------
 -- Tablonun veri dökümü `zamanlanmisgorev_gunluk`
 -- ------------------------------------------------------
+INSERT INTO `zamanlanmisgorev_gunluk` VALUES(1, 'USD den TL Güncellendi<br>EURO dan TL Güncellendi<br>EURO dan USD Güncellendi<br>', 'deneme', 'test_gorev.php', 1714813687, '00:00:00:00006', 0);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

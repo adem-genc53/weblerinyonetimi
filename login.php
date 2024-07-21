@@ -2,13 +2,14 @@
 require_once('./includes/connect.php');
 
 class SecureLogin {
+    private $errors = [];
     private $PDOdb;
     private $user_email;
     private $password;
     private $remember_me;
     private $csrf_token;
 
-    public function __construct(PDO $PDOdb, ) {
+    public function __construct(PDO $PDOdb) {
         $this->PDOdb = $PDOdb;
 
         // Oturumu başlat
@@ -29,20 +30,20 @@ session_name(str_replace('.','_',$serverName)); // Bu oturum name oturum_guncell
             session_regenerate_id(true);
         }
 
-        // Oturum çalıntısı için CSRF koruması sağla
+        // Oturum tokeni başlat
         $this->setCSRFToken();
     }
 
     public function login(string $user_email, string $password, string $csrf_token, $remember_me = null): bool {
 
         if(empty($user_email)){
-            $this->errors[] = "E-Posta alanı Zorunludur";
+            $this->addError("E-Posta alanı Zorunludur");
             return false;
         }else if(!filter_var($user_email, FILTER_VALIDATE_EMAIL)){
-            $this->errors[] = "E-Posta geçersiz";
+            $this->addError("E-Posta geçersiz");
             return false;
         }else if(empty($password)){
-            $this->errors[] = "Şifre alanı Zorunludur";
+            $this->addError("Şifre alanı Zorunludur");
             return false;
         }
 
@@ -55,11 +56,12 @@ session_name(str_replace('.','_',$serverName)); // Bu oturum name oturum_guncell
             $result->execute(array($user_email));
             $count = $result->rowCount();
             $res = $result->fetch(PDO::FETCH_ASSOC);
+
             if($count == 1){
                 // Girilen şifre ile veritabanındaki şifreyi karşılaştır
                 if(password_verify($password, $res['user_password_hash'])){
 
-                        session_destroy();
+                        //session_destroy();
 
                         $_SESSION['user_is_logged_in']          = true;
                         $_SESSION['user_id']                    = $res['user_id'];
@@ -116,10 +118,10 @@ session_name(str_replace('.','_',$serverName)); // Bu oturum name oturum_guncell
                     }
         return true;
                 }else{
-                    $this->errors[] = "E-posta veya Şifre Hatalı";
+                    $this->addError("E-posta veya Şifre Hatalı");
                 }
             }else{
-                $this->errors[] = "E-posta veya Şifre Hatalı";
+                $this->addError("E-posta veya Şifre Hatalı");
             }
     return false;
     }
@@ -145,49 +147,59 @@ session_name(str_replace('.','_',$serverName)); // Bu oturum name oturum_guncell
         return isset($_SESSION['user_id']);
     }
 
+    // Session da Token mevcut değil ise oluştur
     private function setCSRFToken(): void {
         if (!isset($_SESSION['csrf_token'])) {
             $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
         }
     }
 
+    // Tokeni ver
     public function getCSRFToken(): string {
         return $_SESSION['csrf_token'];
     }
 
+    // Tokeni doğrula, doğru değil ise hata mesajı döndür
     public function validateCSRFToken(string $token): bool {
-        return hash_equals($_SESSION['csrf_token'], $token);
+        if (!hash_equals($_SESSION['csrf_token'], $token)) {
+            $this->addError("Geçersiz CSRF token.");
+            return false;
+        }
+        return true;
     }
 
+    // Hata mesajı ekle
+    private function addError(string $error): void {
+        $this->errors[] = $error;
+    }
+
+    // Hata mesajı ver
     public function getErrors(): array {
         return $this->errors;
     }
 
 }
 
+##########################################################################################################
+
+##########################################################################################################
+
     // Sınıf örneğini oluştur
     $secureLogin = new SecureLogin($PDOdb);
 
     // Oturum kontrolü yap
     if ($secureLogin->isLoggedIn()) {
-                // Kullanıcı oturumda değilse, giriş sayfasına yönlendir
-                //header('Location: login.php');
-                //exit();
-        // Kullanıcı girişi başarılı ise son sayfasına yönlendir
-        if(isset($_GET['last']) && !empty($_GET['last'])){
-            header("location: ".$_GET['last']." ");
-        }else{
-            header("location: /");
-        }
-    }elseif (isset($_COOKIE['beni_hatirla'])) {
-        require_once("check-login.php");
-        if(isset($_GET['last']) && !empty($_GET['last'])){
-            header("location: ".$_GET['last']." ");
-        }else{
-            header("location: /");
-        }
-    }
+        // Kullanıcı oturumu geçerli
+        $lastlink = isset($_GET['last']) ? htmlspecialchars($_GET['last']) : $_SERVER['REQUEST_URI'];
+        header("Location: " . $lastlink);
+        exit;
 
+    }elseif (isset($_COOKIE['beni_hatirla'])) {
+        // Çerezi kontrol et ve login işlemi için yönlendir
+        $lastlink = isset($_GET['last']) ? htmlspecialchars($_GET['last']) : $_SERVER['REQUEST_URI'];
+        header("Location: check-login.php?last=" . $lastlink);
+        exit;
+    }
 
 // Kullanıcı girişini kontrol etmek için
 $errors = [];
@@ -226,14 +238,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // Kullanıcı giriş işlemini gerçekleştir
         if ($secureLogin->login($user_email, $password, $csrf_token, $remember_me)) {
-            //echo "Giriş başarılı!";
-            $errors[] = 'Giriş başarılı!';
-            // Kullanıcı girişi başarılı ise son sayfasına yönlendir
-            if(isset($_GET['last']) && !empty($_GET['last'])){
-                header("location: ".$_GET['last']." ");
-            }else{
-                header("location: /");
-            }
+
+            $lastlink = isset($_GET['last']) ? htmlspecialchars($_GET['last']) : $_SERVER['REQUEST_URI'];
+            header("Location: " . $lastlink);
+            exit;
+    
         } else {
             // Hata mesajlarını almak için:
             $errors = $secureLogin->getErrors();
@@ -245,6 +254,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 ##########################################################################################################
 
 ##########################################################################################################
+
 include('includes/header.php');
 ?>
 <div class="hold-transition login-page">
@@ -262,7 +272,7 @@ include('includes/header.php');
                 echo "</div>";
             }
         ?>
-    <form role="form" method="post">
+    <form role="form" action="<?php echo $_SERVER['REQUEST_URI']; ?>" method="post">
         <input type="hidden" name="csrf_token" value="<?php //echo $token; ?>">
         <div class="input-group mb-3">
         <input class="form-control" placeholder="E-POSTA ADRESİ" name="user_email" type="email" autofocus value="<?php if(isset($_POST['user_email'])){ echo $_POST['user_email']; } ?>" required />
@@ -286,7 +296,7 @@ include('includes/header.php');
         </div>
 
         <div class="input-group mb-3">
-        <div class="g-recaptcha" data-sitekey="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"></div>
+        <div class="g-recaptcha" data-sitekey="6Le6jL0UAAAAAGd8kRl9RSkMl82ERek090TOODEG"></div>
         </div>
 
         <div class="row">
@@ -319,18 +329,14 @@ include('includes/header.php');
 <!-- /.login-box -->
 </div></div>
 
-
 <script>
 $(document).ready(function () {        
     var width = $('.g-recaptcha').parent().width();
-    //console.log(width);
-    //if (width < 322) {
         var scale = width / 302;
         $('.g-recaptcha').css('transform', 'scale(' + scale + ')');
         $('.g-recaptcha').css('-webkit-transform', 'scale(' + scale + ')');
         $('.g-recaptcha').css('transform-origin', '0 0');
         $('.g-recaptcha').css('-webkit-transform-origin', '0 0');
-    //}
 });
 
     $(".toggle-password").click(function() {
