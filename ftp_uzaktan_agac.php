@@ -27,9 +27,10 @@ class FtpTreeView {
     private $dir; // Resource or false
 
     function __construct(string $tiklanan_path, $genel_ayarlar, $hash) {
-        $this->ftpsunucu    = $genel_ayarlar['sunucu'];
-        $this->ftpusername  = $hash->take($genel_ayarlar['username']);
-        $this->ftppass      = $hash->take($genel_ayarlar['password']);
+
+        $this->ftpsunucu    = $genel_ayarlar['sunucu'] ?? '';
+        $this->ftpusername  = !empty($genel_ayarlar['username']) ? $hash->take($genel_ayarlar['username']) : '';
+        $this->ftppass      = !empty($genel_ayarlar['password']) ? $hash->take($genel_ayarlar['password']) : '';
         $this->ftppath      = $genel_ayarlar['path'];
         $this->ftp_path     = $tiklanan_path;
 

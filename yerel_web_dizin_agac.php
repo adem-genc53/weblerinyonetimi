@@ -12,8 +12,21 @@ class LocaleTreeView {
     private mixed $dir;
 
     public function __construct(string $path, mixed $genel_ayarlar) {
-        // Hariç tutulacak dizin isimleri
-        $dizinler_arr = json_decode($genel_ayarlar['haric_dizinler'], true);
+
+    $haric_dizinler_json = $genel_ayarlar['haric_dizinler'];
+
+    // JSON verisi null veya boş mu kontrol edin
+    if (is_null($haric_dizinler_json) || $haric_dizinler_json === '') {
+        $dizinler_arr = []; // Boş dizi olarak ayarlayın
+    } else {
+        // JSON verisini decode edin
+        $dizinler_arr = json_decode($haric_dizinler_json, true);
+        
+        // Decode işlemi başarısız olduysa boş dizi olarak ayarlayın
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            $dizinler_arr = [];
+        }
+    }
 
         if (file_exists($path)) {
             $this->folder = rtrim($path, '/') . '/';

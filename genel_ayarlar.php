@@ -594,7 +594,6 @@ include('includes/sub_navbar.php');
                                             $gizli_dizinler = [];
                                         }
                                     }
-
                                     foreach($dizin_array AS $dizin){
                                         if(in_array($dizin, $gizli_dizinler)){
                                             //echo "<input type='checkbox' name='dizinler[]' value='{$dizin}' checked> {$dizin}\n<br />";

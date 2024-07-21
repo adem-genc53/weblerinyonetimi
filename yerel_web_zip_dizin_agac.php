@@ -4,113 +4,6 @@ require_once __DIR__ . '/includes/connect.php';
 require_once __DIR__ . '/check-login.php';
 require_once __DIR__ . '/includes/turkcegunler.php';
 
-/*
- Folder Tree with PHP and jQuery.
-
- R. Savoul Pelister
- http://techlister.com
-
-*/
-/*
-class treeview {
-
-	private $files = []; 
-	private $folder; 
-	
-	
-	function __construct( $path, $genel_ayarlar ) {
-		if(empty($path)){
-			$yol = DIZINDIR; 
-		}else{
-			$yol = $path;
-		}
-
-
-  $dizinler_arr = json_decode($genel_ayarlar['haric_dizinler'], true);
-
-		if( file_exists( $path)) {
-			if( $path[ strlen( $path ) - 1 ] ==  '/' ){
-				$this->folder = $path;
-			}else{
-				$this->folder = $path . '/';
-			}
-
-			$this->dir = opendir( $this->folder );
-			while(( $file = readdir( $this->dir ) ) != false ){
-				if(!in_array(basename($file), $dizinler_arr) && is_dir( $this->folder . $file ) && substr($file, 0, 1) != '.' && substr($file, 0, 2) != '..' ){
-					$this->files[] = $file;
-				}else if(is_file( $this->folder . $file ) && substr($file, 0, 1) != '.' && substr($file, 0, 2) != '..' ){
-					$this->files[] = $file;
-				}
-			}
-			closedir( $this->dir );
-		}
-
-	}
-
-
-
-	function create_tree( ) {
-
-    function showSize($size_in_bytes) {
-        if ($size_in_bytes >= 1073741824) {
-            $size_in_bytes = number_format($size_in_bytes / 1073741824, 2) . ' GB';
-        } elseif ($size_in_bytes >= 1048576) {
-            $size_in_bytes = number_format($size_in_bytes / 1048576, 2) . ' MB';
-        } elseif ($size_in_bytes >= 1024) {
-            $size_in_bytes = number_format($size_in_bytes / 1024, 2) . ' KB';
-        } elseif ($size_in_bytes > 1) {
-            $size_in_bytes = $size_in_bytes . ' Bayt';
-        } elseif ($size_in_bytes == 1) {
-            $size_in_bytes = $size_in_bytes . ' Bayt';
-        } else {
-            $size_in_bytes = '0 Bayt';
-        }
-        return $size_in_bytes;
-    }
-
-	// Dizin boşmu dolumu kontrol fonksiyonu
-	function is_dir_empty($dir) {
-		foreach (new DirectoryIterator($dir) as $fileInfo) {
-			if($fileInfo->isDot()) continue;
-			return false;
-		}
-	    return true;
-	}
-
-		if( count( $this->files ) > 0 ) {
-			natcasesort( $this->files );
-			$list = '<ul id="yerel" class="filetree" style="display: none;">';
-			// Önce klasörleri gruplandıralım
-			foreach( $this->files as $file ) {
-				if( file_exists( $this->folder . $file ) && $file != '..' && is_dir( $this->folder . $file )) {
-					if(is_dir_empty($this->folder . $file)){ // Dizin boşmu değilmi
-						$list .= '<li class="folder yerel_collapsed"><a href="#" rel="' . htmlentities( $this->folder . $file ) . '/" adi="' . htmlentities( $file ) . '">' . htmlentities( $file ) . '<span style="float: right;color: black;padding-right: 10px;">'.showSize(filesize($this->folder . $file)).'</span></a></li>';
-					}else{
-						$list .= '<li class="folder_plus yerel_collapsed"><a href="#" rel="' . htmlentities( $this->folder . $file ) . '/" adi="' . htmlentities( $file ) . '">' . htmlentities( $file ) . '<span style="float: right;color: black;padding-right: 10px;">'.showSize(filesize($this->folder . $file)).'</span></a></li>';
-					}
-					
-				}
-			}
-
-			// Sonra tüm dosyaları gruplandıralım
-			foreach( $this->files as $file ) {
-				if( file_exists( $this->folder . $file ) && $file != '.' && $file != '..' && !is_dir( $this->folder . $file )) {
-					$ext = preg_replace('/^.*\./', '', $file);
-					$list .= '<li class="file ext_' . $ext . '"><a href="#" rel="' . htmlentities( $this->folder . $file ) . '" adi="' . htmlentities( $file ) . '">' . htmlentities( $file ) . '<span style="float: right;color: black;padding-right: 10px;">'.showSize(filesize($this->folder . $file)).'</span></a></li>';
-				}
-			}
-
-			$list .= '</ul>';	
-			return $list;
-		}
-	}
-}
-
-$path = urldecode( $_REQUEST['dir'] );
-$tree = new treeview( $path, $genel_ayarlar );
-echo $tree->create_tree();
-*/
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -124,8 +17,20 @@ class TreeView {
 
     function __construct(string $path, $genel_ayarlar) {
 
-	// Hariç tutulacak dizin isimleri
-  	$dizinler_arr = json_decode($genel_ayarlar['haric_dizinler'], true);
+    $haric_dizinler_json = $genel_ayarlar['haric_dizinler'];
+
+    // JSON verisi null veya boş mu kontrol edin
+    if (is_null($haric_dizinler_json) || $haric_dizinler_json === '') {
+        $dizinler_arr = []; // Boş dizi olarak ayarlayın
+    } else {
+        // JSON verisini decode edin
+        $dizinler_arr = json_decode($haric_dizinler_json, true);
+        
+        // Decode işlemi başarısız olduysa boş dizi olarak ayarlayın
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            $dizinler_arr = [];
+        }
+    }
 
         if (file_exists($path)) {
             $this->folder = rtrim($path, '/') . '/';

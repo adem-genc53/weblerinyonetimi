@@ -13,9 +13,9 @@ set_time_limit(3600); //7200 saniye 120 dakikadır, 3600 1 saat
 
 if($_SERVER['REQUEST_METHOD'] == 'POST'){
 echo "<div style='margin: 25px;'>";
-$ftphost = $genel_ayarlar['sunucu'];
-$ftpuser = $hash->take($genel_ayarlar['username']);
-$ftppass = $hash->take($genel_ayarlar['password']);
+$ftphost = $genel_ayarlar['sunucu'] ?? '';
+$ftpuser = !empty($genel_ayarlar['username']) ? $hash->take($genel_ayarlar['username']) : '';
+$ftppass = !empty($genel_ayarlar['password']) ? $hash->take($genel_ayarlar['password']) : '';
 $ftp_path = $genel_ayarlar['path'];
 
 

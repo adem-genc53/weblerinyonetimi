@@ -16,16 +16,16 @@ class SecureLogin {
         if(session_status() == PHP_SESSION_NONE && !headers_sent())
         {
             // Oturum adını belirleyin
-if (isset($_SERVER['SERVER_NAME'])) {
-    $serverName = $_SERVER['SERVER_NAME'];
-} elseif (isset($_SERVER['HTTP_HOST'])) {
-    $serverName = $_SERVER['HTTP_HOST'];
-} elseif (getenv('SERVER_NAME') !== null) {
-    $serverName = getenv('SERVER_NAME');
-}else{
-    $serverName = "webleryonetimi";
-}
-session_name(str_replace('.','_',$serverName)); // Bu oturum name oturum_guncelle.php deki ile aynı olması gerekiyor
+            if (isset($_SERVER['SERVER_NAME'])) {
+                $serverName = $_SERVER['SERVER_NAME'];
+            } elseif (isset($_SERVER['HTTP_HOST'])) {
+                $serverName = $_SERVER['HTTP_HOST'];
+            } elseif (getenv('SERVER_NAME') !== null) {
+                $serverName = getenv('SERVER_NAME');
+            }else{
+                $serverName = "webleryonetimi";
+            }
+            session_name(str_replace('.','_',$serverName)); // Bu oturum name oturum_guncelle.php deki ile aynı olması gerekiyor
             session_start();
             session_regenerate_id(true);
         }
@@ -56,12 +56,9 @@ session_name(str_replace('.','_',$serverName)); // Bu oturum name oturum_guncell
             $result->execute(array($user_email));
             $count = $result->rowCount();
             $res = $result->fetch(PDO::FETCH_ASSOC);
-
             if($count == 1){
                 // Girilen şifre ile veritabanındaki şifreyi karşılaştır
                 if(password_verify($password, $res['user_password_hash'])){
-
-                        //session_destroy();
 
                         $_SESSION['user_is_logged_in']          = true;
                         $_SESSION['user_id']                    = $res['user_id'];
@@ -332,11 +329,11 @@ include('includes/header.php');
 <script>
 $(document).ready(function () {        
     var width = $('.g-recaptcha').parent().width();
-        var scale = width / 302;
-        $('.g-recaptcha').css('transform', 'scale(' + scale + ')');
-        $('.g-recaptcha').css('-webkit-transform', 'scale(' + scale + ')');
-        $('.g-recaptcha').css('transform-origin', '0 0');
-        $('.g-recaptcha').css('-webkit-transform-origin', '0 0');
+    var scale = width / 302;
+    $('.g-recaptcha').css('transform', 'scale(' + scale + ')');
+    $('.g-recaptcha').css('-webkit-transform', 'scale(' + scale + ')');
+    $('.g-recaptcha').css('transform-origin', '0 0');
+    $('.g-recaptcha').css('-webkit-transform-origin', '0 0');
 });
 
     $(".toggle-password").click(function() {

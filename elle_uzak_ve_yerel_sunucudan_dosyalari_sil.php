@@ -88,9 +88,9 @@ if(isset($_POST['googdan_sil']) && $_POST['googdan_sil'] == 1 && isset($_POST['g
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 if (isset($_POST['ftpden_sil']) && $_POST['ftpden_sil'] == 1 && isset($_POST['ftp_den_secileni_sil']) && !empty($_POST['ftp_den_secileni_sil'])) {
     
-    $ftp_host = $genel_ayarlar['sunucu'];
-    $ftp_user = $hash->take($genel_ayarlar['username']);
-    $ftp_pass = $hash->take($genel_ayarlar['password']);
+    $ftp_host = $genel_ayarlar['sunucu'] ?? '';
+    $ftp_user = !empty($genel_ayarlar['username']) ? $hash->take($genel_ayarlar['username']) : '';
+    $ftp_pass = !empty($genel_ayarlar['password']) ? $hash->take($genel_ayarlar['password']) : '';
     $ftp_path = $genel_ayarlar['path'];
 
     // Başlangıçta değişkeni boş olarak tanımla

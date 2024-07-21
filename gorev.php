@@ -52,9 +52,9 @@ try {
 
 #########################################################################################################################
     // FTP BAĞLANTI BİLGİLERİ
-    $ftp_server     = $genel_ayarlar['sunucu']; //ftp domain name
-    $ftp_username   = $hash->take($genel_ayarlar['username']); //ftp user name 
-    $ftp_password   = $hash->take($genel_ayarlar['password']); //ftp passowrd
+    $ftp_server     = $genel_ayarlar['sunucu'] ?? ''; //ftp domain name
+    $ftp_username   = !empty($genel_ayarlar['username']) ? $hash->take($genel_ayarlar['username']) : ''; //ftp user name 
+    $ftp_password   = !empty($genel_ayarlar['password']) ? $hash->take($genel_ayarlar['password']) : ''; //ftp passowrd
     $ftp_path       = $genel_ayarlar['path']; //ftp passowrd
 #########################################################################################################################
 // ÇALIŞTIRILACAK DOSYANIN URL OLUP OLMADIĞINI KONTROLUNU YAP
