@@ -440,9 +440,9 @@ div tt {
             <td>Eğer veri tabnının tümünü geri yüklemek yerine belirli tabloları ayrı ayrı geri yüklemek istiyorsanız burada bir klasör seçin</td>
         </tr>
         <tr>
-          <td>Seçili dizindeki tabloları birleştir</td>
-          <td><button type="button" id="merge" class="btn btn-success btn-sm" title="Seçili Dizindeki Tabloları Birleştir"><i class='fas fa-object-ungroup'></i> Seçili Dizindeki Tabloları Birleştir </button></td>
-          <td>Eğer Al-Dizindeki tüm tabloları geri yüklemek istiyorsunuz ancak tek tek tabloları yüklemek yerine önce birleştir sonra birleştirilen dosyayı geri yükle</td>
+          <td>Seçili Alt-Dizindeki tabloları birleştir</td>
+          <td><button type="button" id="merge" class="btn btn-success btn-sm" title="Seçili Alt-Dizindeki Tabloları Birleştir"><i class='fas fa-compress'></i> Seçili Alt-Dizindeki Tabloları Birleştir </button></td>
+          <td>Eğer Alt-Dizindeki tüm tabloları geri yüklemek istiyorsanız tek tek tabloları yüklemek yerine önce tabloları birleştirin ve sonra birleştirilen dosyayı geri yükle</td>
         </tr>
 <?php } ?>
 
