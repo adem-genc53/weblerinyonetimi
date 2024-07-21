@@ -47,16 +47,13 @@ if (isset($_SESSION['start_time']) && (time() - $_SESSION['start_time'] > $regen
     $_SESSION['start_time'] = time();
 }
 
+//Tüm hataları gizle
+//error_reporting(0);
+//ini_set('display_errors', 0);
 
-// Hata raporlamayı aç
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
+// Tüm hataları göster
 error_reporting(E_ALL);
-
-// Hata günlüğünü belirli bir dosyaya yönlendir
-ini_set('log_errors', 1);
-ini_set('error_log', '/home/user/error.log'); // Bu yolu kendi sunucunuzdaki uygun bir yolla değiştirin
-
+ini_set('display_errors', 1);
 
     defined('DB_USER')      or define('DB_USER', 'root');
     defined('DB_PASSWORD')  or define('DB_PASSWORD', '');
@@ -99,7 +96,7 @@ ini_set('error_log', '/home/user/error.log'); // Bu yolu kendi sunucunuzdaki uyg
 ########################################################################################################################
     // Google Drive Servis Hesabının hesap bilgileri içeren json dosyanın yolu
     // Bu yolun tam yol olması gerekiyor yani "../../" gibi değil "/home/user/website/plugins/google_drive/client_json/client_secrets.json" gibi tam yol olmalıdır
-    $authConfigPath = '/home/user/web_site_dizin/plugins/google_drive/client_json/client_secrets.json';
+    defined('AUTHCONFIGPATH')        or define('AUTHCONFIGPATH', 'plugins/google_drive/client_json/client_secrets.json');
 ########################################################################################################################
 
     // veritabanı yedeklenecek 'DATABASEBACKUP' klasör adını değiştirebilirsiniz
