@@ -360,6 +360,10 @@ foreach($directoriesAndFiles AS $key => $klasor_dosya_arr){
     .dosya_adi {
         margin-left: 20px; /* Dosya adlarına girinti ekler */
     }
+    .dropdown-item.selected {
+        background-color: #E0E0E6; /* Vurgu rengi */
+        color: black;
+    }
 </style>
 
 
@@ -394,6 +398,10 @@ foreach($directoriesAndFiles AS $key => $klasor_dosya_arr){
         // Buton rengini sıfırla
         $(this).removeClass('btn-primary').addClass('btn-secondary');
       });
+
+      // Seçili öğeyi vurgula
+      $dropdownMenu.find('.dropdown-item').removeClass('selected');
+      $(this).addClass('selected');
 
 
 if($("#selectedFilePath2").val()!=='' || $("#selectedFilePath3").val()!=='' || $("#selectedFilePath4").val()!==''){
