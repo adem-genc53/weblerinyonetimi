@@ -15,16 +15,16 @@ class BeniHatirla {
         if(session_status() == PHP_SESSION_NONE && !headers_sent())
         {
             // Oturum adını belirleyin
-if (isset($_SERVER['SERVER_NAME'])) {
-    $serverName = $_SERVER['SERVER_NAME'];
-} elseif (isset($_SERVER['HTTP_HOST'])) {
-    $serverName = $_SERVER['HTTP_HOST'];
-} elseif (getenv('SERVER_NAME') !== null) {
-    $serverName = getenv('SERVER_NAME');
-}else{
-    $serverName = "webleryonetimi";
-}
-session_name(str_replace('.','_',$serverName)); // Bu oturum name oturum_guncelle.php deki ile aynı olması gerekiyor
+            if (isset($_SERVER['SERVER_NAME'])) {
+                $serverName = $_SERVER['SERVER_NAME'];
+            } elseif (isset($_SERVER['HTTP_HOST'])) {
+                $serverName = $_SERVER['HTTP_HOST'];
+            } elseif (getenv('SERVER_NAME') !== null) {
+                $serverName = getenv('SERVER_NAME');
+            }else{
+                $serverName = "webleryonetimi";
+            }
+            session_name(str_replace('.','_',$serverName)); // Bu oturum name oturum_guncelle.php deki ile aynı olması gerekiyor
             session_start();
             session_regenerate_id(true);
         }
@@ -191,24 +191,24 @@ session_name(str_replace('.','_',$serverName)); // Bu oturum name oturum_guncell
 
         // FONKSİYONU ÇAĞIR VE COOKIE TOKENİN GEÇERLİ OLUP OLMADIĞINI KONTROL EDİYORUZ
         $benihatirla->checkRememberMe();
-        header("Location: /");
+        //$lastlink = isset($_GET['last']) ? htmlspecialchars($_GET['last']) : '/';
+        //header("Location: " . $lastlink);
+        //exit;
 
         // COOKIE MEVCUT DEĞİL ANCAK SESSION MEVCUT İSE 
     } elseif (!isset($_COOKIE['beni_hatirla']) && isset($_SESSION['user_is_logged_in']) && $_SESSION['user_is_logged_in'] == true) {
         $userId = $_SESSION['user_id'] ?? null;
         // KULLANICININ SESSION OTURUMU OLUŞTUR
         $benihatirla->refreshUserSession($userId);
-        header("Location: /");
+        //$lastlink = isset($_GET['last']) ? htmlspecialchars($_GET['last']) : '/';
+        //header("Location: " . $lastlink);
+        //exit;
 
         // COOKIE VE SESSION MEVCUT DEĞİL LOGIN.PHP SAYFASINA YÖNLENDİRİYORUZ
     } elseif (!isset($_COOKIE['beni_hatirla']) && !isset($_SESSION['user_is_logged_in'])) {
 
-        $protocol = isset($_SERVER["HTTPS"]) ? 'https' : 'http';
-        $site_url = $protocol."://".$_SERVER["SERVER_NAME"];
-        $last_link = "?last=".$_SERVER['REQUEST_URI'];
-
-        // KULLANICIYI GİRİŞ SAYFASINA YÖNLENDİR
-        header("Location: $site_url/login.php".$last_link);
+        $lastlink = isset($_GET['last']) ? htmlspecialchars($_GET['last']) : $_SERVER['REQUEST_URI'];
+        header("Location: login.php?last=" . $lastlink);
 
     }  
 ?>
