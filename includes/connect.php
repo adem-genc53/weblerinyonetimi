@@ -5,7 +5,7 @@ if (session_status() == PHP_SESSION_NONE && !headers_sent()) {
     // Session adı olarak alan adınızdır. Eğer aşağıdaki kodlar ile alan adınız alınamaz ise buraya gireceğiniz alan adınız kullanıcılacaktır
     // Alan adındaki . noktaları _ alt tire ile değiştirin. Örnek: "alanadi.com.tr" yerine "alanadi_com_tr"
     // Eğer buraya gerçek alan adınız değil farklı alan adı veya farklı isim girerseniz oturum açmada sorun yaşanacaktır
-    $serverName = 'webleryonetimi_com_tr'; 
+    $serverName = 'github_webyonetimi'; 
 
     // SERVER_NAME'ı kontrol et
     if (isset($_SERVER['SERVER_NAME']) && !empty($_SERVER['SERVER_NAME'])) {
@@ -29,7 +29,7 @@ if (session_status() == PHP_SESSION_NONE && !headers_sent()) {
     } else {
         // Hata durumunda varsayılan oturum adı kullanılır
         // En üste belirlediğiniz alan adının aynısını buraya girin
-        session_name('webleryonetimi_com_tr');
+        session_name('github_webyonetimi');
     }
 
     // Oturumu başlatın
