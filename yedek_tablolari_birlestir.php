@@ -49,8 +49,10 @@ function addLinesAndSpaces($line, $markers) {
                 return "\n" . $line;
             } elseif ($line == 'SET time_zone = \'+03:00\';') {
                 return $line . "\n";
+            } elseif ($line == '-- Tablolar:'){
+                return false;
             } else {
-                return "\n-- ------------------------------------------------------\n" . $line . "\n-- ------------------------------------------------------";
+                return "\n\n\n-- ------------------------------------------------------\n" . $line . "\n-- ------------------------------------------------------";
             }
         }
     }
@@ -67,7 +69,7 @@ if (is_dir($path)) {
     });
 
     $uniqueLines = [];
-    $markers = ['-- Tablonun veri dökümü', '-- Tablo için tablo yapısı', 'SET SQL_MODE = \'NO_AUTO_VALUE_ON_ZERO\';', 'SET time_zone = \'+03:00\';'];
+    $markers = ['-- Tablolar:', '-- Tablo Adı:', '-- Tablonun veri dökümü', '-- Tablo için tablo yapısı', 'SET SQL_MODE = \'NO_AUTO_VALUE_ON_ZERO\';', 'SET time_zone = \'+03:00\';'];
 
     foreach ($sqlFiles as $file) {
         $filePath = $path . DIRECTORY_SEPARATOR . $file;
@@ -114,9 +116,12 @@ if (is_dir($path)) {
             }
         }
     }
+$bul = "-- ------------------------------------------------------\n\n\n\n-- ------------------------------------------------------";
+$degistir = "-- ------------------------------------------------------\n-- ------------------------------------------------------";
 
     // Birleştirilmiş içeriğin sonuna footer SQL ifadelerini ekle
     $mergedContent = implode("\n", $uniqueLines) . "\n" . $footerSQL;
+    $mergedContent = str_replace($bul, $degistir, $mergedContent);
 
     if ($save) {
         // Birleştirilen içeriği UTF-8 olarak encode et ve dosyaya kaydet
@@ -125,7 +130,35 @@ if (is_dir($path)) {
         echo "Dosya başarıyla birleştirilerek kaydedildi: $outputFileName";
     } else {
         // İçeriği ekrana yazdır (isteğe bağlı, sadece debug için)
-        echo $mergedContent;
+        //echo $mergedContent;
+
+        try {
+        $ftvtk = $PDOdb->prepare("INSERT INTO deneme (
+                test) 
+                VALUES (
+                :test
+                )");
+                $ftvtk->bindParam(':test', $mergedContent, PDO::PARAM_STR);
+                $ftvtk->execute();
+
+		if($PDOdb->lastInsertId()){
+		    $messages[] = "Veritabanı Bilgileri Başarıyla Eklendi.";
+            header("Refresh:2");
+		}else{
+            $errors[] = "Bir Hatadan Dolayı Veritabanı Bilgileri Eklenemedi. Tekrar Deneyin.";
+        }
+
+        } catch (PDOException $e) {
+            $existingkey = "Integrity constraint violation: 1062 Duplicate entry";
+            if (strpos($e->getMessage(), $existingkey) !== FALSE) {
+                $errors[] = "Eklemeye çalıştığınız Veritabanı Bilgileri veritabanında zaten kayıtlıdır";
+            } else {
+                throw $e;
+            }
+        }
+
+
+
     }
 } else {
     echo "Belirtilen yol geçerli bir dizin değil.";
