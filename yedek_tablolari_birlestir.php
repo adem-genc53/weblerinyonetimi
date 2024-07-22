@@ -15,13 +15,11 @@ set_time_limit(0);
 ################################################################################
 
 // İşlenecek dosya veya dizin yolu ve kaydet parametresi
-
 $path = BACKUPDIR.'/'.$_POST['folder'] ?? '';
 $save = true;
 
 // Hedef dosya adı ve yolu (birleştirilecek SQL dosyası için)
 $outputFileName = 'BIRLESTIRILDI-'.$_POST['folder'].'.sql';
-
 $outputFilePath = BACKUPDIR.'/'.$outputFileName;
 
 // Fonksiyon: Dosya içeriğini oku ve birleştir
@@ -43,6 +41,22 @@ $footerSQL = "COMMIT;\n
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;";
 
+// Belirli satırlara boşluk ve çizgi ekleme fonksiyonu
+function addLinesAndSpaces($line, $markers) {
+    foreach ($markers as $marker) {
+        if (strpos($line, $marker) !== false) {
+            if ($line == 'SET SQL_MODE = \'NO_AUTO_VALUE_ON_ZERO\';') {
+                return "\n" . $line;
+            } elseif ($line == 'SET time_zone = \'+03:00\';') {
+                return $line . "\n";
+            } else {
+                return "\n-- ------------------------------------------------------\n" . $line . "\n-- ------------------------------------------------------";
+            }
+        }
+    }
+    return $line;
+}
+
 if (is_dir($path)) {
     // Dizin içindeki tüm dosyaları al
     $files = array_diff(scandir($path), array('..', '.'));
@@ -52,27 +66,8 @@ if (is_dir($path)) {
         return preg_match('/\.sql(\.gz)?$/i', $file) && is_file($path . DIRECTORY_SEPARATOR . $file);
     });
 
-    // Birleştirirken array içindeki alanlara böşluk ve çizgiler ekleme fonksiyonu
-    $bosluk_eklenecekler = ['-- Tablonun veri dökümü', '-- Tablo için tablo yapısı', 'SET SQL_MODE = \'NO_AUTO_VALUE_ON_ZERO\';', 'SET time_zone = \'+03:00\';'];
-    function strposa($haystack, $needles)
-    {
-        foreach($needles as $needle) {
-            if(strpos($haystack, $needle) !== false) {
-                if($haystack == 'SET SQL_MODE = \'NO_AUTO_VALUE_ON_ZERO\';'){
-                    return "\n".$haystack;
-                }elseif($haystack == 'SET time_zone = \'+03:00\';'){
-                    return $haystack."\n";
-                }else{
-                    return "\n-- ------------------------------------------------------\n".$haystack."\n-- ------------------------------------------------------";
-                }
-                
-            }
-        }
-
-        return $haystack;
-    }
-
     $uniqueLines = [];
+    $markers = ['-- Tablonun veri dökümü', '-- Tablo için tablo yapısı', 'SET SQL_MODE = \'NO_AUTO_VALUE_ON_ZERO\';', 'SET time_zone = \'+03:00\';'];
 
     foreach ($sqlFiles as $file) {
         $filePath = $path . DIRECTORY_SEPARATOR . $file;
@@ -101,16 +96,16 @@ if (is_dir($path)) {
                     }
                 }
                 continue;
-            }else{
+            } else {
                 // Array ile belirlenen alanlara boşluk ve çizgi ekleme fonksiyon çağırma kodu
-                $line = strposa($line, $bosluk_eklenecekler);
-                
+                $line = addLinesAndSpaces($line, $markers);
+
                 // INSERT INTO satırlara benzersiz uygulamayı hariç tut
                 if (strpos($trimmedLine, 'INSERT INTO') === 0) {
                     if (!in_array($line, $uniqueLines)) {
                         $uniqueLines[] = $line;
                     }
-                }else{
+                } else {
                     // Diğer satırları benzersizlik kontrolü ile ekle
                     if (!in_array($line, $uniqueLines) && !empty($trimmedLine) && strpos($footerSQL, $trimmedLine) === false) {
                         $uniqueLines[] = $line;
