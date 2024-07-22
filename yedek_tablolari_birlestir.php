@@ -52,7 +52,7 @@ if (is_dir($path)) {
         return preg_match('/\.sql(\.gz)?$/i', $file) && is_file($path . DIRECTORY_SEPARATOR . $file);
     });
 
-    // Birleştirirken dizideki alanlara böşluk ve çizgiler ekleme fonksiyonu
+    // Birleştirirken array içindeki alanlara böşluk ve çizgiler ekleme fonksiyonu
     $bosluk_eklenecekler = ['-- Tablonun veri dökümü', '-- Tablo için tablo yapısı', 'SET SQL_MODE = \'NO_AUTO_VALUE_ON_ZERO\';', 'SET time_zone = \'+03:00\';'];
     function strposa($haystack, $needles)
     {
@@ -73,16 +73,49 @@ if (is_dir($path)) {
     }
 
     $uniqueLines = [];
+
     foreach ($sqlFiles as $file) {
         $filePath = $path . DIRECTORY_SEPARATOR . $file;
         $fileContent = getFileContent($filePath);
-        
+
         $lines = explode("\n", $fileContent);
+        $isTableDefinition = false;
+
         foreach ($lines as $line) {
-            $line = strposa($line, $bosluk_eklenecekler);
-            // Footer SQL ifadelerini hariç tut
-            if (!in_array($line, $uniqueLines) && !empty(trim($line)) && strpos($footerSQL, trim($line)) === false) {
-                $uniqueLines[] = $line;
+            $trimmedLine = trim($line);
+
+            // Tablo yapısı tanımlamalarını kontrol et
+            if (strpos($trimmedLine, 'DROP TABLE IF EXISTS') === 0) {
+                $isTableDefinition = true;
+                $tableDefinition = $line . "\n";
+                continue;
+            }
+
+            // Tablo yapısına benzersiz uygulamayı hariç tut
+            if ($isTableDefinition) {
+                $tableDefinition .= $line . "\n";
+                if (strpos($trimmedLine, ') ENGINE=') !== false) {
+                    $isTableDefinition = false;
+                    if (!in_array($tableDefinition, $uniqueLines)) {
+                        $uniqueLines[] = $tableDefinition;
+                    }
+                }
+                continue;
+            }else{
+                // Array ile belirlenen alanlara boşluk ve çizgi ekleme fonksiyon çağırma kodu
+                $line = strposa($line, $bosluk_eklenecekler);
+                
+                // INSERT INTO satırlara benzersiz uygulamayı hariç tut
+                if (strpos($trimmedLine, 'INSERT INTO') === 0) {
+                    if (!in_array($line, $uniqueLines)) {
+                        $uniqueLines[] = $line;
+                    }
+                }else{
+                    // Diğer satırları benzersizlik kontrolü ile ekle
+                    if (!in_array($line, $uniqueLines) && !empty($trimmedLine) && strpos($footerSQL, $trimmedLine) === false) {
+                        $uniqueLines[] = $line;
+                    }
+                }
             }
         }
     }
