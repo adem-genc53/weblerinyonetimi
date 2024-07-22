@@ -304,8 +304,9 @@ if (!function_exists('veritabaniYedekleme')) {
                 "-- MySQL Sunucu Sürümü: " . $initialSettings['mysql_sunucu_surumu'] . "\n" .
                 "-- PHP Sürümü: " . phpversion() . "\n" .
                 "-- Karakter Seti: " . $initialSettings['karakter_seti'] . "\n\n" . 
-                "-- Veritabanı: `" . $initialSettings['database_name'] . "`\n" . 
-                "-- Tablolar:\n";
+                "-- Veritabanı: `" . $initialSettings['database_name'] . "`\n"; 
+                //"-- Tablolar:\n";
+                /*
             // BAŞLANGIÇ BİLGİLERİNDE TABLO ADI VE VERİ SATIR SAYISI GÖSTERMEK İÇİNDİR
             foreach ($initialSettings['tables'] as $table) {
                 if(in_array($table, $tables)){
@@ -313,6 +314,7 @@ if (!function_exists('veritabaniYedekleme')) {
                     $genel_bilgi .= "-- - {$table}: {$count} kayıt\n";
                 }
             }
+            */
             //$genel_bilgi .= "-- - SON\n"; // INSERT sayıldığı için iptal edildi
 
             $genel_bilgi .= 

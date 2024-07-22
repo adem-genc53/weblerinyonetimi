@@ -37,6 +37,12 @@ function getFileContent($filePath) {
     return $fileContent;
 }
 
+// Sonunda eklemek istediğimiz SQL ifadeleri
+$footerSQL = "COMMIT;\n
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;";
+
 if (is_dir($path)) {
     // Dizin içindeki tüm dosyaları al
     $files = array_diff(scandir($path), array('..', '.'));
@@ -46,24 +52,55 @@ if (is_dir($path)) {
         return preg_match('/\.sql(\.gz)?$/i', $file) && is_file($path . DIRECTORY_SEPARATOR . $file);
     });
 
-    $mergedContent = '';
-    foreach ($sqlFiles as $file) {
-        $filePath = $path . DIRECTORY_SEPARATOR . $file;
-        $mergedContent .= getFileContent($filePath) . "\n";
+    // Birleştirirken dizideki alanlara böşluk ve çizgiler ekleme fonksiyonu
+    $bosluk_eklenecekler = ['-- Tablonun veri dökümü', '-- Tablo için tablo yapısı', 'SET SQL_MODE = \'NO_AUTO_VALUE_ON_ZERO\';', 'SET time_zone = \'+03:00\';'];
+    function strposa($haystack, $needles)
+    {
+        foreach($needles as $needle) {
+            if(strpos($haystack, $needle) !== false) {
+                if($haystack == 'SET SQL_MODE = \'NO_AUTO_VALUE_ON_ZERO\';'){
+                    return "\n".$haystack;
+                }elseif($haystack == 'SET time_zone = \'+03:00\';'){
+                    return $haystack."\n";
+                }else{
+                    return "\n-- ------------------------------------------------------\n".$haystack."\n-- ------------------------------------------------------";
+                }
+                
+            }
+        }
+
+        return $haystack;
     }
 
+    $uniqueLines = [];
+    foreach ($sqlFiles as $file) {
+        $filePath = $path . DIRECTORY_SEPARATOR . $file;
+        $fileContent = getFileContent($filePath);
+        
+        $lines = explode("\n", $fileContent);
+        foreach ($lines as $line) {
+            $line = strposa($line, $bosluk_eklenecekler);
+            // Footer SQL ifadelerini hariç tut
+            if (!in_array($line, $uniqueLines) && !empty(trim($line)) && strpos($footerSQL, trim($line)) === false) {
+                $uniqueLines[] = $line;
+            }
+        }
+    }
+
+    // Birleştirilmiş içeriğin sonuna footer SQL ifadelerini ekle
+    $mergedContent = implode("\n", $uniqueLines) . "\n" . $footerSQL;
+
     if ($save) {
-        // Birleştirilmiş içeriği UTF-8 olarak encode et ve dosyaya kaydet
+        // Birleştirilen içeriği UTF-8 olarak encode et ve dosyaya kaydet
         $mergedContent = mb_convert_encoding($mergedContent, 'UTF-8', 'auto');
         file_put_contents($outputFilePath, $mergedContent);
         echo "Dosya başarıyla birleştirilerek kaydedildi: $outputFileName";
     } else {
-        // İçeriği ekrana yazdır
-        //echo $mergedContent;
+        // İçeriği ekrana yazdır (isteğe bağlı, sadece debug için)
+        echo $mergedContent;
     }
-
 } else {
-    echo "Belirtilen yol geçerli bir dosya veya dizin değil.";
+    echo "Belirtilen yol geçerli bir dizin değil.";
 }
 
 ?>
