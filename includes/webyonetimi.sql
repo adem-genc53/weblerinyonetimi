@@ -44,7 +44,7 @@ CREATE TABLE IF NOT EXISTS `dovizkuru` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `tcmb_kur` (`tcmb_kur`),
   UNIQUE KEY `elle_kur` (`elle_kur`)
-) ENGINE=MyISAM AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_turkish_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- ------------------------------------------------------
 -- Tablonun veri dökümü `dovizkuru`
