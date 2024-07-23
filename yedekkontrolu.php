@@ -170,8 +170,8 @@ include('includes/sub_navbar.php');
             <table class="table" style="min-width: 1000px;">
                 <colgroup span="2">
                     <col style="width:13%"></col>
-                    <col style="width:40%"></col>
-                    <col style="width:45%"></col>
+                    <col style="width:35%"></col>
+                    <col style="width:50%"></col>
                 </colgroup>
             <thead>
                 <tr class="bg-primary">
@@ -209,7 +209,7 @@ include('includes/sub_navbar.php');
 <input type="hidden" name="veritabani_id" id="selectedFilePath1">
 
                     </td>
-                    <td style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;"><button type="button" id="bakim" class="btn btn-success btn-sm" title="Seçili Veritabanına Bakım Yap"><i class="fa fa-wrench" aria-hidden="true"></i> Seçili Veritabanına Bakım Yap </button></td>
+                    <td style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;"><button type="button" id="bakim" class="btn btn-success btn-sm" title="Seçili Veritabanına Bakım Yap"><i class="fa fa-wrench" aria-hidden="true"></i> Seçili Veritabanına Bakım Yap </button> <b>check</b>, <b>repair</b>, <b>optimize</b>, <b>analyze</b> seçeneklerini kullanarak bakım yapar.</td>
                 </tr>
                 <tr>
                     <td style="text-align:right;"><img style="width:40px;height:20px;" border="0" src="images/mysqlwinrar.png"></td>
