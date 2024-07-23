@@ -38,7 +38,7 @@ class FtpTreeView {
         try {
             $this->ftp = @ftp_ssl_connect($this->ftpsunucu);
             if (!$this->ftp) {
-                throw new Exception($this->ftpsunucu . " sunucuya bağlanamadı");
+                throw new Exception($this->ftpsunucu . " sunucuya bağlanamadı, FTP bilgilerini kontrol edin");
             }
 
             $this->login_result = ftp_login($this->ftp, $this->ftpusername, $this->ftppass);

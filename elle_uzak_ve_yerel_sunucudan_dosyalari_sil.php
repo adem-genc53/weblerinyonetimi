@@ -130,7 +130,7 @@ if (isset($_POST['ftpden_sil']) && $_POST['ftpden_sil'] == 1 && isset($_POST['ft
     }
 
     // FTP bağlantısını kur
-    $ftp = @ftp_ssl_connect($ftp_host) or die($ftp_host . " sunucuya bağlanamadı");
+    $ftp = @ftp_ssl_connect($ftp_host) or die($ftp_host . " sunucuya bağlanamadı, FTP bilgilerini kontrol edin");
     $ftp_login = ftp_login($ftp, $ftp_user, $ftp_pass);
     ftp_pasv($ftp, true);
 

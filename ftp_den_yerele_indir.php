@@ -20,7 +20,7 @@ $ftp_path = $genel_ayarlar['path'];
 
 
 $ftp_connect = @ftp_ssl_connect($ftphost) 
-    or die($ftphost  . " sunucuya bağlanamadı"); 
+    or die($ftphost  . " sunucuya bağlanamadı, FTP bilgilerini kontrol edin"); 
 
 $login_result = ftp_login($ftp_connect, $ftpuser, $ftppass); 
 if ((!$ftp_connect) || (!$login_result)) 
