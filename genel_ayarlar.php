@@ -744,10 +744,10 @@ include('includes/sub_navbar.php');
                                                     <tbody>
                                                         <tr>
                                                             <td colspan="5">
-                                                                Web dizinlerin zaman zaman yedeklenmesinde fayda olacağı için elle veya görev zamanlayıcı ile yedeklerken web dizinleri zip formatında sıkıştırarak yedeklemek gerekiyor.<br />
-                                                                Dizinleri zip formatında sıkıştırmak için iki yöntem bulunmaktadır bunlardan biri <b>PHP</b> kodu kullanarak Zip oluşturmak bu yöntem web sitenizin belleğini ve CPU kullanımı tüketeceği gibi yavaş sıkıştırma olacaktır.<br />
-                                                                Diğer ikinci yöntem ise <b>EXEC</b> fonksiyonu kullanımı bu fonksiyon bazı sunucular desteklemeyebilir, ancak destekleyen sunucular için bu fonksiyonun tercih edilmesini öneririz, çünkü bu fonksiyon sistem üzerinden kullanıldığı için hem çok hızlı sıkıştırma yapacağız için PHP zaman aşımı, bellek kullanımı ve CPU kullanımı yapmak<br />
-                                                                <b>EXEC</b> fonksiyonu sunucunuzda çalışıp çalışmadığını aşağıdaki buton ile test ederek sonuca göre sıkıştırma tercihini seçebilirsiniz.
+                                                                Web dizinlerin zaman zaman yedeklenmesinde faydalı olacağı için elle veya görev zamanlayıcı ile yedeklerken web dizinlerin zip formatında sıkıştırarak yedeklemek gerekiyor.<br />
+                                                                Dizinlerin zip formatında sıkıştırmak için iki yöntem bulunmaktadır bunlardan biri <b>PHP</b> kodu kullanarak Zip oluşturmaktır, bu yöntem web sitenizin belleğini ve CPU kullanımı tüketeceği gibi yavaş sıkıştırma olacaktır.<br />
+                                                                Diğer ikinci yöntem ise <b>EXEC</b> ve <b>Zip</b> komutu kullanımı bu fonksiyon bazı sunucular desteklemeyebilir, ancak destekleyen sunucular için bu fonksiyonun tercih edilmesi öneririz, çünkü bu fonksiyon sistem üzerinden kullanıldığı için hem çok hızlı sıkıştırma yapacağız için PHP zaman aşımı, bellek kullanımı ve CPU kullanımı yapmaz<br />
+                                                                <b>EXEC</b> ve <b>Zip</b> komutu sunucunuzda çalışıp çalışmadığını aşağıdaki buton ile test ederek sonuca göre sıkıştırma tercihinizi seçebilirsiniz.
                                                             </td>
                                                         </tr>
                                                         <tr>
@@ -777,8 +777,8 @@ include('includes/sub_navbar.php');
                                                             <td colspan="3">&nbsp;</td>
                                                         </tr>
                                                         <tr>
-                                                            <td>Sunucunuzda EXEC Fonksiyonu Testi Buradan Yapabilirsiniz:</td>
-                                                            <td style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;"><button type="button" id="execTestButton" class="btn btn-success btn-sm">EXEC Fonksiyonu Testi</button></td>
+                                                            <td>Sunucunuzda EXEC ve Zip Komutu Testi Buradan Yapabilirsiniz:</td>
+                                                            <td style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;"><button type="button" id="execTestButton" class="btn btn-success btn-sm">EXEC ve Zip Komutu Testi</button></td>
                                                             <td colspan="3"><div id="messageContainer"></div></td>
                                                         </tr>
                                                     </tbody>
