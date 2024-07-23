@@ -63,6 +63,14 @@ $tables = $PDOdbsecilen->query("SHOW TABLES")->fetchAll(PDO::FETCH_COLUMN); // T
 
 $maintenanceResults = performDatabaseMaintenance($PDOdbsecilen, $tables);
 echo "<table class='table-striped' width='100%'>";
+echo "
+<thead>
+    <tr>
+    <th colspan='2'><h6>Veritabanı Adı: $db_name</h6></th>
+    </tr>
+</thead>
+";
+echo "<tbody>";
 foreach ($maintenanceResults as $table => $result) {
     echo "
         <tr>
@@ -71,6 +79,7 @@ foreach ($maintenanceResults as $table => $result) {
         </tr>
     ";
 }
+echo "</tbody>";
 echo "</table>";
 
 ?>
