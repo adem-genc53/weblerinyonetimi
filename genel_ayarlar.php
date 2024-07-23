@@ -576,7 +576,7 @@ include('includes/sub_navbar.php');
                                     Web dizinleri listelerken sunucunun sistem dizinleri/dosyalar dahil olmasını istemediğiniz dizin/dosya adlarını seciniz. Burada seçeceğiniz dizin/dosya adları listede gözükmeyecektir.
                                 </td>
                             </tr>
-                            <tr>
+                            <tr class="table-light">
                                 <td colspan="5" style="min-width: 200px;">
                                 <?php 
 

@@ -209,7 +209,7 @@ include('includes/sub_navbar.php');
 <input type="hidden" name="veritabani_id" id="selectedFilePath1">
 
                     </td>
-                    <td>&nbsp;</td>
+                    <td style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;"><button type="button" id="bakim" class="btn btn-success btn-sm" title="Seçili Veritabanına Bakım Yap"><i class="fa fa-wrench" aria-hidden="true"></i> Seçili Veritabanına Bakım Yap </button></td>
                 </tr>
                 <tr>
                     <td style="text-align:right;"><img style="width:40px;height:20px;" border="0" src="images/mysqlwinrar.png"></td>
@@ -525,6 +525,32 @@ $("input[name='sadece']").click(function(){
 
 <br />
         </div><!-- / <div class="content-wrapper"> -->
+
+<script type='text/javascript'>
+$('#bakim').click(function( e ){
+  var veritabani_id = $('#selectedFilePath1').val();
+      if(!veritabani_id) {
+        $(function(){
+            jw("b olumsuz").baslik("Veritabanı Belirlemediniz!").icerik("Bakım yapacağınız veritabanı seçmelisiniz").kilitle().en(400).boy(100).ac();
+        })
+        return false;
+    }
+    var bekleme = jw("b bekle").baslik("Veri Tabanı Bakım Yapılıyor...").en(350).boy(10).kilitle().akilliKapatPasif().ac();
+
+    $.ajax({
+        type:'POST',
+        url: "db_bakim.php",
+        data: { veritabani_id : veritabani_id},
+        success: function(msg){
+            $(function () {
+                bekleme.kapat();
+                var pen = jw('d').baslik('Veritabanı Bakım Sonucu').icerik(msg).en(750).boy(550).kucultPasif().acEfekt(2, 1000).kapatEfekt(2, 1000).ac();
+            });
+        }
+    });
+
+});
+</script>
 
 <script type='text/javascript'>
     var satir = '';
