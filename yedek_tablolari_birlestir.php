@@ -131,34 +131,6 @@ $degistir = "-- ------------------------------------------------------\n-- -----
     } else {
         // İçeriği ekrana yazdır (isteğe bağlı, sadece debug için)
         //echo $mergedContent;
-
-        try {
-        $ftvtk = $PDOdb->prepare("INSERT INTO deneme (
-                test) 
-                VALUES (
-                :test
-                )");
-                $ftvtk->bindParam(':test', $mergedContent, PDO::PARAM_STR);
-                $ftvtk->execute();
-
-		if($PDOdb->lastInsertId()){
-		    $messages[] = "Veritabanı Bilgileri Başarıyla Eklendi.";
-            header("Refresh:2");
-		}else{
-            $errors[] = "Bir Hatadan Dolayı Veritabanı Bilgileri Eklenemedi. Tekrar Deneyin.";
-        }
-
-        } catch (PDOException $e) {
-            $existingkey = "Integrity constraint violation: 1062 Duplicate entry";
-            if (strpos($e->getMessage(), $existingkey) !== FALSE) {
-                $errors[] = "Eklemeye çalıştığınız Veritabanı Bilgileri veritabanında zaten kayıtlıdır";
-            } else {
-                throw $e;
-            }
-        }
-
-
-
     }
 } else {
     echo "Belirtilen yol geçerli bir dizin değil.";
