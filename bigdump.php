@@ -668,13 +668,40 @@ echo "</tbody>";
               ');
     else 
       echo ('
-          <table class="table table-striped table-hover" style="min-width: 1000px;">
-              <tr>
-                <th style="text-align:center;">HENÜZ YEDEKLENMİŞ VERİ TABANI YOK</td>
+    <!-- Gövde İçerik Başlangıcı -->
+    <section class="content">
+    <div class="container-fluid">
+        <div class="row mb-2">
+        <div class="col-sm-12">
+            <div class="card">
+                <div class="card-body p-0">
+
+          <table class="table table-sm table-striped table-hover" style="min-width: 1000px;">
+            <colgroup span="5">
+                <col style="width:50%"></col>
+                <col style="width:15%"></col>
+                <col style="width:15%"></col>
+                <col style="width:10%"></col>
+                <col style="width:10%"></col>
+            </colgroup>
+    
+            <thead>
+              <tr style="line-height: 1.2;font-size: 1rem;" class="bg-primary">
+                <th >Yedek Veri Tabanı Dosya Adı</th>
+                <th style="text-align:center;">Boyutu</th>
+                <th>Yedekleme/Düzenleme Zamanı</th>
+                <th style="text-align:center;">Dosya Tipi</th>
+                <th>Yedeği Geri Yükle</th>
               </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th colspan="5" style="text-align:center;">HENÜZ YEDEKLENMİŞ VERİ TABANI YOK</td>
+              </tr>
+            </tbody>
             <tfoot>
               <tr>
-                <th style="text-align:center;">Veri Tabanı Yedeklemek için "Veri Tabanı Yedekle" Alanında Yedekleyebilirsiniz</th>
+                <th colspan="5" style="text-align:center;">Veri Tabanı Yedeklemek için "Veri Tabanı Yedekle" Alanında Yedekleyebilirsiniz</th>
               </tr>
             </tfoot>
           </table>

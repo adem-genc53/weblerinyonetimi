@@ -324,6 +324,13 @@ include('includes/sub_navbar.php');
             echo "</td>";
         echo "</tr>";
     }
+    if(count($files)==0){
+        echo '
+        <tr>
+        <th colspan="5" style="text-align: center;">HENÜZ YEDEKLENMİŞ VERİ TABANI YOK </th>
+        </tr>
+        ';
+    }
         echo "<tfoot>";
         echo "<tr>";
         echo "  <th>&nbsp</td>";
