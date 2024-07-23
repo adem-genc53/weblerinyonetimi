@@ -3,20 +3,22 @@
 -- WebSiteler Yönetimi Script Versiyonu: 2.0.1
 
 -- Anamakine: webyonetimi
--- Yedekleme Zamanı: 2024-07-21 20:27:36
+-- Yedekleme Zamanı: 2024-07-23 12:46:22
 -- MySQL Sunucu Sürümü: 8.3.0
 -- PHP Sürümü: 8.1.28
 -- Karakter Seti: utf8mb4
 
 -- Veritabanı: `github_webyonetimi`
+
+
 -- Tablolar:
--- - dovizkuru: 3 kayıt
--- - genel_ayarlar: 1 kayıt
--- - user_logins: 10 kayıt
--- - uyeler: 1 kayıt
--- - veritabanlari: 0 kayıt
--- - zamanlanmisgorev: 1 kayıt
--- - zamanlanmisgorev_gunluk: 1 kayıt
+-- Tablo Adı: dovizkuru: 3 kayıt
+-- Tablo Adı: genel_ayarlar: 1 kayıt
+-- Tablo Adı: user_logins: 10 kayıt
+-- Tablo Adı: uyeler: 1 kayıt
+-- Tablo Adı: veritabanlari: 0 kayıt
+-- Tablo Adı: zamanlanmisgorev: 1 kayıt
+-- Tablo Adı: zamanlanmisgorev_gunluk: 1 kayıt
 
 
 SET SQL_MODE = 'NO_AUTO_VALUE_ON_ZERO';
@@ -90,7 +92,21 @@ CREATE TABLE IF NOT EXISTS `user_logins` (
   `log_in_from` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `user_id` (`user_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=40 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- ------------------------------------------------------
+-- Tablonun veri dökümü `user_logins`
+-- ------------------------------------------------------
+INSERT INTO `user_logins` VALUES(38, 1, 1721643956, 'Giriş ile');
+INSERT INTO `user_logins` VALUES(39, 1, 1721727382, 'Giriş ile');
+INSERT INTO `user_logins` VALUES(30, 1, 1721581327, 'Beni Hatırla ile');
+INSERT INTO `user_logins` VALUES(31, 1, 1721581412, 'Beni Hatırla ile');
+INSERT INTO `user_logins` VALUES(32, 1, 1721581682, 'Giriş ile');
+INSERT INTO `user_logins` VALUES(33, 1, 1721581730, 'Giriş ile');
+INSERT INTO `user_logins` VALUES(34, 1, 1721639724, 'Giriş ile');
+INSERT INTO `user_logins` VALUES(35, 1, 1721643485, 'Giriş ile');
+INSERT INTO `user_logins` VALUES(36, 1, 1721643511, 'Giriş ile');
+INSERT INTO `user_logins` VALUES(37, 1, 1721643553, 'Giriş ile');
 
 
 -- ------------------------------------------------------
@@ -113,7 +129,7 @@ CREATE TABLE IF NOT EXISTS `uyeler` (
 -- ------------------------------------------------------
 -- Tablonun veri dökümü `uyeler`
 -- ------------------------------------------------------
-INSERT INTO `uyeler` VALUES(1, 'Adem GENÇ', '$2y$10$uY/PW6S17AXp0s/xvu73qusf52qkOUrdueLkXvqjHdXXYhhaZuhgi', 'admin@gmail.com', 1, '92f1da530840599237728ea5df547f39bc8f5946865817d6f28743d868e3879f', '0000-00-00 00:00:00');
+INSERT INTO `uyeler` VALUES(1, 'Adem GENÇ', '$2y$10$uY/PW6S17AXp0s/xvu73qusf52qkOUrdueLkXvqjHdXXYhhaZuhgi', 'admin@gmail.com', 1, 'e24d3c696497212ba5efba4e8ac3d8abe7e79ae48b9bc28f9d8c73ea81637f6a', '0000-00-00 00:00:00');
 
 
 -- ------------------------------------------------------
