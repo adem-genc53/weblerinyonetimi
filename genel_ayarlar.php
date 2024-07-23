@@ -746,8 +746,8 @@ include('includes/sub_navbar.php');
                                                             <td colspan="5">
                                                                 Web dizinlerin zaman zaman yedeklenmesinde faydalı olacağı için elle veya görev zamanlayıcı ile yedeklerken web dizinlerin zip formatında sıkıştırarak yedeklemek gerekiyor.<br />
                                                                 Dizinlerin zip formatında sıkıştırmak için iki yöntem bulunmaktadır bunlardan biri <b>PHP</b> kodu kullanarak Zip oluşturmaktır, bu yöntem web sitenizin belleğini ve CPU kullanımı tüketeceği gibi yavaş sıkıştırma olacaktır.<br />
-                                                                Diğer ikinci yöntem ise <b>EXEC</b> ve <b>Zip</b> komutu kullanımı bu fonksiyon bazı sunucular desteklemeyebilir, ancak destekleyen sunucular için bu fonksiyonun tercih edilmesi öneririz, çünkü bu fonksiyon sistem üzerinden kullanıldığı için hem çok hızlı sıkıştırma yapacağız için PHP zaman aşımı, bellek kullanımı ve CPU kullanımı yapmaz<br />
-                                                                <b>EXEC</b> ve <b>Zip</b> komutu sunucunuzda çalışıp çalışmadığını aşağıdaki buton ile test ederek sonuca göre sıkıştırma tercihinizi seçebilirsiniz.
+                                                                Diğer ikinci yöntem ise <b>EXEC</b> le <b>Zip</b> komutu kullanımı bu fonksiyon bazı sunucular desteklemeyebilir, ancak destekleyen sunucular için bu fonksiyonun tercih edilmesi öneririz, çünkü bu fonksiyon sistem üzerinden kullanıldığı için hem çok hızlı sıkıştırma yapacağız için PHP zaman aşımı, bellek kullanımı ve CPU kullanımı yapmaz<br />
+                                                                <b>EXEC</b> ile <b>Zip</b> komutu sunucunuzda çalışıp çalışmadığını aşağıdaki buton ile test ederek sonuca göre sıkıştırma tercihinizi seçebilirsiniz.
                                                             </td>
                                                         </tr>
                                                         <tr>
