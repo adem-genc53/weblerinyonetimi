@@ -305,16 +305,7 @@ if (!function_exists('veritabaniYedekleme')) {
                 "-- PHP Sürümü: " . phpversion() . "\n" .
                 "-- Karakter Seti: " . $initialSettings['karakter_seti'] . "\n\n" . 
                 "-- Veritabanı: `" . $initialSettings['database_name'] . "`\n";
-/*
-            $genel_bilgi .= "\n\n-- Tablolar:\n";
-            // BAŞLANGIÇ BİLGİLERİNDE TABLO ADI VE VERİ SATIR SAYISI GÖSTERMEK İÇİNDİR
-            foreach ($initialSettings['tables'] as $table) {
-                if(in_array($table, $tables)){
-                    $count = $initialSettings['table_counts'][$table];
-                    $genel_bilgi .= "-- Tablo Adı: {$table}: {$count} kayıt\n";
-                }
-            }
-*/
+
             $genel_bilgi .= 
                 "\n\nSET SQL_MODE = '" . $sql_mode . "';\n" .
                 "START TRANSACTION;\n" .
@@ -324,6 +315,16 @@ if (!function_exists('veritabaniYedekleme')) {
                 "/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;\n" .
                 "/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;\n" .
                 "/*!40101 SET NAMES " . $initialSettings['karakter_seti'] . " */;\n\n";
+
+            $genel_bilgi .= "\n\n-- Tablolar:\n";
+            // BAŞLANGIÇ BİLGİLERİNDE TABLO ADI VE VERİ SATIR SAYISI GÖSTERMEK İÇİNDİR
+            foreach ($initialSettings['tables'] as $table) {
+                if(in_array($table, $tables)){
+                    $count = $initialSettings['table_counts'][$table];
+                    $genel_bilgi .= "-- Tablo Adı: {$table}: {$count} kayıt\n";
+                }
+            }
+
         return $genel_bilgi;
         }
     }
@@ -403,8 +404,7 @@ if (!function_exists('veritabaniYedekleme')) {
 
                 $triggerQuery .= 'DROP TRIGGER IF EXISTS `' . $trigger['Trigger'] . '`;' . $crlf;
                 $triggerQuery .= 'DELIMITER ' . $delimiter . $crlf;
-                $triggerQuery .= 'CREATE TRIGGER `' . $trigger['Trigger'] . '` '
-                    . $trigger['Timing'] . ' ' . $trigger['Event'] . ' ON `' . $trigger['Table'] . '` FOR EACH ROW ';
+                $triggerQuery .= 'CREATE TRIGGER `' . $trigger['Trigger'] . '` ' . $trigger['Timing'] . ' ' . $trigger['Event'] . ' ON `' . $trigger['Table'] . '` FOR EACH ROW ';
                 $triggerQuery .= $trigger['Statement'] . $crlf;
                 $triggerQuery .= $delimiter . $crlf;
                 $triggerQuery .= 'DELIMITER ;' . $crlf.$crlf;

@@ -505,15 +505,69 @@ $("input[name='sadece']").click(function(){
         top: unset;
         left: unset;
     }
+
+        #tamekran.fullscreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 110%;
+            z-index: 1000000000;
+            background-color: white;
+        }
+
+        #fullscreen-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            z-index: 1000000001;
+            
+        }
+        .pencere-tam {
+            height: 90%;
+            width: 100%;
+        }
+        .pencere-normal {
+            height: 600px;
+            width: 100%;
+        }
 </style>
+
 
     <div id="sql-loading" style='text-align: center;'>
         <img src="images/ajax-loader.gif" alt="Yükleniyor..." />
         <br />Yedek Veritabanı İçeriği Listeleniyor...
     </div>
 
+<div id="tamekran">
+    <button id="fullscreen-btn" type="button" title="Tam Ekran" onclick="toggleFullScreen()"><i class="fas fa-expand-arrows-alt"></i></button>
     <span style="padding-left: 10px;">Sadece önizleme, düzenleme yok</span>
-    <code-input required id="sql-listele" class="line-numbers" style="width:101%;height:1000px;display:none-;" lang="sql" placeholder="Yükleniyor Lütfen bekleyin...!" template="code-input"></code-input>
+
+    <code-input required id="sql-listele" class="line-numbers pencere-normal" lang="sql" placeholder="Yükleniyor Lütfen bekleyin...!" template="code-input"></code-input>
+</div>
+
+    <script>
+        function toggleFullScreen() {
+            const codeInputElement = document.getElementById('tamekran');
+            const fullscreenBtnIcon = document.querySelector('#fullscreen-btn i');
+            const codeInputStyle = document.querySelector('#sql-listele');
+            if (codeInputElement.classList.contains('fullscreen')) {
+                console.log("aaa");
+                codeInputStyle.classList.remove('pencere-tam');
+                codeInputStyle.classList.add('pencere-normal');
+
+                codeInputElement.classList.remove('fullscreen');
+                fullscreenBtnIcon.classList.remove('fa-compress-arrows-alt');
+                fullscreenBtnIcon.classList.add('fa-expand-arrows-alt');
+            } else {
+                codeInputStyle.classList.remove('pencere-normal');
+                codeInputStyle.classList.add('pencere-tam');
+                codeInputElement.classList.add('fullscreen');
+                fullscreenBtnIcon.classList.remove('fa-expand-arrows-alt');
+                fullscreenBtnIcon.classList.add('fa-compress-arrows-alt');
+            }
+        }
+    </script>
 
                 </div><!-- / <div class="card-body p-0"> -->
             </div><!-- / <div class="card"> -->

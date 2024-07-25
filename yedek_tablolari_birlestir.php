@@ -26,6 +26,27 @@ $outputFilePath = BACKUPDIR.'/'.$outputFileName;
 function getFileContent($filePath) {
     if (preg_match('/\.sql\.gz$/i', $filePath)) {
         // .sql.gz dosyasını aç ve içeriğini oku
+        $file = gzopen($filePath, 'r');
+        $fileContent = '';
+        while (!gzeof($file)) {
+            $fileContent .= gzgets($file, 4096);
+        }
+        gzclose($file);
+    } else {
+        // .sql dosyasını aç ve içeriğini oku
+        $file = fopen($filePath, 'r');
+        $fileContent = '';
+        while (!feof($file)) {
+            $fileContent .= fgets($file, 4096);
+        }
+        fclose($file);
+    }
+    return $fileContent;
+}
+/*
+function getFileContent($filePath) {
+    if (preg_match('/\.sql\.gz$/i', $filePath)) {
+        // .sql.gz dosyasını aç ve içeriğini oku
         $fileContent = gzfile($filePath);
         $fileContent = implode("", $fileContent);
     } else {
@@ -34,6 +55,7 @@ function getFileContent($filePath) {
     }
     return $fileContent;
 }
+*/
 
 // Sonunda eklemek istediğimiz SQL ifadeleri
 $footerSQL = "COMMIT;\n
@@ -51,8 +73,10 @@ function addLinesAndSpaces($line, $markers) {
                 return $line . "\n";
             } elseif ($line == '-- Tablolar:'){
                 return false;
+            } elseif ($line == '-- Tablonun veri dökümü'){
+                return "-- ------------------------------------------------------\n" . $line . "\n-- ------------------------------------------------------";
             } else {
-                return "\n\n\n-- ------------------------------------------------------\n" . $line . "\n-- ------------------------------------------------------";
+                return "\n-- ------------------------------------------------------\n" . $line . "\n-- ------------------------------------------------------";
             }
         }
     }
@@ -69,7 +93,10 @@ if (is_dir($path)) {
     });
 
     $uniqueLines = [];
-    $markers = ['-- Tablolar:', '-- Tablo Adı:', '-- Tablonun veri dökümü', '-- Tablo için tablo yapısı', 'SET SQL_MODE = \'NO_AUTO_VALUE_ON_ZERO\';', 'SET time_zone = \'+03:00\';'];
+    $markers = ['-- Tablolar:', '-- Tablo Adı:', '-- Tablonun veri dökümü', '-- Tablo için tablo yapısı', '-- Tablo için Tetikleyiciler', 'SET SQL_MODE = \'NO_AUTO_VALUE_ON_ZERO\';', 'SET time_zone = \'+03:00\';'];
+
+    // Hash set olarak kullanmak için array
+    $uniqueLinesHashSet = [];
 
     foreach ($sqlFiles as $file) {
         $filePath = $path . DIRECTORY_SEPARATOR . $file;
@@ -82,7 +109,7 @@ if (is_dir($path)) {
             $trimmedLine = trim($line);
 
             // Tablo yapısı tanımlamalarını kontrol et
-            if (strpos($trimmedLine, 'DROP TABLE IF EXISTS') === 0) {
+            if (strpos($trimmedLine, 'DROP TABLE IF EXISTS') === 0 || strpos($trimmedLine, 'DROP TRIGGER IF EXISTS') === 0) {
                 $isTableDefinition = true;
                 $tableDefinition = $line . "\n";
                 continue;
@@ -91,9 +118,10 @@ if (is_dir($path)) {
             // Tablo yapısına benzersiz uygulamayı hariç tut
             if ($isTableDefinition) {
                 $tableDefinition .= $line . "\n";
-                if (strpos($trimmedLine, ') ENGINE=') !== false) {
+                if (strpos($trimmedLine, ') ENGINE=') !== false || strpos($trimmedLine, 'DELIMITER ;') !== false) {
                     $isTableDefinition = false;
-                    if (!in_array($tableDefinition, $uniqueLines)) {
+                    if (!isset($uniqueLinesHashSet[$tableDefinition])) {
+                        $uniqueLinesHashSet[$tableDefinition] = true;
                         $uniqueLines[] = $tableDefinition;
                     }
                 }
@@ -104,20 +132,23 @@ if (is_dir($path)) {
 
                 // INSERT INTO satırlara benzersiz uygulamayı hariç tut
                 if (strpos($trimmedLine, 'INSERT INTO') === 0) {
-                    if (!in_array($line, $uniqueLines)) {
+                    //if (!isset($uniqueLinesHashSet[$line])) // ID si olmayan benzer satırleri eksiltir
+                        $uniqueLinesHashSet[$line] = true;
                         $uniqueLines[] = $line;
-                    }
                 } else {
+
                     // Diğer satırları benzersizlik kontrolü ile ekle
-                    if (!in_array($line, $uniqueLines) && !empty($trimmedLine) && strpos($footerSQL, $trimmedLine) === false) {
+                    if (!isset($uniqueLinesHashSet[$line]) && !empty($trimmedLine) && strpos($footerSQL, $trimmedLine) === false) {
+                        $uniqueLinesHashSet[$line] = true;
                         $uniqueLines[] = $line;
                     }
                 }
             }
         }
     }
-$bul = "-- ------------------------------------------------------\n\n\n\n-- ------------------------------------------------------";
-$degistir = "-- ------------------------------------------------------\n-- ------------------------------------------------------";
+
+    $bul = "-- ------------------------------------------------------\n\n-- ------------------------------------------------------";
+    $degistir = "-- ------------------------------------------------------\n-- ------------------------------------------------------";
 
     // Birleştirilmiş içeriğin sonuna footer SQL ifadelerini ekle
     $mergedContent = implode("\n", $uniqueLines) . "\n" . $footerSQL;
