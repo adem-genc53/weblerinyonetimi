@@ -441,7 +441,7 @@ div tt {
         </tr>
         <tr>
           <td>Seçili Alt-Dizindeki tabloları birleştir</td>
-          <td><button type="button" id="merge" class="btn btn-success btn-sm" title="Seçili Alt-Dizindeki Tabloları Birleştir"><i class='fas fa-compress'></i> Seçili Alt-Dizindeki Tabloları Birleştir </button></td>
+          <td><button type="button" id="merge" class="btn btn-success btn-sm" title="Seçili Alt-Dizindeki Tabloları Birleştir"><i class="fas fa-object-ungroup"></i> Seçili Alt-Dizindeki Tabloları Birleştir </button></td>
           <td>Eğer Alt-Dizindeki tüm tabloları geri yüklemek istiyorsanız tek tek tabloları yüklemek yerine önce tabloları birleştirin ve sonra birleştirilen dosyayı geri yükle</td>
         </tr>
 <?php } ?>
