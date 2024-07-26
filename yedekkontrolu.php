@@ -169,7 +169,7 @@ include('includes/sub_navbar.php');
         <form id="f">
             <table class="table" style="min-width: 1000px;">
                 <colgroup span="2">
-                    <col style="width:13%"></col>
+                    <col style="width:15%"></col>
                     <col style="width:35%"></col>
                     <col style="width:50%"></col>
                 </colgroup>
@@ -180,8 +180,12 @@ include('includes/sub_navbar.php');
             </thead>
             <tbody>
                 <tr>
-                    <td><b>Sadece</b></td>
-                    <td colspan="2"><span style="padding-right:20px;">Karşılaştır: <input class="sadece" type="radio" name="sadece" value="1" checked></span> <span style="padding:0 20px;">İçeriği Listele: <input class="sadece" type="radio" name="sadece" value="2"></span>Büyük boyutlu yedeğin içeriği listelerken tarayıcının kilitlenebileceğini unutmayın</td>
+                    <td>Veritabanını Karşılaştır</td>
+                    <td colspan="2"><span style="padding-right:20px;"><input class="sadece" type="radio" name="sadece" value="1" checked></span> Kaynak sunucudaki veritabanı ile yedek vervitabanını karşılaştır</td>
+                </tr>
+                <tr>
+                    <td>Veritabanının İçeriğini Görüntüle</td>
+                    <td colspan="2"><span style="padding-right:20px;"><input class="sadece" type="radio" name="sadece" value="2"></span> Yedek veritabanının içeriğini görüntüle, düzenle ve farklı kaydet. Not: MB ve üstü boyutlu dosyalarda tarayıcınız kilitlenebilir. Tek tablo veya küçük boyutlu dosyalar için kullanmanız önerilir.</td>
                 </tr>
                 <tr>
                     <td>Veritabanı Seç</td>
@@ -481,23 +485,24 @@ $("input[name='sadece']").click(function(){
             <div class="card">
                 <div class="card-body p-0">
 
-<!--Prism-->
-<link id="import-theme" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.css"/>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.js"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.css"/>
 
-<!--Code-input is on GitHub ==> https://github.com/WebCoder49/code-input-->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/WebCoder49/code-input@2.1/code-input.css">
-<script src="https://cdn.jsdelivr.net/gh/WebCoder49/code-input@2.1/code-input.js"></script>
-<script src="https://cdn.jsdelivr.net/gh/WebCoder49/code-input@2.1/plugins/indent.min.js"></script>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/WebCoder49/code-input@2.1/plugins/prism-line-numbers.min.css">
+    <!--Prism-->
+    <link id="import-theme" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.css"/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.css"/>
 
-<script>
-  codeInput.registerTemplate("code-input", codeInput.templates.prism(Prism, [new codeInput.plugins.Indent()]));
-  codeInput.registerTemplate("demo", codeInput.templates.prism(Prism, [new codeInput.plugins.Indent()]));
-</script>
+    <!--Code-input is on GitHub ==> https://github.com/WebCoder49/code-input-->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/WebCoder49/code-input@2.1/code-input.css">
+    <script src="https://cdn.jsdelivr.net/gh/WebCoder49/code-input@2.1/code-input.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/WebCoder49/code-input@2.1/plugins/indent.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/WebCoder49/code-input@2.1/plugins/prism-line-numbers.min.css">
+
+    <script>
+        codeInput.registerTemplate("code-input", codeInput.templates.prism(Prism, [new codeInput.plugins.Indent()]));
+        codeInput.registerTemplate("demo", codeInput.templates.prism(Prism, [new codeInput.plugins.Indent()]));
+    </script>
 
 <style>
     code-input textarea, code-input pre {
@@ -518,10 +523,15 @@ $("input[name='sadece']").click(function(){
 
         #fullscreen-btn {
             position: absolute;
-            top: 5px;
-            right: 5px;
+            top: 10px;
+            right: 10px;
             z-index: 1000000001;
-            
+        }
+        #save-btn {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 1000000001;
         }
         .pencere-tam {
             height: 90%;
@@ -540,34 +550,129 @@ $("input[name='sadece']").click(function(){
     </div>
 
 <div id="tamekran">
-    <button id="fullscreen-btn" type="button" title="Tam Ekran" onclick="toggleFullScreen()"><i class="fas fa-expand-arrows-alt"></i></button>
-    <span style="padding-left: 10px;">Sadece önizleme, düzenleme yok</span>
-
+    <div style="height: 40px;">
+    <button class="btn btn-success btn-sm" id="save-btn" type="button" title="Kaydet veya Farklı Kaydet" onclick="saveContent()">Kaydet veya Farklı Kaydet</button>
+    <button class="btn btn-success btn-sm" id="fullscreen-btn" type="button" title="Tam Ekran" onclick="toggleFullScreen()"><i class="fas fa-expand-arrows-alt"></i></button>
+    <div style="text-align: center;"><span>Önizleme veya düzenleme<br />MB ve üstü boyutlu dosyalarda içeriği görüntüleme ve düzenleme yaparken tarayıcınız kilitlenebilir. Tek tablo veya küçük boyutlu dosyalarda kullanılmalıdır.</span></div>
+    </div>
     <code-input required id="sql-listele" class="line-numbers pencere-normal" lang="sql" placeholder="Yükleniyor Lütfen bekleyin...!" template="code-input"></code-input>
 </div>
 
-    <script>
-        function toggleFullScreen() {
-            const codeInputElement = document.getElementById('tamekran');
-            const fullscreenBtnIcon = document.querySelector('#fullscreen-btn i');
-            const codeInputStyle = document.querySelector('#sql-listele');
-            if (codeInputElement.classList.contains('fullscreen')) {
-                console.log("aaa");
-                codeInputStyle.classList.remove('pencere-tam');
-                codeInputStyle.classList.add('pencere-normal');
+<script>
+    function toggleFullScreen() {
+        const codeInputElement = document.getElementById('tamekran');
+        const fullscreenBtnIcon = document.querySelector('#fullscreen-btn i');
+        const codeInputStyle = document.querySelector('#sql-listele');
+        if (codeInputElement.classList.contains('fullscreen')) {
+            console.log("aaa");
+            codeInputStyle.classList.remove('pencere-tam');
+            codeInputStyle.classList.add('pencere-normal');
 
-                codeInputElement.classList.remove('fullscreen');
-                fullscreenBtnIcon.classList.remove('fa-compress-arrows-alt');
-                fullscreenBtnIcon.classList.add('fa-expand-arrows-alt');
+            codeInputElement.classList.remove('fullscreen');
+            fullscreenBtnIcon.classList.remove('fa-compress-arrows-alt');
+            fullscreenBtnIcon.classList.add('fa-expand-arrows-alt');
+        } else {
+            codeInputStyle.classList.remove('pencere-normal');
+            codeInputStyle.classList.add('pencere-tam');
+            codeInputElement.classList.add('fullscreen');
+            fullscreenBtnIcon.classList.remove('fa-expand-arrows-alt');
+            fullscreenBtnIcon.classList.add('fa-compress-arrows-alt');
+        }
+    }
+
+function getRawContent() {
+    const codeInputElement = document.getElementById('sql-listele');
+    const rawContent = codeInputElement.querySelector('code').textContent;
+    return rawContent;
+}
+
+function saveContent() {
+
+    if ( $("#selectedFilePath2").val()!='' ) {
+
+        var secilen_dosya_adi = $("#selectedFilePath2").val();
+
+    } else if ( $("#selectedFilePath4").val()!='' ) {
+
+        var secilen_dosya_adi = $("#selectedFilePath4").val();
+
+    }
+
+    const rawContent = getRawContent();
+
+    var pencere = jw('b secim',OK).baslik('Veritabanını Kaydet').akilliKapatPasif().kapatPasif().icerik("Veritabanı Yedek Yolunu ve veya Dosya Adını Değiştirebilirsiniz<br /><br /><b id='sqlyoludosyadibos' style='color:blue;'></b><input id='sqlyoludosyadi' value=" + secilen_dosya_adi + " size='80' /><br /><br /><b>ÖNEMLİ NOT:</b> Aynı dosya mevcut ise üzerine yazılacağını unutmayın.<br /><br />Veritabanını kaydetmek istediğinizden emin misiniz?").en(550).ac();
+
+
+    const myTimeout = setTimeout(idver, 1);
+    function idver() {
+        var i=0;
+        $('.jw-t-standart').each(function(){
+            i++;
+            var newID='button_'+i;
+            $(this).attr('id',newID);
+        });
+    }
+
+    $("#sqlyoludosyadi").on("keypress keyup input", function(event) {
+
+        var girilendizinadi = document.getElementById('sqlyoludosyadi').value;
+
+        if(girilendizinadi==''){
+            $("#sqlyoludosyadibos").html("DİZİN, YOLU VE DOSYA ADI ZORUNLUDUR<br /><br />");
+            $("#button_1").hide();
+        }else{
+            $("#sqlyoludosyadibos").html("");
+            $("#button_1").show();
+        }
+
+        var englishAlphabetAndWhiteSpace = /[A-Za-z0-9-/_.]/g;
+        var key = String.fromCharCode(event.which);
+            if (event.keyCode == 8 || event.keyCode == 37 || event.keyCode == 39 || englishAlphabetAndWhiteSpace.test(key)) {
+                return true;
+            }
+            return false;
+    });
+
+
+function OK(x){
+
+    var yeniadi = document.getElementById('sqlyoludosyadi').value;
+
+    if(x==1){
+
+        var bekleme = jw("b bekle").baslik("Veritabanı Kaydediliyor...").en(450).boy(10).kilitle().akilliKapatPasif().ac();
+
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", "save_sql.php", true);
+    xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4) {
+            if (xhr.status === 200) {
+                const response = JSON.parse(xhr.responseText);
+                bekleme.kapat();
+                if (response.status === 'success') {
+                    jw("b olumlu").baslik("Veritabanı Kaydetme Sonucu").icerik( yeniadi + "<br />Dosya başarıyla kaydedildi!").en(450).boy(10).kilitle().akilliKapatPasif().kapaninca(function(){ window.location.href=window.location.href }).ac();
+                } else {
+                    jw("b olumlu").baslik("Veritabanı Kaydetme Sonucu").icerik("<b>Dosya kaydedilirken bir hata oluştu:</b> " + response.message).en(350).boy(10).kilitle().akilliKapatPasif().ac();
+                }
             } else {
-                codeInputStyle.classList.remove('pencere-normal');
-                codeInputStyle.classList.add('pencere-tam');
-                codeInputElement.classList.add('fullscreen');
-                fullscreenBtnIcon.classList.remove('fa-expand-arrows-alt');
-                fullscreenBtnIcon.classList.add('fa-compress-arrows-alt');
+                jw("b olumlu").baslik("Veritabanı Kaydetme Sonucu").icerik("Sunucuya bağlanırken bir hata oluştu.").en(350).boy(10).kilitle().akilliKapatPasif().ac();
             }
         }
-    </script>
+    };
+
+        xhr.send(JSON.stringify({ content: rawContent, dosyayoluveadi: yeniadi }));
+
+    } else {
+        pencere.kapat();
+     }
+}
+
+}
+// JavaScript Prompt // açılan pencere içine input ekler
+
+</script>
+
 
                 </div><!-- / <div class="card-body p-0"> -->
             </div><!-- / <div class="card"> -->
