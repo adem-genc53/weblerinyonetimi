@@ -20,35 +20,49 @@ class GoogleDriveTreeView {
 
     public function showSize($size_in_bytes) {
         if ($size_in_bytes >= 1073741824) {
-            $size_in_bytes = number_format($size_in_bytes / 1073741824, 2) . ' GB';
+            return number_format($size_in_bytes / 1073741824, 2) . ' GB';
         } elseif ($size_in_bytes >= 1048576) {
-            $size_in_bytes = number_format($size_in_bytes / 1048576, 2) . ' MB';
+            return number_format($size_in_bytes / 1048576, 2) . ' MB';
         } elseif ($size_in_bytes >= 1024) {
-            $size_in_bytes = number_format($size_in_bytes / 1024, 2) . ' KB';
+            return number_format($size_in_bytes / 1024, 2) . ' KB';
         } elseif ($size_in_bytes >= 1) {
-            $size_in_bytes = $size_in_bytes . ' Bayt';
+            return $size_in_bytes . ' Bayt';
         } else {
-            $size_in_bytes = '0 Bayt';
+            return '0 Bayt';
         }
-        return $size_in_bytes;
+    }
+
+    private function fetchFiles($query) {
+        $pageToken = null;
+        $files = [];
+
+        do {
+            $response = $this->service->files->listFiles([
+                'q' => $query,
+                'pageToken' => $pageToken,
+                'fields' => 'nextPageToken, files(id, name, mimeType, size)',
+                'orderBy' => 'name',
+            ]);
+
+            $files = array_merge($files, $response->files);
+            $pageToken = $response->nextPageToken;
+        } while ($pageToken);
+
+        return $files;
     }
 
     public function getFilesAndFolders() {
-        $results = $this->service->files->listFiles(array(
-            'q' => "'{$this->folderId}' in parents",
-            'orderBy' => 'name'
-        ));
+        $query = "'{$this->folderId}' in parents";
+        $files = $this->fetchFiles($query);
 
         $drive_dizinler_arr = [];
         $drive_dosyalar_arr = [];
 
-        foreach ($results->getFiles() as $file) {
-            $optpParams = array('fields' => "size");
-            $response = $this->service->files->get($file->getId(), $optpParams);
-            if ($file->getMimeType() == 'application/vnd.google-apps.folder') {
-                $drive_dizinler_arr[$file->getId()][$this->showSize($response->size)] = $file->getName();
+        foreach ($files as $file) {
+            if ($file->mimeType == 'application/vnd.google-apps.folder') {
+                $drive_dizinler_arr[$file->id][$this->showSize($file->size ?? 0)] = $file->name;
             } else {
-                $drive_dosyalar_arr[$file->getId()][$this->showSize($response->size)] = $file->getName();
+                $drive_dosyalar_arr[$file->id][$this->showSize($file->size ?? 0)] = $file->name;
             }
         }
 
@@ -56,10 +70,9 @@ class GoogleDriveTreeView {
     }
 
     public function emptyDir($dirid) {
-        $results = $this->service->files->listFiles(array(
-            'q' => "'$dirid' in parents"
-        ));
-        return count($results->getFiles());
+        $query = "'$dirid' in parents";
+        $files = $this->fetchFiles($query);
+        return count($files);
     }
 
     public function generateList() {
