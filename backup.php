@@ -271,21 +271,7 @@ if (!function_exists('veritabaniYedekleme')) {
         // Başlangıç ayarlarını string olarak oluşturma fonksiyonu
     if (!function_exists('generateInitialSettingsString')) {
         function generateInitialSettingsString($tables, $initialSettings) {
-/*
-            // BELKİ BAŞKA ZAMAN KULLANIRIZ DİYE ŞİMDİLİK KALSIN
 
-            $initialSettingsString = "-- -------------------------------------------------------\n";
-            $initialSettingsString .= "-- Veritabanı yedeği oluşturma başlangıç ayarları\n";
-            $initialSettingsString .= "-- -------------------------------------------------------\n";
-            $initialSettingsString .= "SET sql_mode = '" . $initialSettings['sql_mode'] . "';\n";
-            $initialSettingsString .= "SET time_zone = '" . $initialSettings['time_zone'] . "';\n";
-            $initialSettingsString .= "SET character_set_client = '" . $initialSettings['character_set_client'] . "';\n";
-            $initialSettingsString .= "SET character_set_results = '" . $initialSettings['character_set_results'] . "';\n";
-            $initialSettingsString .= "SET collation_connection = '" . $initialSettings['collation_connection'] . "';\n";
-            $initialSettingsString .= "SET NAMES '" . $initialSettings['karakter_seti'] . "';\n";
-            $initialSettingsString .= "\n";
-            return $initialSettingsString;
-*/
             // SQL Mode ayarları
             $sql_mode = 'NO_AUTO_VALUE_ON_ZERO'; // Varsayılan değer
             if (!empty($initialSettings['sql_mode'])) {

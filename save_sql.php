@@ -18,7 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (isset($data['content']) && isset($data['dosyayoluveadi'])) {
         $content = $data['content'];
-        $dosyaYoluVeAdi = $data['dosyayoluveadi'];
+        $dosyaYoluVeAdi = KOKYOLU.$data['dosyayoluveadi'];
 
         // Dosya uzantısını kontrol etme
         if (substr($dosyaYoluVeAdi, -7) !== '.sql.gz' && substr($dosyaYoluVeAdi, -4) !== '.sql') {

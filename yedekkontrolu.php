@@ -579,7 +579,10 @@ $("input[name='sadece']").click(function(){
             fullscreenBtnIcon.classList.add('fa-compress-arrows-alt');
         }
     }
+</script>
 
+<script>
+         
 function getRawContent() {
     const codeInputElement = document.getElementById('sql-listele');
     const rawContent = codeInputElement.querySelector('code').textContent;
@@ -592,6 +595,10 @@ function saveContent() {
 
         var secilen_dosya_adi = $("#selectedFilePath2").val();
 
+    } else if ( $("#selectedFilePath3").val()!='' ) {
+
+        var secilen_dosya_adi = $("#selectedFilePath3").val();
+
     } else if ( $("#selectedFilePath4").val()!='' ) {
 
         var secilen_dosya_adi = $("#selectedFilePath4").val();
@@ -600,9 +607,49 @@ function saveContent() {
 
     const rawContent = getRawContent();
 
-    var pencere = jw('b secim',OK).baslik('Veritabanını Kaydet').akilliKapatPasif().kapatPasif().icerik("Veritabanı Yedek Yolunu ve veya Dosya Adını Değiştirebilirsiniz<br /><br /><b id='sqlyoludosyadibos' style='color:blue;'></b><input id='sqlyoludosyadi' value=" + secilen_dosya_adi + " size='80' /><br /><br /><b>ÖNEMLİ NOT:</b> Aynı dosya mevcut ise üzerine yazılacağını unutmayın.<br /><br />Veritabanını kaydetmek istediğinizden emin misiniz?").en(550).ac();
+    function uzantiKontrolu(dosya_yolu_dosya_adi_uzanti) {
+        var validExtensions = ['sql', 'sql.gz'];
+        var dosya_adi = dosya_yolu_dosya_adi_uzanti.split('\\').pop().split('/').pop();
+        
+        // Dosya adının uzantısını tam olarak al
+        var uzantilar = dosya_adi.split('.').slice(1).join('.').toLowerCase();
+        
+        if (validExtensions.indexOf(uzantilar) === -1) {
+            return false;
+        }
+        return true;
+    }
+
+    $(document).on("keypress keyup input", "#sqlyoludosyadi", function () {
+        var $this = $(this);
+        setTimeout(function() {
+            var dosya_yolu_dosya_adi_uzanti = $this.val();
+
+            if (uzantiKontrolu(dosya_yolu_dosya_adi_uzanti)){
+                $('#button_1').show();
+            } else {
+                $('#button_1').hide();
+            }
+        }, 100); // 100ms delay
+    });
 
 
+    var yol = "<?php echo KOKYOLU; ?>";
+    var secilendosya_adi = secilen_dosya_adi.replace(yol, '');
+
+    var isim = yol + secilendosya_adi;
+    var isimname = isim.match(/([^\/]*)\/*$/)[1];
+    var pencere = jw('b secim',OK).baslik("Veritabanını Kaydet").akilliKapatPasif().kapatPasif()
+    .icerik("<p id='dizinvarmi'></p> <p><div class='editable' data-placeholder='" + yol + "'><input type='text' value='" + secilendosya_adi +"' id='sqlyoludosyadi' /></div></p><div style='padding-bottom:5px;'>Dosya yolunu ve adını değiştirebilirsiniz. Desteklenen dosya uzantıları <b>sql</b> ve <b>sql.gz</b> dir</b></div><div id='geridizin' style='display:none;color:blue;padding-bottom:5px;font-weight: bold;'></div>")
+    .en(650).ac();
+
+
+    var dizinvarmi = true;
+    if(dizinvarmi){
+        $("#dizinvarmi").html("<span style='font-size: 12px;color:blue;'><b>DİKKAT!</b></span> Bu <b>" + secilendosya_adi + "</b> <b style='font-size: 12px;color:blue;'> dosya mevcut</b>. Eğer kaydederseniz üzerine yazılacaktır.");
+    }
+
+    <?php // Popup penceredeki butonları kontrol etmek için ID ekliyoruz. setTimeout() ile bekletiyoruz ki popup pencere açılsın butonlar oluşsun ?>
     const myTimeout = setTimeout(idver, 1);
     function idver() {
         var i=0;
@@ -611,21 +658,17 @@ function saveContent() {
             var newID='button_'+i;
             $(this).attr('id',newID);
         });
+        $('#button_1').html('SQL Dosyayı Kaydet');
     }
-
+        
     $("#sqlyoludosyadi").on("keypress keyup input", function(event) {
 
-        var girilendizinadi = document.getElementById('sqlyoludosyadi').value;
+        var dizinyolu = document.getElementById('sqlyoludosyadi').value;
+        var yol = "<?php echo KOKYOLU; ?>";
+        var anadizinbozuldumu = dizinyolu.match(yol);
+        showResult(dizinyolu)
 
-        if(girilendizinadi==''){
-            $("#sqlyoludosyadibos").html("DİZİN, YOLU VE DOSYA ADI ZORUNLUDUR<br /><br />");
-            $("#button_1").hide();
-        }else{
-            $("#sqlyoludosyadibos").html("");
-            $("#button_1").show();
-        }
-
-        var englishAlphabetAndWhiteSpace = /[A-Za-z0-9-/_.]/g;
+        var englishAlphabetAndWhiteSpace = /[.A-Za-z0-9-_/]/g;
         var key = String.fromCharCode(event.which);
             if (event.keyCode == 8 || event.keyCode == 37 || event.keyCode == 39 || englishAlphabetAndWhiteSpace.test(key)) {
                 return true;
@@ -633,46 +676,98 @@ function saveContent() {
             return false;
     });
 
+function showResult(str) {
+
+    var xmlhttp=new XMLHttpRequest();
+    xmlhttp.onreadystatechange=function() {
+        if (this.readyState==4 && this.status==200) {
+            document.getElementById("dizinvarmi").innerHTML=this.responseText;
+        }
+    }
+    xmlhttp.open("GET","dizin_varmi.php?sql_varmi="+str,true);
+    xmlhttp.send();
+} 
 
 function OK(x){
-
-    var yeniadi = document.getElementById('sqlyoludosyadi').value;
-
     if(x==1){
+        var yeniadi = document.getElementById('sqlyoludosyadi').value;
 
-        var bekleme = jw("b bekle").baslik("Veritabanı Kaydediliyor...").en(450).boy(10).kilitle().akilliKapatPasif().ac();
+        var bekleme = jw("b bekle").baslik("Veritabanı Kaydediliyor...").en(400).boy(10).kilitle().akilliKapatPasif().ac();
 
-    const xhr = new XMLHttpRequest();
-    xhr.open("POST", "save_sql.php", true);
-    xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-    xhr.onreadystatechange = function () {
-        if (xhr.readyState === 4) {
-            if (xhr.status === 200) {
-                const response = JSON.parse(xhr.responseText);
-                bekleme.kapat();
-                if (response.status === 'success') {
-                    jw("b olumlu").baslik("Veritabanı Kaydetme Sonucu").icerik( yeniadi + "<br />Dosya başarıyla kaydedildi!").en(450).boy(10).kilitle().akilliKapatPasif().kapaninca(function(){ window.location.href=window.location.href }).ac();
-                } else {
-                    jw("b olumlu").baslik("Veritabanı Kaydetme Sonucu").icerik("<b>Dosya kaydedilirken bir hata oluştu:</b> " + response.message).en(350).boy(10).kilitle().akilliKapatPasif().ac();
+            const xhr = new XMLHttpRequest();
+            xhr.open("POST", "save_sql.php", true);
+            xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 200) {
+                        const response = JSON.parse(xhr.responseText);
+                        bekleme.kapat();
+                        if (response.status === 'success') {
+                            jw("b olumlu").baslik("Veritabanı Kaydetme Sonucu").icerik("<b>Dosya başarıyla kaydedildi!</b><br />" + yeniadi).en(450).boy(10).kilitle().akilliKapatPasif().kapaninca(function(){ window.location.href=window.location.href }).ac();
+                        } else {
+                            jw("b olumlu").baslik("Veritabanı Kaydetme Sonucu").icerik("<b>Dosya kaydedilirken bir hata oluştu:</b><br />" + response.message).en(350).boy(10).kilitle().akilliKapatPasif().ac();
+                        }
+                    } else {
+                        jw("b olumlu").baslik("Veritabanı Kaydetme Sonucu").icerik("Sunucuya bağlanırken bir hata oluştu.").en(350).boy(10).kilitle().akilliKapatPasif().ac();
+                    }
                 }
-            } else {
-                jw("b olumlu").baslik("Veritabanı Kaydetme Sonucu").icerik("Sunucuya bağlanırken bir hata oluştu.").en(350).boy(10).kilitle().akilliKapatPasif().ac();
-            }
-        }
-    };
-
-        xhr.send(JSON.stringify({ content: rawContent, dosyayoluveadi: yeniadi }));
-
+            };
+            xhr.send(JSON.stringify({ content: rawContent, dosyayoluveadi: yeniadi }));
     } else {
         pencere.kapat();
      }
 }
-
+  getTextWidth()
 }
-// JavaScript Prompt // açılan pencere içine input ekler
-
+// JavaScript Prompt
 </script>
 
+<style>
+    .editable
+        {
+            position: relative;
+            /*border: 1px solid gray;*/
+            padding-top: 1px;
+            /*background-color: white;*/
+            box-shadow: rgba(0,0,0,0.4) 2px 2px 2px inset;
+        }
+
+    .editable > input
+        {
+            /*position: relative;
+            z-index: 1;*/
+            border-color: white;
+            /*background-color: transparent;
+            box-shadow: none;*/
+            width: 100%;
+            /*padding-left: 40px;*/
+        }
+
+    .editable::before
+        {
+            position: absolute;
+            left: 4px;
+            top: 5px;
+            content: attr(data-placeholder);
+            pointer-events: none;
+            opacity: 1;
+            z-index: 1;
+        }
+</style>
+
+<script type="text/javascript">
+    function getTextWidth() {
+        inputText = "<?php echo KOKYOLU; ?>";
+        font = "14px Helvetica Neue";
+
+        canvas = document.createElement("canvas");
+        context = canvas.getContext("2d");
+        context.font = font;
+        width = context.measureText(inputText).width;
+        formattedWidth = Math.ceil(width) + "px";
+        $('.editable').css('padding-left', formattedWidth);
+    }
+</script>
 
                 </div><!-- / <div class="card-body p-0"> -->
             </div><!-- / <div class="card"> -->
@@ -721,4 +816,3 @@ $('#bakim').click(function( e ){
 <?php 
 include('includes/footer.php');
 ?>
-

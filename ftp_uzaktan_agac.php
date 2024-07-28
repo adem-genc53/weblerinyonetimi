@@ -11,11 +11,11 @@ $hash = new Hash;
     }
 
 class FtpTreeView {
-
     private string $ftpsunucu;
     private string $ftpusername;
     private string $ftppass;
     private string $ftppath;
+    private string $ftp_path;
     private array $files = [];
     private array $ftpdeki_dosyalar = [];
     private array $ftpdeki_dizinler = [];
@@ -27,7 +27,6 @@ class FtpTreeView {
     private $dir; // Resource or false
 
     function __construct(string $tiklanan_path, $genel_ayarlar, $hash) {
-
         $this->ftpsunucu    = $genel_ayarlar['sunucu'] ?? '';
         $this->ftpusername  = !empty($genel_ayarlar['username']) ? $hash->take($genel_ayarlar['username']) : '';
         $this->ftppass      = !empty($genel_ayarlar['password']) ? $hash->take($genel_ayarlar['password']) : '';
@@ -72,14 +71,12 @@ class FtpTreeView {
     }
 
     private function getFtpContent() {
-
         $full_path = "/".trim($this->ftppath, '/');
 
         if ($this->ftp_path !== '/') {
             $full_path .= $this->ftp_path;
         }
 
-            //file_put_contents(KOKYOLU.'error.log', date('Y-m-d H:i:s') . " - FTP Ağaç: " .$full_path. "\n", FILE_APPEND);
 
         // Dizinin var olup olmadığını kontrol et
         if (@ftp_chdir($this->ftp, $full_path)) {
@@ -169,6 +166,7 @@ class FtpTreeView {
 $tiklanan_path = urldecode($_POST['dir'] ?? ''); // Default to empty string if not set
 $tree = new FtpTreeView($tiklanan_path, $genel_ayarlar, $hash);
 echo $tree->createTree();
+
 
  
 
