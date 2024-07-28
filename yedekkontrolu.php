@@ -778,13 +778,19 @@ function OK(x){
 
 <script type='text/javascript'>
 $('#bakim').click(function( e ){
-  var veritabani_id = $('#selectedFilePath1').val();
-      if(!veritabani_id) {
-        $(function(){
-            jw("b olumsuz").baslik("Veritabanı Belirlemediniz!").icerik("Bakım yapacağınız veritabanı seçmelisiniz").kilitle().en(400).boy(100).ac();
-        })
-        return false;
-    }
+
+    $('#sql-listele').val("");
+    $("#sql-listele").hide();
+    $("#sql-listeleme-aktif").hide();
+    $('#veritabanikarsilastir').empty();
+
+    var veritabani_id = $('#selectedFilePath1').val();
+        if(!veritabani_id) {
+            $(function(){
+                jw("b olumsuz").baslik("Veritabanı Belirlemediniz!").icerik("Bakım yapacağınız veritabanı seçmelisiniz").kilitle().en(400).boy(100).ac();
+            })
+            return false;
+        }
     var bekleme = jw("b bekle").baslik("Veri Tabanı Bakım Yapılıyor...").en(350).boy(10).kilitle().akilliKapatPasif().ac();
 
     $.ajax({
