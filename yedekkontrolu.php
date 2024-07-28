@@ -637,8 +637,6 @@ function saveContent() {
     var yol = "<?php echo KOKYOLU; ?>";
     var secilendosya_adi = secilen_dosya_adi.replace(yol, '');
 
-    var isim = yol + secilendosya_adi;
-    var isimname = isim.match(/([^\/]*)\/*$/)[1];
     var pencere = jw('b secim',OK).baslik("Veritabanını Kaydet").akilliKapatPasif().kapatPasif()
     .icerik("<p id='dizinvarmi'></p> <p><div class='editable' data-placeholder='" + yol + "'><input type='text' value='" + secilendosya_adi +"' id='sqlyoludosyadi' /></div></p><div style='padding-bottom:5px;'>Dosya yolunu ve adını değiştirebilirsiniz. Desteklenen dosya uzantıları <b>sql</b> ve <b>sql.gz</b> dir</b></div><div id='geridizin' style='display:none;color:blue;padding-bottom:5px;font-weight: bold;'></div>")
     .en(650).ac();
@@ -662,7 +660,6 @@ function saveContent() {
     }
         
     $("#sqlyoludosyadi").on("keypress keyup input", function(event) {
-
         var dizinyolu = document.getElementById('sqlyoludosyadi').value;
         var yol = "<?php echo KOKYOLU; ?>";
         var anadizinbozuldumu = dizinyolu.match(yol);
@@ -677,7 +674,6 @@ function saveContent() {
     });
 
 function showResult(str) {
-
     var xmlhttp=new XMLHttpRequest();
     xmlhttp.onreadystatechange=function() {
         if (this.readyState==4 && this.status==200) {
