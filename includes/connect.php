@@ -132,8 +132,9 @@ if(preg_match("/[a-zA-Z0-9_]/i", BACKUPDIR)){
         }
     }
     // Dizinin içine kimse ulaşamasın diye .htaccess oluşturuyoruz ve içine 'deny from all' yazıyoruz
-    if(!file_exists(BACKUPDIR . '/.htaccess')){
-        $file = new SplFileObject(ZIPDIR . '/.htaccess', "w") ;
+    $htaccessPathBackup = BACKUPDIR . '/.htaccess';
+    if (!file_exists($htaccessPathBackup)) {
+        $file = new SplFileObject($htaccessPathBackup, "w");
         $file->fwrite('deny from all');
     }
 }
@@ -145,8 +146,9 @@ if(preg_match("/[a-zA-Z0-9_]/i", ZIPDIR)){
         }
     }
     // Dizinin içine kimse ulaşamasın diye .htaccess oluşturuyoruz ve içine 'deny from all' yazıyoruz
-    if(!file_exists(ZIPDIR . '/.htaccess')){
-        $file = new SplFileObject(ZIPDIR . '/.htaccess', "w") ;
+    $htaccessPathZip = ZIPDIR . '/.htaccess';
+    if (!file_exists($htaccessPathZip)) {
+        $file = new SplFileObject($htaccessPathZip, "w");
         $file->fwrite('deny from all');
     }
 }
