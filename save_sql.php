@@ -12,8 +12,9 @@ require_once __DIR__ . '/includes/turkcegunler.php';
     exit;
 */
 
-header('Content-Type: application/json');
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    
     $data = json_decode(file_get_contents('php://input'), true);
 
     if (isset($data['content']) && isset($data['dosyayoluveadi'])) {

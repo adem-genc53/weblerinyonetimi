@@ -12,12 +12,6 @@ if(isset($_GET['do'])){
   unset($_SESSION['folder'],$_SESSION['testmode'],$_SESSION['test'],$_SESSION['secilen_veritabani_id']);
 }
 
-    // Yedeklenecek dizin yoksa oluştur
-    if(!file_exists(BACKUPDIR)){
-        if (!mkdir(BACKUPDIR, 0777, true)) {
-            die('Failed to create folder' .BACKUPDIR);
-        }
-    }
 ###########################################################################################################################################
 
   // Sayfa ilk geldiğinde veya yükleme modu değiştirdiğinde
@@ -441,7 +435,9 @@ div tt {
         </tr>
         <tr>
           <td>Seçili Alt-Dizindeki tabloları birleştir</td>
-          <td><button type="button" id="merge" class="btn btn-success btn-sm" title="Seçili Alt-Dizindeki Tabloları Birleştir"><i class="fas fa-object-ungroup"></i> Seçili Alt-Dizindeki Tabloları Birleştir </button></td>
+          <td>
+            <button class="btn btn-success btn-sm" id="save-btn" type="button" title="Seçili Alt-Dizindeki Tabloları Birleştir" onclick="saveContent()"><i class="fas fa-object-ungroup"></i> Seçili Alt-Dizindeki Tabloları Birleştir </button>
+          </td>
           <td>Eğer Alt-Dizindeki tüm tabloları geri yüklemek istiyorsanız tek tek tabloları yüklemek yerine önce tabloları birleştirin ve sonra birleştirilen dosyayı geri yükle</td>
         </tr>
 <?php } ?>
@@ -1532,5 +1528,182 @@ var bekleme = jw("b bekle").baslik("Veri Tabanı Birleştiriliyor...").en(350).b
     });
 
 });
+</script>
+
+<script>
+
+function saveContent() {
+
+    function uzantiKontrolu(dosya_yolu_dosya_adi_uzanti) {
+        var validExtensions = ['sql', 'sql.gz'];
+        var dosya_adi = dosya_yolu_dosya_adi_uzanti.split('\\').pop().split('/').pop();
+        
+        // Dosya adının uzantısını tam olarak al
+        var uzantilar = dosya_adi.split('.').slice(1).join('.').toLowerCase();
+        
+        if (validExtensions.indexOf(uzantilar) === -1) {
+            return false;
+        }
+        return true;
+    }
+
+    $(document).on("keypress keyup input", "#sqlyoludosyadi", function () {
+        var $this = $(this);
+        setTimeout(function() {
+            var dosya_yolu_dosya_adi_uzanti = $this.val();
+
+            if (uzantiKontrolu(dosya_yolu_dosya_adi_uzanti)){
+                $('#button_1').show();
+            } else {
+                $('#button_1').hide();
+            }
+        }, 100); // 100ms delay
+    });
+
+    var folder = $('select[name="folder"] option:selected').val();
+      if(!folder) {
+        $(function(){
+            jw("b olumsuz").baslik("Önce Alt-Dizin Seçiniz!").icerik("Birleştirmek istediğiniz bir Alt-Dizin seçmelisiniz").kilitle().en(400).boy(100).ac();
+        })
+        return false;
+    }
+
+    var yol = "<?php echo KOKYOLU; ?>";
+    var backupdir = "<?php echo BACKUPDIR; ?>/";
+    var secilen_dosya_adi = backupdir + 'BIRLESTIRILDI-' + folder + '.sql'; //secilen_dosya_adi.replace(yol, '');
+    var secilendosya_adi = secilen_dosya_adi.replace(yol, '');
+
+    var pencere = jw('b secim',OK).baslik("Veritabanını Kaydet").akilliKapatPasif().kapatPasif()
+    .icerik("<p id='dizinvarmi'></p> <p><div class='editable' data-placeholder='" + yol + "'><input type='text' value='" + secilendosya_adi +"' id='sqlyoludosyadi' /></div></p><div style='padding-bottom:5px;'>Dosya yolunu ve adını değiştirebilirsiniz. Desteklenen dosya uzantıları <b>sql</b> ve <b>sql.gz</b> dir</b></div><div id='geridizin' style='display:none;color:blue;padding-bottom:5px;font-weight: bold;'></div>")
+    .en(650).ac();
+
+
+    var dizinvarmi = false;
+    if(dizinvarmi){
+        $("#dizinvarmi").html("<span style='font-size: 12px;color:blue;'><b>DİKKAT!</b></span> Bu <b>" + secilendosya_adi + "</b> <b style='font-size: 12px;color:blue;'> dosya mevcut</b>. Eğer kaydederseniz üzerine yazılacaktır.");
+    }
+
+    <?php // Popup penceredeki butonları kontrol etmek için ID ekliyoruz. setTimeout() ile bekletiyoruz ki popup pencere açılsın butonlar oluşsun ?>
+    const myTimeout = setTimeout(idver, 1);
+    function idver() {
+        var i=0;
+        $('.jw-t-standart').each(function(){
+            i++;
+            var newID='button_'+i;
+            $(this).attr('id',newID);
+        });
+        $('#button_1').html('SQL Dosyayı Kaydet');
+    }
+        
+  
+    $("#sqlyoludosyadi").on("keypress keyup input", function(event) {
+        var dizinyolu = document.getElementById('sqlyoludosyadi').value;
+        var yol = "<?php echo KOKYOLU; ?>";
+        var anadizinbozuldumu = dizinyolu.match(yol);
+        showResult(dizinyolu)
+
+        var englishAlphabetAndWhiteSpace = /[.A-Za-z0-9-_/]/g;
+        var key = String.fromCharCode(event.which);
+            if (event.keyCode == 8 || event.keyCode == 37 || event.keyCode == 39 || englishAlphabetAndWhiteSpace.test(key)) {
+                return true;
+            }
+            return false;
+    });
+
+    setTimeout(function() {
+      $("#sqlyoludosyadi").trigger("input");
+      console.log("Input olayı manuel olarak tetiklendi.");
+    }, 100); // 1000 milisaniye = 1 saniye
+
+function showResult(str) {
+    var xmlhttp=new XMLHttpRequest();
+    xmlhttp.onreadystatechange=function() {
+        if (this.readyState==4 && this.status==200) {
+            document.getElementById("dizinvarmi").innerHTML=this.responseText;
+        }
+    }
+    xmlhttp.open("GET","dizin_varmi.php?sql_varmi="+str,true);
+    xmlhttp.send();
+} 
+
+function OK(x){
+    if(x==1){
+        var yeniadi = document.getElementById('sqlyoludosyadi').value;
+
+        var bekleme = jw("b bekle").baslik("Veritabanı Kaydediliyor...").en(400).boy(10).kilitle().akilliKapatPasif().ac();
+
+            const xhr = new XMLHttpRequest();
+            xhr.open("POST", "yedek_tablolari_birlestir.php", true);
+            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 200) {
+                      const response = JSON.parse(xhr.responseText);
+                        bekleme.kapat();
+                        if (response.status === 'success') {
+                            jw("b olumlu").baslik("Veritabanı Kaydetme Sonucu").icerik("<b>Dosya başarıyla kaydedildi!</b><br />" + yeniadi).en(450).boy(10).kilitle().akilliKapatPasif().kapaninca(function(){ window.location.href=window.location.href }).ac();
+                        } else {
+                            jw("b olumlu").baslik("Veritabanı Kaydetme Sonucu").icerik("<b>Dosya kaydedilirken bir hata oluştu:</b><br />" + response.message).en(350).boy(10).kilitle().akilliKapatPasif().ac();
+                        }
+                    } else {
+                        jw("b olumlu").baslik("Veritabanı Kaydetme Sonucu").icerik("Sunucuya bağlanırken bir hata oluştu.").en(350).boy(10).kilitle().akilliKapatPasif().ac();
+                    }
+                }
+            };
+            xhr.send("klasor_adi=" + encodeURIComponent(folder) + "&dosya_adi=" + encodeURIComponent(yeniadi));
+    } else {
+        pencere.kapat();
+     }
+}
+  getTextWidth()
+}
+// JavaScript Prompt
+</script>
+
+<style>
+    .editable
+        {
+            position: relative;
+            /*border: 1px solid gray;*/
+            padding-top: 1px;
+            /*background-color: white;*/
+            box-shadow: rgba(0,0,0,0.4) 2px 2px 2px inset;
+        }
+
+    .editable > input
+        {
+            /*position: relative;
+            z-index: 1;*/
+            border-color: white;
+            /*background-color: transparent;
+            box-shadow: none;*/
+            width: 100%;
+            /*padding-left: 40px;*/
+        }
+
+    .editable::before
+        {
+            position: absolute;
+            left: 4px;
+            top: 5px;
+            content: attr(data-placeholder);
+            pointer-events: none;
+            opacity: 1;
+            z-index: 1;
+        }
+</style>
+
+<script type="text/javascript">
+    function getTextWidth() {
+        inputText = "<?php echo KOKYOLU; ?>";
+        font = "14px Helvetica Neue";
+
+        canvas = document.createElement("canvas");
+        context = canvas.getContext("2d");
+        context.font = font;
+        width = context.measureText(inputText).width;
+        formattedWidth = Math.ceil(width) + "px";
+        $('.editable').css('padding-left', formattedWidth);
+    }
 </script>
 

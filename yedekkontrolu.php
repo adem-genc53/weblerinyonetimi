@@ -564,7 +564,6 @@ $("input[name='sadece']").click(function(){
         const fullscreenBtnIcon = document.querySelector('#fullscreen-btn i');
         const codeInputStyle = document.querySelector('#sql-listele');
         if (codeInputElement.classList.contains('fullscreen')) {
-            console.log("aaa");
             codeInputStyle.classList.remove('pencere-tam');
             codeInputStyle.classList.add('pencere-normal');
 

@@ -11,16 +11,19 @@ set_time_limit(0);
 
     //sleep(5);
      //echo '<pre>' . print_r($_POST, true) . '</pre>';
+     //echo json_encode(['status' => 'error', 'message' => '<pre>' . print_r($_POST, true) . '</pre>']);
      //exit;
 ################################################################################
-
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 // İşlenecek dosya veya dizin yolu ve kaydet parametresi
-$path = BACKUPDIR.'/'.$_POST['folder'] ?? '';
+$path = isset($_POST['klasor_adi']) ? BACKUPDIR ."/". trim($_POST['klasor_adi']) : '';
 $save = true;
 
 // Hedef dosya adı ve yolu (birleştirilecek SQL dosyası için)
-$outputFileName = 'BIRLESTIRILDI-'.$_POST['folder'].'.sql';
-$outputFilePath = BACKUPDIR.'/'.$outputFileName;
+$outputFilePath = isset($_POST['dosya_adi']) ? KOKYOLU . trim($_POST['dosya_adi']) : '';
+
+
+//file_put_contents(KOKYOLU.'error.log', date('Y-m-d H:i:s') . '<pre>' . print_r($outputFilePath, true) . '</pre>' . "\n", FILE_APPEND);
 
 // Fonksiyon: Dosya içeriğini oku ve birleştir
 function getFileContent($filePath) {
@@ -154,17 +157,58 @@ if (is_dir($path)) {
     $mergedContent = implode("\n", $uniqueLines) . "\n" . $footerSQL;
     $mergedContent = str_replace($bul, $degistir, $mergedContent);
 
-    if ($save) {
-        // Birleştirilen içeriği UTF-8 olarak encode et ve dosyaya kaydet
-        $mergedContent = mb_convert_encoding($mergedContent, 'UTF-8', 'auto');
-        file_put_contents($outputFilePath, $mergedContent);
-        echo "Dosya başarıyla birleştirilerek kaydedildi: $outputFileName";
-    } else {
-        // İçeriği ekrana yazdır (isteğe bağlı, sadece debug için)
-        //echo $mergedContent;
-    }
+
+    $mergedContent = mb_convert_encoding($mergedContent, 'UTF-8', 'auto');
+
+    
+        if (isset($_POST['klasor_adi']) && isset($_POST['dosya_adi'])) {
+            $content = $mergedContent;
+            $dosyaYoluVeAdi = $outputFilePath;
+    
+            // Dosya uzantısını kontrol etme
+            if (substr($dosyaYoluVeAdi, -7) !== '.sql.gz' && substr($dosyaYoluVeAdi, -4) !== '.sql') {
+                echo json_encode(['status' => 'error', 'message' => 'Geçersiz dosya uzantısı. Dosya .sql veya .sql.gz olmalı.']);
+                exit;
+            }
+
+            // Dizin oluşturma fonksiyonu
+            function createDirectory($dirPath) {
+                if (!is_dir($dirPath)) {
+                    return mkdir($dirPath, 0777, true);
+                }
+                return true;
+            }
+    
+            if (createDirectory(dirname($dosyaYoluVeAdi))) {
+                if (substr($dosyaYoluVeAdi, -7) === '.sql.gz') {
+                    @$file = gzopen($dosyaYoluVeAdi, 'w');
+                    if ($file) {
+                        gzwrite($file, $content);
+                        gzclose($file);
+                        echo json_encode(['status' => 'success']);
+                    } else {
+                        echo json_encode(['status' => 'error', 'message' => 'Dosya açılamadı']);
+                    }
+                } else {
+                    @$file = fopen($dosyaYoluVeAdi, 'w');
+                    if ($file) {
+                        fwrite($file, $content);
+                        fclose($file);
+                        echo json_encode(['status' => 'success']);
+                    } else {
+                        echo json_encode(['status' => 'error', 'message' => 'Dosya açılamadı']);
+                    }
+                }
+            } else {
+                echo json_encode(['status' => 'error', 'message' => 'Dizin oluşturulamadı']);
+            }
+        } else {
+            echo json_encode(['status' => 'error', 'message' => 'Eksik veri, dosya yolu veya içerik biri eksik']);
+        }
+
 } else {
-    echo "Belirtilen yol geçerli bir dizin değil.";
+    echo json_encode(['status' => 'error', 'message' => 'Belirtilen yol geçerli bir dizin değil.']);
+}
 }
 
 ?>
