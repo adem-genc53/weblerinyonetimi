@@ -48,6 +48,7 @@ $errors = [];
         $website_name       = $_POST['website_name'];
         $database_host      = str_replace(' ', '', $_POST['database_host']);
         $db_name            = str_replace(' ', '', $_POST['db_name']);
+        $port               = str_replace(' ', '', $_POST['port']);
         $database_user      = $hash->make(str_replace(' ', '', $_POST['database_user'])); // Veri Tabanı kullanıcı adını şifrele
         if(isset($_POST['database_password']) && empty($_POST['database_password'])){
         $database_password  = "";
@@ -61,19 +62,22 @@ $errors = [];
                 database_host,
                 db_name,
                 database_user,
-                database_password) 
+                database_password,
+                port) 
                 VALUES (
                 :website_name,
                 :database_host,
                 :db_name,
                 :database_user,
-                :database_password
+                :database_password,
+                :port
                 )");
                 $ftvtk->bindParam(':website_name', $website_name, PDO::PARAM_STR);
                 $ftvtk->bindParam(':database_host', $database_host, PDO::PARAM_STR);
                 $ftvtk->bindParam(':db_name', $db_name, PDO::PARAM_STR);
                 $ftvtk->bindParam(':database_user', $database_user, PDO::PARAM_STR);
                 $ftvtk->bindParam(':database_password', $database_password, PDO::PARAM_STR);
+                $ftvtk->bindParam(':port', $port, PDO::PARAM_INT);
                 $ftvtk->execute();
 
 		if($PDOdb->lastInsertId()){
@@ -98,7 +102,8 @@ $errors = [];
     if(isset($_POST['guncelle']) && $_POST['guncelle'] == 1 && empty($errors)){
         $website_name       = $_POST['website_name'];
         $database_host      = str_replace(' ', '', $_POST['database_host']);
-        $db_name      = str_replace(' ', '', $_POST['db_name']);
+        $db_name            = str_replace(' ', '', $_POST['db_name']);
+        $port               = str_replace(' ', '', $_POST['port']);
 
         if(isset($_POST['database_user']) && empty($_POST['database_user'])){
         $databaseuser = "";
@@ -122,7 +127,8 @@ $errors = [];
                 $databasepassword
                 website_name=:website_name,
                 database_host=:database_host,
-                db_name=:db_name
+                db_name=:db_name,
+                port=:port
                 WHERE id=:id");
 
                 if(isset($_POST['database_user']) && !empty($_POST['database_user'])){
@@ -136,6 +142,7 @@ $errors = [];
                 $ftvtk->bindParam(':website_name', $website_name, PDO::PARAM_STR);
                 $ftvtk->bindParam(':database_host', $database_host, PDO::PARAM_STR);
                 $ftvtk->bindParam(':db_name', $db_name, PDO::PARAM_STR);
+                $ftvtk->bindParam(':port', $port, PDO::PARAM_INT);
                 $ftvtk->bindParam(':id', $edit_id, PDO::PARAM_INT);
                 $ftvtk->execute();
 
@@ -278,6 +285,11 @@ include('includes/sub_navbar.php');
                                     <td>Veritabanının host adını girin. Çoğunlukla "localhost" kullanılmaktadır</td>
                                 </tr>
                                 <tr>
+                                    <td>Veritabanı Port: </td>
+                                    <td style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;"><input type="text" class="form-control" name="port" id="port" value="<?php echo $row['port']; ?>" placeholder="Port" /></td>
+                                    <td>Veritabanı port genellikle 3306 dır. MySQL ve MariaDB ikisi kurulu ise MariaDB için 3307 olabilir.</td>
+                                </tr>
+                                <tr>
                                     <td>Veritabanı Adı: </td>
                                     <td style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;"><input type="text" class="form-control" name="db_name" id="db_name" value="<?php echo $row['db_name']; ?>" placeholder="Veritabanı adı" /></td>
                                     <td>Veritabanının adını girin.</td>
@@ -402,6 +414,11 @@ include('includes/sub_navbar.php');
                                     <td>Veritabanı Host Adı: </td>
                                     <td style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;"><input type="text" class="form-control" name="database_host" id="database_host" placeholder="Host adı" /></td>
                                     <td>Veritabanının host adını girin. Çoğunlukla "localhost" kullanılmaktadır</td>
+                                </tr>
+                                <tr>
+                                    <td>Veritabanı Port: </td>
+                                    <td style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;"><input type="text" class="form-control" name="port" id="port" placeholder="Port" /></td>
+                                    <td>Veritabanı port genellikle 3306 dır. MySQL ve MariaDB ikisi kurulu ise MariaDB için 3307 olabilir.</td>
                                 </tr>
                                 <tr>
                                     <td>Veritabanı Adı: </td>

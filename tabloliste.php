@@ -36,7 +36,7 @@ $hash = new Hash;
 
         $db_name = "";
         // Seçilen veritabanı varsa bağlantı oluşturuyoruz
-            $secilen = "mysql:host=".$varsayilan['database_host'].";dbname=".$varsayilan['db_name'].";charset=".CHARSET.";port=".PORT."";
+            $secilen = "mysql:host=".$varsayilan['database_host'].";dbname=".$varsayilan['db_name'].";charset=".CHARSET.";port=".$varsayilan['port']."";
             try {
                 $PDOdbsecilen = new PDO($secilen, $hash->take($varsayilan['database_user']), $hash->take($varsayilan['database_password']), $options);
                 $PDOdbsecilen->exec("set names ".CHARSET);
