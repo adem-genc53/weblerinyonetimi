@@ -26,7 +26,7 @@ set_time_limit(0);
     $varsayilan = $default->fetch(PDO::FETCH_ASSOC);
 
     // Seçilen veritabanı varsa bağlantı oluşturuyoruz
-    $secilen = "mysql:host=".$varsayilan['database_host'].";dbname=".$varsayilan['db_name'].";charset=".CHARSET.";port=".$varsayilan['port']."";
+    $secilen = "mysql:host=".$varsayilan['database_host'].";dbname=".$varsayilan['db_name'].";charset=".$varsayilan['charset'].";port=".$varsayilan['port']."";
     try {
     $PDOdbsecilen = new PDO($secilen, $hash->take($varsayilan['database_user']), $hash->take($varsayilan['database_password']), $options);
     $PDOdbsecilen->exec("set names ".CHARSET);

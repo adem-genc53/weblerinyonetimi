@@ -49,6 +49,7 @@ $errors = [];
         $database_host      = str_replace(' ', '', $_POST['database_host']);
         $db_name            = str_replace(' ', '', $_POST['db_name']);
         $port               = str_replace(' ', '', $_POST['port']);
+        $charset            = str_replace(' ', '', $_POST['charset']);
         $database_user      = $hash->make(str_replace(' ', '', $_POST['database_user'])); // Veri Tabanı kullanıcı adını şifrele
         if(isset($_POST['database_password']) && empty($_POST['database_password'])){
         $database_password  = "";
@@ -63,14 +64,16 @@ $errors = [];
                 db_name,
                 database_user,
                 database_password,
-                port) 
+                port,
+                charset) 
                 VALUES (
                 :website_name,
                 :database_host,
                 :db_name,
                 :database_user,
                 :database_password,
-                :port
+                :port,
+                :charset
                 )");
                 $ftvtk->bindParam(':website_name', $website_name, PDO::PARAM_STR);
                 $ftvtk->bindParam(':database_host', $database_host, PDO::PARAM_STR);
@@ -78,6 +81,7 @@ $errors = [];
                 $ftvtk->bindParam(':database_user', $database_user, PDO::PARAM_STR);
                 $ftvtk->bindParam(':database_password', $database_password, PDO::PARAM_STR);
                 $ftvtk->bindParam(':port', $port, PDO::PARAM_INT);
+                $ftvtk->bindParam(':charset', $charset, PDO::PARAM_STR);
                 $ftvtk->execute();
 
 		if($PDOdb->lastInsertId()){
@@ -104,6 +108,7 @@ $errors = [];
         $database_host      = str_replace(' ', '', $_POST['database_host']);
         $db_name            = str_replace(' ', '', $_POST['db_name']);
         $port               = str_replace(' ', '', $_POST['port']);
+        $charset            = str_replace(' ', '', $_POST['charset']);
 
         if(isset($_POST['database_user']) && empty($_POST['database_user'])){
         $databaseuser = "";
@@ -128,7 +133,8 @@ $errors = [];
                 website_name=:website_name,
                 database_host=:database_host,
                 db_name=:db_name,
-                port=:port
+                port=:port,
+                charset=:charset
                 WHERE id=:id");
 
                 if(isset($_POST['database_user']) && !empty($_POST['database_user'])){
@@ -143,6 +149,7 @@ $errors = [];
                 $ftvtk->bindParam(':database_host', $database_host, PDO::PARAM_STR);
                 $ftvtk->bindParam(':db_name', $db_name, PDO::PARAM_STR);
                 $ftvtk->bindParam(':port', $port, PDO::PARAM_INT);
+                $ftvtk->bindParam(':charset', $charset, PDO::PARAM_STR);
                 $ftvtk->bindParam(':id', $edit_id, PDO::PARAM_INT);
                 $ftvtk->execute();
 
@@ -290,6 +297,11 @@ include('includes/sub_navbar.php');
                                     <td>Veritabanı port genellikle 3306 dır. MySQL ve MariaDB ikisi kurulu ise MariaDB için 3307 olabilir.</td>
                                 </tr>
                                 <tr>
+                                    <td>Veritabanı Karakter Seti: </td>
+                                    <td style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;"><input type="text" class="form-control" name="charset" id="charset" value="<?php echo $row['charset']; ?>" placeholder="Karakter Seti" /></td>
+                                    <td>Veritabanı karakter seti. Bunu kullanabilirsiniz: <b>utf8mb4</b></td>
+                                </tr>
+                                <tr>
                                     <td>Veritabanı Adı: </td>
                                     <td style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;"><input type="text" class="form-control" name="db_name" id="db_name" value="<?php echo $row['db_name']; ?>" placeholder="Veritabanı adı" /></td>
                                     <td>Veritabanının adını girin.</td>
@@ -419,6 +431,11 @@ include('includes/sub_navbar.php');
                                     <td>Veritabanı Port: </td>
                                     <td style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;"><input type="text" class="form-control" name="port" id="port" placeholder="Port" /></td>
                                     <td>Veritabanı port genellikle 3306 dır. MySQL ve MariaDB ikisi kurulu ise MariaDB için 3307 olabilir.</td>
+                                </tr>
+                                <tr>
+                                    <td>Veritabanı Karakter Seti: </td>
+                                    <td style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;"><input type="text" class="form-control" name="charset" id="charset" placeholder="Karakter Seti" /></td>
+                                    <td>Veritabanı karakter seti. Bunu kullanabilirsiniz: <b>utf8mb4</b></td>
                                 </tr>
                                 <tr>
                                     <td>Veritabanı Adı: </td>

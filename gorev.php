@@ -173,7 +173,7 @@ if(isset($row['yedekleme_gorevi']) && $row['yedekleme_gorevi'] == '1' && is_nume
     $db_name = $varsayilan['db_name'];
 
     // YEDEKLENECEK VERİTABANINA BAĞLANTI KURALIM
-    $secilen = "mysql:host=".$varsayilan['database_host'].";dbname=".$varsayilan['db_name'].";charset=".CHARSET.";port=".$varsayilan['port']."";
+    $secilen = "mysql:host=".$varsayilan['database_host'].";dbname=".$varsayilan['db_name'].";charset=".$varsayilan['charset'].";port=".$varsayilan['port']."";
     try {
     $PDOdbsecilen = new PDO($secilen, $hash->take($varsayilan['database_user']), $hash->take($varsayilan['database_password']), $options);
     $PDOdbsecilen->exec("set names ".CHARSET);

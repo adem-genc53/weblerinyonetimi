@@ -87,7 +87,7 @@ if(isset($_POST['veritabani_id']) && $_POST['veritabani_id'] > 0 || isset($_SESS
 
 
     // Seçilen veritabanı varsa bağlantı oluşturuyoruz
-    $secilen = "mysql:host=".$varsayilan['database_host'].";dbname=".$varsayilan['db_name'].";charset=".CHARSET.";port=".$varsayilan['port']."";
+    $secilen = "mysql:host=".$varsayilan['database_host'].";dbname=".$varsayilan['db_name'].";charset=".$varsayilan['charset'].";port=".$varsayilan['port']."";
     try {
     $PDOdbsecilen = new PDO($secilen, $hash->take($varsayilan['database_user']), $hash->take($varsayilan['database_password']), $options);
     $PDOdbsecilen->exec("set names ".CHARSET);
