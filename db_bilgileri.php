@@ -86,7 +86,7 @@ $errors = [];
 
 		if($PDOdb->lastInsertId()){
 		    $messages[] = "Veritabanı Bilgileri Başarıyla Eklendi.";
-            header("Refresh:2");
+            header("Refresh: 2; url=".htmlspecialchars($_SERVER["PHP_SELF"])."?");
 		}else{
             $errors[] = "Bir Hatadan Dolayı Veritabanı Bilgileri Eklenemedi. Tekrar Deneyin.";
         }
@@ -155,8 +155,7 @@ $errors = [];
 
 		if($ftvtk->rowCount()){
 		    $messages[] = "Veritabanı Bilgileri Başarıyla Guncellendi.";
-            //header("Refresh:2");
-            //header("Location: ".$_SERVER['PHP_SELF']);
+            header("Refresh: 2; url=".htmlspecialchars($_SERVER["PHP_SELF"])."?");
 		}else{
             $errors[] = "Bir Hatadan Dolayı Veritabanı Bilgileri Güncellenemedi. Tekrar Deneyin.<br />Veya hiçbir değişiklik yapmadan güncelliyorsunuz";
         }
