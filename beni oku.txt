@@ -37,6 +37,7 @@ Indirdiğiniz JSON dosyayı `client_secrets.json` olarak yeniden adlandırın ve
 Görevlerin çalışması için siteyi birileri ziyaret etmesi gerekiyor ki görevler yerine getirilsin<br />
 Eğer ben tam zamanında görevin çalışmasını istiyorum diyorsanız "hosting cPaneldeki" "Cron İşleri" alanında yeni bir cron oluşturup dakikada bir kez seçiniz<br />
 Komut alanına `/usr/local/bin/php /home/user/alan_adiniz.com/gorev.php >/dev/null 2>&1` girip kaydedin planladığınız zamanlarda webyönetim siteniz tetiklenecek ve zamanında görevler yerine getirilecek<br />
+Eğer görevleri sadece "Cron İşleri" ile çalıştırırsanız cPanelden bu siteye ait dizini şifreleyip bu web siteyi dahada güvenli halde getirmiş olursunuz. Güçlü dizin şifresi bilenin dışında kimse erişemez. (tabiki 100% güvenli garantisi hiçbir şeyde olmadığını unutmayın)<br />
 
 ## Not:<br />
 Veri tabanı bilgileri eklediğiniz veri tabanına kaydederken şifreliyor bu şifre için şifre anahtarı değiştirebilirsiniz<br />
