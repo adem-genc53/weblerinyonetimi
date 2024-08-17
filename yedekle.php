@@ -532,15 +532,15 @@ $(document).ready(function() {
                 
     function yedekle() {
 
-        var veritabani_id = $("#selectedVeritabaniId").val();
-        var onek = $('#onek').val();
-        var gz = $("input[name='gz']:checked").attr('value');
-        var lock = $("input[name='lock']:checked").attr('value');
-        var bakim = $("input[name='bakim']:checked").attr('value');
-        var combine = $("input[name='combine']:checked").attr('value');
-        var tablolar = $('input[class=tablolar]:checked').length;
-        var elle = $("input[name='elle']:checked").attr('value');
-        var onekmetin = $('.dropdown-item.selected').data('value');
+        var veritabani_id   = $("#selectedVeritabaniId").val();
+        var onek            = $('#onek').val();
+        var gz              = $("input[name='gz']:checked").attr('value');
+        var lock            = $("input[name='lock']:checked").attr('value');
+        var bakim           = $("input[name='bakim']:checked").attr('value');
+        var combine         = $("input[name='combine']:checked").attr('value');
+        var tablolar        = $('input[class=tablolar]:checked').length;
+        var elle            = $("input[name='elle']:checked").attr('value');
+        var onekmetin       = $('.dropdown-item.selected').data('value');
 
         if(veritabani_id==='') {
             $(function(){
@@ -616,14 +616,8 @@ $(document).ready(function() {
 </script>
 
 <script type="text/javascript">
-    function yenile(){
-        window.self.location.reload();
-    }
-</script>
-
-<script type="text/javascript">
     $('#dropdownVeritabaniIdButton').siblings('.dropdown-menu').find('.dropdown-item').on('click', function(e) {
-        //e.preventDefault();
+        e.preventDefault();
         const key = $(this).data('key');
         const value = $(this).data('value');
         $('#onek').val(value);
@@ -633,16 +627,16 @@ $(document).ready(function() {
         }
     });
 
-    $('#onek').val($('.dropdown-item.selected').data('value'));
+    // $('#onek').val($('.dropdown-item.selected').data('value'));
 
     function tablolariYukle(key, sort) {
+    
     if(key){
         var veritabani_id = key;
     }else{
         var veritabani_id = $('#selectedVeritabaniId').val();
     }
     
-
     $("#loading").show();
     $('#showTablolarYedekler').show();
     $('#showTablolar').show();

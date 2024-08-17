@@ -392,8 +392,8 @@ div tt {
 
 <div class="dropdown">
 		<?php
+		$disabled = isset($_GET['start']) ? 'disabled' : '';
 		if(isset($_POST['veritabani_id']) && !empty($_POST['veritabani_id']) || isset($_SESSION['secilen_veritabani_id']) && !empty($_SESSION['secilen_veritabani_id'])){
-			$disabled = isset($_GET['start']) ? 'disabled' : '';
 			echo '<button class="btn btn-primary dropdown-toggle  d-flex justify-content-between align-items-center" type="button" id="dropdownVeritabaniIdButton" data-bs-toggle="dropdown" aria-expanded="false" '.$disabled.'>';
 			if(isset($_POST['veritabani_id']) && !empty($_POST['veritabani_id'])){
 				echo '<span class="icon"><img src="images/database-connect-icon-beyaz.svg" style="border:0;width:24px;height:24px;"></span>';
@@ -462,15 +462,15 @@ div tt {
 			<td style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;">
 
 <div class="dropdown">
-		<?php 
+		<?php
+		$disabled = isset($_GET['start']) ? 'disabled' : '';
 		if(in_array($secili_dizin, $files)){
-			$disabled = isset($_GET['start']) ? 'disabled' : '';
 			echo '<button class="btn btn-primary dropdown-toggle  d-flex justify-content-between align-items-center" type="button" id="dropdownAltKlasorButton" data-bs-toggle="dropdown" aria-expanded="false" '.$disabled.'>';
 			echo "<i class='fas fa-folder-open' style='font-size:20px;color:#FFA500;padding-right:10px;'></i>";
 			echo ' <span class="file-name">' . $secili_dizin . '</span>';
 			echo '<script> var dizin_secildi = true; </script>';
 		}else{
-			echo '<button class="btn btn-secondary dropdown-toggle  d-flex justify-content-between align-items-center" type="button" id="dropdownAltKlasorButton" data-bs-toggle="dropdown" aria-expanded="false">';
+			echo '<button class="btn btn-secondary dropdown-toggle  d-flex justify-content-between align-items-center" type="button" id="dropdownAltKlasorButton" data-bs-toggle="dropdown" aria-expanded="false" '.$disabled.'>';
 			echo 'Yedek Tabloları İçeren Alt-Klasörü Seçin';
 		}
 		?>
