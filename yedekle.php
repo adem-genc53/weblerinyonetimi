@@ -163,7 +163,7 @@ include('includes/sub_navbar.php');
                                 <tr>
                                     <td>Veritabanının tabloları <b>Elle</b> seç</td>
                                     <td>Evet</td>
-                                    <td><input type="radio" name="combine" id="combine3" value="3" onclick="return tablolariYukle('TABLE_NAME ASC');"></td>
+                                    <td><input type="radio" name="combine" id="combine3" value="3" onclick="return tablolariYukle('','TABLE_NAME ASC');"></td>
                                     <td colspan="4">İsteğe bağlı olarak yedeklenecek tabloları seçme olanağı verir.</td>
                                 </tr>
 
@@ -623,21 +623,25 @@ $(document).ready(function() {
 
 <script type="text/javascript">
     $('#dropdownVeritabaniIdButton').siblings('.dropdown-menu').find('.dropdown-item').on('click', function(e) {
-        e.preventDefault();
+        //e.preventDefault();
         const key = $(this).data('key');
         const value = $(this).data('value');
         $('#onek').val(value);
 
         if($('input[name=combine]:checked').val() == 3){
-            tablolariYukle();
+            tablolariYukle(key, 'TABLE_NAME ASC');
         }
     });
 
     $('#onek').val($('.dropdown-item.selected').data('value'));
 
-    function tablolariYukle(tablolar, sort) {
-
-    var veritabani_id = $('#selectedVeritabaniId').val();
+    function tablolariYukle(key, sort) {
+    if(key){
+        var veritabani_id = key;
+    }else{
+        var veritabani_id = $('#selectedVeritabaniId').val();
+    }
+    
 
     $("#loading").show();
     $('#showTablolarYedekler').show();
