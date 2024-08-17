@@ -92,14 +92,26 @@ include('includes/sub_navbar.php');
                                 <tr>
                                     <td>Yedeklenecek Veritabanı Seç</td>
                                     <td colspan="5" style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;">
-                                    <select class="form-control" name="veritabani_id" id="ekle_veritabani_id" size="1" required>
-                                        <option value="0">&nbsp;</option>
-                                        <?php 
-                                            foreach($veritabanlari_arr AS $id => $veritabani){
-                                                echo "<option value='{$id}'>{$veritabani}</option>\n";
-                                            }
-                                        ?>
-                                    </select>
+
+<div class="dropdown">
+    <button class="btn btn-secondary dropdown-toggle  d-flex justify-content-between align-items-center" type="button" id="dropdownVeritabaniIdButton" data-bs-toggle="dropdown" aria-expanded="false">
+        <span class="file-name">Yedeklenecek Veritabanı Seç</span>
+	</button>
+	<ul class="dropdown-menu" aria-labelledby="dropdownVeritabaniIdButton" style="width:460px;">
+		<div class="modal-scrollbar">
+		<?php foreach($veritabanlari_arr AS $key => $value): ?>
+			<li>
+				<a class="dropdown-item" href="#" data-key="<?php echo $key; ?>" data-value="<?php echo $value; ?>">
+					<span class="icon"><img src="images/database-connect-icon-mavi.svg" style="border:0;width:24px;height:24px;"></span>
+					<span class="file-name"><?php echo $value; ?></span>
+				</a>
+			</li>
+		<?php endforeach; ?>
+		</div>
+	</ul>
+	<input type="hidden" id="selectedVeritabaniId" name="veritabani_id">
+</div>
+
                                     </td>
                                     <td>Yedeklemek istediğiniz veritabanı seçiniz</td>
                                 </tr>
@@ -361,7 +373,68 @@ include('includes/sub_navbar.php');
     
 
         </div><!-- / <div class="content-wrapper"> -->
-        
+
+<style>
+    .dropdown-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .dropdown-item .file-name {
+        flex: 1;
+    }
+    .dropdown-item .badge {
+        margin-left: 1rem;
+        white-space: nowrap;
+        font-size: 95%;
+    }
+    .dropdown-item .icon {
+        margin-right: 0.5rem;
+    }
+    .icon {
+        padding-right: 5px;
+    }
+    .dropdown-toggle {
+        text-align: left;
+        width: 100%;
+    }
+    .dropdown-toggle::after {
+        margin-left: auto; /* Select ikonu sağ tarafa hizalar */
+    }
+    .dosya_adi {
+        margin-left: 20px; /* Dosya adlarına girinti ekler */
+    }
+    .dropdown-item.selected {
+        background-color: #E0E0E6; /* Vurgu rengi */
+        color: black;
+    }
+</style>
+
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+
+$(document).ready(function() {
+    // Zaman Dilimi Seçimi
+    $('#dropdownVeritabaniIdButton').siblings('.dropdown-menu').find('.dropdown-item').on('click', function(e) {
+        e.preventDefault();
+        const key = $(this).data('key');
+        const value = $(this).data('value');
+
+        // Seçili olan metni güncelle
+        $('#selectedVeritabaniId').val(key);
+        $('#dropdownVeritabaniIdButton').html('<span class="icon"><img src="images/database-connect-icon-beyaz.svg" style="border:0;width:24px;height:24px;"></span>' + value);
+
+        // Dropdown menüde seçili olan öğeyi vurgula
+        $('#dropdownVeritabaniIdButton').removeClass('btn-secondary').addClass('btn-primary');
+        $(this).closest('.dropdown-menu').find('.dropdown-item').removeClass('selected');
+        $(this).addClass('selected');
+    });
+});
+
+</script>
+
 <script type="text/javascript">
 
     function tumunu_sec(spanChk){
@@ -459,7 +532,7 @@ include('includes/sub_navbar.php');
                 
     function yedekle() {
 
-        var veritabani_id = $('select[name="veritabani_id"] option:selected').val();
+        var veritabani_id = $("#selectedVeritabaniId").val();
         var onek = $('#onek').val();
         var gz = $("input[name='gz']:checked").attr('value');
         var lock = $("input[name='lock']:checked").attr('value');
@@ -467,8 +540,9 @@ include('includes/sub_navbar.php');
         var combine = $("input[name='combine']:checked").attr('value');
         var tablolar = $('input[class=tablolar]:checked').length;
         var elle = $("input[name='elle']:checked").attr('value');
+        var onekmetin = $('.dropdown-item.selected').data('value');
 
-        if(veritabani_id=="0") {
+        if(veritabani_id==='') {
             $(function(){
                 jw("b olumsuz").baslik("Veritabanı Belirlemediniz!").icerik("Yedeklenecek veritabanı seçmelisiniz").kilitle().en(400).boy(100).ac();
             })
@@ -518,7 +592,7 @@ include('includes/sub_navbar.php');
         }
             $(function()
             {
-                jw('b secim',OK).baslik("Yedekleyeceğiniz Veritabanı!").icerik("Yedekleyeceğiniz veritabanının adı: <b>" + $('select[name="veritabani_id"] option:selected').text() + "</b><br /><br />Yedeklemeye devam etsin mi?").en(450).kilitle().ac();
+                jw('b secim',OK).baslik("Yedekleyeceğiniz Veritabanı!").icerik("Yedekleyeceğiniz veritabanının adı: <b>" + onekmetin + "</b><br /><br />Yedeklemeye devam etsin mi?").en(450).kilitle().ac();
             })
 
         function OK(x){
@@ -548,18 +622,22 @@ include('includes/sub_navbar.php');
 </script>
 
 <script type="text/javascript">
-    $('select[name="veritabani_id"]').change(function(){    
-        $('#onek').val( $('select[name="veritabani_id"] option:selected').text() );
+    $('#dropdownVeritabaniIdButton').siblings('.dropdown-menu').find('.dropdown-item').on('click', function(e) {
+        e.preventDefault();
+        const key = $(this).data('key');
+        const value = $(this).data('value');
+        $('#onek').val(value);
+
         if($('input[name=combine]:checked').val() == 3){
             tablolariYukle();
         }
     });
 
-    $('#onek').val( $('select[name="veritabani_id"] option:selected').text() );
+    $('#onek').val($('.dropdown-item.selected').data('value'));
 
     function tablolariYukle(tablolar, sort) {
 
-    var veritabani_id = $('select[name="veritabani_id"]').val();
+    var veritabani_id = $('#selectedVeritabaniId').val();
 
     $("#loading").show();
     $('#showTablolarYedekler').show();

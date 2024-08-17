@@ -449,19 +449,28 @@ include('includes/sub_navbar.php');
                                                         <tr>
                                                             <td>Yerel Tarihi & Saati için bölgenizi seçin</td>
                                                             <td style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;min-width: 200px;">
-                                                                <select name="zaman_dilimi" size="1" class="form-control">
-                                                                <?php 
-                                                                    foreach($timezones AS $key => $value){
-                                                                    if($genel_ayarlar['zaman_dilimi'] == $key){
-                                                                        echo "<option value='{$key}' selected>{$value}</option>";
-                                                                    }else{
-                                                                        echo "<option value='{$key}'>{$value}</option>";
-                                                                    }
-                                                                    }
-                                                                ?>
-                                                                </select>
+
+                                                                <div class="dropdown">
+                                                                    <button class="btn btn-primary dropdown-toggle  d-flex justify-content-between align-items-center" type="button" id="dropdownTimezoneButton" data-bs-toggle="dropdown" aria-expanded="false">
+                                                                        <?php echo isset($genel_ayarlar['zaman_dilimi']) ? $timezones[$genel_ayarlar['zaman_dilimi']] : 'Zaman Dilimi Seç'; ?>
+                                                                    </button>
+                                                                    <ul class="dropdown-menu" aria-labelledby="dropdownTimezoneButton" style="width:520px;">
+                                                                        <div class="modal-scrollbar">
+                                                                        <?php foreach($timezones as $key => $value): ?>
+                                                                            <li>
+                                                                                <a class="dropdown-item <?php echo $genel_ayarlar['zaman_dilimi'] == $key ? 'selected' : ''; ?>" href="#" data-key="<?php echo $key; ?>" data-value="<?php echo $value; ?>">
+                                                                                    <?php echo $value; ?>
+                                                                                    <span class="badge bg-primary rounded-pill"><?php echo $key; ?></span>
+                                                                                </a>
+                                                                            </li>
+                                                                        <?php endforeach; ?>
+                                                                        </div>
+                                                                    </ul>
+                                                                    <input type="hidden" id="selectedTimezone" name="zaman_dilimi" value="<?php echo $genel_ayarlar['zaman_dilimi']; ?>">
+                                                                </div>
+
                                                             </td>
-                                                            <td colspan="3">&nbsp;</td>
+                                                            <td colspan="3">Seçilen zaman dilimi: <span style="font-weight: bold;" id="zaman_dilimi_display"><?php echo $genel_ayarlar['zaman_dilimi']; ?></span></td>
                                                         </tr>
                                                     </tbody>
                                                     <tfoot>
@@ -514,19 +523,28 @@ include('includes/sub_navbar.php');
                                                         <tr>
                                                             <td>MySQL Geri Yükleme için Karakter Seti</td>
                                                             <td style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;min-width: 200px;">
-                                                        <select name="karakter_seti" class="form-control">
-                                                        <?php 
-                                                            foreach($charsets AS $key => $value){
-                                                                if($genel_ayarlar['karakter_seti'] == $key){
-                                                                    echo "<option value='$key' selected>$value</option>";
-                                                                }else{
-                                                                    echo "<option value='$key'>$value</option>";
-                                                                }
-                                                            }
-                                                        ?>
-                                                        </select>
+
+                                                                <div class="dropdown">
+                                                                    <button class="btn btn-primary dropdown-toggle  d-flex justify-content-between align-items-center" type="button" id="dropdownCharsetButton" data-bs-toggle="dropdown" aria-expanded="false">
+                                                                        <?php echo isset($genel_ayarlar['karakter_seti']) ? $charsets[$genel_ayarlar['karakter_seti']] : 'Karakter Seti Seç'; ?>
+                                                                    </button>
+                                                                    <ul class="dropdown-menu" aria-labelledby="dropdownCharsetButton" style="width:520px;">
+                                                                        <div class="modal-scrollbar">
+                                                                        <?php foreach($charsets as $key => $value): ?>
+                                                                            <li>
+                                                                                <a class="dropdown-item <?php echo $genel_ayarlar['karakter_seti'] == $key ? 'selected' : ''; ?>" href="#" data-key="<?php echo $key; ?>" data-value="<?php echo $value; ?>">
+                                                                                    <?php echo $value; ?>
+                                                                                    <span class="badge bg-primary rounded-pill"><?php echo $key; ?></span>
+                                                                                </a>
+                                                                            </li>
+                                                                        <?php endforeach; ?>
+                                                                        </div>
+                                                                    </ul>
+                                                                    <input type="hidden" id="selectedCharset" name="karakter_seti" value="<?php echo $genel_ayarlar['karakter_seti']; ?>">
+                                                                </div>
+
                                                             </td>
-                                                            <td colspan="3">Belirlenen: <b><?php echo $genel_ayarlar['karakter_seti']; ?></b></td>
+                                                            <td colspan="3">Seçilen karakter seti: <span style="font-weight: bold;" id="karakter_seti_display"><?php echo $genel_ayarlar['karakter_seti']; ?></span></td>
                                                         </tr>
                                                     </tbody>
                                                     <tfoot>
@@ -547,7 +565,87 @@ include('includes/sub_navbar.php');
     </div><!-- / <div class="container-fluid"> -->
     </section><!-- / <section class="content"> -->
     <!-- Gövde İçerik Sonu -->
+<style>
+    .dropdown-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .dropdown-item .file-name {
+        flex: 1;
+    }
+    .dropdown-item .badge {
+        margin-left: 1rem;
+        white-space: nowrap;
+        font-size: 95%;
+    }
+    .dropdown-item .icon {
+        margin-right: 0.5rem;
+    }
+    .dropdown-toggle {
+        text-align: left;
+        width: 100%;
+    }
+    .dropdown-toggle::after {
+        margin-left: auto; /* Select ikonu sağ tarafa hizalar */
+    }
+    .dosya_adi {
+        margin-left: 20px; /* Dosya adlarına girinti ekler */
+    }
+    .dropdown-item.selected {
+        background-color: #E0E0E6; /* Vurgu rengi */
+        color: black;
+    }
 
+.dropdown-item.selected {
+    background-color: #E0E0E6; /* Seçili öğe için vurgu rengi */
+    color: black;
+}
+
+</style>
+
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+
+$(document).ready(function() {
+    // Zaman Dilimi Seçimi
+    $('#dropdownTimezoneButton').siblings('.dropdown-menu').find('.dropdown-item').on('click', function(e) {
+        e.preventDefault();
+        const key = $(this).data('key');
+        const value = $(this).data('value');
+
+        // Seçili olan metni güncelle
+        $('#selectedTimezone').val(key);
+        $('#zaman_dilimi_display').text(key);
+        $('#dropdownTimezoneButton').text(value);
+
+        // Dropdown menüde seçili olan öğeyi vurgula
+        $('#dropdownTimezoneButton').removeClass('btn-secondary').addClass('btn-primary');
+        $(this).closest('.dropdown-menu').find('.dropdown-item').removeClass('selected');
+        $(this).addClass('selected');
+    });
+
+    // Karakter Seti Seçimi
+    $('#dropdownCharsetButton').siblings('.dropdown-menu').find('.dropdown-item').on('click', function(e) {
+        e.preventDefault();
+        const key = $(this).data('key');
+        const value = $(this).data('value');
+
+        // Seçili olan metni güncelle
+        $('#selectedCharset').val(key);
+        $('#karakter_seti_display').text(key);
+        $('#dropdownCharsetButton').text(value);
+
+        // Dropdown menüde seçili olan öğeyi vurgula
+        $('#dropdownCharsetButton').removeClass('btn-secondary').addClass('btn-primary');
+        $(this).closest('.dropdown-menu').find('.dropdown-item').removeClass('selected');
+        $(this).addClass('selected');
+    });
+});
+
+</script>
     <!-- Gövde İçerik Başlangıcı -->
     <section class="content">
     <div class="container-fluid">

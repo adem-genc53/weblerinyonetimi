@@ -202,7 +202,7 @@ include('includes/sub_navbar.php');
     foreach($veritabanlari_arr AS $id => $veritabani){
         echo '
         <li><a class="dropdown-item" href="#" data-file-path="'.$id.'" data-file-name="'.$veritabani.'" data-size="Klasör">
-        <span class="icon"><img style="width:20px;height:20px;" border="0" src="images/pngegg.png"></span>
+        <span class="icon"><img src="images/database-connect-icon-mavi.svg" style="border:0;width:24px;height:24px;"></span>
         <span class="file-name">'.$veritabani.'</span>
         </a></li>
         ';
@@ -249,11 +249,11 @@ foreach($directoriesAndFiles AS $key => $klasor_dosya_arr){
                 </tr>
                 <tr>
                     <td>&nbsp;</td>
-                    <td><b>YADA</b> <img style="width:20px;height:20px;" border="0" src="images/folder.png">klasör içindeki veritabanı tabloları karşılaştır veya içeriğini görüntüle</td>
+                    <td><b>YADA</b> <i class="fas fa-folder" style="font-size:20px;color:#FFA500;"></i> klasör içindeki veritabanı tabloları karşılaştır veya içeriğini görüntüle</td>
                     <td>&nbsp;</td>
                 </tr>
                 <tr>
-                    <td style="text-align:right;"><img style="width:20px;height:20px;" border="0" src="images/folder.png"></td>
+                    <td style="text-align:right;"><i class="fas fa-folder" style="font-size:20px;color:#FFA500;"></i></td>
                     <td style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;">
 
 <button class="btn btn-secondary dropdown-toggle d-flex justify-content-between align-items-center" data-default-text="Veritabanı Yedek Klasör Seçin" type="button" id="dropdownMenuButton3" data-bs-toggle="dropdown" aria-expanded="false" style="width:550px;">
@@ -268,7 +268,7 @@ foreach($directoriesAndFiles AS $key => $klasor_dosya_arr){
         if($key != 'root_files'){
         echo '
             <li><a class="dropdown-item" href="#" data-file-path="'.$key.'/" data-file-name="'.basename($key).'" data-size="Klasör">
-            <span class="icon"><img style="width:20px;height:20px;" border="0" src="images/folder.png"></span>
+            <i class="fas fa-folder-plus" style="font-size:24px;color:#FFA500;padding-right:10px;"></i>
             <span class="file-name">'.basename($key).'</span>
             <span class="badge bg-primary rounded-pill">'.showSize(dirSize($key)).'</span>
             </a></li>
@@ -285,7 +285,7 @@ foreach($directoriesAndFiles AS $key => $klasor_dosya_arr){
                 </tr>
 
                 <tr>
-                    <td style="text-align:right;"><img style="width:20px;height:20px;" border="0" src="images/folder_files.png"></td>
+                    <td style="text-align:right;"><i class="fas fa-folder-open" style="font-size:20px;color:#FFA500;"></i></td>
                     <td style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;">
 
 <button class="btn btn-secondary dropdown-toggle d-flex justify-content-between align-items-center" data-default-text="İçeriğini Görüntülemek İçin Bir Tablo Seçin" type="button" id="dropdownMenuButton4" data-bs-toggle="dropdown" aria-expanded="false" style="width:550px;">
@@ -298,7 +298,7 @@ foreach($directoriesAndFiles AS $key => $klasor_dosya_arr){
 <?php 
     foreach($directoriesAndFiles AS $key => $klasor_dosya_arr){
         if($key != 'root_files'){
-        echo '<li><h6 class="dropdown-header" style="text-align: left;"><span class="icon"><img style="width:20px;height:20px;" border="0" src="images/folder.png"> </span>'.basename($key).'</h6></li>';
+        echo '<li><h6 class="dropdown-header" style="text-align: left;"><i class="fas fa-folder-open" style="font-size:20px;color:#FFA500;padding-right:10px;"></i>'.basename($key).'</h6></li>';
             foreach($klasor_dosya_arr AS $value){
                 echo '
                 <li><a class="dropdown-item" href="#" data-file-path="'.$value.'" data-file-name="'.basename($value).'" data-size="Klasör">
@@ -335,8 +335,6 @@ foreach($directoriesAndFiles AS $key => $klasor_dosya_arr){
             </table>
         </form>
 
-
-
 <style>
     .dropdown-item {
         display: flex;
@@ -353,6 +351,9 @@ foreach($directoriesAndFiles AS $key => $klasor_dosya_arr){
     }
     .dropdown-item .icon {
         margin-right: 0.5rem;
+    }
+    .icon {
+        padding-right: 5px;
     }
     .dropdown-toggle {
         text-align: left;
@@ -385,15 +386,36 @@ foreach($directoriesAndFiles AS $key => $klasor_dosya_arr){
         const $selectedFileName = $dropdownButton.find('#selectedFileName' + $dropdownButton.attr('id').slice(-1));
         const $selectedFilePath = $('#selectedFilePath' + $dropdownButton.attr('id').slice(-1));
 
+        var tiklanan_id = $dropdownButton.find('#selectedFileName' + $dropdownButton.attr('id').slice(-1)).attr('id');
+
         // Seçili dosya adını ve dosya yolunu güncelle
-        $selectedFileName.text(fileName);
-        $selectedFilePath.val(filePath);
+    if(tiklanan_id==='selectedFileName1'){
+        $('#selectedFileName1').html('<span class="icon"><img src="images/database-connect-icon-beyaz.svg" style="border:0;width:24px;height:24px;"></span>' + fileName);
+    }else if(tiklanan_id==='selectedFileName2'){
+        var name=fileName.split('.').pop();
+        if(name==='sql'){
+            $('#selectedFileName2').html('<span class="icon"><img src="images/mysql-svgrepo-com-dosya.svg" style="border:0;width:24px;height:24px;"></span>' + fileName);
+        }else if(name==='gz'){
+            $('#selectedFileName2').html('<span class="icon"><img src="images/mysql-svgrepo-com-dosya.svg" style="border:0;width:24px;height:24px;"></span>' + fileName);
+        }
+    }else if(tiklanan_id==='selectedFileName3'){
+        $('#selectedFileName3').html('<i class="fas fa-folder-open" style="font-size:20px;color:#FFA500;padding-right:10px;"></i>' + fileName);
+    }else if(tiklanan_id==='selectedFileName4'){
+        var name=fileName.split('.').pop();
+        if(name==='sql'){
+            $('#selectedFileName4').html('<span class="icon"><img src="images/mysql-svgrepo-com-dosya.svg" style="border:0;width:24px;height:24px;"></span>' + fileName);
+        }else if(name==='gz'){
+            $('#selectedFileName4').html('<span class="icon"><img src="images/mysql-svgrepo-com-dosya.svg" style="border:0;width:24px;height:24px;"></span>' + fileName);
+        }
+    }
 
-      // Buton rengini değiştir
-      $dropdownButton.removeClass('btn-secondary').addClass('btn-primary');
+    $selectedFilePath.val(filePath);
 
-      // Diğer dropdownları sıfırla, ancak dropdownMenuButton4 hariç
-      $('.dropdown-toggle').not($dropdownButton).not('#dropdownMenuButton1').each(function() {
+    // Buton rengini değiştir
+    $dropdownButton.removeClass('btn-secondary').addClass('btn-primary');
+
+    // Diğer dropdownları sıfırla, ancak dropdownMenuButton4 hariç
+    $('.dropdown-toggle').not($dropdownButton).not('#dropdownMenuButton1').each(function() {
         const defaultText = $(this).attr('data-default-text');
         $(this).find('span:first').text(defaultText);
         const inputId = 'selectedFilePath' + $(this).attr('id').slice(-1);
@@ -401,14 +423,17 @@ foreach($directoriesAndFiles AS $key => $klasor_dosya_arr){
 
         // Buton rengini sıfırla
         $(this).removeClass('btn-primary').addClass('btn-secondary');
-      });
+    });
 
-      // Seçili öğeyi vurgula
-      $dropdownMenu.find('.dropdown-item').removeClass('selected');
-      $(this).addClass('selected');
+    // Seçili öğeyi vurgula
+    $dropdownMenu.find('.dropdown-item').removeClass('selected');
+    $(this).addClass('selected');
 
+    if(tiklanan_id==='selectedFileName3'){
+        $('.dropdown-item.selected').find('i.fas').removeClass('fa-folder-plus').addClass('fa-folder-open');
+    }
 
-if($("#selectedFilePath2").val()!=='' || $("#selectedFilePath3").val()!=='' || $("#selectedFilePath4").val()!==''){
+    if($("#selectedFilePath2").val()!=='' || $("#selectedFilePath3").val()!=='' || $("#selectedFilePath4").val()!==''){
 
       var veritabani_id = $('#selectedFilePath1').val();
 
