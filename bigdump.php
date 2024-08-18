@@ -449,6 +449,7 @@ div tt {
 
   	//if(!isset($_GET['start'])){
     // Dizin içindeki dosya boyutunu hesaplama
+
     function dirSize($directory) {
         $size = 0;
         foreach(new RecursiveIteratorIterator(new RecursiveDirectoryIterator($directory)) as $file){

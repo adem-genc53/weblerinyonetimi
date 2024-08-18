@@ -1170,7 +1170,7 @@ if(isset($_GET['edit'])){
 
     <tr>
         <td colspan="2">Sadece Seçilen Tabloları Yedekle</td>
-        <td><input type="radio" name="combine" id="combine3" value="3" style="display: inline;" class="checkbox" <?php echo $combine_uc; ?> onclick="return tablolariYukle();" /></td>
+        <td><input type="radio" name="combine" id="combine3" value="3" style="display: inline;" class="checkbox" <?php echo $combine_uc; ?> onclick="return tablolariYukle('','','TABLE_NAME ASC');" /></td>
         <td colspan="6">Bu seçenek ile veritabanında seçeceğiniz tabloları yedekler</td>
     </tr>
 
@@ -1664,7 +1664,7 @@ if(isset($_GET['edit'])){
 
     <tr>
         <td colspan="2">Sadece Seçilen Tabloları Yedekle</td>
-        <td><input type="radio" name="combine" id="combine3" value="3" onclick="return tablolariYukle();" /></td>
+        <td><input type="radio" name="combine" id="combine3" value="3" onclick="return tablolariYukle('','','TABLE_NAME ASC');" /></td>
         <td colspan="6">Bu seçenek veritabanında seçilen tabloları yedekler</td>
     </tr>
 
@@ -1877,7 +1877,7 @@ function simdiCalistir(gorev_adi, runid){
         $('input[name="veritabani_secilen_yedekleme_oneki"]').val($.trim($('select[name="veritabani_secilen_yedekleme"] option:selected').text()));
         $('input[name="hide_veritabani_secilen_yedekleme"]').val($.trim($('select[name="veritabani_secilen_yedekleme"] option:selected').text()));
         if($('input[name=combine]:checked').val() == 3){
-            tablolariYukle($(this).val());
+            tablolariYukle($(this).val(), '','TABLE_NAME ASC');
         }
     });
 
@@ -2067,7 +2067,7 @@ $(document).ready(function() {
 
     });
 
-function tablolariYukle(db_secildi, tablolar, sort) {
+function tablolariYukle(db_secildi, $secilen_tablolar, sort) {
     $(document).ready(function() {
 
     <?php 
@@ -2095,32 +2095,32 @@ if(secilen_yedekleme>0){
     $('#bekle-sort').fadeIn('');
     $("#sortliste").empty();
 
-        $.ajax({
-            url: "tabloliste.php",
-            type: "POST",
-            data: { tablolari_listele : 1, secilen_yedekleme : secilen_yedekleme, tablolar : tablolar, sort : sort },
-            success: function(ilksayfa){
-                //console.log(ilksayfa);
-                $("#sortliste").html(ilksayfa);
-                $('#bekle-sort').fadeOut('');
-                $('#gizle').fadeOut('');
-                $("#yedekler-listesi").hide();
-                $("#loading").hide();
+    $.ajax({
+        url: "tabloliste.php",
+        type: "POST",
+        data: { tablolari_listele : 1, secilen_yedekleme : secilen_yedekleme, tablolar : tablolar, sort : sort },
+        success: function(ilksayfa){
+            //console.log(ilksayfa);
+            $("#sortliste").html(ilksayfa);
+            $('#bekle-sort').fadeOut('');
+            $('#gizle').fadeOut('');
+            $("#yedekler-listesi").hide();
+            $("#loading").hide();
 
-                const element = document.getElementById("tbliste");
-                const offset = 20; // 50px üst boşluk
-                const elementPosition = element.getBoundingClientRect().top + window.pageYOffset - offset;
-                window.scrollTo({
+            const element = document.getElementById("tbliste");
+            const offset = 20; // 50px üst boşluk
+            const elementPosition = element.getBoundingClientRect().top + window.pageYOffset - offset;
+            window.scrollTo({
                 top: elementPosition,
                 behavior: "smooth"
-                });
-
-            }
-        });
+            });
+        }
+    });
 } // if(secilen_yedekleme>0){
 });
 }
 </script>
+
 
 <script type="text/javascript">
 
@@ -2142,81 +2142,79 @@ function GorevEkle() {
 
     if(gorev_adi=="") {
         $(function(){
-        jw("b olumsuz").baslik("Görev Adi Girmediniz").icerik("Görevi tanımlayan kısa bir görev adı giriniz").kilitle().en(350).boy(100).ac();
+            jw("b olumsuz").baslik("Görev Adi Girmediniz").icerik("Görevi tanımlayan kısa bir görev adı giriniz").kilitle().en(350).boy(100).ac();
         })
         return false;
     }
     if(dosya_adi=="") {
         $(function(){
-        jw("b olumsuz").baslik("Dosya Adi Girmediniz").icerik("Çalıştırılacak dosya adı giriniz").kilitle().en(350).boy(100).ac();
+            jw("b olumsuz").baslik("Dosya Adi Girmediniz").icerik("Çalıştırılacak dosya adı giriniz").kilitle().en(350).boy(100).ac();
         })
         return false;
     }
     if(aktif==undefined) {
         $(function(){
-        jw("b olumsuz").baslik("Yedekme Görevi Aktif/Pasif").icerik("Yedekleme görevi aktif veya pasif olacağını belirlemediniz").kilitle().en(350).boy(100).ac();
+            jw("b olumsuz").baslik("Yedekme Görevi Aktif/Pasif").icerik("Yedekleme görevi aktif veya pasif olacağını belirlemediniz").kilitle().en(350).boy(100).ac();
         })
         return false;
     }
     if(gunluk_kayit==undefined) {
         $(function(){
-        jw("b olumsuz").baslik("Yedekme Görevi Günlüğü Kaydetme").icerik("Yedekleme görevi yerine getirdiğinde sonucu günlüğe kayit edip etmeyeceğini belirlemediniz").kilitle().en(350).boy(100).ac();
+            jw("b olumsuz").baslik("Yedekme Görevi Günlüğü Kaydetme").icerik("Yedekleme görevi yerine getirdiğinde sonucu günlüğe kayit edip etmeyeceğini belirlemediniz").kilitle().en(350).boy(100).ac();
         })
         return false;
     }
 
     if(checkbox>0){
-
-    if(secilen_yedekleme=="") {
-        $(function(){
-            jw("b olumsuz").baslik("Veritabanı Belirlemediniz!").icerik("Göreve eklenecek veritabanı seçmelisiniz").kilitle().en(400).boy(100).ac();
-        })
-        return false;
-    }
-    if(secilen_yedekleme_oneki=="") {
-        $(function(){
-        jw("b olumsuz").baslik("Yedeğin Önekini Girmediniz!").icerik("Veritabanı yedeğin önekini yada yedeğin adını girmelisiniz").kilitle().en(350).boy(100).ac();
-        })
-        return false;
-    }
-    if(gz==undefined) {
-        $(function(){
-        jw("b olumsuz").baslik("Yedeği GZipleme Belirlemediniz!").icerik("Veritabanı yedeğin GZip ile sıkıştırılıp veya sıkıştırılmayacağını belirlemediniz").kilitle().en(350).boy(100).ac();
-        })
-        return false;
-    }
-    if(lock==undefined) {
-        $(function(){
-        jw("b olumsuz").baslik("Tabları Kilitleme Belirlemediniz!").icerik("Yedeklenmeden önce tabloların kilitlenip kilitlenmeyeceğini belirlemediniz").kilitle().en(350).boy(100).ac();
-        })
-        return false;
-    }
-    if(dbbakim==undefined) {
-        $(function(){
-        jw("b olumsuz").baslik("Tablolara Bakım Belirlemediniz!").icerik("Yedeklenmeden önce tablolara bakım belirlemediniz").kilitle().en(350).boy(100).ac();
-        })
-        return false;
-    }
-    if(combine==undefined) {
-        $(function(){
-        jw("b olumsuz").baslik("Yedekleme Seçeneği Belirlemediniz!").icerik("Veritabanı yedekleme seçeneği belirlemediniz").kilitle().en(350).boy(100).ac();
-        })
-        return false;
-    }
-    if (elle==undefined && combine==3) {
-        $(function(){
-        jw("b olumsuz").baslik("Seçilecek Tabloarın Yedekleme Biçimi Belirlemediniz!").icerik("Seçilecek tabloların yedekleme biçimini seçmediniz").kilitle().en(350).boy(100).ac();
-        })
-        return false;
-    }
-    if (tablolar < 1 && combine==3) {
-        $(function(){
-        jw("b olumsuz").baslik("Tabloları Belirlemediniz!").icerik("Yedeklemek istediğiniz tabloyu veya tabloları seçmediniz").kilitle().en(350).boy(100).ac();
-        })
-        return false;
+        if(secilen_yedekleme=="") {
+            $(function(){
+                jw("b olumsuz").baslik("Veritabanı Belirlemediniz!").icerik("Göreve eklenecek veritabanı seçmelisiniz").kilitle().en(350).boy(100).ac();
+            })
+            return false;
+        }
+        if(secilen_yedekleme_oneki=="") {
+            $(function(){
+                jw("b olumsuz").baslik("Yedeğin Önekini Girmediniz!").icerik("Veritabanı yedeğin önekini yada yedeğin adını girmelisiniz").kilitle().en(350).boy(100).ac();
+            })
+            return false;
+        }
+        if(gz==undefined) {
+            $(function(){
+                jw("b olumsuz").baslik("Yedeği GZipleme Belirlemediniz!").icerik("Veritabanı yedeğin GZip ile sıkıştırılıp veya sıkıştırılmayacağını belirlemediniz").kilitle().en(350).boy(100).ac();
+            })
+            return false;
+        }
+        if(lock==undefined) {
+            $(function(){
+                jw("b olumsuz").baslik("Tabları Kilitleme Belirlemediniz!").icerik("Yedeklenmeden önce tabloların kilitlenip kilitlenmeyeceğini belirlemediniz").kilitle().en(350).boy(100).ac();
+            })
+            return false;
+        }
+        if(dbbakim==undefined) {
+            $(function(){
+                jw("b olumsuz").baslik("Tablolara Bakım Belirlemediniz!").icerik("Yedeklenmeden önce tablolara bakım belirlemediniz").kilitle().en(350).boy(100).ac();
+            })
+            return false;
+        }
+        if(combine==undefined) {
+            $(function(){
+                jw("b olumsuz").baslik("Yedekleme Seçeneği Belirlemediniz!").icerik("Veritabanı yedekleme seçeneği belirlemediniz").kilitle().en(350).boy(100).ac();
+            })
+            return false;
+        }
+        if (elle==undefined && combine==3) {
+            $(function(){
+                jw("b olumsuz").baslik("Seçilecek Tabloarın Yedekleme Biçimi Belirlemediniz!").icerik("Seçilecek tabloların yedekleme biçimini seçmediniz").kilitle().en(350).boy(100).ac();
+            })
+            return false;
+        }
+        if (tablolar < 1 && combine==3) {
+            $(function(){
+                jw("b olumsuz").baslik("Tabloları Belirlemediniz!").icerik("Yedeklemek istediğiniz tabloyu veya tabloları seçmediniz").kilitle().en(350).boy(100).ac();
+            })
+            return false;
         }
     }
-
 }
 </script>
 

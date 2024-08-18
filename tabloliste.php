@@ -14,8 +14,12 @@ $hash = new Hash;
 
     $secilen_tablolar = array();
     if(isset($_POST['tablolar']) && !empty($_POST['tablolar']) ){
-        $secilen_tablolar = explode(",", $_POST['tablolar']);
+        $secilen_tablolar = array_map('trim', explode(',',$_POST['tablolar']));
     }
+
+    //echo '<pre>' . print_r($secilen_tablolar, true) . '</pre>';
+
+    $post_tablolar = $_POST['tablolar'] ?? '';
 #########################################################################################################################################
     // Ajax ile veritabanı ID geliyormu, geliyorsa hem değişkene hemde sessiona ata
     // Gelmiyorsa else den sesiiondan kullan
@@ -58,6 +62,7 @@ $hash = new Hash;
     }
 #########################################################################################################################################
     $post_sort = isset($_POST['sort']) ? $_POST['sort'] : 'TABLE_NAME ASC';
+
     $sort = isset($_POST['sort']) || !empty($_POST['sort']) ? $_POST['sort'] : 'TABLE_NAME ASC';
 
     if(empty($sort)) exit;
@@ -164,12 +169,12 @@ $hash = new Hash;
             <th colspan="7" style="text-align: center;line-height: .20;font-size: 1rem;">Seçili Veri Tabanı <span style="color: yellow;"><?php echo $db_name; ?></span> Tablolarıdır</th>
         </tr>
         <tr>
-            <td style="padding:5px 0px 0px 10px;cursor:pointer;"><div style="text-align:left;"><a class="table-sort" onclick="javascript:tablolariYukle('<?php echo $veritabani_id; ?>','<?php echo $sortname ?>');" title="TABLO ADINA GÖRE SIRALA"><b>Tablo Adı</b><?php echo $asagiokname ?></a></div></td>
-            <td style="nowrap:nowrap;padding:5px 20px 0px 0px;text-align:right;cursor:pointer;"><a class="table-sort" onclick="javascript:tablolariYukle('<?php echo $veritabani_id; ?>','<?php echo $sortdata ?>');" title="VERİ BOYUTUNA GÖRE SIRALA"><b>Veri Boyutu</b><?php echo $asagiokdata ?></a></td>
-            <td style="nowrap:nowrap;padding:5px 10px 0px 0px;text-align:right;cursor:pointer;"><a class="table-sort" onclick="javascript:tablolariYukle('<?php echo $veritabani_id; ?>','<?php echo $sortindex ?>');" title="INDEX BOYUTUNA GÖRE SIRALA"><b>İndex Boyutu</b><?php echo $asagiokindex ?></a></td>
-            <td style="nowrap:nowrap;padding:5px 10px 0px 0px;text-align:right;cursor:pointer;"><a class="table-sort" onclick="javascript:tablolariYukle('<?php echo $veritabani_id; ?>','<?php echo $sortfree ?>');" title="EK YÜK BOYUTUNA GÖRE SIRALA"><b>Ek Yük</b><?php echo $asagiokfree ?></a></td>
-            <td style="nowrap:nowrap;padding:5px 20px 0px 0px;text-align:right;cursor:pointer;"><a class="table-sort" onclick="javascript:tablolariYukle('<?php echo $veritabani_id; ?>','<?php echo $sortsatir ?>');" title="TABLO SATIRA GÖRE SIRALA"><b>Satır</b><?php echo $asagioksatir ?></a></td>
-            <td style="nowrap:nowrap;padding:5px 20px 0px 0px;text-align:right;cursor:pointer;"><a class="table-sort" onclick="javascript:tablolariYukle('<?php echo $veritabani_id; ?>','<?php echo $sortboyutu ?>');" title="TABLO BOYUTUNA GÖRE SIRALA"><b>Boyutu</b><?php echo $asagiokboyutu ?></a></td>
+            <td style="padding:5px 0px 0px 10px;cursor:pointer;"><div style="text-align:left;"><a class="table-sort" onclick="javascript:tablolariYukle('<?php echo $veritabani_id; ?>','<?php echo $post_tablolar; ?>','<?php echo $sortname ?>');" title="TABLO ADINA GÖRE SIRALA"><b>Tablo Adı</b><?php echo $asagiokname ?></a></div></td>
+            <td style="nowrap:nowrap;padding:5px 20px 0px 0px;text-align:right;cursor:pointer;"><a class="table-sort" onclick="javascript:tablolariYukle('<?php echo $veritabani_id; ?>','<?php echo $post_tablolar; ?>','<?php echo $sortdata ?>');" title="VERİ BOYUTUNA GÖRE SIRALA"><b>Veri Boyutu</b><?php echo $asagiokdata ?></a></td>
+            <td style="nowrap:nowrap;padding:5px 10px 0px 0px;text-align:right;cursor:pointer;"><a class="table-sort" onclick="javascript:tablolariYukle('<?php echo $veritabani_id; ?>','<?php echo $post_tablolar; ?>','<?php echo $sortindex ?>');" title="INDEX BOYUTUNA GÖRE SIRALA"><b>İndex Boyutu</b><?php echo $asagiokindex ?></a></td>
+            <td style="nowrap:nowrap;padding:5px 10px 0px 0px;text-align:right;cursor:pointer;"><a class="table-sort" onclick="javascript:tablolariYukle('<?php echo $veritabani_id; ?>','<?php echo $post_tablolar; ?>','<?php echo $sortfree ?>');" title="EK YÜK BOYUTUNA GÖRE SIRALA"><b>Ek Yük</b><?php echo $asagiokfree ?></a></td>
+            <td style="nowrap:nowrap;padding:5px 20px 0px 0px;text-align:right;cursor:pointer;"><a class="table-sort" onclick="javascript:tablolariYukle('<?php echo $veritabani_id; ?>','<?php echo $post_tablolar; ?>','<?php echo $sortsatir ?>');" title="TABLO SATIRA GÖRE SIRALA"><b>Satır</b><?php echo $asagioksatir ?></a></td>
+            <td style="nowrap:nowrap;padding:5px 20px 0px 0px;text-align:right;cursor:pointer;"><a class="table-sort" onclick="javascript:tablolariYukle('<?php echo $veritabani_id; ?>','<?php echo $post_tablolar; ?>','<?php echo $sortboyutu ?>');" title="TABLO BOYUTUNA GÖRE SIRALA"><b>Boyutu</b><?php echo $asagiokboyutu ?></a></td>
             <td style="padding:5px 10px 0px 0px;"><div style="text-align:right;">Tümünü Seç: <input type="checkbox" onclick="javascript:tumunusec(this);" id="hepsi" title="Tümünü Yedeklemek için Seç" /></div></td>        
         </tr>
     </thead>
@@ -197,39 +202,45 @@ $hash = new Hash;
     $boyut += $table['SIZE_KB'];
     $toplam = showSize($boyut);
 
-    if (is_array($secilen_tablolar) AND in_array($table['TABLE_NAME'], $secilen_tablolar)) {
-    $secilirenk = 'style="border-bottom: thin solid;background-color: #FFEB90;"';
+    if (is_array($secilen_tablolar) && in_array($table['TABLE_NAME'], $secilen_tablolar)) {
+        $secilirenk = 'style="background-color: rgb(255, 235, 144); border-bottom: thin solid;"';
+        $tdaltsiyahcizgi = 'style="nowrap:nowrap;padding:5px 0px 0px 10px; background: rgb(255, 235, 144); border-bottom: thin solid;"';
+        $birdensonrakitdler = 'style="nowrap:nowrap;padding:5px 25px 0px 0px;text-align:right; background: rgb(255, 235, 144); border-bottom: thin solid;"';
     }else{
-    $secilirenk = "";
+        $secilirenk = '';
+        $tdaltsiyahcizgi = 'style="nowrap:nowrap;padding:5px 0px 0px 10px;"';
+        $birdensonrakitdler = 'style="nowrap:nowrap;padding:5px 25px 0px 0px;text-align:right;"';
     }
     
     ?>
     <tr <?php echo $secilirenk; ?>>          
-    <td style="nowrap:nowrap;padding:5px 0px 0px 10px;">
-    <?php echo $table['TABLE_NAME'] ?>
+    <td <?php echo $tdaltsiyahcizgi; ?>>
+    <?php echo $table['TABLE_NAME']; ?>
     </td>
-    <td style="nowrap:nowrap;padding:5px 25px 0px 0px;text-align:right;">
+    <td <?php echo $birdensonrakitdler; ?>>
     <?php echo $veriboyutu ?>
     </td>
-    <td style="nowrap:nowrap;padding:5px 25px 0px 0px;text-align:right;">
+    <td <?php echo $birdensonrakitdler; ?>>
     <?php echo $indexboyutu ?>
     </td>
-    <td style="nowrap:nowrap;padding:5px 10px 0px 0px;text-align:right;">
+    <td <?php echo $birdensonrakitdler; ?>>
     <?php echo $ekyuktek ?>
     </td>     
-    <td style="nowrap:nowrap;padding:5px 25px 0px 0px;text-align:right;">
+    <td <?php echo $birdensonrakitdler; ?>>
     <?php echo $table['TABLE_ROWS'] ?>
     </td>
-    <td style="nowrap:nowrap;padding:5px 25px 0px 0px;text-align:right;">
+    <td <?php echo $birdensonrakitdler; ?>>
     <?php echo $boyutu ?>
     </td>
-    <td style="nowrap:nowrap;padding:5px 10px 0px 0px;text-align:right;">
+    <td <?php echo $birdensonrakitdler; ?>>
     <?php
-    if (is_array($secilen_tablolar) AND in_array($table['TABLE_NAME'], $secilen_tablolar)) {
-    echo "<input type=\"checkbox\" class=\"tablolar\" checked=\"checked\" name=\"tablolar[]\" value=\"".$table['TABLE_NAME']."\" onclick=\"javascript:renk(this);\">";
+
+    if (is_array($secilen_tablolar) && in_array(trim($table['TABLE_NAME']), $secilen_tablolar)) {
+        echo "<input type=\"checkbox\" class=\"tablolar\" checked=\"checked\" name=\"tablolar[]\" value=\"".$table['TABLE_NAME']."\" onclick=\"javascript:renk(this);\">";
     }else{
-    echo "<input type=\"checkbox\" class=\"tablolar\" name=\"tablolar[]\" value=\"".$table['TABLE_NAME']."\" onclick=\"javascript:renk(this);\">";
+        echo "<input type=\"checkbox\" class=\"tablolar\" name=\"tablolar[]\" value=\"".$table['TABLE_NAME']."\" onclick=\"javascript:renk(this);\">";
     }
+
     ?>
     </td>
     </tr>
