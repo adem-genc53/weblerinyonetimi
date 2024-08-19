@@ -332,7 +332,7 @@ include('includes/sub_navbar.php');
                 echo near_date($icon[1]);
             echo "</td>";
             echo "<td style='text-align: right;padding-right: 20px;'>";
-                echo "<input type='checkbox' class='delete_veritabaniyedek' name='delete_veritabaniyedek[]' value='{$value}' title='Silmek için seç' onclick='javascript:renk(this);' />";
+                echo "<input type='checkbox' class='delete_veritabaniyedek yedekler' name='delete_veritabaniyedek[]' value='{$value}' title='Silmek için seç' onclick='javascript:renk(this);' />";
             echo "</td>";
         echo "</tr>";
     }
@@ -462,18 +462,18 @@ $(document).ready(function() {
 </script>
 
 <script type="text/javascript">
-    function renk(chkB){
-    var IsChecked = chkB.checked;           
-        if(IsChecked){
-            chkB.parentElement.parentElement.style.backgroundColor='#FFEB90';
-            chkB.parentElement.parentElement.style.borderBottom='thin solid';
-            chkB.parentElement.parentElement.style.color='';
+    $(".yedekler").change(function(){
+        var ischecked= $(this).is(':checked');
+        if(ischecked){
+            $(this).closest('tr').find("td").css('background', '#FFEB90');
+            $(this).closest('tr').find("td").css('borderBottom', 'thin solid');
+            $(this).closest('tr').find("td").css('color', '');
         }else{
-            chkB.parentElement.parentElement.style.backgroundColor='';
-            chkB.parentElement.parentElement.style.borderBottom='';
-            chkB.parentElement.parentElement.style.color='';
+            $(this).closest('tr').find("td").css('background', '');
+            $(this).closest('tr').find("td").css('borderBottom', '');
+            $(this).closest('tr').find("td").css('color', '');
         }
-    }
+    });
 </script>
 
 <script language="javascript">

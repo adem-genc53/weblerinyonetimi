@@ -533,7 +533,7 @@ include('includes/sub_navbar.php');
                                                                         <?php foreach($charsets as $key => $value): ?>
                                                                             <li>
                                                                                 <a class="dropdown-item <?php echo $genel_ayarlar['karakter_seti'] == $key ? 'selected' : ''; ?>" href="#" data-key="<?php echo $key; ?>" data-value="<?php echo $value; ?>">
-                                                                                    <?php echo $value; ?>
+                                                                                    <span class="file-name"><?php echo $value; ?></span>
                                                                                     <span class="badge bg-primary rounded-pill"><?php echo $key; ?></span>
                                                                                 </a>
                                                                             </li>
@@ -593,14 +593,9 @@ include('includes/sub_navbar.php');
         margin-left: 20px; /* Dosya adlarına girinti ekler */
     }
     .dropdown-item.selected {
-        background-color: #E0E0E6; /* Vurgu rengi */
+        background-color: #E0E0E6; /* Seçili öğe için vurgu rengi */
         color: black;
     }
-
-.dropdown-item.selected {
-    background-color: #E0E0E6; /* Seçili öğe için vurgu rengi */
-    color: black;
-}
 
 </style>
 

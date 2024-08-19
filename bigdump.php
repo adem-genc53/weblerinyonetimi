@@ -736,12 +736,13 @@ if (!$error && !TESTMODE && !isset($_REQUEST["fn"]))
 
 
 		  <table class="table table-sm table-striped table-hover" style="min-width: 1000px;">
-			<colgroup span="5">
+			<colgroup span="6">
 				<col style="width:50%"></col>
 				<col style="width:15%"></col>
 				<col style="width:15%"></col>
 				<col style="width:10%"></col>
 				<col style="width:10%"></col>
+				<col style="width:1%"></col>
 			</colgroup>
 	
 			<thead>
@@ -751,6 +752,7 @@ if (!$error && !TESTMODE && !isset($_REQUEST["fn"]))
 				<th>Yedekleme/Düzenleme Zamanı</th>
 				<th style="text-align:center;">Dosya Tipi</th>
 				<th>Yedeği Geri Yükle</th>
+				<th>Sil</th>
 			  </tr>
 			</thead>
 			<tbody>
@@ -791,19 +793,23 @@ if (!$error && !TESTMODE && !isset($_REQUEST["fn"]))
 				<td style="text-align:right;padding-right:70px;"><div class="smallfont"><?php echo near_date(filemtime($upload_dir.'/'.$dirfile)); ?></div></td>
 				<td style="text-align:center;"><div class="smallfont"><?php echo $uzanti; ?></div></td>
 				<td style="text-align:center;"><div class="smallfont"><?php echo $iceri_aktar; ?></div></td>
+				<td style="text-align:center;"><div class="smallfont"><input type="checkbox" class="delete_veritabaniyedek yedekler" name="delete_veritabaniyedek[]" value="<?php echo isset($_SESSION['folder']) ?  $_SESSION['folder']."/".$dirfile : $dirfile; ?>" title="Silmek için seç" onclick="javascript:renk(this);"></div></td>
 			</tr>
 		  <?php
 		  $css++;
 		}
 	  }
 	}
+echo "  <th colspan='6' style='text-align: right;padding-right: 20px;'>Tümünü Seç: <input type='checkbox' onclick='javascript:tumunu_sec(this);' title='Tümünü silmek için seç' /></td>";
 echo "</tbody>";
 	if ($dirhead) 
 	  echo ('
 			<tfoot>
-			  <tr>
-				<th colspan="5" style="text-align:center;">Veri Tabanı Yedeklemek için "Veri Tabanı Yedekle" Alanında Yedekleyebilirsiniz</th>
-			  </tr>
+                <tr>
+                    <td colspan="6" align="center">
+                        <button type="submit" class="btn btn-warning btn-sm" onclick="return confirmDel();"><span class="glyphicon glyphicon-trash"></span> Seçilen Veri Tabanı Yedek(leri) Sil </button>
+                    </td>
+                </tr>
 			</tfoot>
 		  </table>
 			  ');
@@ -818,12 +824,13 @@ echo "</tbody>";
 				<div class="card-body p-0">
 
 		  <table class="table table-sm table-striped table-hover" style="min-width: 1000px;">
-			<colgroup span="5">
+			<colgroup span="6">
 				<col style="width:50%"></col>
 				<col style="width:15%"></col>
 				<col style="width:15%"></col>
 				<col style="width:10%"></col>
 				<col style="width:10%"></col>
+				<col style="width:1%"></col>
 			</colgroup>
 	
 			<thead>
@@ -833,16 +840,17 @@ echo "</tbody>";
 				<th>Yedekleme/Düzenleme Zamanı</th>
 				<th style="text-align:center;">Dosya Tipi</th>
 				<th>Yedeği Geri Yükle</th>
+				<th>Sil</th>
 			  </tr>
 			</thead>
 			<tbody>
 			  <tr>
-				<th colspan="5" style="text-align:center;">HENÜZ YEDEKLENMİŞ VERİ TABANI YOK</td>
+				<th colspan="6" style="text-align:center;">HENÜZ YEDEKLENMİŞ VERİ TABANI YOK</td>
 			  </tr>
 			</tbody>
 			<tfoot>
 			  <tr>
-				<th colspan="5" style="text-align:center;">Veri Tabanı Yedeklemek için "Veri Tabanı Yedekle" Alanında Yedekleyebilirsiniz</th>
+				<th colspan="6" style="text-align:center;">Veri Tabanı Yedeklemek için "Veri Tabanı Yedekle" Alanında Yedekleyebilirsiniz</th>
 			  </tr>
 			</tfoot>
 		  </table>
@@ -1381,7 +1389,82 @@ else if ($file && $gzipmode) gzclose($file);
 include('includes/footer.php');
 ?>
 
+<script type="text/javascript">
 
+    function tumunu_sec(spanChk){
+        var IsChecked = spanChk.checked;
+        var Chk = spanChk;
+            var items = document.getElementsByClassName("delete_veritabaniyedek");
+            //console.log(items);
+            for(i=0;i<items.length;i++)
+            {
+                if(items[i].id != Chk && items[i].type=="checkbox")
+                {
+                    if(items[i].checked!= IsChecked)
+                    {
+                        items[i].click();
+                    }
+                }
+            }
+    }
+</script>
+
+<script type="text/javascript">
+    $(".yedekler").change(function(){
+        var ischecked= $(this).is(':checked');
+        if(ischecked){
+            $(this).closest('tr').find("td").css('background', '#FFEB90');
+            $(this).closest('tr').find("td").css('borderBottom', 'thin solid');
+            $(this).closest('tr').find("td").css('color', '');
+        }else{
+            $(this).closest('tr').find("td").css('background', '');
+            $(this).closest('tr').find("td").css('borderBottom', '');
+            $(this).closest('tr').find("td").css('color', '');
+        }
+    });
+</script>
+
+<script language="javascript">
+    function confirmDel() {
+        var inputElems = document.getElementsByTagName('input'), count = 0;
+        for (var i=0; i<inputElems.length; i++) {
+            if (inputElems[i].type === 'checkbox' && inputElems[i].checked === true) {
+                count++;
+            }
+        }
+
+        if (count<1){
+    $(function(){
+        jw("b olumsuz").baslik("Seçim Yapılmamış").icerik("Silinecek veritabanı yedeği seçmediniz!").kilitle().en(400).boy(100).ac();
+    })  
+    return false;
+    }
+    
+    $(function()
+    {
+        jw('b secim',OK).baslik("Veritabanı Silmeyi Onayla").icerik("Yedek Veritabanını silmek istediğinizden emin misiniz?").en(350).kilitle().ac();
+    })
+
+    function OK(x){
+            if(x==1){
+            var bekleme = jw("b bekle").baslik("Veritabanları siliniyor...").en(300).boy(10).kilitle().akilliKapatPasif().ac();
+            var str = 'grup=sqlyedeksil';
+            var t = $('#veritabani_secimi').serialize();
+            (t !='')? str += '&'+t :'';    
+                xhr = $.ajax({
+                type: "POST",
+                url: "dosyasil.php",
+                data: str,
+                    success: function(veriler){
+                        bekleme.kapat();
+                        jw("b olumlu").baslik("Veritabanı Silme Sonucu").icerik(veriler).en(450).boy(10).kilitle().akilliKapatPasif().kapaninca(function(){ window.location.href='<?php echo $_SERVER['REQUEST_URI']; ?>' }).ac();       
+                    }
+                });             
+            } //if(x==1){
+        } //function DUR(x){
+		return false;
+    }
+</script>
 
 <?php
 
