@@ -487,7 +487,7 @@ $(document).ready(function() {
 
         if (count<1){
     $(function(){
-        jw("b olumsuz").baslik("Seçim Yapılmamış").icerik("Silinecek veritabanı yedeği seçmediniz!").kilitle().en(400).boy(100).ac();
+        jw("b olumsuz").baslik("Seçim Yapılmamış").icerik("Silinecek veritabanı yedeği seçmediniz!").kilitle().en(350).boy(100).ac();
     })  
     return false;
     }

@@ -65,6 +65,41 @@ if(isset($_GET['do'])){
 	krsort($files);
 
 ###########################################################################################################################################
+function getDatabaseNameFromSqlFile($filePath) {
+    // Dosyanın uzantısını kontrol et
+    $extension = pathinfo($filePath, PATHINFO_EXTENSION);
+
+    if ($extension === 'gz') {
+        // .gz uzantılı dosya ise gzopen kullanarak aç
+        $handle = gzopen($filePath, 'r');
+    } else {
+        // Normal .sql dosyası ise fopen kullanarak aç
+        $handle = fopen($filePath, 'r');
+    }
+
+    if ($handle) {
+        while (($line = ($extension === 'gz') ? gzgets($handle) : fgets($handle)) !== false) {
+            // Veritabanı adını içeren satırı bul
+            if (strpos($line, '-- Veritabanı:') !== false) {
+                // Veritabanı adını ayıkla ve tırnak işaretlerinden kurtul
+                preg_match('/-- Veritabanı: `(.*?)`/', $line, $matches);
+                if (isset($matches[1])) {
+                    return $matches[1];
+                }
+            }
+        }
+
+        // Dosyayı kapat
+        if ($extension === 'gz') {
+            gzclose($handle);
+        } else {
+            fclose($handle);
+        }
+    }
+
+    // Veritabanı adı bulunamadıysa null döndür
+    return null;
+}
 #########################################################################################################################################
 	// Ajax ile veritabanı ID geliyormu, geliyorsa hem değişkene hemde sessiona ata
 	// Gelmiyorsa else den sesiiondan kullan
@@ -421,7 +456,7 @@ div tt {
 		<?php endforeach; ?>
 		</div>
 	</ul>
-	<input type="hidden" id="selectedVeritabaniId" name="veritabani_id" value="<?php if(isset($_POST['veritabani_id'])){ echo $_POST['veritabani_id'];} ?>">
+	<input type="hidden" id="selectedVeritabaniId" name="veritabani_id" value="<?php if(isset($_POST['veritabani_id'])){ echo $_POST['veritabani_id'];}elseif(isset($_SESSION['secilen_veritabani_id']) && !empty($_SESSION['secilen_veritabani_id'])){ echo $_SESSION['secilen_veritabani_id']; } ?>">
 </div>
 
 			</td>
@@ -779,13 +814,26 @@ if (!$error && !TESTMODE && !isset($_REQUEST["fn"]))
 		  else
 			$uzanti = "Misc";
 
-		  if ((preg_match("/\.gz$/i",$dirfile) && function_exists("gzopen")) || preg_match("/\.sql$/i",$dirfile) || preg_match("/\.csv$/i",$dirfile))
+		  if ((preg_match("/\.gz$/i",$dirfile) && function_exists("gzopen")) || preg_match("/\.sql$/i",$dirfile) || preg_match("/\.csv$/i",$dirfile)){
 		  
 		  //$iceri_aktar = ("<a class='myButton' href='".$_SERVER["PHP_SELF"]."?start=1&amp;fn=".urlencode($dirfile)."&amp;foffset=0&amp;totalqueries=0&amp;delimiter=".urlencode($delimiter)."'>Geri Yükle</a></td>");
-		  $iceri_aktar = ("<a class='tikla' href='".$_SERVER["PHP_SELF"]."?start=1&amp;fn=".urlencode($dirfile)."&amp;foffset=0&amp;totalqueries=0&amp;delimiter=".urlencode($delimiter)."#tbl'>Geri Yükle</a>");
+		  	if(isset($_SESSION['folder']) && !empty($_SESSION['folder'])){
+				$filePath = BACKUPDIR . '/' . $_SESSION['folder'] . "/" . $dirfile;
+			}else{
+				$filePath = BACKUPDIR . '/' . $dirfile;
+			}
+			$databaseName = getDatabaseNameFromSqlFile($filePath);
+			if ($databaseName) {
+				$veritabaniName = $databaseName;
+			} else {
+				$veritabaniName = "Veritabanı adı bulunamadı.";
+			}
+		  	$iceri_aktar = ("<a class='tikla' data-dosya_adi='".$veritabaniName."' href='".$_SERVER["PHP_SELF"]."?start=1&amp;fn=".urlencode($dirfile)."&amp;foffset=0&amp;totalqueries=0&amp;delimiter=".urlencode($delimiter)."#tbl'>Geri Yükle</a>");
+
 		  // TODO: echo ("<td><a href='".$_SERVER["PHP_SELF"]."?start=1&amp;fn=".urlencode($dirfile)."&amp;foffset=0&amp;totalqueries=0&amp;delimiter=".urlencode($delimiter)."'>Start Import</a></td>\n <td><a href='".$_SERVER["PHP_SELF"]."?delete=".urlencode($dirfile)."'>Delete file</a></td></tr>\n");
-		  else
+		  }else{
 		  echo ("&nbsp;");
+		  }
 		  ?>
 			<tr>
 				<td><div class="smallfont"><img src="images/<?php echo $uzanti; ?>.png"> <?php echo $dirfile; ?></div></td>
@@ -1435,7 +1483,7 @@ include('includes/footer.php');
 
         if (count<1){
     $(function(){
-        jw("b olumsuz").baslik("Seçim Yapılmamış").icerik("Silinecek veritabanı yedeği seçmediniz!").kilitle().en(400).boy(100).ac();
+        jw("b olumsuz").baslik("Seçim Yapılmamış").icerik("Silinecek veritabanı yedeği seçmediniz!").kilitle().en(350).boy(100).ac();
     })  
     return false;
     }
@@ -1694,70 +1742,52 @@ function create_ajax_script()
 
 ?>
 
-<script language="javascript" type="text/javascript"> 
-	  $('.tikla').click(function( e ){
-	  var url = $(this).attr('href');
-	  var urlParams = new URLSearchParams(url);
-	  var yedek = urlParams.get('fn');
-	  var testmode = $("input[name='testmode']:checked").attr('value');
-	  var veritabani_id = $('select[name="veritabani_id"] option:selected').val();
+<script language="javascript" type="text/javascript">
 
-	if(veritabani_id=="0") {
+	$('.tikla').click(function( e ){
+
+	var veritabani_adi = $(this).data('dosya_adi');
+	var url = $(this).attr('href');
+	var urlParams = new URLSearchParams(url);
+	var yedek = urlParams.get('fn');
+	var testmode = $("input[name='testmode']:checked").attr('value');
+	var veritabani_id = $("#selectedVeritabaniId").val();
+
+	if(!veritabani_id) {
 		$(function(){
-			jw("b olumsuz").baslik("Veritabanı Belirlemediniz!").icerik("Geri yükleyeceğiniz veritabanı seçmelisiniz").kilitle().en(400).boy(100).ac();
+			jw("b olumsuz").baslik("Veritabanı Belirlemediniz!").icerik("Geri yükleyeceğiniz veritabanı seçmelisiniz").kilitle().en(350).boy(100).ac();
 		})
 		return false;
 	}
 
-	  if(testmode==undefined) {
-	  $(function(){
-		jw("b olumsuz").baslik("GERİ YÜKLEME MODU SEÇMEDİNİZ").icerik("GERİ YÜKLEME SEÇENEĞİNİ SEÇMEDİNİZ<br /><br />DENEME amaçlı veya GERÇEK yükleme").kilitle().en(350).boy(100).ac();
-	  })
-	  return false;
-	  }
+	if(testmode==undefined) {
+		$(function(){
+			jw("b olumsuz").baslik("GERİ YÜKLEME MODU SEÇMEDİNİZ").icerik("GERİ YÜKLEME SEÇENEĞİNİ SEÇMEDİNİZ<br /><br />DENEME amaçlı veya GERÇEK yükleme").kilitle().en(350).boy(100).ac();
+		})
+		return false;
+	}
 	if(testmode==1){
-	var deneme = "<strong>NOT:</strong> Şuanda <strong>DENEME MODUNDA</strong> yükleme yapıyorsunuz<br /><br /><strong>DENEME</strong> Yüklemeye devam etsin mi?";
+		var deneme = "<strong>NOT:</strong> Şuanda <strong style='color: blue;'>DENEME MODUNDA</strong> yükleme yapıyorsunuz<br /><br /><strong>DENEME</strong> Yüklemeye devam etsin mi?";
 	} 
 	if(testmode==0){
-	var deneme = "<strong>NOT:</strong> Şuanda <strong>GERÇEK</strong> yükleme yapıyorsunuz<br /><br /><strong>GERÇEK</strong> Yüklemeye devam etsin mi?";
+		var deneme = "<strong>NOT:</strong> Şuanda <strong style='color: blue;'>GERÇEK</strong> yükleme yapıyorsunuz<br /><br /><strong>GERÇEK</strong> Yüklemeye devam etsin mi?";
 	}
 
 	$(function()
 	{
-	  jw('b secim',yukle_dur).baslik("Veri Tabanına Geri Yüklemeyi Onayla!").icerik("Geri yüklenecek veri tabanı adı: <strong><?php echo $db_name; ?></strong><br /><br />Veri tabanı veya tablo yedeğin adı: <strong>" + yedek + "</strong><br /><br />" + deneme ).en(450).kilitle().ac();
+	  	jw('b secim',yukle_dur).baslik("Veri Tabanına Geri Yüklemeyi Onayla!").icerik("Geri yüklenecek veritabanı adı: <strong style='color: blue;'><?php echo strtoupper($db_name); ?></strong>, Yedek veritabanı adı: <strong style='color: blue;'>" + veritabani_adi.toUpperCase() + "</strong><br /><br />Veri tabanı veya tablo yedeğin adı: <strong>" + yedek + "</strong><br /><br />" + deneme ).en(550).kilitle().ac();
 	})
+
 	function yukle_dur(x){
-		  if(x==1){
-		  window.self.location= url ;
-		  }else{
-		  return false;
-		  }
-	}
-	return false;
-	});
-/*
-$('#merge').click(function( e ){
-	var folder = $("#selectedAltKlasor").val();
-	console.log(folder);
-		if(!folder) {
-			$(function(){
-				jw("b olumsuz").baslik("Önce Alt-Dizin Seçiniz!").icerik("Birleştirmek istediğiniz bir Alt-Dizin seçmelisiniz").kilitle().en(400).boy(100).ac();
-			})
+		if(x==1){
+			window.self.location= url ;
+		}else{
 			return false;
 		}
-var bekleme = jw("b bekle").baslik("Veri Tabanı Birleştiriliyor...").en(350).boy(10).kilitle().akilliKapatPasif().ac();
-	$.ajax({
-		type:'POST',
-		url: "yedek_tablolari_birlestir.php",
-		data: { folder : folder},
-		success: function(msg){
-			bekleme.kapat();
-			jw("b olumlu").baslik("Veri Tabanı Birleştirme Sonucu").icerik(msg).en(450).boy(10).kilitle().akilliKapatPasif().kapaninca(function(){ window.location.href=window.location.href + "?do=1"; }).ac();     
-		}
-	});
+	}
+	return false;
 
-});
-*/
+	});
 </script>
 
 <script>
