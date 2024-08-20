@@ -155,7 +155,7 @@ $db_connection_charset = $genel_ayarlar['karakter_seti'];
 
 $filename           = '';     // Yüklenecek yedek dosyanın adını giriniz
 $ajax               = true;   // AJAX modu: web sitesi yenilenmeden içe aktarma yapılacaktır
-$linespersession    = 300;   // Bir seferde içe aktarmada yürütülecek satır sayısı
+$linespersession    = 1000;   // Bir seferde içe aktarmada yürütülecek satır sayısı
 $delaypersession    = 0;      // Her oturumdan sonra uyku süresini milisaniye cinsinden belirtebilirsiniz.
 							  // Yalnızca JavaScript etkinleştirildiğinde çalışır. Sunucu taşmasını azaltmak için kullanın
 
@@ -500,6 +500,10 @@ div tt {
 <div class="dropdown">
 		<?php
 		$disabled = isset($_GET['start']) ? 'disabled' : '';
+		if($disabled=='disabled'){
+			echo '<script>$(\'input[name="testmode"]\').attr("disabled",true);</script>';
+			echo "\n";
+		}
 		if(in_array($secili_dizin, $files)){
 			echo '<button class="btn btn-primary dropdown-toggle  d-flex justify-content-between align-items-center" type="button" id="dropdownAltKlasorButton" data-bs-toggle="dropdown" aria-expanded="false" '.$disabled.'>';
 			echo "<i class='fas fa-folder-open' style='font-size:20px;color:#FFA500;padding-right:10px;'></i>";
@@ -1241,9 +1245,9 @@ if (!$error && isset($_REQUEST["start"]) && isset($_REQUEST["foffset"]) && preg_
 // Print statistics
 // İstatistikleri yazdır
 
-skin_open();
+	skin_open();
 
- echo ("<p class='centr'><img id='yukleniyor' src='images/yukleniyor.gif'><br /><strong>İstatistikler Tablosu</strong></p>\n");
+	echo ("<p class='centr'><img id='yukleniyor' src='images/yukleniyor.gif'><br /><strong>İstatistikler Tablosu</strong></p>\n");
 
   if (!$error)
   { 
@@ -1388,7 +1392,7 @@ skin_open();
 	}
 	else
 	{ if ($delaypersession!=0)
-		echo ("<p class='centr'>Şimdi bir sonraki oturuma başlamadan önce <strong>$delaypersession milisaniye</strong> bekliyorum...</p>\n");
+		echo ("<p class='centr'>Bir sonraki oturuma başlamadan önce <strong>$delaypersession milisaniye</strong> bekliyorum...</p>\n");
 	  if (!$ajax) 
 		echo ("<script language='JavaScript' type='text/javascript'>window.setTimeout('location.href='".$_SERVER["PHP_SELF"]."?start=$linenumber&fn=".urlencode($curfilename)."&foffset=$foffset&totalqueries=$totalqueries&delimiter=".urlencode($delimiter)."';',500+$delaypersession);</script>\n");
 
@@ -1490,7 +1494,7 @@ include('includes/footer.php');
     
     $(function()
     {
-        jw('b secim',OK).baslik("Veritabanı Silmeyi Onayla").icerik("Yedek Veritabanını silmek istediğinizden emin misiniz?").en(350).kilitle().ac();
+        jw('b secim',OK).baslik("Veritabanı Yedeği Silmeyi Onayla").icerik("Yedek Veritabanını dosya(ları) silmek istediğinizden emin misiniz?").en(450).kilitle().ac();
     })
 
     function OK(x){
@@ -1773,9 +1777,17 @@ function create_ajax_script()
 		var deneme = "<strong>NOT:</strong> Şuanda <strong style='color: blue;'>GERÇEK</strong> yükleme yapıyorsunuz<br /><br /><strong>GERÇEK</strong> Yüklemeye devam etsin mi?";
 	}
 
+	var secilen_veritabani = '<?php echo $db_name; ?>';
+
+	if(veritabani_adi!==secilen_veritabani){
+		var veritabani_ayni_metin = "<div style='background-color: #fcfcfc;width: 100%;border: 1px solid green;padding: 10px;margin: 0px;text-align:left;'>Geri yüklenecek veritabanı adı: <strong style='color: blue;'>" + secilen_veritabani.toUpperCase() + "</strong><br />Yedek dosyanın veritabanı adı: <strong style='color: blue;'>" + veritabani_adi.toUpperCase() + "</strong><br /><br /><strong style='color: red;'>YÜKLENECEK VERİTABANI ADI İLE YEDEK DOSYANIN VERİTABANI ADI AYNI DEĞİL</strong></div>";
+	}else{
+		var veritabani_ayni_metin = "Yüklenecek veritabanı adı: <b>" + veritabani_adi.toUpperCase() + "</b> ile yedek dosyanın veritabanı adı: <b>" + secilen_veritabani.toUpperCase() + "</b> aynıdır.<br />";
+	}
+
 	$(function()
 	{
-	  	jw('b secim',yukle_dur).baslik("Veri Tabanına Geri Yüklemeyi Onayla!").icerik("Geri yüklenecek veritabanı adı: <strong style='color: blue;'><?php echo strtoupper($db_name); ?></strong>, Yedek veritabanı adı: <strong style='color: blue;'>" + veritabani_adi.toUpperCase() + "</strong><br /><br />Veri tabanı veya tablo yedeğin adı: <strong>" + yedek + "</strong><br /><br />" + deneme ).en(550).kilitle().ac();
+	  	jw('b secim',yukle_dur).baslik("Veri Tabanına Geri Yüklemeyi Onayla!").icerik(" " + veritabani_ayni_metin + " <br />Veri tabanı veya tablo yedeğin adı: <strong>" + yedek + "</strong><br /><br />" + deneme ).en(550).kilitle().ac();
 	})
 
 	function yukle_dur(x){

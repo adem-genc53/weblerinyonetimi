@@ -494,7 +494,7 @@ $(document).ready(function() {
     
     $(function()
     {
-        jw('b secim',OK).baslik("Veritabanı Silmeyi Onayla").icerik("Yedek Veritabanını silmek istediğinizden emin misiniz?").en(350).kilitle().ac();
+        jw('b secim',OK).baslik("Veritabanı Yedeği Silmeyi Onayla").icerik("Yedek Veritabanını dosya(ları) silmek istediğinizden emin misiniz?").en(450).kilitle().ac();
     })
 
     function OK(x){
