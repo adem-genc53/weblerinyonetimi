@@ -1,5 +1,33 @@
+<?php 
+    //echo '<pre>' . print_r($_POST, true) . '</pre>';
+    if(isset($_POST['mobil_pc'])){
+        header("location: /");
+        if(isset($_POST['gecis']) && $_POST['gecis'] == 2){
+            setcookie("mobil_pc_gecis", 'mobil', time() + 3600 , "/", ".antenfiyati.com");
+        }else{
+            setcookie("mobil_pc_gecis", 'pc', time() + 3600 , "/", ".antenfiyati.com");
+        }
+    }
+
+    require(dirname(dirname(__FILE__))."/MobileDetect.php");
+    $mobilversiyon = false;
+    $detect = new \Detection\MobileDetect;
+    $deviceType = ($detect->isMobile() ? ($detect->isTablet() ? 'tablet' : 'phone') : 'computer');
+    // Mobil veya Tabletten masaüstü versiyon görüntülerken ve mobil_pc_gecis cookie belirlenmemiş ise Mobil versiyona yönlendir
+    if( ($deviceType=='tablet' OR $deviceType=='phone') && !isset($_COOKIE['mobil_pc_gecis']) ){
+        //header("Location: https://m.webyonetimi.antenfiyati.com");
+    }else // Masaüstü bilgisayarda masaüstü versiyon görüntülerken Mobil versiyona geç kutu seçildiğinde Mobil versiyona yönlendir
+          // Bu durum masaüstü bilgisayardan Mobil versiyona geçmek istenildiğinde
+    if( (isset($_COOKIE['mobil_pc_gecis']) && $_COOKIE['mobil_pc_gecis']=='mobil') ){
+        //header("Location: https://m.webyonetimi.antenfiyati.com");
+    }
+    
+    if( (isset($_COOKIE['mobil_pc_gecis']) && $_COOKIE['mobil_pc_gecis']=='pc') ){
+        $mobilversiyon = true;
+    }
+?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="tr">
 
 <head>
     <meta charset="utf-8">
@@ -10,6 +38,7 @@
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
 
     <!-- Google Font: Source Sans Pro -->
+
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="plugins/fontawesome-free/css/all.min.css">
@@ -22,6 +51,13 @@
 
     <script src="https://code.jquery.com/jquery-1.9.1.js"></script>
     <link rel="stylesheet" type="text/css" href="jswindow/jswindow.css"/>
+<?php 
+    if($mobilversiyon){
+        echo "<script>$(document).ready(function () { $('#mobil-versiyon').show(); });</script>";
+    }else{
+        echo "<script>$(document).ready(function () { $('#mobil-versiyon').hide(); });</script>";
+    }
+?>
 </head>
 <!--
 `body` tag options:
