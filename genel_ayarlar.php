@@ -993,7 +993,7 @@ $(document).ready(function() {
                                                                 &nbsp;2. Yöntem, bu script içinde herhangi bir sayfa ziyaret edildiğinde ajax ile <b>gorev.php</b> dosyası tetiklerek çalıştırılmasıdır.<br />
                                                                 Bu seçeneklerden önerilen seçenek 1. seçenektir.<br />
                                                                 Cron işlerine komut ekleyip <b>gorev.php</b> dosyayı her dakika çalışacak şeklinde ayarladığınızda hem tüm görevlerin tam zamanında yerine getirilmesi sağlanmış olacağı gibi görevlerin yerine getirilirken web sitesi bundan etkilenmeden rahatça gezinebilir ve yapmak istediğiniz işleri kolaylıkla yapabilirsiniz.<br />
-                                                                Ancak, Ajax ile veya elle doğrudan <b>https://alanadi.com/gorev.php</b> url çalıştırıldığında görev işlemi bitene kadar sitede herhangi bir işlem yada sayfa değiştirilmez.
+                                                                Ancak, Ajax ile veya elle doğrudan <b>https://alanadi.com/gorev.php</b> url çalıştırıldığında php betiği meşgul olacağından görev işlemi bitene kadar sitede herhangi bir işlem yapılamaz yada sayfa değiştirilmez. Bu bir php kuralıdır site tasarımı veya kodlama ile alakası yoktur.
                                                             </td>
                                                         </tr>
                                                         <tr>

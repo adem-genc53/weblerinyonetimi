@@ -16,22 +16,22 @@ require_once __DIR__ . '/includes/turkcegunler.php';
 
 <?php 
 
-    function showSize($size_in_bytes) {
-        if ($size_in_bytes >= 1073741824) {
-            $size_in_bytes = number_format($size_in_bytes / 1073741824, 2) . ' GB';
-        } elseif ($size_in_bytes >= 1048576) {
-            $size_in_bytes = number_format($size_in_bytes / 1048576, 2) . ' MB';
-        } elseif ($size_in_bytes >= 1024) {
-            $size_in_bytes = number_format($size_in_bytes / 1024, 2) . ' KB';
-        } elseif ($size_in_bytes > 1) {
-            $size_in_bytes = $size_in_bytes . ' Bayt';
-        } elseif ($size_in_bytes == 1) {
-            $size_in_bytes = $size_in_bytes . ' Bayt';
-        } else {
-            $size_in_bytes = '0 Bayt';
-        }
-        return $size_in_bytes;
+function showSize($bytes) {
+    if ($bytes >= 1073741824) {
+        $bytes = number_format($bytes / 1073741824, 2) . ' GB';
+    } elseif ($bytes >= 1048576) {
+        $bytes = number_format($bytes / 1048576, 2) . ' MB';
+    } elseif ($bytes >= 1024) {
+        $bytes = number_format($bytes / 1024, 2) . ' KB';
+    } elseif ($bytes > 1) {
+        $bytes = $bytes . ' bytes';
+    } elseif ($bytes == 1) {
+        $bytes = $bytes . ' byte';
+    } else {
+        $bytes = '0 bytes';
     }
+    return $bytes;
+}
 
 function scan_dir($path){
     $ite=new RecursiveDirectoryIterator($path);

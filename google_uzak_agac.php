@@ -19,18 +19,21 @@ class GoogleDriveTreeView {
         set_time_limit(3600); // 1 saat
     }
 
-    public function showSize($size_in_bytes) {
-        if ($size_in_bytes >= 1073741824) {
-            return number_format($size_in_bytes / 1073741824, 2) . ' GB';
-        } elseif ($size_in_bytes >= 1048576) {
-            return number_format($size_in_bytes / 1048576, 2) . ' MB';
-        } elseif ($size_in_bytes >= 1024) {
-            return number_format($size_in_bytes / 1024, 2) . ' KB';
-        } elseif ($size_in_bytes >= 1) {
-            return $size_in_bytes . ' Bayt';
+    private function showSize(string $bytes) {
+        if ($bytes >= 1073741824) {
+            $bytes = number_format($bytes / 1073741824, 2) . ' GB';
+        } elseif ($bytes >= 1048576) {
+            $bytes = number_format($bytes / 1048576, 2) . ' MB';
+        } elseif ($bytes >= 1024) {
+            $bytes = number_format($bytes / 1024, 2) . ' KB';
+        } elseif ($bytes > 1) {
+            $bytes = $bytes . ' bytes';
+        } elseif ($bytes == 1) {
+            $bytes = $bytes . ' byte';
         } else {
-            return '0 Bayt';
+            $bytes = '0 bytes';
         }
+        return $bytes;
     }
 
     private function fetchFiles($query) {

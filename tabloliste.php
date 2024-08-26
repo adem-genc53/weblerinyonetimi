@@ -247,21 +247,21 @@ $hash = new Hash;
     <?php
     $i++;
     }
-    function showSize($size_in_bytes) {
-        $value = 0;
-        $round = "";     
-        if ($size_in_bytes >= 1073741824) {
-            $value = round($size_in_bytes/1073741824*10)/10;
-            return  ($round) ? round($value) . 'GB' : "{$value} GB";
-        } else if ($size_in_bytes >= 1048576) {
-            $value = round($size_in_bytes/1048576*10)/10;
-            return  ($round) ? round($value) . 'MB' : "{$value} MB";
-        } else if ($size_in_bytes >= 1024) {
-            $value = round($size_in_bytes/1024*10)/10;
-            return  ($round) ? round($value) . 'KB' : "{$value} KB";
+    function showSize($bytes) {
+        if ($bytes >= 1073741824) {
+            $bytes = number_format($bytes / 1073741824, 2) . ' GB';
+        } elseif ($bytes >= 1048576) {
+            $bytes = number_format($bytes / 1048576, 2) . ' MB';
+        } elseif ($bytes >= 1024) {
+            $bytes = number_format($bytes / 1024, 2) . ' KB';
+        } elseif ($bytes > 1) {
+            $bytes = $bytes . ' bytes';
+        } elseif ($bytes == 1) {
+            $bytes = $bytes . ' byte';
         } else {
-            return "$size_in_bytes Bayt";
+            $bytes = '0 bytes';
         }
+        return $bytes;
     }     
 ?>
 <tfoot>

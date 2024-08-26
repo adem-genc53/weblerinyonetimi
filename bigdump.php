@@ -142,7 +142,6 @@ if($db_yok){
 	$varsayilan_karakter_set_adi = $PDOdbsecilen->query("SELECT DEFAULT_CHARACTER_SET_NAME, DEFAULT_COLLATION_NAME
 	FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = '$db_name';")->fetch(PDO::FETCH_ASSOC);
 }
-
 ###########################################################################################################################################
 
 // Bağlantı karakter seti, döküm dosyası karakter seti ile aynı olmalıdır (utf8, latin1, cp1251, koi8r vb.)
@@ -230,21 +229,22 @@ foreach ($_REQUEST as $key => $val)
   $_REQUEST[$key] = $val;
 }
 
-  function showSize($size_in_bytes) {
-	$value = 0;
-	if ($size_in_bytes >= 1073741824) {
-		$value = round($size_in_bytes/1073741824*10)/10;
-		return  (@$round) ? round($value) . 'GB' : "{$value} GB";
-	} else if ($size_in_bytes >= 1048576) {
-		$value = round($size_in_bytes/1048576*10)/10;
-		return  (@$round) ? round($value) . 'MB' : "{$value} MB";
-	} else if ($size_in_bytes >= 1024) {
-		$value = round($size_in_bytes/1024*10)/10;
-		return  (@$round) ? round($value) . 'KB' : "{$value} KB";
-	} else {
-		return "$size_in_bytes Bayt";
-	}
-  }
+function showSize($bytes) {
+    if ($bytes >= 1073741824) {
+        $bytes = number_format($bytes / 1073741824, 2) . ' GB';
+    } elseif ($bytes >= 1048576) {
+        $bytes = number_format($bytes / 1048576, 2) . ' MB';
+    } elseif ($bytes >= 1024) {
+        $bytes = number_format($bytes / 1024, 2) . ' KB';
+    } elseif ($bytes > 1) {
+        $bytes = $bytes . ' bytes';
+    } elseif ($bytes == 1) {
+        $bytes = $bytes . ' byte';
+    } else {
+        $bytes = '0 bytes';
+    }
+    return $bytes;
+}
 
 do_action('header');
 
@@ -427,9 +427,8 @@ div tt {
 
 <div class="dropdown">
 		<?php
-		$disabled = isset($_GET['start']) ? 'disabled' : '';
 		if(isset($_POST['veritabani_id']) && !empty($_POST['veritabani_id']) || isset($_SESSION['secilen_veritabani_id']) && !empty($_SESSION['secilen_veritabani_id'])){
-			echo '<button class="btn btn-primary dropdown-toggle  d-flex justify-content-between align-items-center" type="button" id="dropdownVeritabaniIdButton" data-bs-toggle="dropdown" aria-expanded="false" '.$disabled.'>';
+			echo '<button class="btn btn-primary dropdown-toggle  d-flex justify-content-between align-items-center" type="button" id="dropdownVeritabaniIdButton" data-bs-toggle="dropdown" aria-expanded="false">';
 			if(isset($_POST['veritabani_id']) && !empty($_POST['veritabani_id'])){
 				echo '<span class="icon"><img src="images/database-connect-icon-beyaz.svg" style="border:0;width:24px;height:24px;"></span>';
 				echo '<span class="file-name">' . $veritabanlari_arr[$_POST['veritabani_id']] . '</span>';
@@ -482,16 +481,17 @@ div tt {
 <?php 
 	//echo '<pre>' . print_r($files, true) . '</pre>';
 
-  	//if(!isset($_GET['start'])){
-    // Dizin içindeki dosya boyutunu hesaplama
-
     function dirSize($directory) {
         $size = 0;
         foreach(new RecursiveIteratorIterator(new RecursiveDirectoryIterator($directory)) as $file){
-            $size+=$file->getSize();
+			// Sadece dosya ise boyutunu ekleyin
+			if ($file->isFile()) {
+				$size += $file->getSize();
+			}
         }
         return $size;
     }
+
 ?>
 		<tr>
 			<td>Alt dizinden bir klasör seçin:</td>
@@ -499,18 +499,13 @@ div tt {
 
 <div class="dropdown">
 		<?php
-		$disabled = isset($_GET['start']) ? 'disabled' : '';
-		if($disabled=='disabled'){
-			echo '<script>$(\'input[name="testmode"]\').attr("disabled",true);</script>';
-			echo "\n";
-		}
 		if(in_array($secili_dizin, $files)){
-			echo '<button class="btn btn-primary dropdown-toggle  d-flex justify-content-between align-items-center" type="button" id="dropdownAltKlasorButton" data-bs-toggle="dropdown" aria-expanded="false" '.$disabled.'>';
+			echo '<button class="btn btn-primary dropdown-toggle  d-flex justify-content-between align-items-center" type="button" id="dropdownAltKlasorButton" data-bs-toggle="dropdown" aria-expanded="false">';
 			echo "<i class='fas fa-folder-open' style='font-size:20px;color:#FFA500;padding-right:10px;'></i>";
 			echo ' <span class="file-name">' . $secili_dizin . '</span>';
 			echo '<script> var dizin_secildi = true; </script>';
 		}else{
-			echo '<button class="btn btn-secondary dropdown-toggle  d-flex justify-content-between align-items-center" type="button" id="dropdownAltKlasorButton" data-bs-toggle="dropdown" aria-expanded="false" '.$disabled.'>';
+			echo '<button class="btn btn-secondary dropdown-toggle  d-flex justify-content-between align-items-center" type="button" id="dropdownAltKlasorButton" data-bs-toggle="dropdown" aria-expanded="false">';
 			echo 'Yedek Tabloları İçeren Alt-Klasörü Seçin';
 		}
 		?>
@@ -537,7 +532,7 @@ div tt {
 		<tr>
 		  <td>Seçili Alt-Dizindeki tabloları birleştir</td>
 		  <td>
-			<button class="btn btn-success btn-sm" id="save-btn" type="button" title="Seçili Alt-Dizindeki Tabloları Birleştir" onclick="saveContent()" <?php echo isset($_GET['start']) ? 'disabled' : ''; ?>><i class="fas fa-object-ungroup"></i> Seçili Alt-Dizindeki Tabloları Birleştir </button>
+			<button class="btn btn-success btn-sm" id="save-btn" type="button" title="Seçili Alt-Dizindeki Tabloları Birleştir" onclick="saveContent()"><i class="fas fa-object-ungroup"></i> Seçili Alt-Dizindeki Tabloları Birleştir </button>
 		  </td>
 		  <td>Eğer Alt-Dizindeki tüm tabloları geri yüklemek istiyorsanız tek tek tabloları yüklemek yerine önce tabloları birleştirin ve sonra birleştirilen dosyayı geri yükle</td>
 		</tr>
@@ -553,7 +548,22 @@ div tt {
 	</div><!-- / <div class="container-fluid"> -->
 	</section><!-- / <section class="content"> -->
 	<!-- Gövde İçerik Sonu -->
-
+<?php
+	// Veritabanı yükleme yaparken tüm seçenkleri devre dışı bırakıyoruz  
+	if(isset($_GET['start'])){
+		echo "\n<script>";
+		echo "\n";
+		echo '	$(\'input[name="testmode"]\').attr("disabled",true);';
+		echo "\n";
+		echo '	$("#dropdownVeritabaniIdButton").prop("disabled", true);';
+		echo "\n";
+		echo '	$("#dropdownAltKlasorButton").prop("disabled", true);';
+		echo "\n";
+		echo '	$("#save-btn").prop("disabled", true);';
+		echo "\n";
+		echo "</script>\n\n";
+	}
+?>
 <style>
     .dropdown-item {
         display: flex;
@@ -1032,9 +1042,9 @@ if (!$error && isset($_REQUEST["start"]) && isset($_REQUEST["foffset"]) && preg_
   if (!$error)
   { skin_open();
 	if (TESTMODE){
-	  echo ("<p class='centr' style='color: blue;'><b>DENEME MODU ETKİN</b></p>\n");
+	  echo ("<p class='centr' style='color: blue;margin-top:10px;'><b>DENEME MODU ETKİN</b></p>\n");
 	}else{
-	  echo ("<p class='centr' style='color: red;'><b>GERÇEK YÜKLEME MODU ETKİN</b></p>\n");
+	  echo ("<p class='centr' style='color: red;margin-top:10px;'><b>GERÇEK YÜKLEME MODU ETKİN</b></p>\n");
 	}
 	echo ("<p class='centr'>Geri yüklenen veritabanı: <strong>".$curfilename."</strong></p>\n");
 	echo ("<p class='smlcentr suan_satir'>İşlenen satır başlangıcı: ".$_REQUEST["start"]."</p>\n");	
@@ -1884,7 +1894,7 @@ function saveContent() {
 
 	setTimeout(function() {
 	  $("#sqlyoludosyadi").trigger("input");
-	  console.log("Input olayı manuel olarak tetiklendi.");
+	  //console.log("Input olayı manuel olarak tetiklendi.");
 	}, 100); // 1000 milisaniye = 1 saniye
 
 function showResult(str) {

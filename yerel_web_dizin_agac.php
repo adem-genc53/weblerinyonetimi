@@ -76,19 +76,21 @@ class LocaleTreeView {
         return file_exists($this->folder . $file) && $file !== '.' && $file !== '..';
     }
 
-    private function showSize(string $size_in_bytes): string {
-        if ($size_in_bytes >= 1073741824) {
-            $size_in_bytes = number_format($size_in_bytes / 1073741824, 2) . ' GB';
-        } elseif ($size_in_bytes >= 1048576) {
-            $size_in_bytes = number_format($size_in_bytes / 1048576, 2) . ' MB';
-        } elseif ($size_in_bytes >= 1024) {
-            $size_in_bytes = number_format($size_in_bytes / 1024, 2) . ' KB';
-        } elseif ($size_in_bytes >= 1) {
-            $size_in_bytes = $size_in_bytes . ' Bayt';
+    private function showSize(string $bytes) {
+        if ($bytes >= 1073741824) {
+            $bytes = number_format($bytes / 1073741824, 2) . ' GB';
+        } elseif ($bytes >= 1048576) {
+            $bytes = number_format($bytes / 1048576, 2) . ' MB';
+        } elseif ($bytes >= 1024) {
+            $bytes = number_format($bytes / 1024, 2) . ' KB';
+        } elseif ($bytes > 1) {
+            $bytes = $bytes . ' bytes';
+        } elseif ($bytes == 1) {
+            $bytes = $bytes . ' byte';
         } else {
-            $size_in_bytes = '0 Bayt';
+            $bytes = '0 bytes';
         }
-        return $size_in_bytes;
+        return $bytes;
     }
 
     // Dizin boşmu dolumu kontrol fonksiyonu
