@@ -411,8 +411,8 @@ div tt {
 	  <table class="table" style="min-width: 1000px;">
 		<colgroup span="3">
 		  <col style="width:17%"></col>
-		  <col style="width:33%"></col>
-		  <col style="width:50%"></col>
+		  <col style="width:30%"></col>
+		  <col style="width:43%"></col>
 		</colgroup>
 		<thead>
 		  <tr class="bg-primary">
@@ -428,7 +428,7 @@ div tt {
 <div class="dropdown">
 		<?php
 		if(isset($_POST['veritabani_id']) && !empty($_POST['veritabani_id']) || isset($_SESSION['secilen_veritabani_id']) && !empty($_SESSION['secilen_veritabani_id'])){
-			echo '<button class="btn btn-primary dropdown-toggle  d-flex justify-content-between align-items-center" type="button" id="dropdownVeritabaniIdButton" data-bs-toggle="dropdown" aria-expanded="false">';
+			echo '<button class="btn btn-primary dropdown-toggle  d-flex justify-content-between align-items-center" type="button" id="dropdownVeritabaniIdButton" data-bs-toggle="dropdown" aria-expanded="false"  style="width:600px;">';
 			if(isset($_POST['veritabani_id']) && !empty($_POST['veritabani_id'])){
 				echo '<span class="icon"><img src="images/database-connect-icon-beyaz.svg" style="border:0;width:24px;height:24px;"></span>';
 				echo '<span class="file-name">' . $veritabanlari_arr[$_POST['veritabani_id']] . '</span>';
@@ -438,12 +438,12 @@ div tt {
 				echo '<span class="file-name">' . $veritabanlari_arr[$_SESSION['secilen_veritabani_id']] . '</span>';
 			}
 		}else{
-			echo '<button class="btn btn-secondary dropdown-toggle  d-flex justify-content-between align-items-center" type="button" id="dropdownVeritabaniIdButton" data-bs-toggle="dropdown" aria-expanded="false">';
+			echo '<button class="btn btn-secondary dropdown-toggle  d-flex justify-content-between align-items-center" type="button" id="dropdownVeritabaniIdButton" data-bs-toggle="dropdown" aria-expanded="false"  style="width:600px;">';
 			echo '<span class="file-name">Geri Yükleme Yapacağınız Veritabanını Seçin</span>';
 		}
 		?>
 	</button>
-	<ul class="dropdown-menu" aria-labelledby="dropdownVeritabaniIdButton" style="width:520px;">
+	<ul class="dropdown-menu" aria-labelledby="dropdownVeritabaniIdButton" style="width:600px;">
 		<div class="modal-scrollbar">
 		<?php foreach($veritabanlari_arr AS $key => $value): ?>
 			<li>
@@ -500,17 +500,17 @@ div tt {
 <div class="dropdown">
 		<?php
 		if(in_array($secili_dizin, $files)){
-			echo '<button class="btn btn-primary dropdown-toggle  d-flex justify-content-between align-items-center" type="button" id="dropdownAltKlasorButton" data-bs-toggle="dropdown" aria-expanded="false">';
+			echo '<button class="btn btn-primary dropdown-toggle  d-flex justify-content-between align-items-center" type="button" id="dropdownAltKlasorButton" data-bs-toggle="dropdown" aria-expanded="false"  style="width:600px;">';
 			echo "<i class='fas fa-folder-open' style='font-size:20px;color:#FFA500;padding-right:10px;'></i>";
 			echo ' <span class="file-name">' . $secili_dizin . '</span>';
 			echo '<script> var dizin_secildi = true; </script>';
 		}else{
-			echo '<button class="btn btn-secondary dropdown-toggle  d-flex justify-content-between align-items-center" type="button" id="dropdownAltKlasorButton" data-bs-toggle="dropdown" aria-expanded="false">';
+			echo '<button class="btn btn-secondary dropdown-toggle  d-flex justify-content-between align-items-center" type="button" id="dropdownAltKlasorButton" data-bs-toggle="dropdown" aria-expanded="false"  style="width:600px;">';
 			echo 'Yedek Tabloları İçeren Alt-Klasörü Seçin';
 		}
 		?>
 	</button>
-	<ul class="dropdown-menu" aria-labelledby="dropdownAltKlasorButton" style="width:520px;">
+	<ul class="dropdown-menu" aria-labelledby="dropdownAltKlasorButton" style="width:600px;">
 		<div class="modal-scrollbar">
 		<?php foreach($files AS $key => $value): ?>
 			<li>

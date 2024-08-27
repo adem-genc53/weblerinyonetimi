@@ -171,8 +171,8 @@ include('includes/sub_navbar.php');
             <table class="table" style="min-width: 1000px;">
                 <colgroup span="2">
                     <col style="width:15%"></col>
-                    <col style="width:35%"></col>
-                    <col style="width:50%"></col>
+                    <col style="width:40%"></col>
+                    <col style="width:45%"></col>
                 </colgroup>
             <thead>
                 <tr class="bg-primary">
@@ -192,12 +192,12 @@ include('includes/sub_navbar.php');
                     <td>Veritabanı Seç</td>
                     <td style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;">
 
-<button class="btn btn-secondary dropdown-toggle d-flex justify-content-between align-items-center" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false" style="width:550px;">
+<button class="btn btn-secondary dropdown-toggle d-flex justify-content-between align-items-center" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false" style="width:600px;">
 <span id="selectedFileName1">İşlem Yapacağınız Veritabanı Seçin</span>
 <span class="dropdown-toggle-icon"></span>
 </button>
 
-<ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1" style="width:550px;">
+<ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1" style="width:600px;">
 <div class="modal-scrollbar">
 <?php 
     foreach($veritabanlari_arr AS $id => $veritabani){
@@ -220,12 +220,12 @@ include('includes/sub_navbar.php');
                     <td style="text-align:right;"><img style="width:40px;height:20px;" border="0" src="images/mysqlwinrar.png"></td>
                     <td style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;">
 
-<button class="btn btn-secondary dropdown-toggle d-flex justify-content-between align-items-center" data-default-text="Veritabanı Yedek Dosyayı Seçin" type="button" id="dropdownMenuButton2" data-bs-toggle="dropdown" aria-expanded="false" style="width:550px;">
+<button class="btn btn-secondary dropdown-toggle d-flex justify-content-between align-items-center" data-default-text="Veritabanı Yedek Dosyayı Seçin" type="button" id="dropdownMenuButton2" data-bs-toggle="dropdown" aria-expanded="false" style="width:600px;">
 <span id="selectedFileName2">Veritabanı Yedek Dosyayı Seçin</span>
 <span class="dropdown-toggle-icon"></span>
 </button>
 
-<ul class="dropdown-menu" aria-labelledby="dropdownMenuButton2" style="width:550px;">
+<ul class="dropdown-menu" aria-labelledby="dropdownMenuButton2" style="width:600px;">
 <div class="modal-scrollbar">
 <?php 
 foreach($directoriesAndFiles AS $key => $klasor_dosya_arr){
@@ -257,12 +257,12 @@ foreach($directoriesAndFiles AS $key => $klasor_dosya_arr){
                     <td style="text-align:right;"><i class="fas fa-folder" style="font-size:20px;color:#FFA500;"></i></td>
                     <td style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;">
 
-<button class="btn btn-secondary dropdown-toggle d-flex justify-content-between align-items-center" data-default-text="Veritabanı Yedek Klasör Seçin" type="button" id="dropdownMenuButton3" data-bs-toggle="dropdown" aria-expanded="false" style="width:550px;">
+<button class="btn btn-secondary dropdown-toggle d-flex justify-content-between align-items-center" data-default-text="Veritabanı Yedek Klasör Seçin" type="button" id="dropdownMenuButton3" data-bs-toggle="dropdown" aria-expanded="false" style="width:600px;">
 <span id="selectedFileName3">Veritabanı Yedek Klasör Seçin</span>
 <span class="dropdown-toggle-icon"></span>
 </button>
 
-<ul class="dropdown-menu" aria-labelledby="dropdownMenuButton3" style="width:550px;">
+<ul class="dropdown-menu" aria-labelledby="dropdownMenuButton3" style="width:600px;">
 <div class="modal-scrollbar">
 <?php 
     foreach($directoriesAndFiles AS $key => $value){
@@ -271,7 +271,7 @@ foreach($directoriesAndFiles AS $key => $klasor_dosya_arr){
             <li><a class="dropdown-item" href="#" data-file-path="'.$key.'/" data-file-name="'.basename($key).'" data-size="Klasör">
             <i class="fas fa-folder-plus" style="font-size:24px;color:#FFA500;padding-right:10px;"></i>
             <span class="file-name">'.basename($key).'</span>
-            <span class="badge bg-primary rounded-pill">'.showSize(dirSize($key)).'</span>
+            <span class="badge bg-primary rounded-pill">' . count(glob($key . "/*.{sql,gz}",GLOB_BRACE)). ' / ' . showSize(dirSize($key)) . '</span>
             </a></li>
         ';
         }
@@ -289,12 +289,12 @@ foreach($directoriesAndFiles AS $key => $klasor_dosya_arr){
                     <td style="text-align:right;"><i class="fas fa-folder-open" style="font-size:20px;color:#FFA500;"></i></td>
                     <td style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;">
 
-<button class="btn btn-secondary dropdown-toggle d-flex justify-content-between align-items-center" data-default-text="İçeriğini Görüntülemek İçin Bir Tablo Seçin" type="button" id="dropdownMenuButton4" data-bs-toggle="dropdown" aria-expanded="false" style="width:550px;">
+<button class="btn btn-secondary dropdown-toggle d-flex justify-content-between align-items-center" data-default-text="İçeriğini Görüntülemek İçin Bir Tablo Seçin" type="button" id="dropdownMenuButton4" data-bs-toggle="dropdown" aria-expanded="false" style="width:600px;">
 <span id="selectedFileName4">İçeriğini Görüntülemek İçin Bir Tablo Seçin</span>
 <span class="dropdown-toggle-icon"></span>
 </button>
 
-<ul class="dropdown-menu" aria-labelledby="dropdownMenuButton4" style="width:550px;">
+<ul class="dropdown-menu" aria-labelledby="dropdownMenuButton4" style="width:600px;">
 <div class="modal-scrollbar">
 <?php 
     foreach($directoriesAndFiles AS $key => $klasor_dosya_arr){

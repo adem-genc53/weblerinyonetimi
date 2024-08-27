@@ -81,7 +81,7 @@ include('includes/sub_navbar.php');
                             <col style="width:1%"></col>
                             <col style="width:1%"></col>
                             <col style="width:20%"></col>
-                            <col style="width:50%"></col>
+                            <col style="width:60%"></col>
                         </colgroup>
                             <thead>
                                 <tr class="bg-primary">
@@ -94,10 +94,10 @@ include('includes/sub_navbar.php');
                                     <td colspan="5" style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;">
 
 <div class="dropdown">
-    <button class="btn btn-secondary dropdown-toggle  d-flex justify-content-between align-items-center" type="button" id="dropdownVeritabaniIdButton" data-bs-toggle="dropdown" aria-expanded="false">
+    <button class="btn btn-secondary dropdown-toggle  d-flex justify-content-between align-items-center" type="button" id="dropdownVeritabaniIdButton" data-bs-toggle="dropdown" aria-expanded="false" style="width:600px;">
         <span class="file-name">Yedeklenecek Veritabanı Seç</span>
 	</button>
-	<ul class="dropdown-menu" aria-labelledby="dropdownVeritabaniIdButton" style="width:460px;">
+	<ul class="dropdown-menu" aria-labelledby="dropdownVeritabaniIdButton" style="width:600px;">
 		<div class="modal-scrollbar">
 		<?php foreach($veritabanlari_arr AS $key => $value): ?>
 			<li>
@@ -121,7 +121,7 @@ include('includes/sub_navbar.php');
                                 </tr>
                                 <tr>
                                     <td style="padding: 0.75rem 0.75rem 0.75rem 1.5rem;vertical-align: middle;">Veritabanı Yedeğin <b>Öneki</b></td>
-                                    <td colspan="5" style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;"><input type="text" id="onek" class="form-control" name="onek" style="min-width:150px;" maxlength="40" /><strong class="err" style="display: none;"></strong></td>
+                                    <td colspan="5" style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;"><input type="text" id="onek" class="form-control" name="onek" style="min-width:150px;max-width:600px;" maxlength="40" /><strong class="err" style="display: none;"></strong></td>
                                     <td style="padding: 0.75rem;vertical-align: middle;">Veritabanı yedeğini tanımlamak için yeniden adlandırabilirsiniz. En fazla 40 karakter.</td>
                                 </tr>
                                 <tr>
