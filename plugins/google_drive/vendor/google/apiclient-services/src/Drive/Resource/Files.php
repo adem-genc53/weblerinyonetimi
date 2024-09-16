@@ -24,6 +24,7 @@ use Google\Service\Drive\GeneratedIds;
 use Google\Service\Drive\LabelList;
 use Google\Service\Drive\ModifyLabelsRequest;
 use Google\Service\Drive\ModifyLabelsResponse;
+use Google\Service\Drive\Operation as OperationModel;
 
 /**
  * The "files" collection of methods.
@@ -65,6 +66,7 @@ class Files extends \Google\Service\Resource
    * @opt_param bool supportsTeamDrives Deprecated: Use `supportsAllDrives`
    * instead.
    * @return DriveFile
+   * @throws \Google\Service\Exception
    */
   public function copy($fileId, DriveFile $postBody, $optParams = [])
   {
@@ -118,6 +120,7 @@ class Files extends \Google\Service\Resource
    * @opt_param bool useContentAsIndexableText Whether to use the uploaded content
    * as indexable text.
    * @return DriveFile
+   * @throws \Google\Service\Exception
    */
   public function create(DriveFile $postBody, $optParams = [])
   {
@@ -141,12 +144,39 @@ class Files extends \Google\Service\Resource
    * both My Drives and shared drives.
    * @opt_param bool supportsTeamDrives Deprecated: Use `supportsAllDrives`
    * instead.
+   * @throws \Google\Service\Exception
    */
   public function delete($fileId, $optParams = [])
   {
     $params = ['fileId' => $fileId];
     $params = array_merge($params, $optParams);
     return $this->call('delete', [$params]);
+  }
+  /**
+   * Downloads content of a file. Operations are valid for 24 hours from the time
+   * of creation. (files.download)
+   *
+   * @param string $fileId Required. The ID of the file to download.
+   * @param array $optParams Optional parameters.
+   *
+   * @opt_param string mimeType Optional. The MIME type the file should be
+   * downloaded as. This field can only be set when downloading Google Workspace
+   * documents. See [Export MIME types for Google Workspace
+   * documents](/drive/api/guides/ref-export-formats) for the list of supported
+   * MIME types. If not set, a Google Workspace document is downloaded with a
+   * default MIME type. The default MIME type might change in the future.
+   * @opt_param string revisionId Optional. The revision ID of the file to
+   * download. This field can only be set when downloading blob files, Google
+   * Docs, and Google Sheets. Returns `INVALID_ARGUMENT` if downloading a specific
+   * revision on the file is unsupported.
+   * @return OperationModel
+   * @throws \Google\Service\Exception
+   */
+  public function download($fileId, $optParams = [])
+  {
+    $params = ['fileId' => $fileId];
+    $params = array_merge($params, $optParams);
+    return $this->call('download', [$params], OperationModel::class);
   }
   /**
    * Permanently deletes all of the user's trashed files. (files.emptyTrash)
@@ -158,6 +188,7 @@ class Files extends \Google\Service\Resource
    * @opt_param bool enforceSingleParent Deprecated: If an item is not in a shared
    * drive and its last parent is deleted but the item itself is not, the item
    * will be placed under its owner's root.
+   * @throws \Google\Service\Exception
    */
   public function emptyTrash($optParams = [])
   {
@@ -174,6 +205,7 @@ class Files extends \Google\Service\Resource
    * @param string $mimeType Required. The MIME type of the format requested for
    * this export.
    * @param array $optParams Optional parameters.
+   * @throws \Google\Service\Exception
    */
   public function export($fileId, $mimeType, $optParams = [])
   {
@@ -194,6 +226,7 @@ class Files extends \Google\Service\Resource
    * Supported values are 'files' and 'shortcuts'. Note that 'shortcuts' are only
    * supported in the `drive` 'space'. (Default: 'files')
    * @return GeneratedIds
+   * @throws \Google\Service\Exception
    */
   public function generateIds($optParams = [])
   {
@@ -215,7 +248,8 @@ class Files extends \Google\Service\Resource
    *
    * @opt_param bool acknowledgeAbuse Whether the user is acknowledging the risk
    * of downloading known malware or other abusive files. This is only applicable
-   * when alt=media.
+   * when the `alt` parameter is set to `media` and the user is the owner of the
+   * file or an organizer of the shared drive in which the file resides.
    * @opt_param string includeLabels A comma-separated list of IDs of labels to
    * include in the `labelInfo` part of the response.
    * @opt_param string includePermissionsForView Specifies which additional view's
@@ -225,6 +259,7 @@ class Files extends \Google\Service\Resource
    * @opt_param bool supportsTeamDrives Deprecated: Use `supportsAllDrives`
    * instead.
    * @return DriveFile
+   * @throws \Google\Service\Exception
    */
   public function get($fileId, $optParams = [])
   {
@@ -281,6 +316,7 @@ class Files extends \Google\Service\Resource
    * instead.
    * @opt_param string teamDriveId Deprecated: Use `driveId` instead.
    * @return FileList
+   * @throws \Google\Service\Exception
    */
   public function listFiles($optParams = [])
   {
@@ -300,6 +336,7 @@ class Files extends \Google\Service\Resource
    * on the next page. This should be set to the value of 'nextPageToken' from the
    * previous response.
    * @return LabelList
+   * @throws \Google\Service\Exception
    */
   public function listLabels($fileId, $optParams = [])
   {
@@ -315,6 +352,7 @@ class Files extends \Google\Service\Resource
    * @param ModifyLabelsRequest $postBody
    * @param array $optParams Optional parameters.
    * @return ModifyLabelsResponse
+   * @throws \Google\Service\Exception
    */
   public function modifyLabels($fileId, ModifyLabelsRequest $postBody, $optParams = [])
   {
@@ -360,6 +398,7 @@ class Files extends \Google\Service\Resource
    * @opt_param bool useContentAsIndexableText Whether to use the uploaded content
    * as indexable text.
    * @return DriveFile
+   * @throws \Google\Service\Exception
    */
   public function update($fileId, DriveFile $postBody, $optParams = [])
   {
@@ -376,7 +415,8 @@ class Files extends \Google\Service\Resource
    *
    * @opt_param bool acknowledgeAbuse Whether the user is acknowledging the risk
    * of downloading known malware or other abusive files. This is only applicable
-   * when alt=media.
+   * when the `alt` parameter is set to `media` and the user is the owner of the
+   * file or an organizer of the shared drive in which the file resides.
    * @opt_param string includeLabels A comma-separated list of IDs of labels to
    * include in the `labelInfo` part of the response.
    * @opt_param string includePermissionsForView Specifies which additional view's
@@ -386,6 +426,7 @@ class Files extends \Google\Service\Resource
    * @opt_param bool supportsTeamDrives Deprecated: Use `supportsAllDrives`
    * instead.
    * @return Channel
+   * @throws \Google\Service\Exception
    */
   public function watch($fileId, Channel $postBody, $optParams = [])
   {

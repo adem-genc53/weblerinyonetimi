@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright 2020 Google LLC
+ * Copyright 2024 Google Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+namespace Google\Auth\ExecutableHandler;
 
-namespace Google\AuthHandler;
+use Error;
 
-/**
- * This supports Guzzle 7
- */
-class Guzzle7AuthHandler extends Guzzle6AuthHandler
+class ExecutableResponseError extends Error
 {
+    public function __construct(string $message, string $executableErrorCode = 'INVALID_EXECUTABLE_RESPONSE')
+    {
+        parent::__construct(sprintf('Error code %s: %s', $executableErrorCode, $message));
+    }
 }

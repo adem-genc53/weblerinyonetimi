@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright 2014 Google Inc.
+ * Copyright 2023 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,21 @@
  * limitations under the License.
  */
 
-namespace Google\Task;
+namespace Google\Auth;
 
 /**
- * Interface for checking how many times a given task can be retried following
- * a failure.
+ * An interface implemented by objects that can get universe domain for Google Cloud APIs.
  */
-interface Retryable
+interface GetUniverseDomainInterface
 {
+    const DEFAULT_UNIVERSE_DOMAIN = 'googleapis.com';
+
+    /**
+     * Get the universe domain from the credential. This should always return
+     * a string, and default to "googleapis.com" if no universe domain is
+     * configured.
+     *
+     * @return string
+     */
+    public function getUniverseDomain(): string;
 }
