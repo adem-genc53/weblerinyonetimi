@@ -1,59 +1,51 @@
 <?php 
 // Bismillahirrahmanirrahim
-if (session_status() == PHP_SESSION_NONE && !headers_sent()) {
+    if (session_status() == PHP_SESSION_NONE && !headers_sent()) {
 
-    // Session adı olarak alan adınızdır. Eğer aşağıdaki kodlar ile alan adınız alınamaz ise buraya gireceğiniz alan adınız kullanıcılacaktır
-    // Alan adındaki . noktaları _ alt tire ile değiştirin. Örnek: "alanadi.com.tr" yerine "alanadi_com_tr"
-    // Eğer buraya gerçek alan adınız değil farklı alan adı veya farklı isim girerseniz oturum açmada sorun yaşanacaktır
-    $serverName = 'github_webyonetimi'; 
+        // Session adı olarak alan adınızdır. Eğer aşağıdaki kodlar ile alan adınız alınamaz ise buraya gireceğiniz alan adınız kullanıcılacaktır
+        // Alan adındaki . noktaları _ alt tire ile değiştirin. Örnek: "alanadi.com.tr" yerine "alanadi_com_tr"
+        // Eğer buraya gerçek alan adınız değil farklı alan adı veya farklı isim girerseniz oturum açmada sorun yaşanacaktır
+        $serverName = 'github_webyonetimi'; // Buraya domain adınızı yazın ve . noktaları _ alt tire ile değiştirin
 
-    // SERVER_NAME'ı kontrol et
-    if (isset($_SERVER['SERVER_NAME']) && !empty($_SERVER['SERVER_NAME'])) {
-        $serverName = $_SERVER['SERVER_NAME'];
+        // SERVER_NAME'ı kontrol et
+        if (isset($_SERVER['SERVER_NAME']) && !empty($_SERVER['SERVER_NAME'])) {
+            $serverName = $_SERVER['SERVER_NAME'];
+        }
+        // HTTP_HOST'ı kontrol et
+        elseif (isset($_SERVER['HTTP_HOST']) && !empty($_SERVER['HTTP_HOST'])) {
+            $serverName = $_SERVER['HTTP_HOST'];
+        }
+        // Çevresel değişkeni kontrol et (cron işleri için)
+        elseif (($envServerName = getenv('SERVER_NAME')) !== false && !empty($envServerName)) {
+            $serverName = $envServerName;
+        }
+
+        // Noktaları alt çizgiye çevir
+        $serverName = str_replace('.', '_', $serverName);
+
+        // Oturum adını belirleyin ve kontrol edin
+        if (!empty($serverName) && !is_numeric($serverName)) {
+            session_name($serverName);
+        } else {
+            // Hata durumunda varsayılan oturum adı kullanılır
+            // En üste belirlediğiniz alan adının aynısını buraya girin
+            session_name('github_webyonetimi'); // Buraya domain adınızı yazın ve . noktaları _ alt tire ile değiştirin
+        }
+
+        // Oturumu başlatın
+        session_start();
     }
-    // HTTP_HOST'ı kontrol et
-    elseif (isset($_SERVER['HTTP_HOST']) && !empty($_SERVER['HTTP_HOST'])) {
-        $serverName = $_SERVER['HTTP_HOST'];
+
+
+    // Oturum kimliğini yenileme süresini belirleyin (örneğin 15 dakika)
+    $regenerate_time = 15 * 60; // 15 dakika
+    // Şu anki zaman ve oturum başlangıç zamanını kontrol edin
+    if (isset($_SESSION['start_time']) && (time() - $_SESSION['start_time'] > $regenerate_time) && isset($_SESSION)) {
+        // Oturum kimliğini yenileyin
+        session_regenerate_id(true);
+        // Yeni başlangıç zamanını ayarlayın
+        $_SESSION['start_time'] = time();
     }
-    // Çevresel değişkeni kontrol et (cron işleri için)
-    elseif (($envServerName = getenv('SERVER_NAME')) !== false && !empty($envServerName)) {
-        $serverName = $envServerName;
-    }
-
-    // Noktaları alt çizgiye çevir
-    $serverName = str_replace('.', '_', $serverName);
-
-    // Oturum adını belirleyin ve kontrol edin
-    if (!empty($serverName) && !is_numeric($serverName)) {
-        session_name($serverName);
-    } else {
-        // Hata durumunda varsayılan oturum adı kullanılır
-        // En üste belirlediğiniz alan adının aynısını buraya girin
-        session_name('github_webyonetimi');
-    }
-
-    // Oturumu başlatın
-    session_start();
-}
-
-
-// Oturum kimliğini yenileme süresini belirleyin (örneğin 15 dakika)
-$regenerate_time = 15 * 60; // 15 dakika
-// Şu anki zaman ve oturum başlangıç zamanını kontrol edin
-if (isset($_SESSION['start_time']) && (time() - $_SESSION['start_time'] > $regenerate_time) && isset($_SESSION)) {
-    // Oturum kimliğini yenileyin
-    session_regenerate_id(true);
-    // Yeni başlangıç zamanını ayarlayın
-    $_SESSION['start_time'] = time();
-}
-
-//Tüm hataları gizle
-//error_reporting(0);
-//ini_set('display_errors', 0);
-
-// Tüm hataları göster
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
 
     defined('DB_USER')      or define('DB_USER', 'root');
     defined('DB_PASSWORD')  or define('DB_PASSWORD', '');
@@ -96,7 +88,7 @@ ini_set('display_errors', 1);
 ########################################################################################################################
     // Google Drive Servis Hesabının hesap bilgileri içeren json dosyanın yolu
     // Bu yolun tam yol olması gerekiyor yani "../../" gibi değil "/home/user/website/plugins/google_drive/client_json/client_secrets.json" gibi tam yol olmalıdır
-    defined('AUTHCONFIGPATH')        or define('AUTHCONFIGPATH', 'plugins/google_drive/client_json/client_secrets.json');
+    defined('AUTHCONFIGPATH')   or define('AUTHCONFIGPATH', 'plugins/google_drive/client_json/client_secrets.json');
 ########################################################################################################################
 
     // veritabanı yedeklenecek 'DATABASEBACKUP' klasör adını değiştirebilirsiniz
@@ -121,39 +113,58 @@ ini_set('display_errors', 1);
 
     //Script versiyonu
     defined('VERSIYON')         or define('VERSIYON', '2.0.1');
+########################################################################################################################
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////
+    // Tüm hataları raporla (notices, warnings, errors, vs.)
+    error_reporting(E_ALL);
+
+    // Hataları ekranda gösterme
+    ini_set('display_errors', 0);
+
+    // Hataları log dosyasına yaz
+    ini_set('log_errors', 1);
+
+    // Hata log dosyasının yolu
+    ini_set('error_log', KOKYOLU.'error.log');
+
+########################################################################################################################
+########################################################################################################################
+
     // DEFINE de belirlenen dizin yoksa oluştur
-if(preg_match("/[a-zA-Z0-9_]/i", BACKUPDIR)){
-    if(!is_dir(BACKUPDIR)){
-        if (!mkdir(BACKUPDIR, 0755, true)) {
-            die('Klasörler oluşturulamadı.');
+    if(preg_match("/[a-zA-Z0-9_]/i", BACKUPDIR)){
+        if(!is_dir(BACKUPDIR)){
+            if (!mkdir(BACKUPDIR, 0755, true)) {
+                die('Klasörler oluşturulamadı.');
+            }
+        }
+        // Dizinin içine kimse ulaşamasın diye .htaccess oluşturuyoruz ve içine 'deny from all' yazıyoruz
+        $htaccessPathBackup = BACKUPDIR . '/.htaccess';
+        if (!file_exists($htaccessPathBackup)) {
+            $file = new SplFileObject($htaccessPathBackup, "w");
+            $file->fwrite('deny from all');
         }
     }
-    // Dizinin içine kimse ulaşamasın diye .htaccess oluşturuyoruz ve içine 'deny from all' yazıyoruz
-    $htaccessPathBackup = BACKUPDIR . '/.htaccess';
-    if (!file_exists($htaccessPathBackup)) {
-        $file = new SplFileObject($htaccessPathBackup, "w");
-        $file->fwrite('deny from all');
-    }
-}
-/////////////////////////////////////////////////////////////////////////////////////////////////////
-if(preg_match("/[a-zA-Z0-9_]/i", ZIPDIR)){
-    if(!is_dir(ZIPDIR)){
-        if (!mkdir(ZIPDIR, 0755, true)) {
-            die('Klasörler oluşturulamadı.');
+
+########################################################################################################################
+
+    // DEFINE de belirlenen dizin yoksa oluştur
+    if(preg_match("/[a-zA-Z0-9_]/i", ZIPDIR)){
+        if(!is_dir(ZIPDIR)){
+            if (!mkdir(ZIPDIR, 0755, true)) {
+                die('Klasörler oluşturulamadı.');
+            }
+        }
+        // Dizinin içine kimse ulaşamasın diye .htaccess oluşturuyoruz ve içine 'deny from all' yazıyoruz
+        $htaccessPathZip = ZIPDIR . '/.htaccess';
+        if (!file_exists($htaccessPathZip)) {
+            $file = new SplFileObject($htaccessPathZip, "w");
+            $file->fwrite('deny from all');
         }
     }
-    // Dizinin içine kimse ulaşamasın diye .htaccess oluşturuyoruz ve içine 'deny from all' yazıyoruz
-    $htaccessPathZip = ZIPDIR . '/.htaccess';
-    if (!file_exists($htaccessPathZip)) {
-        $file = new SplFileObject($htaccessPathZip, "w");
-        $file->fwrite('deny from all');
-    }
-}
-/////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////
+
+########################################################################################################################
+########################################################################################################################
+
     /* BURAYAI DEĞİŞTİRMEYİN */
     function htmlpath($relative_path) {
         $realpath = realpath($relative_path);
@@ -161,5 +172,6 @@ if(preg_match("/[a-zA-Z0-9_]/i", ZIPDIR)){
         $htmlpath = str_replace('\\', '/', $htmlpath);
         return $htmlpath;
     }
+########################################################################################################################
 
 ?>
