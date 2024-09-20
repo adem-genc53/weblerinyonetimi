@@ -64,9 +64,9 @@ class GoogleDriveTreeView {
 
         foreach ($files as $file) {
             if ($file->mimeType == 'application/vnd.google-apps.folder') {
-                $drive_dizinler_arr[$file->id][$this->showSize($file->size ?? 0)] = $file->name;
+                $drive_dizinler_arr[$file->id][$file->size ?? 0] = $file->name;
             } else {
-                $drive_dosyalar_arr[$file->id][$this->showSize($file->size ?? 0)] = $file->name;
+                $drive_dosyalar_arr[$file->id][$file->size ?? 0] = $file->name;
             }
         }
 
@@ -86,9 +86,9 @@ class GoogleDriveTreeView {
         foreach ($drive_dizinler_arr as $id => $arr_devam) {
             foreach ($arr_devam as $boyutu => $dizin_adi) {
                 if ($this->emptyDir($id) == '0') {
-                    $list .= '<li class="folder collapsed"><a href="#" rel="' . $id . '" adi="' . $dizin_adi . '">' . $dizin_adi . '<span style="float: right;color: black;padding-right: 10px;">4 KB</span></a></li>';
+                    $list .= '<li class="folder collapsed"><a href="#" rel="' . $id . '" adi="' . $dizin_adi . '" boyutu="-1">' . $dizin_adi . '<span style="float: right;color: black;padding-right: 10px;">4 KB</span></a></li>';
                 } else {
-                    $list .= '<li class="folder_plus collapsed"><a href="#" rel="' . $id . '" adi="' . $dizin_adi . '">' . $dizin_adi . '<span style="float: right;color: black;padding-right: 10px;">4 KB</span></a></li>';
+                    $list .= '<li class="folder_plus collapsed"><a href="#" rel="' . $id . '" adi="' . $dizin_adi . '" boyutu="-1">' . $dizin_adi . '<span style="float: right;color: black;padding-right: 10px;">4 KB</span></a></li>';
                 }
             }
         }
@@ -96,7 +96,7 @@ class GoogleDriveTreeView {
         foreach ($drive_dosyalar_arr as $id => $devam_arr) {
             foreach ($devam_arr as $boyutu => $dosya_adi) {
                 $ext = preg_replace('/^.*\./', '', $dosya_adi);
-                $list .= '<li class="file ext_' . $ext . '"><a href="#" rel="' . $id . '" adi="' . $dosya_adi . '">' . $dosya_adi . '<span style="float: right;color: black;padding-right: 10px;">' . $boyutu . '</span></a></li>';
+                $list .= '<li class="file ext_' . $ext . '"><a href="#" rel="' . $id . '" adi="' . $dosya_adi . '" boyutu="' . $boyutu . '">' . $dosya_adi . '<span style="float: right;color: black;padding-right: 10px;">' . $this->showSize($boyutu) . '</span></a></li>';
             }
         }
 

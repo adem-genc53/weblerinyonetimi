@@ -5,7 +5,7 @@ require_once __DIR__ . '/check-login.php';
 require_once __DIR__ . '/includes/turkcegunler.php';
 
 ini_set('memory_limit', '-1');
-
+set_time_limit(3600); // 1 saat
 ##########################################################################################################
 
 ##########################################################################################################
@@ -75,7 +75,7 @@ include('includes/sub_navbar.php');
         <div class="col-sm-12">
             <div class="card">
                 <div class="card-body p-0">
-<?php 
+<?php
     $error = false;
     if (!(PHP_VERSION_ID >= 80100)) {
         echo ("<div style='font-weight: bold;font-size: 16px;text-align:center;font-family: Arial, Helvetica, sans-serif;'>Google Drive Kütüphanesi En Düşük \">= 8.1.0\" PHP sürümünü gerektirir. Siz " . PHP_VERSION . " Çalıştırıyorsunuz.</div>");
@@ -101,6 +101,7 @@ include('includes/sub_navbar.php');
             <input class="form-control" type="text" id="google_drive_dan_secilen_dosya_adini_goster" disabled style="background-color: #fff;" />
             <input type="hidden" id="google_drive_dan_secilen_dosya_id" name="google_drive_dan_secilen_dosya_id" />
             <input type="hidden" id="google_drive_dan_secilen_dosya_id_sil" name="google_drive_dan_secilen_dosya_id_sil" />
+            <input type="hidden" id="google_drive_dan_secilen_dosya_boyutu" name="google_drive_dan_secilen_dosya_boyutu" />
                 </div>
         </div>
     </div>
@@ -165,6 +166,7 @@ if(!$error){
 </script>
 
 <script type="text/javascript">
+
 var gif =
 {
   lines: 10, // The number of lines to draw
@@ -185,8 +187,10 @@ var gif =
 }
 
     function uzakSunucudanIndir() {
+
         var google_drive_dan_secilen_dosya_id = $('#google_drive_dan_secilen_dosya_id').val();
         var google_drive_dan_secilen_dosya_adini_goster = $('#google_drive_dan_secilen_dosya_adini_goster').val();
+
         var yerel_den_secilen_dosya = $('#yerel_den_secilen_dosya').val();
         var dosyami_dizinmi = yerel_den_secilen_dosya.replace(/^.*?\.([a-zA-Z0-9]+)$/, "$1");
 
@@ -219,20 +223,80 @@ var gif =
 
         //var pen = jw('d').baslik('Google Drive Hesabından Yedekleri İndir').en(750).boy(550).kucultPasif().acEfekt(2, 1000).kapatEfekt(2, 1000).ac();
         //pen.icerikTD.spin(gif);
-        var bekleme = jw("b bekle").baslik("Google Drive Hesabından Yedekler İndiriliyor...").en(300).boy(10).kilitle().akilliKapatPasif().ac();
 
+        if($("#google_drive_dan_secilen_dosya_boyutu").val()==='-1'){
+            var google_drive_dan_secilen_dosya_boyutu = 0;
+            var bekleme = jw("b bekle").baslik("Google Drive Hesabından Yedekler İndiriliyor...").en(350).boy(10).kilitle().akilliKapatPasif().ac();
+        }else{
+            
+            var bekleme = jw("b bekle").baslik("Google Drive Hesabından Yedekler İndiriliyor...").icerik("<div class='progress' style='height:15px'><div class='progress-bar progress-bar-striped progress-bar-animated' style='width:2%'>1%</div></div><br />Lütfen Bekleyiniz...").en(350).boy(10).kilitle().akilliKapatPasif().ac();
+        }
+// var google_drive_dan_secilen_dosya_boyutu = $("#google_drive_dan_secilen_dosya_boyutu").val();
+////////////////////////////////////////////
+// Interval ID'yi saklayacak bir değişken
+var downloadInterval;
+
+if ($("#google_drive_dan_secilen_dosya_boyutu").val() > 0) {
+    // Daha önce başlatılmış bir interval varsa temizleyin
+    if (downloadInterval) {
+        clearInterval(downloadInterval);
+    }
+
+    // Yeni bir interval başlatın
+    downloadInterval = setInterval(function () {
+        $.ajax({
+            type: "POST",
+            dataType: 'json',
+            url: "progress.json",
+            success: function (veri) {
+                // İndirme işleminin ilerlemesini yüzde olarak hesaplayın
+                var downloadedSize = veri.size;
+                var totalSize = parseInt($("#google_drive_dan_secilen_dosya_boyutu").val());
+
+                // Eğer totalSize geçersiz (örneğin -1) ise intervali durdurun
+                if (totalSize <= 0) {
+                    clearInterval(downloadInterval);
+                    return;
+                }
+
+                var percentComplete = (downloadedSize / totalSize) * 100;
+
+                // İlerleme çubuğunu güncelleyin
+                $(".progress-bar-animated").css('width', percentComplete + '%');
+                $(".progress-bar-animated").text(Math.round(percentComplete) + '%');
+            }
+        });
+    }, 2000);
+} else {
+    // Dosya boyutu 0 veya negatifse, indirme başlatılmasın
+    if (downloadInterval) {
+        clearInterval(downloadInterval); // Intervali durdur
+    }
+    //console.log("Geçersiz dosya boyutu: Klasör seçilmiş olabilir.");
+}
+////////////////////////////////////////////
             $.ajax({
                 type: "POST",
                 url: "google_den_yerele_indir.php",
-                data: { google_drive_dan_secilen_dosya_id: google_drive_dan_secilen_dosya_id, yerel_den_secilen_dosya: yerel_den_secilen_dosya, google_drive_dan_secilen_dosya_adini_goster: google_drive_dan_secilen_dosya_adini_goster },
+                data: { google_drive_dan_secilen_dosya_id: google_drive_dan_secilen_dosya_id, yerel_den_secilen_dosya: yerel_den_secilen_dosya, google_drive_dan_secilen_dosya_adini_goster: google_drive_dan_secilen_dosya_adini_goster, google_drive_dan_secilen_dosya_boyutu: $("#google_drive_dan_secilen_dosya_boyutu").val() },
+                timeout: 3600000, // 1 saat = 3600000 ms
                 success: function (msg) {
-                $(function () {
-                    bekleme.kapat();
-                    var pen = jw('d').baslik('Google Drive Hesabından Yedekleri İndirme Sonucu').icerik(msg).en(750).boy(550).kucultPasif().acEfekt(2, 1000).kapatEfekt(2, 1000).ac();
-                })
+                // 5 saniye bekleyin ve ardından popup'ı kapatın
+                setTimeout(function() {                    
+                    $(function () {
+                        bekleme.kapat();
+                        var pen = jw('d').baslik('Google Drive Hesabından Yedekleri İndirme Sonucu').icerik(msg).en(750).boy(550).kucultPasif().acEfekt(2, 1000).kapatEfekt(2, 1000).ac();
+                    });
+                        if (downloadInterval) {
+                            clearInterval(downloadInterval); // Intervali durdur
+                        }
+                }, 3000); // 5000 ms = 5 saniye
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    // Timeout veya başka bir hata durumunda burası çalışır
+                    console.log("Hata: " + textStatus + " " + errorThrown);
                 }
             });
-
         }
         }
     }
@@ -439,6 +503,7 @@ var gif =
         {
 			$('#google_drive_dan_secilen_dosya_adini_goster,#google_drive_dan_secilen_dosya_id_sil').val($.trim($(this).attr('adi')));
             $('#google_drive_dan_secilen_dosya_id').val($.trim($(this).attr('rel')));
+            $('#google_drive_dan_secilen_dosya_boyutu').val($.trim($(this).attr('boyutu')));
 
             $('#google_drive_uzaktan_agac a').removeClass("aktif");
             $(this).addClass("aktif");
@@ -464,10 +529,12 @@ var gif =
 			}
 			$('#google_drive_dan_secilen_dosya_adini_goster,#google_drive_dan_secilen_dosya_id_sil').val($.trim($(this).attr('adi')));
             $('#google_drive_dan_secilen_dosya_id').val($.trim($(this).attr('rel')));
+            $('#google_drive_dan_secilen_dosya_boyutu').val($.trim($(this).attr('boyutu')));
 			
 		} else {
 			$('#google_drive_dan_secilen_dosya_adini_goster,#google_drive_dan_secilen_dosya_id_sil').val($.trim($(this).attr('adi')));
             $('#google_drive_dan_secilen_dosya_id').val($.trim($(this).attr('rel')));
+            $('#google_drive_dan_secilen_dosya_boyutu').val($.trim($(this).attr('boyutu')));
 		}
 	return false;
     }

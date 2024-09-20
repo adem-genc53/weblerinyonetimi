@@ -5,10 +5,25 @@ require_once __DIR__ . '/check-login.php';
 require_once __DIR__ . '/includes/turkcegunler.php';
 include __DIR__ . '/google_drive_setup.php';
 
+//echo '<pre>' . print_r($_POST, true) . '</pre>';
+//exit;
+
+if(file_exists("progress.json")){
+    unlink("progress.json");
+}
+#############################################################################################################
+    $starttime = microtime(true);
+#############################################################################################################
+
+    ob_start();
+    ini_set('memory_limit', '-1');
+    ignore_user_abort(true);
+    set_time_limit(3600); // 7200 saniye 120 dakikadır, 3600 1 saat
 
 class GoogleDriveDownloader {
     private $service;
     private $client;
+    private $output = [];
 
     public function __construct($service, $client) {
         $this->service = $service;
@@ -34,7 +49,7 @@ class GoogleDriveDownloader {
         return $resultArray;
     }
 
-    public function downloadFile($yerel_hedef, $google_kaynak, $fileId) {
+    public function downloadFile($dosyaninTamBoyutu, $yerel_hedef, $google_kaynak, $fileId) {
         if (pathinfo($google_kaynak, PATHINFO_EXTENSION)) {
             $file = $this->service->files->get($fileId, ['fields' => 'id,size']);
 
@@ -46,7 +61,19 @@ class GoogleDriveDownloader {
             $fileSize = intval($file->size);
             $http = $this->client->authorize();
             $fp = fopen(rtrim($yerel_hedef, '/') . "/" . $google_kaynak, 'w');
-            $chunkSizeBytes = 10 * 1024 * 1024; // 10 MB
+            //$chunkSizeBytes = 10 * 1024 * 1024; // 10 MB
+
+// Eğer dosya 50 MB'den küçükse, bölmeden tek parça olarak indir
+if ($dosyaninTamBoyutu <= 50 * 1024 * 1024) { // 50 MB'den küçük dosyalar
+    $chunkSizeBytes = $fileSize; // Tüm dosya tek parça olarak indir
+} elseif ($dosyaninTamBoyutu <= 100 * 1024 * 1024) { // 50 MB - 100 MB arası dosyalar
+    $chunkSizeBytes = 5 * 1024 * 1024; // 5 MB parça boyutu
+} elseif ($dosyaninTamBoyutu <= 500 * 1024 * 1024) { // 100 MB - 500 MB arası dosyalar
+    $chunkSizeBytes = 10 * 1024 * 1024; // 10 MB parça boyutu
+} else { // 500 MB'dan büyük dosyalar
+    $chunkSizeBytes = 20 * 1024 * 1024; // 20 MB parça boyutu
+}
+
             $chunkStart = 0;
 
             while ($chunkStart < $fileSize) {
@@ -70,6 +97,13 @@ class GoogleDriveDownloader {
                 }
 
                 fwrite($fp, $response->getBody()->getContents());
+
+                if($dosyaninTamBoyutu > 0){
+                    // Sunucudaki dosyanın mevcut boyutunu hesaplayın ve JSON ile gönderin
+                    $currentSize = filesize(rtrim($yerel_hedef, '/') . "/" . $google_kaynak);
+                    file_put_contents('progress.json', json_encode(['size' => $currentSize]));
+                }
+
             }
 
             fclose($fp);
@@ -106,7 +140,19 @@ class GoogleDriveDownloader {
                         $fileSize = intval($file->size);
                         $http = $this->client->authorize();
                         $fp = fopen($yerel_hedef . $dosya_adi, 'w');
-                        $chunkSizeBytes = 10 * 1024 * 1024;
+                        //$chunkSizeBytes = 10 * 1024 * 1024;
+
+// Eğer dosya 50 MB'den küçükse, bölmeden tek parça olarak indir
+if ($dosyaninTamBoyutu <= 50 * 1024 * 1024) { // 50 MB'den küçük dosyalar
+    $chunkSizeBytes = $fileSize; // Tüm dosya tek parça olarak indir
+} elseif ($dosyaninTamBoyutu <= 100 * 1024 * 1024) { // 50 MB - 100 MB arası dosyalar
+    $chunkSizeBytes = 5 * 1024 * 1024; // 5 MB parça boyutu
+} elseif ($dosyaninTamBoyutu <= 500 * 1024 * 1024) { // 100 MB - 500 MB arası dosyalar
+    $chunkSizeBytes = 10 * 1024 * 1024; // 10 MB parça boyutu
+} else { // 500 MB'dan büyük dosyalar
+    $chunkSizeBytes = 20 * 1024 * 1024; // 20 MB parça boyutu
+}
+
                         $chunkStart = 0;
 
                         while ($chunkStart < $fileSize) {
@@ -130,6 +176,13 @@ class GoogleDriveDownloader {
                             }
 
                             fwrite($fp, $response->getBody()->getContents());
+
+                            if($dosyaninTamBoyutu > 0){
+                                // Sunucudaki dosyanın mevcut boyutunu hesaplayın ve JSON ile gönderin
+                                $currentSize = filesize(rtrim($yerel_hedef, '/') . "/" . $google_kaynak);
+                                file_put_contents('progress.json', json_encode(['size' => $currentSize]));
+                            }
+
                         }
 
                         fclose($fp);
@@ -147,23 +200,15 @@ class GoogleDriveDownloader {
 
 }
 
-#############################################################################################################
-    $starttime = microtime(true);
-#############################################################################################################
-
-    ob_start();
-    ini_set('memory_limit', '-1');
-    ignore_user_abort(true);
-    set_time_limit(3600); // 7200 saniye 120 dakikadır, 3600 1 saat
-
     if (isset($_POST['yerel_den_secilen_dosya']) && isset($_POST['google_drive_dan_secilen_dosya_id'])) {
 
         $yerel_hedef = rtrim($_POST['yerel_den_secilen_dosya'], '/');
         $google_kaynak = trim($_POST['google_drive_dan_secilen_dosya_adini_goster'], '/');
         $fileId = $_POST['google_drive_dan_secilen_dosya_id'];
+        $dosyaninTamBoyutu = $_POST['google_drive_dan_secilen_dosya_boyutu'] ? $_POST['google_drive_dan_secilen_dosya_boyutu'] : 0;
 
         $downloader = new GoogleDriveDownloader($service, $client);
-        $downloader->downloadFile($yerel_hedef, $google_kaynak, $fileId);
+        $downloader->downloadFile($dosyaninTamBoyutu, $yerel_hedef, $google_kaynak, $fileId);
 
     } else {
         echo "Kaynak ve indirilecek dizin seçilmelidir";
@@ -180,13 +225,22 @@ class GoogleDriveDownloader {
 #############################################################################################################
 
     echo "<b>İndirme Süresi:</b> " . $calisma_suresi . "<br />";
-    echo $downloader->getOutput();
+    $output = $downloader -> getOutput();
+
+    if (empty($output)) {
+        echo "Dosya indirilemedi veya bir hata oluştu.";
+    } else {
+        echo $output;
+    }
+
+ob_flush();
+flush();
 
 /*
 use Google\Client as GoogleClient;
 use Google\Service\Drive;
 use GuzzleHttp\Client as GuzzleClient;
-use GuzzleHttp\Promise;
+use GuzzleHttp\Promise\Utils;
 
 class GoogleDriveDownloader {
     private $service;
@@ -244,7 +298,7 @@ class GoogleDriveDownloader {
                 $chunkStart = $chunkEnd + 1;
             }
 
-            Promise\all($promises)->wait();
+            Utils::all($promises)->wait();
             fclose($fp);
             echo "<br /><b>Yerel </b> " . $yerel_hedef . " <b>dizine</b><br />";
             echo $google_kaynak . " <b>[İNDİRİLDİ]</b>";
@@ -295,7 +349,7 @@ class GoogleDriveDownloader {
                             $chunkStart = $chunkEnd + 1;
                         }
 
-                        Promise\all($promises)->wait();
+                        Utils::all($promises)->wait();
                         fclose($fp);
                         echo $dosya_adi . " <b>[İNDİRİLDİ]</b><br />";
                     }
