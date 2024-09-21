@@ -77,7 +77,6 @@ class FtpTreeView {
             $full_path .= $this->ftp_path;
         }
 
-
         // Dizinin var olup olmadığını kontrol et
         if (@ftp_chdir($this->ftp, $full_path)) {
             // Dizin mevcut, içeriğini al
@@ -96,6 +95,8 @@ class FtpTreeView {
 
         if (is_array($this->files) && count($this->files) > 0) {
             foreach ($this->files as $file_list_arr) {
+                // Anahtarları küçük harfe dönüştür
+                $file_list_arr = array_change_key_case($file_list_arr, CASE_LOWER);
                 if (!in_array($file_list_arr['type'], array("pdir", "cdir"))) {
                     if ($file_list_arr['type'] == 'file') {
                         $this->ftpdeki_dosyalar[$file_list_arr['modify']][] = $this->showSize(ftp_size($this->ftp, $this->ftppath ."/". $this->ftp_path . $file_list_arr['name'])) . "|" . $file_list_arr['name'];

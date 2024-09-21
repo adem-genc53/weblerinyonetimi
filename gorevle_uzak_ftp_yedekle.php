@@ -155,6 +155,8 @@ if (!function_exists('uzakFTPsunucuyaYedekle')) {
             $ftpdeki_dizinler = [];
             if (is_array($file_list) || is_object($file_list)) {
                 foreach ($file_list as $file_list_arr) {
+                    // Anahtarları küçük harfe dönüştür
+                    $file_list_arr = array_change_key_case($file_list_arr, CASE_LOWER);
                     if (!in_array($file_list_arr['type'], array("pdir", "cdir")) && stripos($file_list_arr['name'], $secilen_yedekleme_oneki) !== false) {
                         if ($file_list_arr['type'] == 'file' && in_array(pathinfo($file_list_arr['name'], PATHINFO_EXTENSION), $sil_uzantilar)) {
                             $ftpdeki_dosyalar[$file_list_arr['modify']][] = $uzak_sunucu_ici_dizin_adi . "/" . $file_list_arr['name'];

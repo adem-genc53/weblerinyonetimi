@@ -9,9 +9,14 @@ $hash = new Hash;
 ob_start();
 ini_set('memory_limit', '-1');
 ignore_user_abort(true);
-set_time_limit(3600); //7200 saniye 120 dakikadır, 3600 1 saat
+set_time_limit(3600); // 7200 saniye 120 dakikadır, 3600 1 saat
 
 if($_SERVER['REQUEST_METHOD'] == 'POST'){
+
+//echo '<pre>' . print_r($_POST, true) . '</pre>';
+//exit;
+
+
 echo "<div style='margin: 25px;'>";
 $ftphost = $genel_ayarlar['sunucu'] ?? '';
 $ftpuser = !empty($genel_ayarlar['username']) ? $hash->take($genel_ayarlar['username']) : '';
@@ -26,34 +31,31 @@ $login_result = ftp_login($ftp_connect, $ftpuser, $ftppass);
 if ((!$ftp_connect) || (!$login_result)) 
     die("FTP Bağlantısı Başarısız");
 
-    //var_dump(ftp_chdir($ftp_connect, $_POST['ftp_den_secilen_dosya']));
-    //echo '<pre>' . print_r($yerel_dizin, true) . '</pre>';
-    //exit;
-
 if(isset($_POST['ftp_den_secilen_dosya']) && !empty($_POST['ftp_den_secilen_dosya'])){
-    $ftp_kaynak = trim($_POST['ftp_den_secilen_dosya']); //"/dizinsizwebyonetimitablotablo-2023-10-12-00-00/"; // başında ve sonunda eğik çizgi var
+    $ftp_kaynak = trim($_POST['ftp_den_secilen_dosya']); //  " /dizinsizwebyonetimitablotablo-2023-10-12-00-00/ " // başında ve sonunda eğik çizgi var
 
     // Başlangıçta değişkeni boş olarak tanımla
     $ftp_secilen_kaynak_indir = '';
     $ftp_hesabindaki_dizini_bosalt = false;
-
-    $ftp_kaynak = trim($_POST['ftp_den_secilen_dosya']);
     
-    // FTP Hesap bilgileri ile DİZİN belirlenmedi ise ve / eğik çizgi varsa
+    // Genel Ayarlarda $ftp_path FTP Hesap bilgileri ile "FTP iç Yolu:" DİZİN belirlenmedi ise ve / eğik çizgi varsa
     if ($ftp_path === '/') {
 
         $ftp_secilen_kaynak_indir .= "/"; // eğik / çizgiyi tekrar ekle
 
-    // FTP hesabında DİZİN var ve Ağaçtan Ev seçildi ise / eğik çizgi geliyor
+    // Genel Ayarlarda $ftp_path FTP hesabında "FTP iç Yolu:" DİZİN var.
+    // $ftp_kaynak Ağaçtan Ev seçildi ise / eğik çizgi geliyor
     }elseif($ftp_path != '/' && $ftp_kaynak == '/'){
 
-        // FTP hesabında DİZİN var ve AĞAÇ tan Ev seçilerek / eğik çizgi geldi
+        // Genel Ayarlarda $ftp_path FTP hesabında DİZİN var.
+        // $ftp_kaynak AĞAÇ tan Ev seçilerek / eğik çizgi geldi
         // Bu durumda FTP hesabındaki dizini boşaltacağız
         $ftp_secilen_kaynak_indir .= "/".trim($ftp_path, '/');
         // Bu değişken true gönderek FTP hesab dizini silmesini engelleyecek
         $ftp_hesabindaki_dizini_bosalt = true;
 
-    // FTP hesabında DİZİN var ve Ağaçtan DOSYA veya DİZİN seçildiz ise
+    // Genel Ayarlarda $ftp_path FTP hesabında DİZİN var.
+    // $ftp_kaynak Ağaçtan DOSYA veya DİZİN seçildi ise
     }elseif($ftp_path !== '/' && $ftp_kaynak !== '/'){
 
         // Ağaçta klasör veya dosya seçildi ise seçileni sil
@@ -71,14 +73,13 @@ if(isset($_POST['ftp_den_secilen_dosya']) && !empty($_POST['ftp_den_secilen_dosy
 }
 
 if(isset($_POST['yerel_den_secilen_dosya']) && !empty($_POST['yerel_den_secilen_dosya'])){
-    if(!@ftp_chdir($ftp_connect, trim($_POST['ftp_den_secilen_dosya']))){
-        $yerel_dizin = trim($_POST['yerel_den_secilen_dosya']);
+    $path_secilen = str_replace(['//', '\\\\'], '/', $ftp_path.trim($_POST['ftp_den_secilen_dosya']));
+    if(!@ftp_chdir($ftp_connect, $path_secilen)){
+        $yerel_dizin = trim($_POST['yerel_den_secilen_dosya']); // Dosya indiriliyor
     }else{
-        $yerel_dizin = trim($_POST['yerel_den_secilen_dosya']).basename(trim($_POST['ftp_den_secilen_dosya']));
+        $yerel_dizin = trim($_POST['yerel_den_secilen_dosya']).basename(trim($_POST['ftp_den_secilen_dosya'])); // Klasör indiriliyor
     }
 }
-    //$ftp_kaynak = preg_replace('/^\//', '', $ftp_kaynak);
-    //$ftp_kaynak = preg_replace('/\/*$/', '', $ftp_kaynak);
 
     echo "<b>Yerel:</b> ".$_POST['yerel_den_secilen_dosya']." <b>Dizine:</b><br />";
 function ftp_sync($_from = null, $_to = null) {
@@ -95,7 +96,7 @@ function ftp_sync($_from = null, $_to = null) {
             if (!is_dir($_to)) mkdir($_to, 0777, true);
             if (!chdir($_to)) die("Yerelde dizin mevcut değil mi? $_to");
             if (ftp_get($ftp_connect, $tekdosya, $_from, FTP_BINARY)) {
-                echo $tekdosya." [KOPYALANDI]";
+                echo $tekdosya." <b>[İNDİRİLDİ]</b>";
             }
         }
     }else{
@@ -107,6 +108,7 @@ function ftp_sync($_from = null, $_to = null) {
         if (isset($_from)) {
             if (!ftp_chdir($ftp_connect, $_from)) die("FTP'de dizin bulunamadı: $_from");
             if (isset($_to)) {
+                echo " <br /><b>Dizin oluşturuldu:</b> " .basename($_to) ."<br />\n";
                 if (!is_dir($_to)) mkdir($_to, 0777, true);
                 if (!chdir($_to)) die("Yerelde dizin mevcut değil mi? $_to"); 
             }
@@ -116,22 +118,23 @@ function ftp_sync($_from = null, $_to = null) {
         $contents = ftp_mlsd($ftp_connect, '.');
         
         foreach ($contents as $p) {
+            // Anahtarları küçük harfe dönüştür
+            $p = array_change_key_case($p, CASE_LOWER);
             
             if ($p['type'] != 'dir' && $p['type'] != 'file') continue;
             
             $file = $p['name'];
             
-            //echo ftp_pwd($ftp_connect).'/'.$file;
             echo $p['type'] == 'file' ? $file : "";
             
             if (file_exists($file) && !is_dir($file) && filemtime($file) >= strtotime($p['modify'])) {
-                echo " [MEVCUT VE GÜNCEL]";
+                echo " <b>[MEVCUT VE GÜNCEL]</b>";
             }
             elseif ($p['type'] == 'file' && @ftp_get($ftp_connect, $file, $file, FTP_BINARY)) {
-                echo " [KOPYALANDI]";
+                echo " <b>[İNDİRİLDİ]</b>";
             }
             elseif ($p['type'] == 'dir' && @ftp_chdir($ftp_connect, $file)) {
-                echo " <br /><b>Dizin oluşturuldu:</b> $file<br />\n";
+                echo " <br /><b>Dizin oluşturuldu:</b> " . basename($file) ."<br />\n";
                 if (!is_dir($file)) mkdir($file, 0777, true);
                 chdir($file);
                 ftp_sync();
@@ -153,4 +156,6 @@ ftp_close($ftp_connect);
 
 umask(0); // her dizin chmod 777 olacak
 echo "</div>";
+ob_flush();
+flush();
 } //  if($_SERVER['REQUEST_METHOD'] == 'POST'){
