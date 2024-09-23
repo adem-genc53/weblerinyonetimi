@@ -222,17 +222,38 @@ include('includes/footer.php');
                 //var pen = jw('d').baslik("FTP'ye yedekleme").en(750).boy(550).kucultPasif().acEfekt(2, 1000).kapatEfekt(2, 1000).ac();
                 //pen.icerikTD.spin(gif);
                 var bekleme = jw("b bekle").baslik("Uzak FTP Hesabına Yedekleniyor...").en(300).boy(10).kilitle().akilliKapatPasif().ac();
-
+            // İstek başlamadan önceki zamanı al
+            const startTime = new Date();
                 $.ajax({
                     type: "POST",
                     url: "gorevle_uzak_ftp_yedekle.php",
                     data: { ftpye_yukle: 1, yerel_den_secilen_dosya: yerel_den_secilen_dosya, ftp_den_secilen_dosya: ftp_den_secilen_dosya },
                     timeout: 3600000, // 1 saat = 3600000 ms
                     success: function (msg) {
+
+                    // İstek sonlandığında zamanı al
+                    const endTime = new Date();
+
+                    // Geçen süreyi hesapla (milisaniye cinsinden)
+                    const elapsedTime = endTime - startTime;
+
+                    // Geçen süreyi saat, dakika, saniye ve milisaniye olarak parçala
+                    const hours = Math.floor(elapsedTime / (1000 * 60 * 60));
+                    const minutes = Math.floor((elapsedTime % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((elapsedTime % (1000 * 60)) / 1000);
+                    const milliseconds = elapsedTime % 1000;
+
+                    // Sonucu uygun formatta göster
+                    const formattedTime = 
+                        String(hours).padStart(2, '0') + ':' +
+                        String(minutes).padStart(2, '0') + ':' +
+                        String(seconds).padStart(2, '0') + ':' +
+                        String(milliseconds).padStart(3, '0');
+
                         $(function () {
                             //pen.icerik(msg);
                             bekleme.kapat();
-                            var pen = jw('d').baslik('Uzak FTP Hesabına Yedekleme Sonucu').icerik(msg).en(750).boy(550).kucultPasif().acEfekt(2, 1000).kapatEfekt(2, 1000).ac();
+                            var pen = jw('d').baslik('Uzak FTP Hesabına Yedekleme Sonucu').icerik("<b>Yükleme süresi:</b> " + formattedTime + "<br />" + msg).en(750).boy(550).kucultPasif().acEfekt(2, 1000).kapatEfekt(2, 1000).ac();
                         })
                     }
                 });
@@ -262,7 +283,8 @@ include('includes/footer.php');
             if(x==1){
 
             var bekleme = jw("b bekle").baslik("FTP'deki Yedek(ler) siliniyor...").en(300).boy(10).kilitle().akilliKapatPasif().ac();
-
+            // İstek başlamadan önceki zamanı al
+            const startTime = new Date();
         $.ajax({
             url: "elle_uzak_ve_yerel_sunucudan_dosyalari_sil.php",
             type: "POST",
@@ -270,8 +292,28 @@ include('includes/footer.php');
             data: { ftpden_sil: 1, ftp_den_secileni_sil : ftp_den_secileni_sil },
             timeout: 3600000, // 1 saat = 3600000 ms
             success: function (data) {
+
+                    // İstek sonlandığında zamanı al
+                    const endTime = new Date();
+
+                    // Geçen süreyi hesapla (milisaniye cinsinden)
+                    const elapsedTime = endTime - startTime;
+
+                    // Geçen süreyi saat, dakika, saniye ve milisaniye olarak parçala
+                    const hours = Math.floor(elapsedTime / (1000 * 60 * 60));
+                    const minutes = Math.floor((elapsedTime % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((elapsedTime % (1000 * 60)) / 1000);
+                    const milliseconds = elapsedTime % 1000;
+
+                    // Sonucu uygun formatta göster
+                    const formattedTime = 
+                        String(hours).padStart(2, '0') + ':' +
+                        String(minutes).padStart(2, '0') + ':' +
+                        String(seconds).padStart(2, '0') + ':' +
+                        String(milliseconds).padStart(3, '0');
+
                 bekleme.kapat();
-                jw("b olumlu").baslik("FTP'den Silme Sonucu").icerik(data.mesaj).en(500).boy(10).kilitle().akilliKapatPasif().kapaninca(function(){ ftpSatirSil(data.li_sil_adi); }).ac(); 
+                jw("b olumlu").baslik("FTP'den Silme Sonucu").icerik("<b>Silme süresi:</b> " + formattedTime + "<br />" + data.mesaj).en(500).boy(10).kilitle().akilliKapatPasif().kapaninca(function(){ ftpSatirSil(data.li_sil_adi); }).ac(); 
             }
         });
 
@@ -310,7 +352,8 @@ include('includes/footer.php');
             if(x==1){
 
             var bekleme = jw("b bekle").baslik("Yerelden dosya siliniyor...").en(300).boy(10).kilitle().akilliKapatPasif().ac();
-
+            // İstek başlamadan önceki zamanı al
+            const startTime = new Date();
                 $.ajax({
                     url: "elle_uzak_ve_yerel_sunucudan_dosyalari_sil.php",
                     type: "POST",
@@ -318,8 +361,28 @@ include('includes/footer.php');
                     data: { yerelden_sil: 1, yerel_den_secilen_dosya: yerel_den_secilen_dosya },
                     timeout: 3600000, // 1 saat = 3600000 ms
                     success: function (data) {
+
+                    // İstek sonlandığında zamanı al
+                    const endTime = new Date();
+
+                    // Geçen süreyi hesapla (milisaniye cinsinden)
+                    const elapsedTime = endTime - startTime;
+
+                    // Geçen süreyi saat, dakika, saniye ve milisaniye olarak parçala
+                    const hours = Math.floor(elapsedTime / (1000 * 60 * 60));
+                    const minutes = Math.floor((elapsedTime % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((elapsedTime % (1000 * 60)) / 1000);
+                    const milliseconds = elapsedTime % 1000;
+
+                    // Sonucu uygun formatta göster
+                    const formattedTime = 
+                        String(hours).padStart(2, '0') + ':' +
+                        String(minutes).padStart(2, '0') + ':' +
+                        String(seconds).padStart(2, '0') + ':' +
+                        String(milliseconds).padStart(3, '0');
+
                     bekleme.kapat();
-                        jw("b olumlu").baslik("Yerelden Dosya Silme Sonucu").icerik(data.mesaj).en(500).boy(10).kilitle().akilliKapatPasif().kapaninca(function(){ yerelSatirSil(data.li_sil_adi); }).ac(); 
+                        jw("b olumlu").baslik("Yerelden Dosya Silme Sonucu").icerik("<b>Silme süresi:</b> " + formattedTime + "<br />" + data.mesaj).en(500).boy(10).kilitle().akilliKapatPasif().kapaninca(function(){ yerelSatirSil(data.li_sil_adi); }).ac(); 
                     }
                 });
 

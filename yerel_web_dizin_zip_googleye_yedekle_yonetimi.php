@@ -238,17 +238,38 @@ include('includes/footer.php');
                 //var pen = jw('d').baslik("Google Drive'a yedekleme").en(750).boy(550).kucultPasif().acEfekt(2, 1000).kapatEfekt(2, 1000).ac();
                 //pen.icerikTD.spin(gif);
                 var bekleme = jw("b bekle").baslik("Google Drive'a yedekleniyor...").en(300).boy(10).kilitle().akilliKapatPasif().ac();
-
+            // İstek başlamadan önceki zamanı al
+            const startTime = new Date();
                 $.ajax({
                     type: "POST",
                     url: "gorevle_uzak_google_yedekle.php",
                     data: { googla_yukle: 1, yerel_den_secilen_dosya: yerel_den_secilen_dosya, google_drive_dan_secilen_dosya_id: google_drive_dan_secilen_dosya_id, google_drive_dan_secilen_dosya_adini_goster: google_drive_dan_secilen_dosya_adini_goster },
                     timeout: 3600000, // 1 saat = 3600000 ms
                     success: function (msg) {
+
+                    // İstek sonlandığında zamanı al
+                    const endTime = new Date();
+
+                    // Geçen süreyi hesapla (milisaniye cinsinden)
+                    const elapsedTime = endTime - startTime;
+
+                    // Geçen süreyi saat, dakika, saniye ve milisaniye olarak parçala
+                    const hours = Math.floor(elapsedTime / (1000 * 60 * 60));
+                    const minutes = Math.floor((elapsedTime % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((elapsedTime % (1000 * 60)) / 1000);
+                    const milliseconds = elapsedTime % 1000;
+
+                    // Sonucu uygun formatta göster
+                    const formattedTime = 
+                        String(hours).padStart(2, '0') + ':' +
+                        String(minutes).padStart(2, '0') + ':' +
+                        String(seconds).padStart(2, '0') + ':' +
+                        String(milliseconds).padStart(3, '0');
+
                         $(function () {
                             //pen.icerik(msg);
                             bekleme.kapat();
-                            var pen = jw('d').baslik('Google Drive\'a yedekleme Sonucu').icerik(msg).en(750).boy(550).kucultPasif().acEfekt(2, 1000).kapatEfekt(2, 1000).ac();
+                            var pen = jw('d').baslik('Google Drive\'a yedekleme Sonucu').icerik("<b>Yükleme süresi:</b> " + formattedTime + "<br />" + msg).en(750).boy(550).kucultPasif().acEfekt(2, 1000).kapatEfekt(2, 1000).ac();
                         })
                     }
                 });
@@ -279,7 +300,8 @@ include('includes/footer.php');
             if(x==1){
 
             var bekleme = jw("b bekle").baslik("Google Drive Hesabından Yedek(ler) siliniyor...").en(300).boy(10).kilitle().akilliKapatPasif().ac();
-
+            // İstek başlamadan önceki zamanı al
+            const startTime = new Date();
         $.ajax({
             url: "elle_uzak_ve_yerel_sunucudan_dosyalari_sil.php",
             type: "POST",
@@ -287,9 +309,29 @@ include('includes/footer.php');
             data: { googdan_sil: 1, google_drive_dan_secilen_dosya_id : google_drive_dan_secilen_dosya_id, google_drive_dan_secilen_dosya_id_sil : google_drive_dan_secilen_dosya_id_sil },
             timeout: 3600000, // 1 saat = 3600000 ms
             success: function (data) {
+
+                    // İstek sonlandığında zamanı al
+                    const endTime = new Date();
+
+                    // Geçen süreyi hesapla (milisaniye cinsinden)
+                    const elapsedTime = endTime - startTime;
+
+                    // Geçen süreyi saat, dakika, saniye ve milisaniye olarak parçala
+                    const hours = Math.floor(elapsedTime / (1000 * 60 * 60));
+                    const minutes = Math.floor((elapsedTime % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((elapsedTime % (1000 * 60)) / 1000);
+                    const milliseconds = elapsedTime % 1000;
+
+                    // Sonucu uygun formatta göster
+                    const formattedTime = 
+                        String(hours).padStart(2, '0') + ':' +
+                        String(minutes).padStart(2, '0') + ':' +
+                        String(seconds).padStart(2, '0') + ':' +
+                        String(milliseconds).padStart(3, '0');
+
                 bekleme.kapat();
                 //alert(data);
-                jw("b olumlu").baslik("Google Drive'dan Silme Sonucu").icerik(data.mesaj).en(500).boy(10).kilitle().akilliKapatPasif().kapaninca(function(){ googleSatirSil(data.li_sil_adi); }).ac(); 
+                jw("b olumlu").baslik("Google Drive'dan Silme Sonucu").icerik("<b>Silme süresi:</b> " + formattedTime + "<br />" + data.mesaj).en(500).boy(10).kilitle().akilliKapatPasif().kapaninca(function(){ googleSatirSil(data.li_sil_adi); }).ac(); 
             }
         });
 
@@ -330,7 +372,8 @@ include('includes/footer.php');
         if(x==1){
 
         var bekleme = jw("b bekle").baslik("Yerelden dosya siliniyor...").en(300).boy(10).kilitle().akilliKapatPasif().ac();
-
+            // İstek başlamadan önceki zamanı al
+            const startTime = new Date();
     $.ajax({
         url: "elle_uzak_ve_yerel_sunucudan_dosyalari_sil.php",
         type: "POST",
@@ -338,8 +381,28 @@ include('includes/footer.php');
         data: { yerelden_sil: 1, yerel_den_secilen_dosya: yerel_den_secilen_dosya },
         timeout: 3600000, // 1 saat = 3600000 ms
         success: function (data) {
+
+                    // İstek sonlandığında zamanı al
+                    const endTime = new Date();
+
+                    // Geçen süreyi hesapla (milisaniye cinsinden)
+                    const elapsedTime = endTime - startTime;
+
+                    // Geçen süreyi saat, dakika, saniye ve milisaniye olarak parçala
+                    const hours = Math.floor(elapsedTime / (1000 * 60 * 60));
+                    const minutes = Math.floor((elapsedTime % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((elapsedTime % (1000 * 60)) / 1000);
+                    const milliseconds = elapsedTime % 1000;
+
+                    // Sonucu uygun formatta göster
+                    const formattedTime = 
+                        String(hours).padStart(2, '0') + ':' +
+                        String(minutes).padStart(2, '0') + ':' +
+                        String(seconds).padStart(2, '0') + ':' +
+                        String(milliseconds).padStart(3, '0');
+
         bekleme.kapat();
-            jw("b olumlu").baslik("Yerelden Dosya Silme Sonucu").icerik(data.mesaj).en(500).boy(10).kilitle().akilliKapatPasif().kapaninca(function(){ yerelSatirSil(data.li_sil_adi); }).ac(); 
+            jw("b olumlu").baslik("Yerelden Dosya Silme Sonucu").icerik("<b>Silme süresi:</b> " + formattedTime + "<br />" + data.mesaj).en(500).boy(10).kilitle().akilliKapatPasif().kapaninca(function(){ yerelSatirSil(data.li_sil_adi); }).ac(); 
         }
     });
 

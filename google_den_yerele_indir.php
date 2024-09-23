@@ -226,7 +226,7 @@ if ($dosyaninTamBoyutu <= 50 * 1024 * 1024) { // 50 MB'den küçük dosyalar
     $calisma_suresi = sprintf('%02d:%02d:%02d:%05.0f', $hours,$minutes,$seconds,$milliseconds);
 #############################################################################################################
 
-    echo "<b>İndirme Süresi:</b> " . $calisma_suresi . "<br />";
+    //echo "<b>İndirme Süresi:</b> " . $calisma_suresi . "<br />";
     $output = $downloader -> getOutput();
 
     if (empty($output)) {
