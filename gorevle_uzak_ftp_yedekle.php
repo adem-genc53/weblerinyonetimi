@@ -1,102 +1,132 @@
 <?php 
 // Bismillahirrahmanirrahim
+header('Connection: Keep-Alive');
+header('Keep-Alive: timeout=5, max=100');
+require_once __DIR__ . '/includes/connect.php';
+require_once(__DIR__ . '/hash.php');
+$hash = new Hash;
+
+ob_start();
+ini_set('memory_limit', '-1');
+ignore_user_abort(true);
+set_time_limit(3600); // 7200 saniye 120 dakikadır, 3600 1 saat
 
 if (!function_exists('uzakFTPsunucuyaYedekle')) {
-    function uzakFTPsunucuyaYedekle($ftp_server, $ftp_username, $ftp_password, $ftp_path, $dosya_adi_yolu, $yedekleme_gorevi, $uzak_sunucu_ici_dizin_adi, $ftp_sunucu_korunacak_yedek, $secilen_yedekleme_oneki) {
+    function uzakFTPsunucuyaYedekle($genel_ayarlar, $ftp_server, $ftp_username, $ftp_password, $ftp_path, $dosya_adi_yolu, $yedekleme_gorevi, $uzak_sunucu_ici_dizin_adi, $ftp_sunucu_korunacak_yedek, $secilen_yedekleme_oneki) {
+        
+    // FTP Bağlantı türü ve modunu ayarlardan al
+    $ftp_mode = $genel_ayarlar['ftp_mode']; // 'active' veya 'passive'
+    $ftp_ssl = $genel_ayarlar['ftp_ssl']; // true veya false
+        
         $ftpyedeklemebasarili = false;
         $ftp_cikti_mesaji = [];
 
-        // BAĞLANTI KUR VE OTURUMU AÇ
-        $ftp = ftp_ssl_connect($ftp_server);
-        if (!$ftp) {
-            die("FTP bağlantısı kurulamadı.");
+        // FTP bağlantısı kur
+        if ($ftp_ssl) {
+            // SSL bağlantısı kur ve oturumu aç
+            $ftp_connect = ftp_ssl_connect($ftp_server);
+            if (!$ftp_connect) {
+                die("FTP SSL bağlantısı kurulamadı.");
+            }
+        } else {
+            // Standart bağlantı kur ve oturumu aç
+            $ftp_connect = ftp_connect($ftp_server);
+            if (!$ftp_connect) {
+                die("FTP Standart bağlantısı kurulamadı.");
+            }
         }
 
-        $login = ftp_login($ftp, $ftp_username, $ftp_password);
-        if (!$login) {
-            ftp_close($ftp);
+        // Zaman aşımını ayarla (örneğin, 120 saniye)
+        ftp_set_option($ftp_connect, FTP_TIMEOUT_SEC, 120);
+
+        if ($ftp_connect) {
+            ftp_login($ftp_connect, $ftp_username, $ftp_password);
+
+            // Pasif/Aktif mod ayarı
+            if ($ftp_mode) {
+                ftp_pasv($ftp_connect, true);
+            } else {
+                ftp_pasv($ftp_connect, false);
+            }
+        }else{
+            ftp_close($ftp_connect);
             die("FTP oturumu açılamadı.");
         }
 
-        // PASİF MODA GEÇ
-        ftp_pasv($ftp, true);
-
         // TÜM ALT DİZİNLERİ OLUŞTURMA FONKSİYONU
-        if (!function_exists('ftp_mkdir_recursive')) {
-            function ftp_mkdir_recursive($ftp, $dir) {
-                global $ftp_cikti_mesaji; // Mesajları global olarak tut
-                $parts = explode('/', $dir);
-                $current_dir = '';
-                foreach ($parts as $part) {
-                    if (!$part) continue;
-                    $current_dir .= "/$part";
-                    if (!@ftp_chdir($ftp, $current_dir)) {
-                        if (!ftp_mkdir($ftp, $current_dir)) {
-                            $ftp_cikti_mesaji[] = "Alt-Dizin oluşturulamadı: $current_dir";
-                            return false;
-                        }
+        function ftp_mkdir_recursive($ftp_connect, $dir, &$ftp_cikti_mesaji) {
+            $parts = explode('/', $dir);
+            $current_dir = '';
+            foreach ($parts as $part) {
+                if (!$part) continue;
+                $current_dir .= "/$part";
+                if (!@ftp_chdir($ftp_connect, $current_dir)) {
+                    if (!ftp_mkdir($ftp_connect, $current_dir)) {
+                        $ftp_cikti_mesaji[] = "Alt-Dizin oluşturulamadı: $current_dir";
+                        return false;
                     }
                 }
-                ftp_chdir($ftp, "/"); // ANA DİZİNE GERİ DÖN
-                return true;
             }
+            ftp_chdir($ftp_connect, "/"); // Ana dizine geri dön
+            return true;
         }
 
         // DOSYA VEYA DİZİN YÜKLEME FONKSİYONU
-        if (!function_exists('upload')) {
-            function upload($ftp, $dosya_adi_yolu, $remote_path) {
-                global $ftp_cikti_mesaji; // Mesajları global olarak tut
-                if (is_dir($dosya_adi_yolu)) {
-                    // HEDEF DİZİNİ OLUŞTUR
-                    if (!ftp_mkdir_recursive($ftp, $remote_path)) {
-                        $ftp_cikti_mesaji[] = "Hedef Dizin oluşturulamadı: $remote_path";
-                        return false;
-                    }
-
-                    // DİZİN İÇERİĞİNİ YÜKLE
-                    $files = scandir($dosya_adi_yolu);
-                    foreach ($files as $file) {
-                        if ($file == '.' || $file == '..') continue;
-                        $local_file = "$dosya_adi_yolu/$file";
-                        $remote_file = "$remote_path/$file";
-                        if (!upload($ftp, $local_file, $remote_file)) {
-                            return false; // HATA OLURSA false DÖNER
-                        }
-                    }
-                } else {
-                    // HEDEF DİZİNİ OLUŞTUR
-                    $remote_dir = dirname($remote_path);
-                    if (!ftp_mkdir_recursive($ftp, $remote_dir)) {
-                        $ftp_cikti_mesaji[] = "Hedef Dizin oluşturulamadı: $remote_dir";
-                        return false;
-                    }
-
-                    // DOSYA İSE, DOSYAYI YÜKLE
-                    if (!is_file($dosya_adi_yolu)) {
-                        $ftp_cikti_mesaji[] = "Geçersiz dosya: $dosya_adi_yolu";
-                        return false;
-                    }
-                    if (!ftp_put($ftp, $remote_path, $dosya_adi_yolu, FTP_BINARY)) {
-                        $ftp_cikti_mesaji[] = "Dosya yüklenemedi: $dosya_adi_yolu";
-                        return false;
-                    }
-                    $ftp_cikti_mesaji[] = "Dosya yüklendi: $dosya_adi_yolu -> $remote_path";
+        function upload($ftp_connect, $dosya_adi_yolu, $remote_path, &$ftp_cikti_mesaji) {
+            // Klasör kontrolü
+            if (is_dir($dosya_adi_yolu)) {
+                // Hedef dizini oluştur
+                if (!ftp_mkdir_recursive($ftp_connect, $remote_path, $ftp_cikti_mesaji)) {
+                    $ftp_cikti_mesaji[] = "Hedef Dizin oluşturulamadı: $remote_path";
+                    return false;
                 }
-                return true;
+
+                // Dizin içeriğini yükle
+                $files = scandir($dosya_adi_yolu);
+                foreach ($files as $file) {
+                    if ($file == '.' || $file == '..') continue;
+                    $local_file = "$dosya_adi_yolu/$file";
+                    $remote_file = "$remote_path/$file";
+                    if (!upload($ftp_connect, $local_file, $remote_file, $ftp_cikti_mesaji)) {
+                        return false; // Hata olursa false döner
+                    }
+                }
+            } else {
+                // Dosya kontrolü
+                if (!is_file($dosya_adi_yolu)) {
+                    $ftp_cikti_mesaji[] = "Geçersiz dosya: $dosya_adi_yolu";
+                    return false;
+                }
+
+                // Hedef dizini oluştur
+                $remote_dir = dirname($remote_path);
+                if (!ftp_mkdir_recursive($ftp_connect, $remote_dir, $ftp_cikti_mesaji)) {
+                    $ftp_cikti_mesaji[] = "Hedef Dizin oluşturulamadı: $remote_dir";
+                    return false;
+                }
+
+                // Dosyayı yükle
+                if (!ftp_put($ftp_connect, $remote_path, $dosya_adi_yolu, FTP_BINARY)) {
+                    $ftp_cikti_mesaji[] = "Dosya yüklenemedi: $dosya_adi_yolu";
+                    return false;
+                }
+                $ftp_cikti_mesaji[] = "Dosya yüklendi: $dosya_adi_yolu -> $remote_path";
             }
+
+            return true;
         }
 
-        // HEDEF DİZİNİ AYARLA
+        // Hedef dizini ayarla
         $ftp_path = rtrim($ftp_path, '/') . '/';
         if ($uzak_sunucu_ici_dizin_adi) {
             $ftp_path .= rtrim($uzak_sunucu_ici_dizin_adi, '/') . '/';
         }
 
-        // YÜKLENECEK YEREL DOSYA VEYA DİZİN YOLU
+        // Yüklenecek yerel dosya veya dizin yolu
         $remote_path = $ftp_path . basename($dosya_adi_yolu);
 
-        // YÜKLEME İŞLEMİNİ BAŞLAT
-        if (upload($ftp, $dosya_adi_yolu, $remote_path)) {
+        // Yükleme işlemini başlat
+        if (upload($ftp_connect, $dosya_adi_yolu, $remote_path, $ftp_cikti_mesaji)) {
             $ftp_cikti_mesaji[] = "FTP Sunucusuna Başarıyla Yüklendi";
             $ftpyedeklemebasarili = true;
         } else {
@@ -109,28 +139,28 @@ if (!function_exists('uzakFTPsunucuyaYedekle')) {
         if ($ftpyedeklemebasarili && $ftp_sunucu_korunacak_yedek != '-1') {
             // ESKİ YEDEKLERİ SİLME FONKSİYONU
             if (!function_exists('deleteDirectoryRecursive')) {
-                function deleteDirectoryRecursive($directory, $ftp) {
+                function deleteDirectoryRecursive($directory, $ftp_connect) {
                     // Fonksiyonla gelen dosya ise siliyoruz, eğer dizin ise bir aşağı fonksiyona geçiyoruz
-                    if (@ftp_delete($ftp, $directory)) {
+                    if (@ftp_delete($ftp_connect, $directory)) {
                         return;
                     }
                     // Burada dizini silmeye çalışıyoruz dizin içi boş değil ise devam ediyoruz ve dizin içindekilerini siliyoruz
-                    if (!@ftp_rmdir($ftp, $directory)) {
+                    if (!@ftp_rmdir($ftp_connect, $directory)) {
                         // Dizin içindeki dosyaları listeliyoruz
-                        if ($files = @ftp_nlist($ftp, $directory)) {
+                        if ($files = @ftp_nlist($ftp_connect, $directory)) {
                             foreach ($files as $file) {
                                 // Dizideki . ve .. ile dizinleri gösterenleri parçıyoruz ve dizideki son öğeyi alıyoruz
                                 $haric = explode("/", $file);
                                 // Satırlarında . ve .. olanları hariç tutuyoruz
                                 if (end($haric) != '.' && end($haric) != '..') {
                                     // fonsiyona tekrar gönderip en baştaki ftp_delete() ile dosyaları siliyoruz
-                                    deleteDirectoryRecursive($file, $ftp);
+                                    deleteDirectoryRecursive($file, $ftp_connect);
                                 }
                             }
                         }
                     }
                     // Dosyalar silinip dizin boş kaldığında dizinide siliyoruz
-                    @ftp_rmdir($ftp, $directory);
+                    @ftp_rmdir($ftp_connect, $directory);
                 }
             }
 
@@ -149,7 +179,7 @@ if (!function_exists('uzakFTPsunucuyaYedekle')) {
                 $uzak_sunucu_ici_dizin_adi = "";
             }
 
-            $file_list = ftp_mlsd($ftp, $uzak_sunucu_ici_dizin_adi);
+            $file_list = ftp_mlsd($ftp_connect, $uzak_sunucu_ici_dizin_adi);
 
             $ftpdeki_dosyalar = [];
             $ftpdeki_dizinler = [];
@@ -189,7 +219,7 @@ if (!function_exists('uzakFTPsunucuyaYedekle')) {
                     $silinendosya = array_pop($ftpdeki_dosyalar);
                     $dosya_tarihi = substr($silinendosya, strpos($silinendosya, $secilen_yedekleme_oneki . "-") + strlen($secilen_yedekleme_oneki . "-"), 19);
                     if (validateDate($dosya_tarihi)) {
-                        deleteDirectoryRecursive($silinendosya, $ftp);
+                        deleteDirectoryRecursive($silinendosya, $ftp_connect);
                         $ftp_cikti_mesaji[] = "FTP Sunucusundaki Eski Dosya(lar) Başarıyla Silindi";
                     }
                 }
@@ -200,7 +230,7 @@ if (!function_exists('uzakFTPsunucuyaYedekle')) {
                     $silinendizin = array_pop($ftpdeki_dizinler);
                     $dizin_tarihi = substr($silinendizin, -19);
                     if (validateDate($dizin_tarihi)) {
-                        deleteDirectoryRecursive($silinendizin, $ftp);
+                        deleteDirectoryRecursive($silinendizin, $ftp_connect);
                         $ftp_cikti_mesaji[] = "FTP Sunucusundaki Eski Klasör(ler) Başarıyla Silindi";
                     }
                 }
@@ -208,17 +238,16 @@ if (!function_exists('uzakFTPsunucuyaYedekle')) {
         }
 
         // BAĞLANTIYI KAPAT
-        ftp_close($ftp);
+        ftp_close($ftp_connect);
 
         return $ftp_cikti_mesaji;
     }
 }
 
+
 if(isset($_POST['ftpye_yukle']) && $_POST['ftpye_yukle'] == '1' && isset($_POST['yerel_den_secilen_dosya']) && !empty($_POST['yerel_den_secilen_dosya']) && isset($_POST['ftp_den_secilen_dosya']) && !empty($_POST['ftp_den_secilen_dosya']))
 {
-require_once __DIR__ . '/includes/connect.php';
-require_once(__DIR__ . '/hash.php');
-$hash = new Hash;
+
     // FTP BAĞLANTI BİLGİLERİ
     $ftp_server     = $genel_ayarlar['sunucu'] ?? ''; //ftp domain name
     $ftp_username   = !empty($genel_ayarlar['username']) ? $hash->take($genel_ayarlar['username']) : ''; //ftp user name 
@@ -232,7 +261,7 @@ $hash = new Hash;
     $yedekleme_gorevi               = "";
 
 try {
-    uzakFTPsunucuyaYedekle($ftp_server, $ftp_username, $ftp_password, $ftp_path, $dosya_adi_yolu, $yedekleme_gorevi, $uzak_sunucu_ici_dizin_adi, $ftp_sunucu_korunacak_yedek, $secilen_yedekleme_oneki);
+    uzakFTPsunucuyaYedekle($genel_ayarlar, $ftp_server, $ftp_username, $ftp_password, $ftp_path, $dosya_adi_yolu, $yedekleme_gorevi, $uzak_sunucu_ici_dizin_adi, $ftp_sunucu_korunacak_yedek, $secilen_yedekleme_oneki);
     echo "FTP Sunucusuna Başarıyla Yüklendi: ". basename($dosya_adi_yolu);
 } catch (\Google\Service\Exception $e) {
     echo "Hata: " . $e->getMessage();
@@ -240,4 +269,7 @@ try {
     echo "Hata: " . $e->getMessage();
 }
 }
+
+ob_flush();
+flush();
 ?>

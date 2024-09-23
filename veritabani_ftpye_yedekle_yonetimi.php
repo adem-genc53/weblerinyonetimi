@@ -5,13 +5,15 @@ header('Keep-Alive: timeout=5, max=100');
 require_once __DIR__ . '/includes/connect.php';
 require_once __DIR__ . '/check-login.php';
 require_once __DIR__ . '/includes/turkcegunler.php';
-##########################################################################################################
+
+    if (!extension_loaded('ftp')) {
+        exit("<div style='font-weight: bold;font-size: 16px;text-align:center;'>PHP.ini de FTP uzantısı etkinleştirilmedi.</div>");
+    }
 
 ini_set('memory_limit', '-1');
 ignore_user_abort(true);
 set_time_limit(3600); // 7200 saniye 120 dakikadır, 3600 1 saat
 
-##########################################################################################################
 include('includes/header.php');
 include('includes/navigation.php');
 include('includes/sub_navbar.php');
@@ -28,12 +30,14 @@ include('includes/sub_navbar.php');
                         <div class="col-sm-6">
                             <ol class="breadcrumb float-sm-right">
                                 <li class="breadcrumb-item"><a href="index.php">Anasayfa</a></li>
-                                <li class="breadcrumb-item active">FTP'den Yedekleri İndir</li>
+                                <li class="breadcrumb-item active">Veritabanı FTP'ye Yedekle</li>
                             </ol>
                         </div><!-- / <div class="col-sm-6"> -->
                     </div><!-- / <div class="row mb-2"> -->
                 </div><!-- / <div class="container-fluid"> -->
             </div><!-- / <div class="content-header"> -->
+
+
 
     <!-- Bilgilendirme Satırı Başlangıcı -->
     <section class="content">
@@ -46,19 +50,17 @@ include('includes/sub_navbar.php');
                             <div class="card-header" id="headingOne">
                             <h5 class="m-0">
                                 <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
-                                FTP Yedekleri İndirme Hakkında Bilmeniz Gerekenler !
+                                Veritabanı Geri Yükleme Hakkında Bilmeniz Gerekenler !
                                 </button>
                             </h5>
                             </div>
 
                             <div id="collapseOne" class="collapse" aria-labelledby="headingOne" data-parent="#accordion">
                             <div class="card-body">
-                                <p>Buradan uzak sunucu FTP hesabındaki yedekleri yerel web site dizinleri alanına indirebilirsiniz.
-                                </p>
-                                <p>Yerel web dizinlerinin herhangi bir birine veya içindeki herhangi bir dizine veya <strong>İndirilecek Yerel Hedef</strong> alanına yeni bir dizin adı veya mevcut dizin içine yeni dizin adı belirleyerek inidrebilirsiniz.
-                                </p>
-                                <p>Uzak FTP hesanındaki tek dosya seçerek indirebilirsiniz veya dizin seçerek dizin ile beraber dizin içindeki tüm dosyalarıda indirebilirsiniz.
-                                </p>
+<p>Buradan veritabanı yedekler dizinden uzak FTP sunucuya veritabanı yedekleri elle yedekyebilirsiniz.
+</p>
+<p>İster tek dosya olarak ister dizin seçilerek içindeki tüm yedekleri uzak FTP hesabına elle yedekleyebilirsiniz
+</p>
                                 <b>Veritabanı yedeklerin bulunduğu dizin: </b><span id="yol"><?php echo strtolower(htmlpath(BACKUPDIR)); ?></span><br />
                                 <p><b>Web site zip yedeklerin bulunduğu dizin: </b><span id="yol"><?php echo strtolower(htmlpath(ZIPDIR)); ?></span></p>
                             </div>
@@ -82,29 +84,29 @@ include('includes/sub_navbar.php');
     <form method="POST">
     <div class="row">
         <div class="col-sm-12 p-3 text-center">
-            <div class="p-1 bg-primary text-white"><strong>Uzak FTP Sunucudan Yerel Sunucuya Yedek İndir</strong></div>
+            <div class="p-1 bg-primary text-white"><strong>Yerel Veritabani Dizini/Dosyayı FTP Sunucuya Yedekleme</strong></div>
         </div>
     </div>
     <div class="row">
         <div class="col-sm-12 p-3">
                 <div class="input-group">
-                <span class="input-group-text" style="width: 150px;">Uzak FTP Kaynak</span>
-            <input class="form-control" type="text" id="ftp_den_secilen_dosya" name="ftp_den_secilen_dosya" />
-                </div>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-sm-12 p-3">
-                <div class="input-group">
-                <span class="input-group-text" style="width: 150px;">İndirilecek Yerel Hedef</span>
+                <span class="input-group-text" style="width: 170px;">Yerel Veritabani Kaynak</span>
             <input class="form-control" type="text" id="yerel_den_secilen_dosya" name="yerel_den_secilen_dosya" />
                 </div>
         </div>
     </div>
-    <div class="text-center p-3">
-        <button type="button" class="btn btn-success btn-sm" onclick="javascript:uzakSunucudanIndir();"><i class="fa fa-download" aria-hidden="true"></i> Seçilen Yedeği İndir </button>
+    <div class="row">
+        <div class="col-sm-12 p-3">
+                <div class="input-group">
+                <span class="input-group-text" style="width: 170px;">Uzak FTP Hedef</span>
+            <input class="form-control" type="text" id="ftp_den_secilen_dosya" name="ftp_den_secilen_dosya" />
+                </div>
+        </div>
     </div>
 
+    <div class="text-center p-3">
+        <button type="button" class="btn btn-success btn-sm" onclick="javascript:uzakSunucuyaYukle();"><i class="fa fa-upload" aria-hidden="true"></i> FTP'ye Yükle </button>
+    </div>
     </form>
 
                 </div><!-- / <div class="card-body p-0"> -->
@@ -115,6 +117,7 @@ include('includes/sub_navbar.php');
     </section><!-- / <section class="content"> -->
     <!-- Gövde İçerik Sonu -->
 
+
     <!-- Gövde İçerik Başlangıcı -->
     <section class="content">
     <div class="container-fluid">
@@ -124,16 +127,15 @@ include('includes/sub_navbar.php');
                 <div class="card-body p-0">
 
     <div class="row">
-        <div class="col-sm-6 p-3"><div class="p-1 bg-primary text-white"><strong>Uzak FTP'deki Yedekler</strong></div>
-            <div id="ftp_uzaktan_agac"></div>
-            <button type="button" class="btn btn-warning btn-sm" style="margin-top: 15px;" onclick="return ftpDenSil();"><span class="glyphicon glyphicon-trash"></span> Seçilen Öğeyi Sil </button>
-        </div>
-        <div class="col-sm-6 p-3"><div class="p-1 bg-primary text-white"><strong>Yerel Web Dizinleri</strong></div>
+        <div class="col-sm-6 p-3"><div class="p-1 bg-primary text-white"><strong>Yerel Veritabani Yedekleri</strong></div>
             <div id="yerel_dizin_agac"></div>
             <button type="button" class="btn btn-warning btn-sm" style="margin-top: 15px;" onclick="return yerelOgeleriSil();"><span class="glyphicon glyphicon-trash"></span> Seçilen Öğeyi Sil </button>
         </div>
+        <div class="col-sm-6 p-3"><div class="p-1 bg-primary text-white"><strong>Uzak FTP Sunucu</strong></div>
+            <div id="ftp_uzaktan_agac"></div>
+            <button type="button" class="btn btn-warning btn-sm" style="margin-top: 15px;" onclick="return ftpDenSil();"><span class="glyphicon glyphicon-trash"></span> Seçilen Öğeyi Sil </button>
+        </div>
     </div>
-    
 
                 </div><!-- / <div class="card-body p-0"> -->
             </div><!-- / <div class="card"> -->
@@ -143,93 +145,104 @@ include('includes/sub_navbar.php');
     </section><!-- / <section class="content"> -->
     <!-- Gövde İçerik Sonu -->
 
+
 <br />
         </div><!-- / <div class="content-wrapper"> -->
 
-<script type="application/javascript">
-    var satir = '';
-    var query = '';
-    var tarih = '';
-    var firma = '';
-</script>
+        
 
-<script type="application/javascript">
+<?php 
+include('includes/footer.php');
+?>
+<link rel="stylesheet" href="css/filetree.css" type="text/css" >
 
-var gif =
-{
-  lines: 10, // The number of lines to draw
-  length: 3, // The length of each line
-  width: 7, // The line thickness
-  radius: 15, // The radius of the inner circle
-  corners: 0.7, // Corner roundness (0..1)
-  rotate: 0, // The rotation offset
-  color: '#BFDBDD', // #rgb or #rrggbb
-  speed: 1.2, // Rounds per second
-  trail: 40, // Afterglow percentage
-  shadow: true, // Whether to render a shadow
-  hwaccel: false, // Whether to use hardware acceleration
-  className: 'spinner', // The CSS class to assign to the spinner
-  zIndex: 2e9, // The z-index (defaults to 2000000000)
-  top: 'auto', // Top position relative to parent in px
-  left: 'auto' // Left position relative to parent in px
-}
+<script language="javascript">
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    var gif =
+    {
+        lines: 10, // The number of lines to draw
+        length: 3, // The length of each line
+        width: 7, // The line thickness
+        radius: 15, // The radius of the inner circle
+        corners: 0.7, // Corner roundness (0..1)
+        rotate: 0, // The rotation offset
+        color: '#BFDBDD', // #rgb or #rrggbb
+        speed: 1.2, // Rounds per second
+        trail: 40, // Afterglow percentage
+        shadow: true, // Whether to render a shadow
+        hwaccel: false, // Whether to use hardware acceleration
+        className: 'spinner', // The CSS class to assign to the spinner
+        zIndex: 2e9, // The z-index (defaults to 2000000000)
+        top: 'auto', // Top position relative to parent in px
+        left: 'auto' // Left position relative to parent in px
+    }
 
-    function uzakSunucudanIndir() {
-        var ftp_den_secilen_dosya = $('#ftp_den_secilen_dosya').val();
+    function uzakSunucuyaYukle() {
         var yerel_den_secilen_dosya = $('#yerel_den_secilen_dosya').val();
-        var dosyami_dizinmi = yerel_den_secilen_dosya.replace(/^.*?\.([a-zA-Z0-9]+)$/, "$1"); // dosya ise uzantısını verir
+        var ftp_den_secilen_dosya   = $('#ftp_den_secilen_dosya').val();
+        var dosyami_dizinmi         = ftp_den_secilen_dosya.replace(/^.*?\.([a-zA-Z0-9]+)$/, "$1");
 
-        //console.log(yerel_den_secilen_dosya.replace(/^.*?\.([a-zA-Z0-9]+)$/, "$1"))
-        if( ftp_den_secilen_dosya == '' ){
-            $(function(){
-            jw("b olumsuz").baslik("FTP'den Kaynak Seçilmedi").icerik("Uzak FTP'den yedek indirmek için bir kaynak seçmelisiniz").kilitle().en(450).boy(100).ac();
-            })
-            return false;
-        }
-        if( yerel_den_secilen_dosya == '' ){
-            $(function(){
-            jw("b olumsuz").baslik("Yerelden Hedef Seçilmedi").icerik("Uzak FTP'den indirilecek yedek için yerelden bir hedef seçmelisiniz").kilitle().en(450).boy(100).ac();
-            })
-            return false;
-        }
-        if(dosyami_dizinmi != yerel_den_secilen_dosya){
-            $(function(){
-            jw("b olumsuz").baslik("Yerelden Dizin Seçilmedi").icerik("Uzak FTP'den indirilecek yedek için yerelden bir dizin hedef seçmelisiniz").kilitle().en(450).boy(100).ac();
-            })
-            return false;
+        function basename(path) {
+            return path.split('/').reverse()[0];
         }
 
-            $(function()
-              {
-                jw('b secim',dur).baslik("FTP'den İndirmeyi Onayla").icerik("Uzak FTP'de seçilen yedek<br />Yerel bölümde seçilen alana<br />indirmek istediğinizden emin misiniz?").en(450).kilitle().ac();
-              })
-              
-    function dur(x){
-        if(x==1){
-
-        //var pen = jw('d').baslik('Uzak FTP Hesabından Yedekleri İndir').en(750).boy(550).kucultPasif().acEfekt(2, 1000).kapatEfekt(2, 1000).ac();
-        //pen.icerikTD.spin(gif);
-        var bekleme = jw("b bekle").baslik("Uzak FTP Hesabından Yedekler İndiriliyor...").en(300).boy(10).kilitle().akilliKapatPasif().ac();
-
-        $.ajax({
-            type: "POST",
-            url: "ftp_den_yerele_indir.php",
-            data: { ftp_den_secilen_dosya: ftp_den_secilen_dosya, yerel_den_secilen_dosya: yerel_den_secilen_dosya },
-            success: function (msg) {
+        if (yerel_den_secilen_dosya == '') {
             $(function () {
-                //pen.icerik(msg);
-                bekleme.kapat();
-                var pen = jw('d').baslik('Uzak FTP Hesabından Yedekleri İndirme Sonucu').icerik(msg).en(750).boy(550).kucultPasif().acEfekt(2, 1000).kapatEfekt(2, 1000).ac();
+                jw("b olumsuz").baslik("Yerelden Kaynak Seçilmedi").icerik("Yerelden bir dosya veya dizin kaynak seçmelisiniz").kilitle().en(450).boy(100).ac();
             })
-            }
-        });
+            return false;
+        }
+        if (basename(yerel_den_secilen_dosya) == '.htaccess') {
+            $(function () {
+                jw("b olumsuz").baslik("Bu Dosya Yüklenemez").icerik("<b>.htaccess</b> dosya tek başına yüklenemez.<br />Dizin içinde olduğunda dizinle beraber yüklenebilir").kilitle().en(450).boy(100).ac();
+            })
+            return false;
+        }
+        if (ftp_den_secilen_dosya == '') {
+            $(function () {
+                jw("b olumsuz").baslik("FTP'den Hedef Seçilmedi").icerik("FTP'ye yedeklemek için bir hedef seçmelisiniz").kilitle().en(450).boy(100).ac();
+            })
+            return false;
+        }
+        if (dosyami_dizinmi != ftp_den_secilen_dosya) {
+            $(function () {
+                jw("b olumsuz").baslik("FTP'den Hedef Dizin Seçilmedi").icerik("FTP'ye yedeklemek için dosya değil bir dizin hedef seçmelisiniz").kilitle().en(450).boy(100).ac();
+            })
+            return false;
+        }
 
+        $(function () {
+            jw('b secim', dur).baslik("FTP'ye yedeklemek için Onayla").icerik("Yerelden seçilen dosyayı FTP'ye yedekeleme üzeresiniz<br />Yedeklemek istediğinizden emin misiniz?").en(450).kilitle().ac();
+        })
+
+        function dur(x) {
+            if (x == 1) {
+
+                //var pen = jw('d').baslik("FTP'ye yedekle").en(750).boy(550).kucultPasif().acEfekt(2, 1000).kapatEfekt(2, 1000).ac();
+                //pen.icerikTD.spin(gif);
+                var bekleme = jw("b bekle").baslik("Uzak FTP Hesabına Yedekleniyor...").en(300).boy(10).kilitle().akilliKapatPasif().ac();
+
+                $.ajax({
+                    type: "POST",
+                    url: "gorevle_uzak_ftp_yedekle.php",
+                    data: { ftpye_yukle: 1, yerel_den_secilen_dosya: yerel_den_secilen_dosya, ftp_den_secilen_dosya: ftp_den_secilen_dosya },
+                    timeout: 3600000, // 1 saat = 3600000 ms
+                    success: function (msg) {
+                        $(function () {
+                            //pen.icerik(msg);
+                            bekleme.kapat();
+                            var pen = jw('d').baslik('Uzak FTP Hesabına Yedekleme Sonucu').icerik(msg).en(750).boy(550).kucultPasif().acEfekt(2, 1000).kapatEfekt(2, 1000).ac();
+
+                        })
+                    }
+                });
+
+            }
+        }
     }
-    }
-    }
-  
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     function ftpDenSil() {
@@ -257,6 +270,7 @@ var gif =
             type: "POST",
             dataType: "json",
             data: { ftpden_sil: 1, ftp_den_secileni_sil : ftp_den_secileni_sil },
+            timeout: 3600000, // 1 saat = 3600000 ms
             success: function (data) {
                 bekleme.kapat();
                 jw("b olumlu").baslik("FTP'den Silme Sonucu").icerik(data.mesaj).en(500).boy(10).kilitle().akilliKapatPasif().kapaninca(function(){ ftpSatirSil(data.li_sil_adi); }).ac(); 
@@ -266,6 +280,8 @@ var gif =
         }
         }
     }
+
+
 
     function ftpSatirSil(dosya) {
         //console.log("Dosya " + dosya);
@@ -297,13 +313,13 @@ var gif =
         if(x==1){
 
         var bekleme = jw("b bekle").baslik("Yerelden dosya siliniyor...").en(300).boy(10).kilitle().akilliKapatPasif().ac();
-        var agaci_yeniden_tukle = "";
 
     $.ajax({
         url: "elle_uzak_ve_yerel_sunucudan_dosyalari_sil.php",
         type: "POST",
         dataType: "json",
         data: { yerelden_sil: 1, yerel_den_secilen_dosya: yerel_den_secilen_dosya },
+        timeout: 3600000, // 1 saat = 3600000 ms
         success: function (data) {
         bekleme.kapat();
             jw("b olumlu").baslik("Yerelden Dosya Silme Sonucu").icerik(data.mesaj).en(500).boy(10).kilitle().akilliKapatPasif().kapaninca(function(){ yerelSatirSil(data.li_sil_adi); }).ac(); 
@@ -316,13 +332,13 @@ var gif =
 
     function yerelSatirSil(dosya) {
     $('ul#yerel li a.aktif').each(function() {
-        if($.trim($(this).attr('adi'))==$.trim(dosya) && $.trim(dosya)!='<?php echo DIZINDIR; ?>') {
+        if($.trim($(this).attr('adi'))==$.trim(dosya) && $.trim(dosya)!='<?php echo BACKUPDIR; ?>') {
             $(this).closest('li').remove();
-        }else if($.trim(dosya)=='<?php echo DIZINDIR; ?>'){
+        }else if($.trim(dosya)=='<?php echo BACKUPDIR; ?>'){
             $('ul#yerel li').each(function() {
                 $(this).closest('li').remove();
             });
-            $("#yerel li:first-child").before('<li class="yerel_home pointer"><a rel="<?php echo DIZINDIR; ?>">Ana Dizin<span style="float: right;color: black;padding-right: 10px;">4 KB</span></a></li>');
+            $("#yerel li:first-child").before('<li class="yerel_home pointer"><a rel="<?php echo BACKUPDIR; ?>">Ana Dizin<span style="float: right;color: black;padding-right: 10px;">4 KB</span></a></li>');
         }
     });
     }
@@ -333,19 +349,19 @@ var gif =
 
 	$( '#yerel_dizin_agac' ).html( '<ul class="filetree start"><li class="wait" style="padding-left: 20px;">' + 'Yerel klasör ağacı oluşturuluyor...' + '<li></ul>' );
 	
-	getfilelist( $('#yerel_dizin_agac') , '<?php echo DIZINDIR; ?>' );
+	getfilelist( $('#yerel_dizin_agac') , '<?php echo BACKUPDIR; ?>' );
 
 	function getfilelist( cont, root ) {
-
+	
 		$( cont ).addClass( 'wait' );
 			
 		$.post( 'yerel_web_dizin_agac.php', { dir: root }, function( data ) {
 
 			$( cont ).find( '.start' ).html( '' );
 			$( cont ).removeClass( 'wait' ).append( data );
-			if( '<?php echo DIZINDIR; ?>' == root ) {
+			if( '<?php echo BACKUPDIR; ?>' == root ) {
 				$( cont ).find('UL:hidden').show();
-                $("#yerel li:first-child").before('<li class="yerel_home pointer"><a rel="<?php echo DIZINDIR; ?>">Ana Dizin<span style="float: right;color: black;padding-right: 10px;">4 KB</span></a></li>');
+                $("#yerel li:first-child").before('<li class="yerel_home pointer"><a rel="<?php echo BACKUPDIR; ?>">Ana Dizin<span style="float: right;color: black;padding-right: 10px;">4 KB</span></a></li>');
             } else {
 				$( cont ).find('UL:hidden').slideDown({ duration: 500, easing: null });
             }
@@ -354,9 +370,9 @@ var gif =
 
 	$( '#yerel_dizin_agac' ).on('click', 'LI A', function() {
         var entry = $(this).parent();
-        if(entry.hasClass('yerel_home') && '<?php echo DIZINDIR; ?>' == $(this).attr('rel') )
+        if(entry.hasClass('yerel_home') && '<?php echo BACKUPDIR; ?>' == $(this).attr('rel') )
         {
-            $('#yerel_den_secilen_dosya').val( $(this).attr('rel') );
+            $('#yerel_den_secilen_dosya').val($(this).attr('rel'));
             $('#yerel_dizin_agac a').removeClass("aktif");
             $(this).addClass("aktif");
             $( '.yerel_expanded' ).find('UL').slideUp({ duration: 500, easing: null });
@@ -458,8 +474,7 @@ var gif =
     }
 	});
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 </script>
-<link rel="stylesheet" href="css/filetree.css" type="text/css" >
-<?php 
-include('includes/footer.php');
-?>

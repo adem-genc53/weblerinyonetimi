@@ -8,10 +8,13 @@ require_once __DIR__ . '/includes/turkcegunler.php';
 
 ini_set('memory_limit', '-1');
 ignore_user_abort(true);
-set_time_limit(3600); // 7200 saniye 120 dakikadır, 3600 1 saat
-##########################################################################################################
+set_time_limit(3600); //7200 saniye 120 dakikadır, 3600 1 saat
 
-##########################################################################################################
+if($_SERVER['REQUEST_METHOD'] == 'POST'){
+    //echo '<pre>' . print_r($_POST, true) . '</pre>';
+    //exit;
+}
+
 include('includes/header.php');
 include('includes/navigation.php');
 include('includes/sub_navbar.php');
@@ -28,12 +31,14 @@ include('includes/sub_navbar.php');
                         <div class="col-sm-6">
                             <ol class="breadcrumb float-sm-right">
                                 <li class="breadcrumb-item"><a href="index.php">Anasayfa</a></li>
-                                <li class="breadcrumb-item active">Google'dan Yedekleri İndir</li>
+                                <li class="breadcrumb-item active">Dizin/Zİp Google'la Yedekle</li>
                             </ol>
                         </div><!-- / <div class="col-sm-6"> -->
                     </div><!-- / <div class="row mb-2"> -->
                 </div><!-- / <div class="container-fluid"> -->
             </div><!-- / <div class="content-header"> -->
+
+
 
     <!-- Bilgilendirme Satırı Başlangıcı -->
     <section class="content">
@@ -46,18 +51,14 @@ include('includes/sub_navbar.php');
                             <div class="card-header" id="headingOne">
                             <h5 class="m-0">
                                 <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
-                                Google Drive Yedekleri İndirme Hakkında Bilmeniz Gerekenler !
+                                Veritabanı Geri Yükleme Hakkında Bilmeniz Gerekenler !
                                 </button>
                             </h5>
                             </div>
 
                             <div id="collapseOne" class="collapse" aria-labelledby="headingOne" data-parent="#accordion">
                             <div class="card-body">
-                                <p>Buradan uzak sunucu Google Drive hesabındaki yedekleri yerel web site dizinleri alanına indirebilirsiniz.
-                                </p>
-                                <p>Yerel web dizinlerinin herhangi bir birine veya içindeki herhangi bir dizine veya <strong>İndirilecek Yerel Hedef</strong> alanına yeni bir dizin adı veya mevcut dizin içine yeni dizin adı belirleyerek inidrebilirsiniz.
-                                </p>
-                                <p>Uzak Google Drive hesanındaki tek dosya seçerek indirebilirsiniz veya dizin seçerek dizin ile beraber dizin içindeki tüm dosyalarıda indirebilirsiniz.
+                                <p>Buradan web dizinlerin zip formatında sıkıştırılarak yedeklenen zipli dosyaların uzak Google Drive hesabına elle yedekleyebilirsiniz
                                 </p>
                                 <b>Veritabanı yedeklerin bulunduğu dizin: </b><span id="yol"><?php echo strtolower(htmlpath(BACKUPDIR)); ?></span><br />
                                 <p><b>Web site zip yedeklerin bulunduğu dizin: </b><span id="yol"><?php echo strtolower(htmlpath(ZIPDIR)); ?></span></p>
@@ -78,7 +79,7 @@ include('includes/sub_navbar.php');
         <div class="col-sm-12">
             <div class="card">
                 <div class="card-body p-0">
-<?php
+<?php 
     $error = false;
     if (!(PHP_VERSION_ID >= 80100)) {
         echo ("<div style='font-weight: bold;font-size: 16px;text-align:center;font-family: Arial, Helvetica, sans-serif;'>Google Drive Kütüphanesi En Düşük \">= 8.1.0\" PHP sürümünü gerektirir. Siz " . PHP_VERSION . " Çalıştırıyorsunuz.</div>");
@@ -88,36 +89,35 @@ include('includes/sub_navbar.php');
         echo 'Hata: AuthConfig dosyası bulunamadı.';
         die('Hata: AuthConfig dosyası bulunamadı.');
     }
-
     if(!$error){
 ?>
     <form method="POST">
     <div class="row">
         <div class="col-sm-12 p-3 text-center">
-            <div class="p-1 bg-primary text-white"><strong>Google Drive Sunucudan Yerel Sunucuya Yedek İndir</strong></div>
+            <div class="p-1 bg-primary text-white"><strong>Yerel Dizini/Dosyayı Google Drive Sunucuya Yedekleme</strong></div>
         </div>
     </div>
     <div class="row">
         <div class="col-sm-12 p-3">
                 <div class="input-group">
-                <span class="input-group-text" style="width: 170px;">Google Drive'dan Kaynak</span>
-            <input class="form-control" type="text" id="google_drive_dan_secilen_dosya_adini_goster" disabled style="background-color: #fff;" />
-            <input type="hidden" id="google_drive_dan_secilen_dosya_id" name="google_drive_dan_secilen_dosya_id" />
-            <input type="hidden" id="google_drive_dan_secilen_dosya_id_sil" name="google_drive_dan_secilen_dosya_id_sil" />
-            <input type="hidden" id="google_drive_dan_secilen_dosya_boyutu" name="google_drive_dan_secilen_dosya_boyutu" />
-                </div>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-sm-12 p-3">
-                <div class="input-group">
-                <span class="input-group-text" style="width: 170px;">Yerel Web Dizinleri</span>
+                <span class="input-group-text" style="width: 170px;">Yerel Web Dizin Kaynak</span>
             <input class="form-control" type="text" id="yerel_den_secilen_dosya" name="yerel_den_secilen_dosya" />
                 </div>
         </div>
     </div>
+    <div class="row">
+        <div class="col-sm-12 p-3">
+                <div class="input-group">
+                <span class="input-group-text" style="width: 170px;">Uzak Google Drive Hedef</span>
+            <input class="form-control" type="text" id="google_drive_dan_secilen_dosya_adini_goster" disabled style="background-color: #fff;" />
+            <input type="hidden" id="google_drive_dan_secilen_dosya_id" name="google_drive_dan_secilen_dosya_id" />
+            <input type="hidden" id="google_drive_dan_secilen_dosya_id_sil" name="google_drive_dan_secilen_dosya_id_sil" />
+                </div>
+        </div>
+    </div>
+
     <div class="text-center p-3">
-        <button type="button" class="btn btn-success btn-sm" onclick="javascript:uzakSunucudanIndir();"><i class="fa fa-download" aria-hidden="true"></i> Seçilen Yedeği İndir </button>
+        <button type="button" class="btn btn-success btn-sm" onclick="javascript:uzakSunucuyaYukle();"><i class="fa fa-upload" aria-hidden="true"></i> Google Drive'a Yükle </button>
     </div>
     </form>
 <?php } ?>
@@ -128,6 +128,7 @@ include('includes/sub_navbar.php');
     </div><!-- / <div class="container-fluid"> -->
     </section><!-- / <section class="content"> -->
     <!-- Gövde İçerik Sonu -->
+
 
     <!-- Gövde İçerik Başlangıcı -->
     <section class="content">
@@ -140,13 +141,13 @@ include('includes/sub_navbar.php');
 if(!$error){
 ?>
     <div class="row">
-        <div class="col-sm-6 p-3"><div class="p-1 bg-primary text-white"><strong>Google Drive'daki Yedekler</strong></div>
-            <div id="google_drive_uzaktan_agac"></div>
-            <button type="button" class="btn btn-warning btn-sm" style="margin-top: 15px;" onclick="return googleDriveSil();"><span class="glyphicon glyphicon-trash"></span> Seçilen Öğeyi Sil </button>
-        </div>
-        <div class="col-sm-6 p-3"><div class="p-1 bg-primary text-white"><strong>Yerel Web Dizinleri</strong></div>
+        <div class="col-sm-6 p-3"><div class="p-1 bg-primary text-white"><strong>Yerel Zipli Web Dizinler</strong></div>
             <div id="yerel_dizin_agac"></div>
             <button type="button" class="btn btn-warning btn-sm" style="margin-top: 15px;" onclick="return yerelOgeleriSil();"><span class="glyphicon glyphicon-trash"></span> Seçilen Öğeyi Sil </button>
+        </div>
+        <div class="col-sm-6 p-3"><div class="p-1 bg-primary text-white"><strong>Uzak Google Drive Sunucu</strong></div>
+            <div id="google_drive_uzaktan_agac"></div>
+            <button type="button" class="btn btn-warning btn-sm" style="margin-top: 15px;" onclick="return googleDriveSil();"><span class="glyphicon glyphicon-trash"></span> Seçilen Öğeyi Sil </button>
         </div>
     </div>
 <?php } ?>
@@ -158,153 +159,104 @@ if(!$error){
     </section><!-- / <section class="content"> -->
     <!-- Gövde İçerik Sonu -->
 
+
 <br />
         </div><!-- / <div class="content-wrapper"> -->
-<div id="google_drive"></div>
-<script type='text/javascript'>
-    var satir = '';
-    var query = '';
-    var tarih = '';
-    var firma = '';
-</script>
 
-<script type="text/javascript">
+        
 
-var gif =
-{
-  lines: 10, // The number of lines to draw
-  length: 3, // The length of each line
-  width: 7, // The line thickness
-  radius: 15, // The radius of the inner circle
-  corners: 0.7, // Corner roundness (0..1)
-  rotate: 0, // The rotation offset
-  color: '#BFDBDD', // #rgb or #rrggbb
-  speed: 1.2, // Rounds per second
-  trail: 40, // Afterglow percentage
-  shadow: true, // Whether to render a shadow
-  hwaccel: false, // Whether to use hardware acceleration
-  className: 'spinner', // The CSS class to assign to the spinner
-  zIndex: 2e9, // The z-index (defaults to 2000000000)
-  top: 'auto', // Top position relative to parent in px
-  left: 'auto' // Left position relative to parent in px
-}
+<?php 
+include('includes/footer.php');
+?>
+<link rel="stylesheet" href="css/filetree.css" type="text/css" >
 
-    function uzakSunucudanIndir() {
+<script language="javascript">
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    var gif =
+    {
+        lines: 10, // The number of lines to draw
+        length: 3, // The length of each line
+        width: 7, // The line thickness
+        radius: 15, // The radius of the inner circle
+        corners: 0.7, // Corner roundness (0..1)
+        rotate: 0, // The rotation offset
+        color: '#BFDBDD', // #rgb or #rrggbb
+        speed: 1.2, // Rounds per second
+        trail: 40, // Afterglow percentage
+        shadow: true, // Whether to render a shadow
+        hwaccel: false, // Whether to use hardware acceleration
+        className: 'spinner', // The CSS class to assign to the spinner
+        zIndex: 2e9, // The z-index (defaults to 2000000000)
+        top: 'auto', // Top position relative to parent in px
+        left: 'auto' // Left position relative to parent in px
+    }
 
+    function uzakSunucuyaYukle() {
+        var yerel_den_secilen_dosya = $('#yerel_den_secilen_dosya').val();
         var google_drive_dan_secilen_dosya_id = $('#google_drive_dan_secilen_dosya_id').val();
         var google_drive_dan_secilen_dosya_adini_goster = $('#google_drive_dan_secilen_dosya_adini_goster').val();
+        var dosyami_dizinmi = google_drive_dan_secilen_dosya_adini_goster.replace(/^.*?\.([a-zA-Z0-9]+)$/, "$1");
 
-        var yerel_den_secilen_dosya = $('#yerel_den_secilen_dosya').val();
-        var dosyami_dizinmi = yerel_den_secilen_dosya.replace(/^.*?\.([a-zA-Z0-9]+)$/, "$1");
+        function basename(path) {
+            return path.split('/').reverse()[0];
+        }
 
-        if( google_drive_dan_secilen_dosya_id == '' ){
-            $(function(){
-            jw("b olumsuz").baslik("Google Drive'dan Kaynak Seçilmedi").icerik("Google Drive'dan yedek indirmek için kaynak seçmelisiniz").kilitle().en(350).boy(100).ac();
+        if (yerel_den_secilen_dosya == '') {
+            $(function () {
+                jw("b olumsuz").baslik("Yerelden Kaynak Seçilmedi").icerik("Yerelden bir dosya veya dizin kaynak seçmelisiniz").kilitle().en(450).boy(100).ac();
             })
             return false;
         }
-        if( yerel_den_secilen_dosya == '' ){
-            $(function(){
-            jw("b olumsuz").baslik("Yerelden Hedef Seçilmedi").icerik("Google Drive'dan indirilecek yedek için yerelden bir hedef seçmelisiniz").kilitle().en(350).boy(100).ac();
+        if (basename(yerel_den_secilen_dosya) == '.htaccess') {
+            $(function () {
+                jw("b olumsuz").baslik("Bu Dosya Yüklenemez").icerik("<b>.htaccess</b> dosya tek başına yüklenemez.<br />Dizin içinde olduğunda dizinle beraber yüklenebilir").kilitle().en(450).boy(100).ac();
             })
             return false;
         }
-        if(dosyami_dizinmi != yerel_den_secilen_dosya){
-            $(function(){
-            jw("b olumsuz").baslik("Yerelden Dizin Seçilmedi").icerik("Google Drive'dan indirilecek yedek için yerelden bir dizin hedef seçmelisiniz").kilitle().en(450).boy(100).ac();
+        if (google_drive_dan_secilen_dosya_id == '') {
+            $(function () {
+                jw("b olumsuz").baslik("Google Drive'da Hedef Seçilmedi").icerik("Google Drive'a yedeklemek için bir hedef seçmelisiniz").kilitle().en(450).boy(100).ac();
+            })
+            return false;
+        }
+        if (dosyami_dizinmi != google_drive_dan_secilen_dosya_adini_goster) {
+            $(function () {
+                jw("b olumsuz").baslik("Google Drive'da Hedef Dizin Seçilmedi").icerik("Google Drive'a yedeklemek için dosya değil bir dizin hedef seçmelisiniz").kilitle().en(450).boy(100).ac();
             })
             return false;
         }
 
-        $(function()
-            {
-            jw('b secim',dur).baslik("Google Drive'dan İndirmeyi Onayla").icerik("Google Drive'da seçilen yedek<br />Yerel bölümde seçilen alana<br />indirmek istediğinizden emin misiniz?").en(450).kilitle().ac();
-            })
-              
-        function dur(x){
-            if(x==1){
+        $(function () {
+            jw('b secim', ftp_dur).baslik("Google Drive'a yedeklemek için Onayla").icerik("Yerelden seçilen dosyayı Google Drive'a yedekeleme üzeresiniz<br />Yedeklemek istediğinizden emin misiniz?").en(450).kilitle().ac();
+        })
 
-        //var pen = jw('d').baslik('Google Drive Hesabından Yedekleri İndir').en(750).boy(550).kucultPasif().acEfekt(2, 1000).kapatEfekt(2, 1000).ac();
-        //pen.icerikTD.spin(gif);
+        function ftp_dur(x) {
+            if (x == 1) {
 
-        if($("#google_drive_dan_secilen_dosya_boyutu").val()==='-1'){
-            var google_drive_dan_secilen_dosya_boyutu = 0;
-            var bekleme = jw("b bekle").baslik("Google Drive Hesabından Yedekler İndiriliyor...").en(350).boy(10).kilitle().akilliKapatPasif().ac();
-        }else{
-            
-            var bekleme = jw("b bekle").baslik("Google Drive Hesabından Yedekler İndiriliyor...").icerik("<div class='progress' style='height:15px'><div class='progress-bar progress-bar-striped progress-bar-animated' style='width:2%'>1%</div></div><br />Lütfen Bekleyiniz...").en(350).boy(10).kilitle().akilliKapatPasif().ac();
-        }
-// var google_drive_dan_secilen_dosya_boyutu = $("#google_drive_dan_secilen_dosya_boyutu").val();
-////////////////////////////////////////////
-// Interval ID'yi saklayacak bir değişken
-var downloadInterval;
+                //var pen = jw('d').baslik("Google Drive'a yedekleme").en(750).boy(550).kucultPasif().acEfekt(2, 1000).kapatEfekt(2, 1000).ac();
+                //pen.icerikTD.spin(gif);
+                var bekleme = jw("b bekle").baslik("Google Drive'a yedekleniyor...").en(300).boy(10).kilitle().akilliKapatPasif().ac();
 
-if ($("#google_drive_dan_secilen_dosya_boyutu").val() > 0) {
-    // Daha önce başlatılmış bir interval varsa temizleyin
-    if (downloadInterval) {
-        clearInterval(downloadInterval);
-    }
+                $.ajax({
+                    type: "POST",
+                    url: "gorevle_uzak_google_yedekle.php",
+                    data: { googla_yukle: 1, yerel_den_secilen_dosya: yerel_den_secilen_dosya, google_drive_dan_secilen_dosya_id: google_drive_dan_secilen_dosya_id, google_drive_dan_secilen_dosya_adini_goster: google_drive_dan_secilen_dosya_adini_goster },
+                    timeout: 3600000, // 1 saat = 3600000 ms
+                    success: function (msg) {
+                        $(function () {
+                            //pen.icerik(msg);
+                            bekleme.kapat();
+                            var pen = jw('d').baslik('Google Drive\'a yedekleme Sonucu').icerik(msg).en(750).boy(550).kucultPasif().acEfekt(2, 1000).kapatEfekt(2, 1000).ac();
+                        })
+                    }
+                });
 
-    // Yeni bir interval başlatın
-    downloadInterval = setInterval(function () {
-        $.ajax({
-            type: "POST",
-            dataType: 'json',
-            url: "progress.json",
-            success: function (veri) {
-                // İndirme işleminin ilerlemesini yüzde olarak hesaplayın
-                var downloadedSize = veri.size;
-                var totalSize = parseInt($("#google_drive_dan_secilen_dosya_boyutu").val());
-
-                // Eğer totalSize geçersiz (örneğin -1) ise intervali durdurun
-                if (totalSize <= 0) {
-                    clearInterval(downloadInterval);
-                    return;
-                }
-
-                var percentComplete = (downloadedSize / totalSize) * 100;
-
-                // İlerleme çubuğunu güncelleyin
-                $(".progress-bar-animated").css('width', percentComplete + '%');
-                $(".progress-bar-animated").text(Math.round(percentComplete) + '%');
             }
-        });
-    }, 2000);
-} else {
-    // Dosya boyutu 0 veya negatifse, indirme başlatılmasın
-    if (downloadInterval) {
-        clearInterval(downloadInterval); // Intervali durdur
-    }
-    //console.log("Geçersiz dosya boyutu: Klasör seçilmiş olabilir.");
-}
-////////////////////////////////////////////
-            $.ajax({
-                type: "POST",
-                url: "google_den_yerele_indir.php",
-                data: { google_drive_dan_secilen_dosya_id: google_drive_dan_secilen_dosya_id, yerel_den_secilen_dosya: yerel_den_secilen_dosya, google_drive_dan_secilen_dosya_adini_goster: google_drive_dan_secilen_dosya_adini_goster, google_drive_dan_secilen_dosya_boyutu: $("#google_drive_dan_secilen_dosya_boyutu").val() },
-                timeout: 3600000, // 1 saat = 3600000 ms
-                success: function (msg) {
-                // 5 saniye bekleyin ve ardından popup'ı kapatın
-                setTimeout(function() {                    
-                    $(function () {
-                        bekleme.kapat();
-                        var pen = jw('d').baslik('Google Drive Hesabından Yedekleri İndirme Sonucu').icerik(msg).en(750).boy(550).kucultPasif().acEfekt(2, 1000).kapatEfekt(2, 1000).ac();
-                    });
-                        if (downloadInterval) {
-                            clearInterval(downloadInterval); // Intervali durdur
-                        }
-                }, 3000); // 5000 ms = 5 saniye
-                },
-                error: function(jqXHR, textStatus, errorThrown) {
-                    // Timeout veya başka bir hata durumunda burası çalışır
-                    console.log("Hata: " + textStatus + " " + errorThrown);
-                }
-            });
-        }
         }
     }
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     function googleDriveSil() {
@@ -322,24 +274,24 @@ if ($("#google_drive_dan_secilen_dosya_boyutu").val() > 0) {
               {
                 jw('b secim',ftp_dur).baslik("Google Drive'dan Silmeyi Onayla").icerik("Google Drive'da seçilen yedek silmek istediğinizden emin misiniz?").en(450).kilitle().ac();
               })
-
+              
         function ftp_dur(x){
             if(x==1){
 
             var bekleme = jw("b bekle").baslik("Google Drive Hesabından Yedek(ler) siliniyor...").en(300).boy(10).kilitle().akilliKapatPasif().ac();
 
-            $.ajax({
-                url: "elle_uzak_ve_yerel_sunucudan_dosyalari_sil.php",
-                type: "POST",
-                dataType: "json",
-                data: { googdan_sil: 1, google_drive_dan_secilen_dosya_id : google_drive_dan_secilen_dosya_id, google_drive_dan_secilen_dosya_id_sil : google_drive_dan_secilen_dosya_id_sil },
-                timeout: 3600000, // 1 saat = 3600000 ms
-                success: function (data) {
-                    bekleme.kapat();
-                    //alert(data);
-                    jw("b olumlu").baslik("Google Drive'dan Silme Sonucu").icerik(data.mesaj).en(500).boy(10).kilitle().akilliKapatPasif().kapaninca(function(){ googleSatirSil(data.li_sil_adi); }).ac(); 
-                }
-            });
+        $.ajax({
+            url: "elle_uzak_ve_yerel_sunucudan_dosyalari_sil.php",
+            type: "POST",
+            dataType: "json",
+            data: { googdan_sil: 1, google_drive_dan_secilen_dosya_id : google_drive_dan_secilen_dosya_id, google_drive_dan_secilen_dosya_id_sil : google_drive_dan_secilen_dosya_id_sil },
+            timeout: 3600000, // 1 saat = 3600000 ms
+            success: function (data) {
+                bekleme.kapat();
+                //alert(data);
+                jw("b olumlu").baslik("Google Drive'dan Silme Sonucu").icerik(data.mesaj).en(500).boy(10).kilitle().akilliKapatPasif().kapaninca(function(){ googleSatirSil(data.li_sil_adi); }).ac(); 
+            }
+        });
 
         }
         }
@@ -397,13 +349,13 @@ if ($("#google_drive_dan_secilen_dosya_boyutu").val() > 0) {
 
     function yerelSatirSil(dosya) {
     $('ul#yerel li a.aktif').each(function() {
-        if($.trim($(this).attr('adi'))==$.trim(dosya) && $.trim(dosya)!='<?php echo DIZINDIR; ?>') {
+        if($.trim($(this).attr('adi'))==$.trim(dosya) && $.trim(dosya)!='<?php echo ZIPDIR; ?>') {
             $(this).closest('li').remove();
-        }else if($.trim(dosya)=='<?php echo DIZINDIR; ?>'){
+        }else if($.trim(dosya)=='<?php echo ZIPDIR; ?>'){
             $('ul#yerel li').each(function() {
                 $(this).closest('li').remove();
             });
-            $("#yerel li:first-child").before('<li class="yerel_home pointer"><a rel="<?php echo DIZINDIR; ?>">Ana Dizin<span style="float: right;color: black;padding-right: 10px;">4 KB</span></a></li>');
+            $("#yerel li:first-child").before('<li class="yerel_home pointer"><a rel="<?php echo ZIPDIR; ?>">Ana Dizin<span style="float: right;color: black;padding-right: 10px;">4 KB</span></a></li>');
         }
     });
     }
@@ -414,19 +366,19 @@ if ($("#google_drive_dan_secilen_dosya_boyutu").val() > 0) {
 
 	$( '#yerel_dizin_agac' ).html( '<ul class="filetree start"><li class="wait" style="padding-left: 20px;">' + 'Yerel klasör ağacı oluşturuluyor...' + '<li></ul>' );
 	
-	getfilelist( $('#yerel_dizin_agac') , '<?php echo DIZINDIR; ?>' );
+	getfilelist( $('#yerel_dizin_agac') , '<?php echo ZIPDIR; ?>' );
 
 	function getfilelist( cont, root ) {
 	
 		$( cont ).addClass( 'wait' );
 			
-		$.post( 'yerel_web_dizin_agac.php', { dir: root }, function( data ) {
+		$.post( 'yerel_web_zip_dizin_agac.php', { dir: root }, function( data ) {
 
 			$( cont ).find( '.start' ).html( '' );
 			$( cont ).removeClass( 'wait' ).append( data );
-			if( '<?php echo DIZINDIR; ?>' == root ) {
+			if( '<?php echo ZIPDIR; ?>' == root ) {
 				$( cont ).find('UL:hidden').show();
-                $("#yerel li:first-child").before('<li class="yerel_home pointer"><a rel="<?php echo DIZINDIR; ?>">Ana Dizin<span style="float: right;color: black;padding-right: 10px;">4 KB</span></a></li>');
+                $("#yerel li:first-child").before('<li class="yerel_home pointer"><a rel="<?php echo ZIPDIR; ?>">Ana Dizin<span style="float: right;color: black;padding-right: 10px;">4 KB</span></a></li>');
             } else {
 				$( cont ).find('UL:hidden').slideDown({ duration: 500, easing: null });
             }
@@ -435,9 +387,9 @@ if ($("#google_drive_dan_secilen_dosya_boyutu").val() > 0) {
 
 	$( '#yerel_dizin_agac' ).on('click', 'LI A', function() {
         var entry = $(this).parent();
-        if(entry.hasClass('yerel_home') && '<?php echo DIZINDIR; ?>' == $(this).attr('rel') )
+        if(entry.hasClass('yerel_home') && '<?php echo ZIPDIR; ?>' == $(this).attr('rel') )
         {
-            $('#yerel_den_secilen_dosya').val( $(this).attr('rel') );
+            $('#yerel_den_secilen_dosya').val($(this).attr('rel'));
             $('#yerel_dizin_agac a').removeClass("aktif");
             $(this).addClass("aktif");
             $( '.yerel_expanded' ).find('UL').slideUp({ duration: 500, easing: null });
@@ -471,7 +423,6 @@ if ($("#google_drive_dan_secilen_dosya_boyutu").val() > 0) {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	$('#google_drive_uzaktan_agac').html( '<ul class="filetree start"><li class="wait" style="padding-left: 20px;">' + 'Google Drive içerik ağacı oluşturuluyor...' + '<li></ul>' );
 	
 	getGooglefilelist( $('#google_drive_uzaktan_agac') , 'root' );
@@ -508,7 +459,6 @@ if ($("#google_drive_dan_secilen_dosya_boyutu").val() > 0) {
         {
 			$('#google_drive_dan_secilen_dosya_adini_goster,#google_drive_dan_secilen_dosya_id_sil').val($.trim($(this).attr('adi')));
             $('#google_drive_dan_secilen_dosya_id').val($.trim($(this).attr('rel')));
-            $('#google_drive_dan_secilen_dosya_boyutu').val($.trim($(this).attr('boyutu')));
 
             $('#google_drive_uzaktan_agac a').removeClass("aktif");
             $(this).addClass("aktif");
@@ -534,23 +484,15 @@ if ($("#google_drive_dan_secilen_dosya_boyutu").val() > 0) {
 			}
 			$('#google_drive_dan_secilen_dosya_adini_goster,#google_drive_dan_secilen_dosya_id_sil').val($.trim($(this).attr('adi')));
             $('#google_drive_dan_secilen_dosya_id').val($.trim($(this).attr('rel')));
-            $('#google_drive_dan_secilen_dosya_boyutu').val($.trim($(this).attr('boyutu')));
 			
 		} else {
 			$('#google_drive_dan_secilen_dosya_adini_goster,#google_drive_dan_secilen_dosya_id_sil').val($.trim($(this).attr('adi')));
             $('#google_drive_dan_secilen_dosya_id').val($.trim($(this).attr('rel')));
-            $('#google_drive_dan_secilen_dosya_boyutu').val($.trim($(this).attr('boyutu')));
 		}
 	return false;
     }
 	});
-
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 </script>
-<link rel="stylesheet" href="css/filetree.css" type="text/css" >
-<?php 
-include('includes/footer.php');
-?>

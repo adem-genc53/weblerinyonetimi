@@ -16,14 +16,14 @@ class FtpTreeView {
     private string $ftppass;
     private string $ftppath;
     private string $ftp_path;
+    private string $ftp_mode;
+    private string $ftp_ssl;
     private array $files = [];
     private array $ftpdeki_dosyalar = [];
     private array $ftpdeki_dizinler = [];
-    private $ftp;
-    private string $login_result;
+    private $ftp_connect;
     private $genel_ayarlar;
     private $hash;
-    private string $folder;
     private $dir; // Resource or false
 
     function __construct(string $tiklanan_path, $genel_ayarlar, $hash) {
@@ -33,36 +33,52 @@ class FtpTreeView {
         $this->ftppath      = $genel_ayarlar['path'];
         $this->ftp_path     = $tiklanan_path;
 
-        // Güvenli olmayan kısmı try-catch içine alalım
-        try {
-            $this->ftp = @ftp_ssl_connect($this->ftpsunucu);
-            if (!$this->ftp) {
-                throw new Exception($this->ftpsunucu . " sunucuya bağlanamadı, FTP bilgilerini kontrol edin");
+        // FTP Bağlantı türü ve modunu ayarlardan al
+        $this->ftp_mode = $genel_ayarlar['ftp_mode']; // 'active' veya 'passive'
+        $this->ftp_ssl = $genel_ayarlar['ftp_ssl']; // true veya false
+
+        // FTP bağlantısı kur
+        if ($this->ftp_ssl) {
+            // SSL bağlantısı kur ve oturumu aç
+            $this->ftp_connect = ftp_ssl_connect($this->ftpsunucu);
+            if (!$this->ftp_connect) {
+                die("FTP SSL bağlantısı kurulamadı.");
             }
-
-            $this->login_result = ftp_login($this->ftp, $this->ftpusername, $this->ftppass);
-            ftp_pasv($this->ftp, true);
-
-            if (!$this->login_result) {
-                throw new Exception("FTP giriş hatası oluştu!");
+        } else {
+            // Standart bağlantı kur ve oturumu aç
+            $this->ftp_connect = ftp_connect($this->ftpsunucu);
+            if (!$this->ftp_connect) {
+                die("FTP Standart bağlantısı kurulamadı.");
             }
+        }
 
+        // Zaman aşımını ayarla (örneğin, 120 saniye)
+        ftp_set_option($this->ftp_connect, FTP_TIMEOUT_SEC, 120);
+
+        if ($this->ftp_connect) {
+            ftp_login($this->ftp_connect, $this->ftpusername, $this->ftppass);
+
+            // Pasif/Aktif mod ayarı
+            if ($this->ftp_mode) {
+                ftp_pasv($this->ftp_connect, true);
+            } else {
+                ftp_pasv($this->ftp_connect, false);
+            }
             $this->getFtpContent();
-
-            ftp_close($this->ftp);
-        } catch (Exception $e) {
-            die($e->getMessage());
+        }else{
+            ftp_close($this->ftp_connect);
+            die("FTP oturumu açılamadı.");
         }
     }
 
-    private function ftp_mkdir_recursively($ftp, $dir) {
+    private function ftp_mkdir_recursively($ftp_connect, $dir) {
         $parts = explode('/', $dir);
         $path = '';
         foreach ($parts as $part) {
             if ($part != '') {
                 $path .= '/' . $part;
-                if (!@ftp_chdir($ftp, $path)) {
-                    if (!ftp_mkdir($ftp, $path)) {
+                if (!@ftp_chdir($ftp_connect, $path)) {
+                    if (!ftp_mkdir($ftp_connect, $path)) {
                         throw new Exception("Dizin oluşturulamadı: " . $path);
                     }
                 }
@@ -78,9 +94,9 @@ class FtpTreeView {
         }
 
         // Dizinin var olup olmadığını kontrol et
-        if (@ftp_chdir($this->ftp, $full_path)) {
+        if (@ftp_chdir($this->ftp_connect, $full_path)) {
             // Dizin mevcut, içeriğini al
-            $directory_contents = ftp_mlsd($this->ftp, $full_path);
+            $directory_contents = ftp_mlsd($this->ftp_connect, $full_path);
             if($directory_contents !== false){
                 $this->files = $directory_contents;
             }else{
@@ -88,7 +104,7 @@ class FtpTreeView {
             }
         } else {
             // Dizin mevcut değil, oluştur
-            $this->ftp_mkdir_recursively($this->ftp, $full_path);
+            $this->ftp_mkdir_recursively($this->ftp_connect, $full_path);
             // Dizin oluşturuldu, files boş dizi olarak ayarla
             $this->files = [];
         }
@@ -99,13 +115,13 @@ class FtpTreeView {
                 $file_list_arr = array_change_key_case($file_list_arr, CASE_LOWER);
                 if (!in_array($file_list_arr['type'], array("pdir", "cdir"))) {
                     if ($file_list_arr['type'] == 'file') {
-                        $this->ftpdeki_dosyalar[$file_list_arr['modify']][] = $this->showSize(ftp_size($this->ftp, $this->ftppath ."/". $this->ftp_path . $file_list_arr['name'])) . "|" . $file_list_arr['name'];
+                        $this->ftpdeki_dosyalar[$file_list_arr['modify']][] = $this->showSize(ftp_size($this->ftp_connect, $this->ftppath ."/". $this->ftp_path . $file_list_arr['name'])) . "|" . $file_list_arr['name'];
                     } elseif ($file_list_arr['type'] == 'dir') {
-                        $bosmu = ftp_mlsd($this->ftp, $this->ftppath ."/". $this->ftp_path . "/" . $file_list_arr['name']);
+                        $bosmu = ftp_mlsd($this->ftp_connect, $this->ftppath ."/". $this->ftp_path . "/" . $file_list_arr['name']);
                         if ($bosmu === false) {
                             $bosmu = [];
                         }
-                        $this->ftpdeki_dizinler[$file_list_arr['modify']][] = $this->showSize(ftp_size($this->ftp, $this->ftppath ."/". $this->ftp_path . $file_list_arr['name'])) . "|" . $file_list_arr['name'] . "|" . count($bosmu);
+                        $this->ftpdeki_dizinler[$file_list_arr['modify']][] = $this->showSize(ftp_size($this->ftp_connect, $this->ftppath ."/". $this->ftp_path . $file_list_arr['name'])) . "|" . $file_list_arr['name'] . "|" . count($bosmu);
                     }
                 }
             }

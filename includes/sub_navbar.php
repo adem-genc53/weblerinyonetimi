@@ -93,42 +93,42 @@
     </li>
 
     <li class="nav-item">
-        <a href="veritabani_ftpye_yedekle.php" class="nav-link">
+        <a href="veritabani_ftpye_yedekle_yonetimi.php" class="nav-link">
             <i class="fa fa-cloud-upload" aria-hidden="true"></i>
             <p> Veritabanı FTP'ye Yedekle</p>
         </a>
     </li>
 
     <li class="nav-item">
-        <a href="veritabani_googleye_yedekle.php" class="nav-link">
+        <a href="veritabani_googleye_yedekle_yonetimi.php" class="nav-link">
             <i class="fa fa-cloud-upload" aria-hidden="true"></i>
             <p> Veritabanı Google'la Yedekle</p>
         </a>
     </li>
 
     <li class="nav-item">
-        <a href="yerel_dizin_ftpye_yedekle.php" class="nav-link">
+        <a href="yerel_dizin_ftpye_yedekle_yonetimi.php" class="nav-link">
             <i class="fa fa-cloud-upload" aria-hidden="true"></i>
             <p> Web Dizin FTP'ye Yedekle</p>
         </a>
     </li>
 
     <li class="nav-item">
-        <a href="yerel_dizin_googleye_yedekle.php" class="nav-link">
+        <a href="yerel_dizin_googleye_yedekle_yonetimi.php" class="nav-link">
             <i class="fa fa-cloud-upload" aria-hidden="true"></i>
             <p> Web Dizin Google'la Yedekle</p>
         </a>
     </li>
 
     <li class="nav-item">
-        <a href="yerel_web_dizin_zip_ftpye_yedekle.php" class="nav-link">
+        <a href="yerel_web_dizin_zip_ftpye_yedekle_yonetimi.php" class="nav-link">
             <i class="fa fa-cloud-upload" aria-hidden="true"></i>
             <p> Web Dizin Zip FTP'ye Yedekle</p>
         </a>
     </li>
 
     <li class="nav-item">
-        <a href="yerel_web_dizin_zip_googleye_yedekle.php" class="nav-link">
+        <a href="yerel_web_dizin_zip_googleye_yedekle_yonetimi.php" class="nav-link">
             <i class="fa fa-cloud-upload" aria-hidden="true"></i>
             <p> Web Dizin Zip Google'la Yedekle</p>
         </a>
@@ -177,7 +177,7 @@ $(function() {
         var urller = this.href.split('?')[0];
         var gecerliurl = window.location.href.split('?')[0];
         var fileName = gecerliurl.split('/').pop();
-        var myarray = ["yerel_web_dizin_zip_googleye_yedekle.php","yerel_web_dizin_zip_ftpye_yedekle.php","ftp_indir_yonetimi.php","google_indir_yonetimi.php","veritabani_ftpye_yedekle.php","veritabani_googleye_yedekle.php","yerel_dizin_ftpye_yedekle.php","yerel_dizin_googleye_yedekle.php"];
+        var myarray = ["yerel_web_dizin_zip_googleye_yedekle_yonetimi.php","yerel_web_dizin_zip_ftpye_yedekle_yonetimi.php","ftp_indir_yonetimi.php","google_indir_yonetimi.php","veritabani_ftpye_yedekle_yonetimi.php","veritabani_googleye_yedekle_yonetimi.php","yerel_dizin_ftpye_yedekle_yonetimi.php","yerel_dizin_googleye_yedekle_yonetimi.php"];
         if(jQuery.inArray(fileName, myarray) !== -1){
             $('#acilir').addClass('active');
             $('#menu-open').addClass('menu-open');

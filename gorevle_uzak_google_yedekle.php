@@ -1,8 +1,14 @@
 <?php 
 // Bismillahirrahmanirrahim
+header('Connection: Keep-Alive');
+header('Keep-Alive: timeout=5, max=100');
 require_once __DIR__ . '/includes/connect.php';
 include __DIR__ . '/google_drive_setup.php';
 
+ob_start();
+ini_set('memory_limit', '-1');
+ignore_user_abort(true);
+set_time_limit(3600); // 7200 saniye 120 dakikadır, 3600 1 saat
 ##################################################################################################################################
 
 if (!function_exists('uzakGoogleSunucudaDosyaSil')) {
@@ -456,4 +462,7 @@ try {
 }
 
 }
+
+ob_flush();
+flush();
 ?>

@@ -134,6 +134,8 @@ $hash = new Hash;
         }
 
         $path       = $_POST['path']       ?? "/";
+        $ftp_ssl    = $_POST['ftp_ssl']    ?? 1;
+        $ftp_mode   = $_POST['ftp_mode']   ?? 1;
 
     try {
     $sorgu = "UPDATE genel_ayarlar SET
@@ -141,7 +143,9 @@ $hash = new Hash;
             port=:port,
             $ftpuser
             $ftppassword
-            path=:path
+            path=:path,
+            ftp_ssl=:ftp_ssl,
+            ftp_mode=:ftp_mode
             LIMIT 1 ";
 
                 $stmt= $PDOdb->prepare($sorgu);
@@ -156,6 +160,8 @@ $hash = new Hash;
                 if(isset($_POST['password']) && !empty($_POST['password'])){
                 $stmt->bindParam(':password', $password, PDO::PARAM_STR);
                 }
+                $stmt->bindParam(':ftp_ssl', $ftp_ssl, PDO::PARAM_INT);
+                $stmt->bindParam(':ftp_mode', $ftp_mode, PDO::PARAM_INT);
                 $stmt->bindParam(':path', $path, PDO::PARAM_STR);
 
                 $stmt->execute();
@@ -789,6 +795,58 @@ $(document).ready(function() {
                                                             <td>FTP iç Yolu:</td>
                                                             <td style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;">
                                                                 <input class="form-control" type="text" name="path" value="<?php echo $genel_ayarlar['path']; ?>">
+                                                            </td>
+                                                            <td colspan="3">&nbsp;</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td><b>FTP Bağlantı Türü:</b> FTPS (SSL ile güvenli bağlantı):</td>
+                                                            <td style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;min-width: 200px;">
+                                                            <?php 
+                                                            if(isset($genel_ayarlar['ftp_ssl']) && $genel_ayarlar['ftp_ssl']==1){
+                                                                echo "<input type='radio' name='ftp_ssl' value='1' checked>";
+                                                            } else if(isset($genel_ayarlar['ftp_ssl']) && $genel_ayarlar['ftp_ssl']==0){
+                                                                echo "<input type='radio' name='ftp_ssl' value='1'>";
+                                                            }
+                                                            ?>
+                                                            </td>
+                                                            <td colspan="3">&nbsp;</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td><b>FTP Bağlantı Türü:</b> FTP (Standart):</td>
+                                                            <td style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;min-width: 200px;">
+                                                            <?php 
+                                                            if(isset($genel_ayarlar['ftp_ssl']) && $genel_ayarlar['ftp_ssl']==0){
+                                                                echo "<input type='radio' name='ftp_ssl' value='1' checked>";
+                                                            } else if(isset($genel_ayarlar['ftp_ssl']) && $genel_ayarlar['ftp_ssl']==1){
+                                                                echo "<input type='radio' name='ftp_ssl' value='1'>";
+                                                            }
+                                                            ?>
+                                                            </td>
+                                                            <td colspan="3">&nbsp;</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td><b>FTP Modu:</b> Pasif Mod:</td>
+                                                            <td style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;min-width: 200px;">
+                                                            <?php 
+                                                            if(isset($genel_ayarlar['ftp_mode']) && $genel_ayarlar['ftp_mode']==1){
+                                                                echo "<input type='radio' name='ftp_mode' value='1' checked>";
+                                                            } else if(isset($genel_ayarlar['ftp_mode']) && $genel_ayarlar['ftp_mode']==0){
+                                                                echo "<input type='radio' name='ftp_mode' value='1'>";
+                                                            }
+                                                            ?>
+                                                            </td>
+                                                            <td colspan="3">&nbsp;</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td><b>FTP Modu:</b> Aktif Mod:</td>
+                                                            <td style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;min-width: 200px;">
+                                                            <?php 
+                                                            if(isset($genel_ayarlar['ftp_mode']) && $genel_ayarlar['ftp_mode']==0){
+                                                                echo "<input type='radio' name='ftp_mode' value='1' checked>";
+                                                            } else if(isset($genel_ayarlar['ftp_mode']) && $genel_ayarlar['ftp_mode']==1){
+                                                                echo "<input type='radio' name='ftp_mode' value='1'>";
+                                                            }
+                                                            ?>
                                                             </td>
                                                             <td colspan="3">&nbsp;</td>
                                                         </tr>
