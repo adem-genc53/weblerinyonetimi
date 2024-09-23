@@ -2,6 +2,10 @@
 // Bismillahirrahmanirrahim
     if (session_status() == PHP_SESSION_NONE && !headers_sent()) {
 
+        // Oturum süresini 1 saat (3600 saniye) olarak ayarla
+        ini_set('session.gc_maxlifetime', 3600);
+        ini_set('session.cookie_lifetime', 3600);
+
         // Session adı olarak alan adınızdır. Eğer aşağıdaki kodlar ile alan adınız alınamaz ise buraya gireceğiniz alan adınız kullanıcılacaktır
         // Alan adındaki . noktaları _ alt tire ile değiştirin. Örnek: "alanadi.com.tr" yerine "alanadi_com_tr"
         // Eğer buraya gerçek alan adınız değil farklı alan adı veya farklı isim girerseniz oturum açmada sorun yaşanacaktır
