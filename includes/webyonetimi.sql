@@ -70,6 +70,8 @@ CREATE TABLE IF NOT EXISTS `genel_ayarlar` (
   `username` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `password` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `path` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '/',
+  `ftp_ssl` int NOT NULL DEFAULT '1',
+  `ftp_mode` int NOT NULL DEFAULT '1',
   `zip_tercihi` int NOT NULL DEFAULT '1',
   `gorevi_calistir` int NOT NULL DEFAULT '2',
   PRIMARY KEY (`id`)
@@ -78,7 +80,7 @@ CREATE TABLE IF NOT EXISTS `genel_ayarlar` (
 -- ------------------------------------------------------
 -- Tablonun veri dökümü `genel_ayarlar`
 -- ------------------------------------------------------
-INSERT INTO `genel_ayarlar` VALUES(1, 'Europe/Istanbul', NULL, 'utf8mb4', NULL, 21, NULL, NULL, '/', 1, 1);
+INSERT INTO `genel_ayarlar` VALUES(1, 'Europe/Istanbul', NULL, 'utf8mb4', NULL, 21, NULL, NULL, '/', 1, 1, 1, 1);
 
 
 -- ------------------------------------------------------
@@ -92,21 +94,11 @@ CREATE TABLE IF NOT EXISTS `user_logins` (
   `log_in_from` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `user_id` (`user_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=40 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- ------------------------------------------------------
 -- Tablonun veri dökümü `user_logins`
 -- ------------------------------------------------------
-INSERT INTO `user_logins` VALUES(38, 1, 1721643956, 'Giriş ile');
-INSERT INTO `user_logins` VALUES(39, 1, 1721727382, 'Giriş ile');
-INSERT INTO `user_logins` VALUES(30, 1, 1721581327, 'Beni Hatırla ile');
-INSERT INTO `user_logins` VALUES(31, 1, 1721581412, 'Beni Hatırla ile');
-INSERT INTO `user_logins` VALUES(32, 1, 1721581682, 'Giriş ile');
-INSERT INTO `user_logins` VALUES(33, 1, 1721581730, 'Giriş ile');
-INSERT INTO `user_logins` VALUES(34, 1, 1721639724, 'Giriş ile');
-INSERT INTO `user_logins` VALUES(35, 1, 1721643485, 'Giriş ile');
-INSERT INTO `user_logins` VALUES(36, 1, 1721643511, 'Giriş ile');
-INSERT INTO `user_logins` VALUES(37, 1, 1721643553, 'Giriş ile');
 
 
 -- ------------------------------------------------------
