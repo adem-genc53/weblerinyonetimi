@@ -187,6 +187,13 @@ function uploadFile($service, $filePath, $parentFolderId = null) {
     $fileName = $fileInfo['basename'];
     $fileMimeType = mime_content_type($filePath);
 
+    // Aynı dosya var mı kontrol et
+    $existingFileId = getFileIdByName($service, $fileName, $parentFolderId);
+    if ($existingFileId) {
+        // Aynı isimde dosya varsa, önce bu dosyayı sil
+        deleteFile($service, $existingFileId);
+    }
+
     $fileMetadata = new \Google\Service\Drive\DriveFile([
         'name' => $fileName,
         'parents' => $parentFolderId ? [$parentFolderId] : []
@@ -230,6 +237,14 @@ function uploadFile($service, $filePath, $parentFolderId = null) {
     }
 }
 
+function deleteFile($service, $fileId) {
+    try {
+        $service->files->delete($fileId);
+        return true;
+    } catch (Exception $e) {
+        return "Dosya silme hatası: " . $e->getMessage();
+    }
+}
 
 function uploadFolder($service, $folderPath, $parentFolderId = null) {
     $folderInfo = pathinfo($folderPath);
@@ -344,6 +359,7 @@ function getFileIdByName($service, $fileName, $parentFolderId = null) {
 
     return count($response->files) > 0 ? $response->files[0]->id : null;
 }
+
 
 function getFolderIdByName($service, $folderName, $parentFolderId = null) {
     $query = "name='$folderName' and mimeType='application/vnd.google-apps.folder' and trashed=false";
