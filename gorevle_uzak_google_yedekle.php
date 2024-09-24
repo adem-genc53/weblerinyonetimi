@@ -453,7 +453,7 @@ if($_POST['google_drive_dan_secilen_dosya_id'] == 'root'){
 // Kullanım
 try {
     main($dosya_adi_yolu, $uzak_sunucu_ici_dizin_id);
-        echo "Google Drive Sunucusuna Başarıyla Yüklendi";
+        echo "<b>Google Drive Sunucusuna Başarıyla Yüklendi:</b> " . basename($dosya_adi_yolu);
 
 } catch (\Google\Service\Exception $e) {
     echo "Hata: " . $e->getMessage();

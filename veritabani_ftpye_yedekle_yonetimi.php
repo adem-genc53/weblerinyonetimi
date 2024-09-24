@@ -295,24 +295,24 @@ include('includes/footer.php');
             timeout: 3600000, // 1 saat = 3600000 ms
             success: function (data) {
 
-                    // İstek sonlandığında zamanı al
-                    const endTime = new Date();
+            // İstek sonlandığında zamanı al
+            const endTime = new Date();
 
-                    // Geçen süreyi hesapla (milisaniye cinsinden)
-                    const elapsedTime = endTime - startTime;
+            // Geçen süreyi hesapla (milisaniye cinsinden)
+            const elapsedTime = endTime - startTime;
 
-                    // Geçen süreyi saat, dakika, saniye ve milisaniye olarak parçala
-                    const hours = Math.floor(elapsedTime / (1000 * 60 * 60));
-                    const minutes = Math.floor((elapsedTime % (1000 * 60 * 60)) / (1000 * 60));
-                    const seconds = Math.floor((elapsedTime % (1000 * 60)) / 1000);
-                    const milliseconds = elapsedTime % 1000;
+            // Geçen süreyi saat, dakika, saniye ve milisaniye olarak parçala
+            const hours = Math.floor(elapsedTime / (1000 * 60 * 60));
+            const minutes = Math.floor((elapsedTime % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((elapsedTime % (1000 * 60)) / 1000);
+            const milliseconds = elapsedTime % 1000;
 
-                    // Sonucu uygun formatta göster
-                    const formattedTime = 
-                        String(hours).padStart(2, '0') + ':' +
-                        String(minutes).padStart(2, '0') + ':' +
-                        String(seconds).padStart(2, '0') + ':' +
-                        String(milliseconds).padStart(3, '0');
+            // Sonucu uygun formatta göster
+            const formattedTime = 
+                String(hours).padStart(2, '0') + ':' +
+                String(minutes).padStart(2, '0') + ':' +
+                String(seconds).padStart(2, '0') + ':' +
+                String(milliseconds).padStart(3, '0');
 
                 bekleme.kapat();
                 jw("b olumlu").baslik("FTP'den Silme Sonucu").icerik("<b>Silme süresi:</b> " + formattedTime + "<br />" + data.mesaj).en(500).boy(10).kilitle().akilliKapatPasif().kapaninca(function(){ ftpSatirSil(data.li_sil_adi); }).ac(); 
@@ -365,24 +365,24 @@ include('includes/footer.php');
         timeout: 3600000, // 1 saat = 3600000 ms
         success: function (data) {
 
-                    // İstek sonlandığında zamanı al
-                    const endTime = new Date();
+        // İstek sonlandığında zamanı al
+        const endTime = new Date();
 
-                    // Geçen süreyi hesapla (milisaniye cinsinden)
-                    const elapsedTime = endTime - startTime;
+        // Geçen süreyi hesapla (milisaniye cinsinden)
+        const elapsedTime = endTime - startTime;
 
-                    // Geçen süreyi saat, dakika, saniye ve milisaniye olarak parçala
-                    const hours = Math.floor(elapsedTime / (1000 * 60 * 60));
-                    const minutes = Math.floor((elapsedTime % (1000 * 60 * 60)) / (1000 * 60));
-                    const seconds = Math.floor((elapsedTime % (1000 * 60)) / 1000);
-                    const milliseconds = elapsedTime % 1000;
+        // Geçen süreyi saat, dakika, saniye ve milisaniye olarak parçala
+        const hours = Math.floor(elapsedTime / (1000 * 60 * 60));
+        const minutes = Math.floor((elapsedTime % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((elapsedTime % (1000 * 60)) / 1000);
+        const milliseconds = elapsedTime % 1000;
 
-                    // Sonucu uygun formatta göster
-                    const formattedTime = 
-                        String(hours).padStart(2, '0') + ':' +
-                        String(minutes).padStart(2, '0') + ':' +
-                        String(seconds).padStart(2, '0') + ':' +
-                        String(milliseconds).padStart(3, '0');
+        // Sonucu uygun formatta göster
+        const formattedTime = 
+            String(hours).padStart(2, '0') + ':' +
+            String(minutes).padStart(2, '0') + ':' +
+            String(seconds).padStart(2, '0') + ':' +
+            String(milliseconds).padStart(3, '0');
 
         bekleme.kapat();
             jw("b olumlu").baslik("Yerelden Dosya Silme Sonucu").icerik("<b>Silme süresi:</b> " + formattedTime + "<br />" + data.mesaj).en(500).boy(10).kilitle().akilliKapatPasif().kapaninca(function(){ yerelSatirSil(data.li_sil_adi); }).ac(); 
