@@ -178,7 +178,8 @@ class SecureLogin {
 }
 
 ##########################################################################################################
-
+$lastlink = isset($_GET['last']) ? htmlspecialchars($_GET['last']) : $_SERVER['REQUEST_URI'];
+$lastlink = str_replace('/','', $lastlink);
 ##########################################################################################################
 
     // Sınıf örneğini oluştur
@@ -187,13 +188,11 @@ class SecureLogin {
     // Oturum kontrolü yap
     if ($secureLogin->isLoggedIn()) {
         // Kullanıcı oturumu geçerli
-        $lastlink = isset($_GET['last']) ? htmlspecialchars($_GET['last']) : $_SERVER['REQUEST_URI'];
-        header("Location: " . $lastlink);
+        header("Location: index.php");
         exit;
 
     }elseif (isset($_COOKIE['beni_hatirla'])) {
         // Çerezi kontrol et ve login işlemi için yönlendir
-        $lastlink = isset($_GET['last']) ? htmlspecialchars($_GET['last']) : $_SERVER['REQUEST_URI'];
         header("Location: check-login.php?last=" . $lastlink);
         exit;
     }
@@ -236,7 +235,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Kullanıcı giriş işlemini gerçekleştir
         if ($secureLogin->login($user_email, $password, $csrf_token, $remember_me)) {
 
-            $lastlink = isset($_GET['last']) ? htmlspecialchars($_GET['last']) : $_SERVER['REQUEST_URI'];
             header("Location: " . $lastlink);
             exit;
     
@@ -293,7 +291,7 @@ include('includes/header.php');
         </div>
 
         <div class="input-group mb-3">
-        <div class="g-recaptcha" data-sitekey="6LcjqxUqAAAAAAfBV02bn0V2KVfuxWv6-JTbUYZ5"></div>
+        <div class="g-recaptcha" data-sitekey="6Le6jL0UAAAAAGd8kRl9RSkMl82ERek090TOODEG"></div>
         </div>
 
         <div class="row">

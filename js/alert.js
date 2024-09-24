@@ -42,7 +42,12 @@ function cikis() {
       $.ajax({
         url: "logout.php",
         success: function () {
-          window.location.href = "/";
+          var currentUrl = window.location.pathname;  // Mevcut URL'yi alır
+          var dosyaAdi = currentUrl.substring(currentUrl.lastIndexOf('/') + 1);  // Dosya adını alır
+
+          // Yeni URL'yi oluştur ve dosya adını ekle
+          var newUrl = "/" + dosyaAdi;  // Ana dizine dosya adını ekler
+          window.location.href = newUrl;  // Yeni URL'ye yönlendir
         }
       });
     }

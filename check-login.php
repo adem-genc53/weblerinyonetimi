@@ -145,7 +145,7 @@ class BeniHatirla {
             $count_stmt->execute();
             $total_logins = $count_stmt->fetchColumn();
 
-            // Eğer toplam giriş sayısı 10'dan büyükse eski kayıtları sil
+        // Eğer toplam giriş sayısı 10'dan büyükse eski kayıtları sil
         if ($total_logins > 10) {
             // Eski giriş kayıtlarını silmek için SQL sorgusu
             $delete_sql = "DELETE FROM user_logins WHERE user_id = :user_id AND id NOT IN (

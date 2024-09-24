@@ -672,11 +672,12 @@ $(document).ready(function() {
                         <tbody>
                             <tr>
                                 <td colspan="5">
-                                    Web dizinleri listelerken sunucunun sistem dizinleri/dosyalar dahil olmasını istemediğiniz dizin/dosya adlarını seciniz. Burada seçeceğiniz dizin/dosya adları listede gözükmeyecektir.
+                                    Web dizinleri listelerken sunucunun sistem dizinleri/dosyaları dahil olmasını istemediğiniz dizin/dosya adlarını seciniz. Burada seçeceğiniz dizin/dosya adları listede gözükmeyecektir.
                                 </td>
                             </tr>
                             <tr class="table-light">
                                 <td colspan="5" style="min-width: 200px;">
+                                    <div class="file-container">
                                 <?php 
 
                                     $haric_dizinler_json = $genel_ayarlar['haric_dizinler'];
@@ -694,24 +695,53 @@ $(document).ready(function() {
                                         }
                                     }
                                     foreach($dizin_array AS $dizin){
+                                        $uzanti = (new SplFileInfo(DIZINDIR.$dizin))->getExtension();
                                         if(in_array($dizin, $gizli_dizinler)){
-                                            //echo "<input type='checkbox' name='dizinler[]' value='{$dizin}' checked> {$dizin}\n<br />";
-                                            echo "<span style='width: 500px;text-align: left;font-weight: 500;font-size: 14px;' class='badge text-dark'><input type='checkbox' name='dizinler[]' value='{$dizin}' checked> {$dizin}</span>";
+                                            echo "<div class='file-item'>";
+                                                echo "<input type='checkbox' name='dizinler[]' value='{$dizin}' checked>";
+                                                if(is_dir(DIZINDIR.$dizin)){
+                                                    echo "<i class='fas fa-folder text-warning' style='font-size:24px'></i>";
+                                                }else if($uzanti=='zip'){
+                                                    echo "<i class='fas fa-file-archive' style='font-size:22px'></i>";
+                                                }else if($uzanti=='gz'){
+                                                    echo "<i class='fas fa-file-archive' style='font-size:22px'></i>";
+                                                }else if($uzanti=='rar'){
+                                                    echo "<i class='fas fa-file-archive' style='font-size:22px'></i>";
+                                                }else{
+                                                    echo "<i class='fas fa-file-alt' style='font-size:22px'></i>";
+                                                }
+                                                echo "<span>{$dizin}</span>";
+                                            echo "</div>";
+                                            //echo "<span style='width: 500px;text-align: left;font-weight: 500;font-size: 14px;' class='badge text-dark'><input type='checkbox' name='dizinler[]' value='{$dizin}' checked> {$dizin}</span>";
                                         }else{
-                                            //echo "<input type='checkbox' name='dizinler[]' value='{$dizin}'> {$dizin}\n<br />";
-                                            //echo "<span style='width: 500px;text-align: left;font-weight: 400;font-size: 14px;' class='badge text-dark'><input type='checkbox' name='dizinler[]' value='{$dizin}'> {$dizin}</span>";
+                                            ////echo "<span style='width: 500px;text-align: left;font-weight: 400;font-size: 14px;' class='badge text-dark'><input type='checkbox' name='dizinler[]' value='{$dizin}'> {$dizin}</span>";
                                         }
                                     }
                                     foreach($dizin_array AS $dizin){
+                                        $uzanti = (new SplFileInfo(DIZINDIR.$dizin))->getExtension();
                                         if(in_array($dizin, $gizli_dizinler)){
-                                            //echo "<input type='checkbox' name='dizinler[]' value='{$dizin}' checked> {$dizin}\n<br />";
-                                            //echo "<span style='width: 500px;text-align: left;font-weight: 500;font-size: 14px;' class='badge text-dark'><input type='checkbox' name='dizinler[]' value='{$dizin}' checked> {$dizin}</span>";
+                                            ////echo "<span style='width: 500px;text-align: left;font-weight: 500;font-size: 14px;' class='badge text-dark'><input type='checkbox' name='dizinler[]' value='{$dizin}' checked> {$dizin}</span>";
                                         }else{
-                                            //echo "<input type='checkbox' name='dizinler[]' value='{$dizin}'> {$dizin}\n<br />";
-                                            echo "<span style='width: 500px;text-align: left;font-weight: 400;font-size: 14px;' class='badge text-dark'><input type='checkbox' name='dizinler[]' value='{$dizin}'> {$dizin}</span>";
+                                            echo "<div class='file-item'>";
+                                                echo "<input type='checkbox' name='dizinler[]' value='{$dizin}'>";
+                                                if(is_dir(DIZINDIR.$dizin)){
+                                                    echo "<i class='fas fa-folder text-warning' style='font-size:24px'></i>";
+                                                }else if($uzanti=='zip'){
+                                                    echo "<i class='far fa-file-archive' style='font-size:22px'></i>";
+                                                }else if($uzanti=='gz'){
+                                                    echo "<i class='far fa-file-archive' style='font-size:22px'></i>";
+                                                }else if($uzanti=='rar'){
+                                                    echo "<i class='far fa-file-archive' style='font-size:22px'></i>";
+                                                }else{
+                                                    echo "<i class='far fa-file-alt' style='font-size:22px'></i>";
+                                                }
+                                                echo "<span>{$dizin}</span>";
+                                            echo "</div>";
+                                            //echo "<span style='width: 500px;text-align: left;font-weight: 400;font-size: 14px;' class='badge text-dark'><input type='checkbox' name='dizinler[]' value='{$dizin}'> {$dizin}</span>";
                                         }
                                     }
                                 ?>
+                                </div>
                                 </td>
                             </tr>
                         </tbody>
@@ -733,6 +763,36 @@ $(document).ready(function() {
     </div><!-- / <div class="container-fluid"> -->
     </section><!-- / <section class="content"> -->
     <!-- Gövde İçerik Sonu -->
+
+    <style>
+        .file-item {
+            display: flex;
+            align-items: center;
+            width: 300px; /* Kutu genişliği 400px */
+            height: 30px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+            padding: 10px;
+            margin: 1px; /* Kutular arasında boşluk */
+        }
+        .file-item i {
+            margin-right: 10px;
+        }
+        .file-item input[type="checkbox"] {
+            margin-right: 15px;
+        }
+        .file-item label {
+            margin-bottom: 0;
+        }
+        /* Flex container ile kutuları sar */
+        .file-container {
+            display: flex;
+            flex-wrap: wrap; /* Kutuların satır dolduğunda alta geçmesini sağlar */
+            gap: 5px; /* Kutular arasındaki boşluk */
+        }
+    </style>
 
     <!-- Gövde İçerik Başlangıcı -->
     <section class="content">
