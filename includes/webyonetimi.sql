@@ -177,6 +177,7 @@ CREATE TABLE IF NOT EXISTS `zamanlanmisgorev` (
   `tablolar` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `tablo_guncelmi_denetle` int NOT NULL DEFAULT '0',
   `secilen_yedekleme` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `secilen_web_sitenin_alt_dizini` varchar(250) COLLATE utf8mb4_general_ci DEFAULT NULL,
   `ozel_onek` int NOT NULL DEFAULT '0',
   `isleniyor` int NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
@@ -186,7 +187,7 @@ CREATE TABLE IF NOT EXISTS `zamanlanmisgorev` (
 -- ------------------------------------------------------
 -- Tablonun veri dökümü `zamanlanmisgorev`
 -- ------------------------------------------------------
-INSERT INTO `zamanlanmisgorev` VALUES(1, 'deneme', 'test_gorev.php', 1718799060, '-1', '-1', '-1', '-1/2', 'Pasif', 'Aktif', 3, 0, 0, NULL, -1, -1, NULL, -1, -1, -1, -1, -1, -1, NULL, 0, NULL, 0, 0);
+INSERT INTO `zamanlanmisgorev` VALUES(1, 'deneme', 'test_gorev.php', 1718799060, '-1', '-1', '-1', '-1/2', 'Pasif', 'Aktif', 3, 0, 0, NULL, -1, -1, NULL, -1, -1, -1, -1, -1, -1, NULL, 0, NULL, NULL, 0, 0);
 
 
 -- ------------------------------------------------------

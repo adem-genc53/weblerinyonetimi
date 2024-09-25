@@ -63,6 +63,7 @@ include("cron_zamanlayici.php");
     }
     $duzeltilecek_id                = isset($_POST['duzelt_id']) ? $_POST['duzelt_id'] : null;
     $ozel_onek                      = 0;
+    $secilen_web_sitenin_alt_dizini = !empty($_POST['secilen_web_sitenin_alt_dizini']) ? $_POST['secilen_web_sitenin_alt_dizini'] : null;
 
     ###########################################################################################################################
     if(isset($_POST['gorev_nedir']) && $_POST['gorev_nedir'] == 1)
@@ -164,6 +165,7 @@ include("cron_zamanlayici.php");
         tablolar,
         tablo_guncelmi_denetle,
         secilen_yedekleme,
+        secilen_web_sitenin_alt_dizini,
         ozel_onek)
             VALUES (
         :gorev_adi, 
@@ -191,6 +193,7 @@ include("cron_zamanlayici.php");
         :tablolar,
         :tablo_guncelmi_denetle,
         :secilen_yedekleme,
+        :secilen_web_sitenin_alt_dizini,
         :ozel_onek)");
 
             $ftvtk->bindValue(':gorev_adi', $gorev_adi, PDO::PARAM_STR);
@@ -217,7 +220,8 @@ include("cron_zamanlayici.php");
             $ftvtk->bindValue(':elle', $elle, PDO::PARAM_INT);
             $ftvtk->bindValue(':tablolar', $tablolar, PDO::PARAM_STR);
             $ftvtk->bindValue(':tablo_guncelmi_denetle', $tablo_guncelmi_denetle, PDO::PARAM_INT);
-            $ftvtk->bindValue(':secilen_yedekleme', $secilen_yedekleme, PDO::PARAM_INT);
+            $ftvtk->bindValue(':secilen_yedekleme', $secilen_yedekleme, PDO::PARAM_STR);
+            $ftvtk->bindValue(':secilen_web_sitenin_alt_dizini', $secilen_web_sitenin_alt_dizini, PDO::PARAM_STR);
             $ftvtk->bindValue(':ozel_onek', $ozel_onek, PDO::PARAM_INT);
             $ftvtk->execute();
 
@@ -265,6 +269,7 @@ include("cron_zamanlayici.php");
         tablolar                        = :tablolar,
         tablo_guncelmi_denetle          = :tablo_guncelmi_denetle,
         secilen_yedekleme               = :secilen_yedekleme,
+        secilen_web_sitenin_alt_dizini  = :secilen_web_sitenin_alt_dizini,
         ozel_onek                       = :ozel_onek
         WHERE
         id                              = :id");
@@ -293,7 +298,8 @@ include("cron_zamanlayici.php");
         $ftvtk->bindValue(':elle', $elle, PDO::PARAM_INT);
         $ftvtk->bindValue(':tablolar', $tablolar, PDO::PARAM_STR);
         $ftvtk->bindValue(':tablo_guncelmi_denetle', $tablo_guncelmi_denetle, PDO::PARAM_INT);
-        $ftvtk->bindValue(':secilen_yedekleme', $secilen_yedekleme, PDO::PARAM_INT);
+        $ftvtk->bindValue(':secilen_yedekleme', $secilen_yedekleme, PDO::PARAM_STR);
+        $ftvtk->bindValue(':secilen_web_sitenin_alt_dizini', $secilen_web_sitenin_alt_dizini, PDO::PARAM_STR);
         $ftvtk->bindValue(':ozel_onek', $ozel_onek, PDO::PARAM_INT);
         $ftvtk->bindValue(':id', $duzeltilecek_id, PDO::PARAM_INT);
         $ftvtk->execute();
@@ -890,7 +896,7 @@ if(isset($_GET['edit'])){
             <option value="0">&nbsp;</option>
 <?php 
     foreach($web_dizinler AS $dizinler){
-        if($editrow['secilen_yedekleme_oneki'] == $dizinler){
+        if($editrow['secilen_yedekleme'] == $dizinler){
             echo "<option value='{$dizinler}' selected>{$dizinler}</option>\n";
         }else{
             echo "<option value='{$dizinler}'>{$dizinler}</option>\n";
@@ -900,6 +906,16 @@ if(isset($_GET['edit'])){
         </select>
         </td>
         <td colspan="2"><span style="font-weight: bold; color: red;">Göreve Eklediğiniz Web Dizinin doğru seçtiğinizden emin olunuz</span></td>
+    </tr>
+
+    <tr>
+        <td colspan="2">Seçilen Sitenin Tümü Yerine Önemli Bir Klasörünü Yedekleyin</td>
+        <td colspan="4" style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;">
+            <select class="form-control" name="secilen_web_sitenin_alt_dizini" id="secilen_web_sitenin_alt_dizini" size="1" style="width:350px;">
+                <option value="">İsteğe bağlı alt-dizin seçiniz</option>
+            </select>
+        </td>
+        <td colspan="2">Eğer alt-dizin <b>seçilmez ise</b> sitenin tümü yedeklenecek. Yedekleme alanını verilmi kullanmak için önemli bir klasörünü yedekleyin.</td>
     </tr>
 
     <tr>
@@ -1452,6 +1468,16 @@ if(isset($_GET['edit'])){
     </tr>
 
     <tr>
+        <td colspan="2">Seçilen Sitenin Tümü Yerine Önemli Bir Klasörünü Yedekleyin</td>
+        <td colspan="4" style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;">
+            <select class="form-control" name="secilen_web_sitenin_alt_dizini" id="secilen_web_sitenin_alt_dizini" size="1" style="width:350px;">
+                <option value="">İsteğe bağlı alt-dizin seçiniz</option>
+            </select>
+        </td>
+        <td colspan="2">Eğer alt-dizin <b>seçilmez ise</b> sitenin tümü yedeklenecek. Yedekleme alanını verilmi kullanmak için önemli bir klasörünü yedekleyin.</td>
+    </tr>
+
+    <tr>
         <td>Uzağa Yedekle</td>
         <td style="text-align:right;">FTP</td>
         <td><input type="checkbox" name="dizin_ftp_yedekle" id="dizin_ftp_yedekle" value="1" /></td>
@@ -1781,6 +1807,28 @@ option:disabled {
    padding: 5px;
    }
 </style>
+
+<script>
+    $(document).ready(function() {
+        $('#dizin_secilen_yedekleme').on('change', function() {
+            var mainDir = $(this).val(); // Seçilen ana dizini al
+            var secilen_alt_dizin = '<?php if(isset($editrow['secilen_web_sitenin_alt_dizini'])){ echo $editrow['secilen_web_sitenin_alt_dizini']; }?>';
+            if (mainDir !== "") {
+                $.ajax({
+                    url: 'get_subdirectories.php', // Alt dizinleri döndüren PHP dosyası
+                    type: 'POST',
+                    data: { mainDir: mainDir, secilen_alt_dizin: secilen_alt_dizin },
+                    success: function(response) {
+                        // Alt dizinler select elementine dolduruluyor
+                        $('#secilen_web_sitenin_alt_dizini').html(response);
+                    }
+                });
+            } else {
+                $('#secilen_web_sitenin_alt_dizini').html('<option value="">İsteğe bağlı alt-dizin seçiniz</option>');
+            }
+        });
+    });
+</script>
 
 <script type='text/javascript'>
     $(document).ready(function(){

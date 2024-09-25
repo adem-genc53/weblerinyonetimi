@@ -1,10 +1,13 @@
 <?php 
 // Bismillahirrahmanirrahim
+header('Connection: Keep-Alive');
+header('Keep-Alive: timeout=5, max=100');
 require_once __DIR__ . '/includes/connect.php';
 require_once __DIR__ . '/includes/turkcegunler.php';
 require_once(__DIR__ . '/hash.php');
 $hash = new Hash;
 
+ob_start();
 ini_set('memory_limit', '-1');
 ignore_user_abort(true);
 set_time_limit(0);
@@ -121,25 +124,26 @@ $yedeklendi_mi = false;
     $elle                           = $row['elle'];
     $veritabani_id                  = $row['secilen_yedekleme'];
     $secilen_yedekleme              = $row['secilen_yedekleme'];
+    $secilen_alt_dizin              = $row['secilen_web_sitenin_alt_dizini'];
     $ozel_onek                      = $row['ozel_onek'];
     $grup                           = 1;
     $yedekleyen                     = 1;
 #########################################################################################################################
-if($yedekleme_gorevi == '1' && $gz == '0' && $combine == '1'){ // veritabanı yedekleme
+if(!empty($yedekleme_gorevi) && $yedekleme_gorevi == '1' && $gz == '0' && $combine == '1'){ // veritabanı yedekleme
     $silinecek_dosya_tipi = "2"; // .sql uzantılı dosya
-} elseif($yedekleme_gorevi == '1' && $gz == '1' && $combine == '1'){ // veritabanı yedekleme
+} elseif(!empty($yedekleme_gorevi) && $yedekleme_gorevi == '1' && $gz == '1' && $combine == '1'){ // veritabanı yedekleme
     $silinecek_dosya_tipi = "1"; // .gz uzantılı dosya
-} elseif($yedekleme_gorevi == '1' && $combine == '2'){ // veritabanı yedekleme
+} elseif(!empty($yedekleme_gorevi) && $yedekleme_gorevi == '1' && $combine == '2'){ // veritabanı yedekleme
     $silinecek_dosya_tipi = "4"; // klasör dosyası
-} elseif($yedekleme_gorevi == '1' && $gz == '1' && $combine == '3' && $elle == '2'){ // veritabanı yedekleme
+} elseif(!empty($yedekleme_gorevi) && $yedekleme_gorevi == '1' && $gz == '1' && $combine == '3' && $elle == '2'){ // veritabanı yedekleme
     $silinecek_dosya_tipi = "4"; // klasör dosyası
-} elseif($yedekleme_gorevi == '1' && $gz == '0' && $combine == '3' && $elle == '1'){ // veritabanı yedekleme
+} elseif(!empty($yedekleme_gorevi) && $yedekleme_gorevi == '1' && $gz == '0' && $combine == '3' && $elle == '1'){ // veritabanı yedekleme
     $silinecek_dosya_tipi = "2"; // .sql uzantılı dosya
-} elseif($yedekleme_gorevi == '1' && $gz == '1' && $combine == '3' && $elle == '1'){ // veritabanı yedekleme
+} elseif(!empty($yedekleme_gorevi) && $yedekleme_gorevi == '1' && $gz == '1' && $combine == '3' && $elle == '1'){ // veritabanı yedekleme
     $silinecek_dosya_tipi = "1"; // .gz uzantılı dosya
-} elseif ($yedekleme_gorevi == '2'){ // dizin yedekleme
+} elseif (!empty($yedekleme_gorevi) && $yedekleme_gorevi == '2'){ // dizin yedekleme
     $silinecek_dosya_tipi = "3";
-} elseif ($yedekleme_gorevi == '3'){ // diğer özel dosyaları çalıştırma
+} elseif (!empty($yedekleme_gorevi) && $yedekleme_gorevi == '3'){ // diğer özel dosyaları çalıştırma
     $silinecek_dosya_tipi = "";
 }
 /*
@@ -325,7 +329,11 @@ if(!empty($veritabani_backup_yedekleme_sonucu) && in_array('Veritabanı Başarı
 #########################################################################################################################
 // YEDEKLEME GÖREVİ 2 İSE WEB DİZİNLERİ YEDEKLEMEDİR. SEÇİLEN YEDEKLEME YEDEKLENECEK WEB DİZİN ADI İÇERDİĞİ İÇİN METİN OLMALIDIR
 if($row['yedekleme_gorevi'] == '2' && is_string($row['secilen_yedekleme']) && !is_null($row['secilen_yedekleme']) ){
-
+    if($secilen_alt_dizin){
+        $secilen_yedekleme = $secilen_alt_dizin;
+    }else{
+        $secilen_yedekleme = $secilen_yedekleme;
+    }
     $source = DIZINDIR . $secilen_yedekleme;
     $destination = ZIPDIR . $secilen_yedekleme_oneki . "-" . $dosya_tarihi . '.zip';
     $comment = $secilen_yedekleme;
@@ -886,4 +894,6 @@ $ozel_dosya_calisma_sonucu);
     // İsterseniz, kullanıcıya hata mesajı gösterin veya yönlendirin
     // echo "Bir hata oluştu: " . $e->getMessage();
 }
+ob_flush();
+flush();
 ?>

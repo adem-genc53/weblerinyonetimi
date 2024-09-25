@@ -1,5 +1,6 @@
 <?php 
-require_once('./includes/connect.php');
+// Bismillahirrahmanirrahim
+require_once __DIR__ . '/includes/connect.php';
 
 class SecureLogin {
     private $errors = [];
@@ -291,7 +292,7 @@ include('includes/header.php');
         </div>
 
         <div class="input-group mb-3">
-        <div class="g-recaptcha" data-sitekey="6Le6jL0UAAAAAGd8kRl9RSkMl82ERek090TOODEG"></div>
+        <div class="g-recaptcha" data-sitekey="6LcjqxUqAAAAAAfBV02bn0V2KVfuxWv6-JTbUYZ5"></div>
         </div>
 
         <div class="row">
