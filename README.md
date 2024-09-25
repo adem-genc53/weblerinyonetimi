@@ -1,5 +1,13 @@
 ## Bu Script nedi?<br />
-Hosting içinde 1 veya daha fazla web sitelerin `veritabanı`, `web site dizini` veya `web sitenin önemli bir klasörü` otomatik olarak yedekleyerek `FTP Sunucusuna`, `Google Drive Api` istenen günde, istenen saatte ve istenen dakikada yedekleme yapar.<br />
+Hosting içinde 1 veya daha fazla web sitelerin `veritabanı`, `web site dizini` veya `web sitenin önemli bir klasörü` otomatik olarak yedekleyerek uzak `FTP Sunucusuna` ve veya `Google Drive Api Sunucusuna` istenen günde, istenen saatte ve istenen dakikada yedekleme yapar.<br />
+Uzak sunuculara elle dosya ve dizin yedekleme yapılabilir.<br />
+Uzak sunuculardan yerelin istenilere yere yedekleri indirilebilir.<br />
+Zip formatında sıkıştırılan web dizini veya web sitenin önemli klasörünü istenilen yerel alan zip çıkarılabilir.<br />
+Yedeklenen veritabanıları geri yükleyebilir<br />
+Elle veritabanı tümü veya seçilecek tabloları yedekleyebilir.<br />
+Elle web site dizinlerini zip formatında sıkıştırabilir.<br />
+Özel görevler ekleyebilirsiniz.<br />
+Ve daha fazlası.<br />
 Herhangi bir neden veya nedenlerden dolayı zarar gören web siteninizin yedekleme zamanına kısa sürede geri dönmenizi sağlar.<br />
 
 ## Nasıl kurulur<br />
