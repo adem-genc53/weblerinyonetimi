@@ -1,13 +1,13 @@
 <?php 
 // Bismillahirrahmanirrahim
-header('Connection: Keep-Alive');
-header('Keep-Alive: timeout=5, max=100');
+//header('Connection: Keep-Alive');
+//header('Keep-Alive: timeout=5, max=100');
 require_once __DIR__ . '/includes/connect.php';
 require_once __DIR__ . '/includes/turkcegunler.php';
 require_once(__DIR__ . '/hash.php');
 $hash = new Hash;
 
-ob_start();
+//ob_start();
 ini_set('memory_limit', '-1');
 ignore_user_abort(true);
 set_time_limit(0);
@@ -364,7 +364,7 @@ if($row['yedekleme_gorevi'] == '2' && is_string($row['secilen_yedekleme']) && !i
     if(!empty($zipyap_sonucu['dosya_adi']) && strlen($zipyap_sonucu['dosya_adi'])>10){
 
         $zip_ftp_dosya_adi_yolu = $zipyap_sonucu['dosya_adi'];
-        $dizin_zip_ftp_yedekleme_sonucu = uzakFTPsunucuyaYedekle($ftp_server, $ftp_username, $ftp_password, $ftp_path, $zip_ftp_dosya_adi_yolu, $yedekleme_gorevi, $uzak_sunucu_ici_dizin_adi, $ftp_sunucu_korunacak_yedek, $secilen_yedekleme_oneki);
+        $dizin_zip_ftp_yedekleme_sonucu = uzakFTPsunucuyaYedekle($genel_ayarlar, $ftp_server, $ftp_username, $ftp_password, $ftp_path, $zip_ftp_dosya_adi_yolu, $yedekleme_gorevi, $uzak_sunucu_ici_dizin_adi, $ftp_sunucu_korunacak_yedek, $secilen_yedekleme_oneki);
         // UZAK FTP YEDEKLEME BAŞARILI OLURSA KENDİ DOSYA İÇİNDE ESKİ FTP YEDEKLERİ SİLECEK
         if(!empty($dizin_zip_ftp_yedekleme_sonucu) && in_array('FTP Sunucusuna Başarıyla Yüklendi',$dizin_zip_ftp_yedekleme_sonucu)){
 
@@ -894,6 +894,6 @@ $ozel_dosya_calisma_sonucu);
     // İsterseniz, kullanıcıya hata mesajı gösterin veya yönlendirin
     // echo "Bir hata oluştu: " . $e->getMessage();
 }
-ob_flush();
-flush();
+//ob_flush();
+//flush();
 ?>
