@@ -700,15 +700,15 @@ $(document).ready(function() {
                                             echo "<div class='file-item'>";
                                                 echo "<input type='checkbox' name='dizinler[]' value='{$dizin}' checked>";
                                                 if(is_dir(DIZINDIR.$dizin)){
-                                                    echo "<i class='fas fa-folder text-warning' style='font-size:24px'></i>";
+                                                    echo "<i class='fas fa-folder' style='font-size:24px;color:orange;'></i>";
                                                 }else if($uzanti=='zip'){
-                                                    echo "<i class='far fa-file-archive' style='font-size:22px'></i>";
+                                                    echo "<i class='fas fa-file-archive' style='font-size:22px;color: #7d6498;'></i>";
                                                 }else if($uzanti=='gz'){
-                                                    echo "<i class='far fa-file-archive' style='font-size:22px'></i>";
+                                                    echo "<i class='fas fa-file-archive' style='font-size:22px;color: #7d6498;'></i>";
                                                 }else if($uzanti=='rar'){
-                                                    echo "<i class='far fa-file-archive' style='font-size:22px'></i>";
+                                                    echo "<i class='fas fa-file-archive' style='font-size:22px;color: #7d6498;'></i>";
                                                 }else{
-                                                    echo "<i class='far fa-file-alt' style='font-size:22px'></i>";
+                                                    echo "<i class='fas fa-file-alt' style='font-size:22px;color: #7d6498;'></i>";
                                                 }
                                                 echo "<span>{$dizin}</span>";
                                             echo "</div>";
@@ -725,15 +725,15 @@ $(document).ready(function() {
                                             echo "<div class='file-item'>";
                                                 echo "<input type='checkbox' name='dizinler[]' value='{$dizin}'>";
                                                 if(is_dir(DIZINDIR.$dizin)){
-                                                    echo "<i class='fas fa-folder text-warning' style='font-size:24px'></i>";
+                                                    echo "<i class='fas fa-folder' style='font-size:24px;color:orange;'></i>";
                                                 }else if($uzanti=='zip'){
-                                                    echo "<i class='far fa-file-archive' style='font-size:22px'></i>";
+                                                    echo "<i class='fas fa-file-archive' style='font-size:22px;color: #7d6498;'></i>";
                                                 }else if($uzanti=='gz'){
-                                                    echo "<i class='far fa-file-archive' style='font-size:22px'></i>";
+                                                    echo "<i class='fas fa-file-archive' style='font-size:22px;color: #7d6498;'></i>";
                                                 }else if($uzanti=='rar'){
-                                                    echo "<i class='far fa-file-archive' style='font-size:22px'></i>";
+                                                    echo "<i class='fas fa-file-archive' style='font-size:22px;color: #7d6498;'></i>";
                                                 }else{
-                                                    echo "<i class='far fa-file-alt' style='font-size:22px'></i>";
+                                                    echo "<i class='fas fa-file-alt' style='font-size:22px;color: #7d6498;'></i>";
                                                 }
                                                 echo "<span>{$dizin}</span>";
                                             echo "</div>";

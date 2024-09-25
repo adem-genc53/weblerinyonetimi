@@ -1,12 +1,16 @@
 <?php 
 // Bismillahirrahmanirrahim
+if(isset($_POST['ftpye_yukle']) && $_POST['ftpye_yukle'] == '1'){
 header('Connection: Keep-Alive');
 header('Keep-Alive: timeout=5, max=100');
+}
 require_once __DIR__ . '/includes/connect.php';
 require_once(__DIR__ . '/hash.php');
 $hash = new Hash;
 
+if(isset($_POST['ftpye_yukle']) && $_POST['ftpye_yukle'] == '1'){
 ob_start();
+}
 ini_set('memory_limit', '-1');
 ignore_user_abort(true);
 set_time_limit(3600); // 7200 saniye 120 dakikadır, 3600 1 saat
@@ -110,7 +114,7 @@ if (!function_exists('uzakFTPsunucuyaYedekle')) {
                     $ftp_cikti_mesaji[] = "Dosya yüklenemedi: $dosya_adi_yolu";
                     return false;
                 }
-                $ftp_cikti_mesaji[] = "Dosya yüklendi: $dosya_adi_yolu -> $remote_path";
+                //$ftp_cikti_mesaji[] = "Dosya yüklendi: $dosya_adi_yolu -> $remote_path";
             }
 
             return true;
@@ -268,8 +272,10 @@ try {
 } catch (Exception $e) {
     echo "Hata: " . $e->getMessage();
 }
-}
 
 ob_flush();
 flush();
+
+}
+
 ?>
