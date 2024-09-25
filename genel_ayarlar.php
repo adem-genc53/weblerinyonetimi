@@ -702,13 +702,13 @@ $(document).ready(function() {
                                                 if(is_dir(DIZINDIR.$dizin)){
                                                     echo "<i class='fas fa-folder text-warning' style='font-size:24px'></i>";
                                                 }else if($uzanti=='zip'){
-                                                    echo "<i class='fas fa-file-archive' style='font-size:22px'></i>";
+                                                    echo "<i class='far fa-file-archive' style='font-size:22px'></i>";
                                                 }else if($uzanti=='gz'){
-                                                    echo "<i class='fas fa-file-archive' style='font-size:22px'></i>";
+                                                    echo "<i class='far fa-file-archive' style='font-size:22px'></i>";
                                                 }else if($uzanti=='rar'){
-                                                    echo "<i class='fas fa-file-archive' style='font-size:22px'></i>";
+                                                    echo "<i class='far fa-file-archive' style='font-size:22px'></i>";
                                                 }else{
-                                                    echo "<i class='fas fa-file-alt' style='font-size:22px'></i>";
+                                                    echo "<i class='far fa-file-alt' style='font-size:22px'></i>";
                                                 }
                                                 echo "<span>{$dizin}</span>";
                                             echo "</div>";
