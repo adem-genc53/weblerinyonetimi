@@ -1,3 +1,7 @@
+## Bu Script nedi?<br />
+Hosting içinde 1 veya daha fazla web sitelerin `veritabanı`, `web site dizini` veya `web sitenin önemli bir klasörü` otomatik olarak yedekleyerek `FTP Sunucusuna`, `Google Drive Api` istenen günde, istenen saatte ve istenen dakikada yedekleme yapar.<br />
+Herhangi bir neden veya nedenlerden dolayı zarar gören web siteninizin yedekleme zamanına kısa sürede geri dönmenizi sağlar.<br />
+
 ## Nasıl kurulur<br />
 Tüm dosyaları bunun için oluşturacağınız domain klasörünün içine kopyalayın<br />
 Bir veri tabanı oluşturun<br />
