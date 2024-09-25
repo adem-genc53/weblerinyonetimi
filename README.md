@@ -7,7 +7,8 @@ Hosting içinde 1 veya daha fazla web sitelerin `veritabanı`, `web site dizini`
 * Elle veritabanı tümü veya seçilecek tabloları yedekleyebilir.<br />
 * Elle web site dizinlerini zip formatında sıkıştırabilir.<br />
 * Özel görevler ekleyebilirsiniz.<br />
-* Ve daha fazlası.
+* Ve daha fazlası.<br />
+
 Herhangi bir neden veya nedenlerden dolayı zarar gören web siteninizin yedekleme zamanına kısa sürede geri dönmenizi sağlar.<br />
 
 ## Nasıl kurulur<br />
@@ -15,21 +16,21 @@ Tüm dosyaları bunun için oluşturacağınız domain klasörünün içine kopy
 Bir veri tabanı oluşturun<br />
 `includes` klasörün içindeki `webyonetimi.sql` veri tabanı yedeğini oluşturduğunuz veri tabanına PhpMyAdmin kullanarak yükleyin<br />
 `includes` klasörün içindeki `connect.php` dosya text editör ile açarak aşağıdaki alana eklediğiniz veri tabanı bilgilerini girim<br />
-
+```php
     defined('DB_USER')      or define('DB_USER', 'root');
     defined('DB_PASSWORD')  or define('DB_PASSWORD', '');
     defined('DB_HOST')      or define('DB_HOST', 'localhost');
     defined('DB_NAME')      or define('DB_NAME', 'webyonetimi');
     defined('PORT')         or define('PORT', '3306');
     defined('CHARSET')      or define('CHARSET', 'utf8mb4');
-
+```
 Aşağıdaki alanlar açıklamaları okuyup kendinize göre değiştirin<br />
-
+```php
     defined('BACKUPDIR')        or define('BACKUPDIR', '/home/user/DATABASEBACKUP');
     defined("DIZINDIR")         or define("DIZINDIR", "/home/user/");
     defined("ZIPDIR")           or define("ZIPDIR", "/home/user/WEBZIPLER/");
     defined("KOKYOLU")          or define("KOKYOLU", "/home/user/");
-
+```
 Ben robot değilim etkinleştirmek için domain adınıza keyleri oluşturmanız gerekiyor<br />
 Buradan https://www.google.com/recaptcha/ keyleri alın<br />
 `login.php` içinde `data-sitekey="xxxxxxxxxxxxxxxxxxxxx"` alana SİTE ANAHTARI girin<br />
