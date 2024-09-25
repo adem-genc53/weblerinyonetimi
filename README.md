@@ -7,7 +7,7 @@ Hosting içinde 1 veya daha fazla web sitelerin `veritabanı`, `web site dizini`
 * Elle veritabanı tümü veya seçilecek tabloları yedekleyebilir.<br />
 * Elle web site dizinlerini zip formatında sıkıştırabilir.<br />
 * Özel görevler ekleyebilirsiniz.<br />
-* Ve daha fazlası.<br />
+* Ve daha fazlası.
 Herhangi bir neden veya nedenlerden dolayı zarar gören web siteninizin yedekleme zamanına kısa sürede geri dönmenizi sağlar.<br />
 
 ## Nasıl kurulur<br />
