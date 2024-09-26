@@ -66,5 +66,5 @@ Giriş için<br />
 Kullanıcı Adı: `admin@gmail.com`<br />
 Şifre: `123456`<br />
 
-## Klasör yükleme ve İndirme<br />
-FTP ve Google Drive Api sunuculara Tek dosyaları yedekleyebileceğiniz gibi İç içe geçmiş (alt-klasör dahil) dizini sorunsuz yedekleyebilirsiniz. <br />
+## Tek Dosya & Klasör yükleme ve İndirme<br />
+FTP ve Google Drive Api sunuculara Tek dosyaları yedekleyebileceğiniz gibi İç içe geçmiş (alt-klasör dahil) dizini sorunsuz yedekleyebilirsiniz ve indirebilirsiniz. <br />
