@@ -2,7 +2,7 @@
 
         <!-- Main Footer -->
         <footer class="main-footer" style="border-top: none;">
-            <b>&copy; 2002-<?php echo date("Y"); ?> Tüm Haklar <a target="_blank" href="https://websiteler.yonetimi.com">WEB SİTELER YÖNETİMİ</a>.</b> aittir & kopyalanamaz.
+<!-- /  -->
         </footer>
         </div><!-- jswindow_website_cerceve -->
     </div><!-- ./wrapper -->
