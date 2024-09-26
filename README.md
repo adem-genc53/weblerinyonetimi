@@ -57,7 +57,7 @@ Eklediğiniz görevleri çalışma zamanı geldiğinde otomatikman çalışacağ
 ## Önemli not:<br />
 Görevlerin çalışması için web yönetim sitesine birileri ziyaret etmesi gerekiyor ki görevler yerine getirilsin<br />
 Ancak, eğer ben tam zamanında görevin çalışmasını istiyorum diyorsanız "Hosting cPaneldeki" -> "Cron İşleri" alanında yeni bir cron oluşturup dakikada bir kez seçiniz<br />
-Komut alanına `/usr/local/bin/php /home/user/alan_adiniz.com/gorev.php >/dev/null 2>&1` girip kaydedin.<br />
+Komut alanına `/usr/local/bin/php /home/user/alan_adiniz.com/gorev.php >/dev/null 2>&1` girip kaydedin. (düzenlemeyi unutmayın)<br />
 Bu sayede planladığınız zamanlarda webyönetim siteniz tetiklenecek ve tam zamanında görevler yerine getirilecek<br /><br />
 
 Görevleri "Cron İşleri" için web yönetim web sitenin dizini şifreleyerek web yönetim sitesininin güvenliğini artırmış olursunuz. (tabiki 100% güvenli garantisi hiçbir şeyde olmadığını unutmayın)<br />
