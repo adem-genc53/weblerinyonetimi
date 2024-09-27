@@ -270,14 +270,14 @@ function OK( x, geridizinac ){
 
     if( dizinyolu=="" && geridizinac==undefined) {
         pencere.kapat();
-        jw("b olumsuz").baslik("Klasör Adını Girmediniz").icerik("Zipin açılacağı klasör adını girmediniz<br /><br />Zipin açılacağı klasör adı belirlenmelidir.").kilitle().en(400).boy(100).ac();
+        jw("b olumsuz").baslik("Klasör Adını Girmediniz").icerik("Zipin açılacağı klasör adını girmediniz<br /><br />Zipin açılacağı klasör adı belirlenmelidir.").kilitle().en(450).boy(100).ac();
     } else {
         pencere.kapat();
-        var bekleme = jw("b bekle").baslik("ZIP \'ten Çıkarılıyor...").icerik("<b>" + zipadi.split('/').reverse()[0] + "</b><br /><br />Dosyası çıkarılıyor. Lutfen bekleyin...").en(400).boy(10).kilitle().akilliKapatPasif().ac();
+        var bekleme = jw("b bekle").baslik("ZIP \'ten Çıkarılıyor...").icerik("<b>" + zipadi.split('/').reverse()[0] + "</b><br /><br />Dosyası çıkarılıyor. Lutfen bekleyin...").en(450).boy(10).kilitle().akilliKapatPasif().ac();
         $.post('zipcikar.php', {grup: 1, zipdosya: zipadi, dizinyolu: yol + dizinyolu},
         function (gelen_cevap) {
 		   bekleme.kapat();
-       jw("b olumlu").baslik("ZIP \'ten Çıkarma Sonucu").icerik(gelen_cevap).en(400).boy(10).kilitle().akilliKapatPasif().ac();    
+       jw("b olumlu").baslik("ZIP \'ten Çıkarma Sonucu").icerik(gelen_cevap).en(450).boy(10).kilitle().akilliKapatPasif().ac();    
        });
     }
     } else {
@@ -303,7 +303,7 @@ function confirmDel() {
 
 if (count<1){
   $(function(){
-	   jw("b olumsuz").baslik("Silinecek dosya(lar) seçilmemiş").icerik("Silinecek zipli dosya(lar) seçmediniz!").kilitle().en(400).boy(100).ac();
+	   jw("b olumsuz").baslik("Silinecek dosya(lar) seçilmemiş").icerik("Silinecek zipli dosya(lar) seçmediniz!").kilitle().en(450).boy(100).ac();
   })  
   return false;
   }
@@ -311,14 +311,14 @@ if (count<1){
 if (count>0){
   $(function()
   {
-	   jw('b secim',OK).baslik("Zipli Dosyaları Silmeyi Onayla").icerik("Zipli dosyaları silmek istediğinizden emin misiniz?").en(400).kilitle().ac();
+	   jw('b secim',OK).baslik("Zipli Dosyaları Silmeyi Onayla").icerik("Zipli dosyaları silmek istediğinizden emin misiniz?").en(450).kilitle().ac();
   })
   return false;
 }
 
 function OK(x){
 	    if(x==1){
-	var bekleme = jw("b bekle").baslik("Zipli Dosyalar siliniyor...").en(400).boy(10).kilitle().akilliKapatPasif().ac();
+	var bekleme = jw("b bekle").baslik("Zipli Dosyalar siliniyor...").en(450).boy(10).kilitle().akilliKapatPasif().ac();
     var str = 'grup=ziplidizinsil';
     var t = $('#gvUsers').serialize();
     (t !='')? str += '&'+t :'';    

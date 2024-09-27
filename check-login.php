@@ -183,6 +183,11 @@ class BeniHatirla {
 
 }
 
+##########################################################################################################
+$lastlink = isset($_GET['last']) ? htmlspecialchars($_GET['last']) : $_SERVER['REQUEST_URI'];
+$lastlink = str_replace('/','', $lastlink);
+##########################################################################################################
+
     // Sınıf örneğini oluştur
     $benihatirla = new BeniHatirla($PDOdb);
 
@@ -192,23 +197,25 @@ class BeniHatirla {
         // FONKSİYONU ÇAĞIR VE COOKIE TOKENİN GEÇERLİ OLUP OLMADIĞINI KONTROL EDİYORUZ
         $benihatirla->checkRememberMe();
         //$lastlink = isset($_GET['last']) ? htmlspecialchars($_GET['last']) : '/';
-        //header("Location: " . $lastlink);
-        //exit;
+        header("Location: " . $lastlink);
+        exit;
 
         // COOKIE MEVCUT DEĞİL ANCAK SESSION MEVCUT İSE 
     } elseif (!isset($_COOKIE['beni_hatirla']) && isset($_SESSION['user_is_logged_in']) && $_SESSION['user_is_logged_in'] == true) {
+
         $userId = $_SESSION['user_id'] ?? null;
         // KULLANICININ SESSION OTURUMU OLUŞTUR
         $benihatirla->refreshUserSession($userId);
         //$lastlink = isset($_GET['last']) ? htmlspecialchars($_GET['last']) : '/';
-        //header("Location: " . $lastlink);
-        //exit;
+        header("Location: " . $lastlink);
+        exit;
 
         // COOKIE VE SESSION MEVCUT DEĞİL LOGIN.PHP SAYFASINA YÖNLENDİRİYORUZ
     } elseif (!isset($_COOKIE['beni_hatirla']) && !isset($_SESSION['user_is_logged_in'])) {
 
         $lastlink = isset($_GET['last']) ? htmlspecialchars($_GET['last']) : $_SERVER['REQUEST_URI'];
         header("Location: login.php?last=" . $lastlink);
+        exit;
 
-    }  
+    }
 ?>

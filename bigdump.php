@@ -1845,7 +1845,7 @@ function saveContent() {
 	var folder = $("#selectedAltKlasor").val();
 	  if(!folder) {
 		$(function(){
-			jw("b olumsuz").baslik("Önce Alt-Dizin Seçiniz!").icerik("Birleştirmek istediğiniz bir Alt-Dizin seçmelisiniz").kilitle().en(400).boy(100).ac();
+			jw("b olumsuz").baslik("Önce Alt-Dizin Seçiniz!").icerik("Birleştirmek istediğiniz bir Alt-Dizin seçmelisiniz").kilitle().en(450).boy(100).ac();
 		})
 		return false;
 	}
@@ -1912,7 +1912,7 @@ function OK(x){
 	if(x==1){
 		var yeniadi = document.getElementById('sqlyoludosyadi').value;
 
-		var bekleme = jw("b bekle").baslik("Veritabanı Kaydediliyor...").en(400).boy(10).kilitle().akilliKapatPasif().ac();
+		var bekleme = jw("b bekle").baslik("Veritabanı Kaydediliyor...").en(450).boy(10).kilitle().akilliKapatPasif().ac();
 
 			const xhr = new XMLHttpRequest();
 			xhr.open("POST", "yedek_tablolari_birlestir.php", true);

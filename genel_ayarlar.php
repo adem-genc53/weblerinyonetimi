@@ -1173,6 +1173,60 @@ $(document).ready(function() {
     </section><!-- / <section class="content"> -->
     <!-- Gövde İçerik Sonu -->
 
+    <!-- Gövde İçerik Başlangıcı -->
+    <section class="content">
+    <div class="container-fluid">
+        <div class="row mb-2">
+        <div class="col-sm-12">
+            <div class="card">
+                <div class="card-body p-0">
+
+<?php
+                    $log_file = KOKYOLU . 'error.log'; // error.log dosyasının tam yolu
+                    $error_log = ''; // Log içeriğini tutacak değişken
+
+                    // Log dosyasını açma ve okuma
+                    if (file_exists($log_file) && is_readable($log_file)) {
+                        // Dosya içeriğini al
+                        $log_content = file_get_contents($log_file);
+                        $error_log = htmlspecialchars($log_content); // Güvenli bir şekilde ekrana yazdırmak için
+                    } else {
+                        $error_log = "Log dosyası bulunamadı veya okunamıyor.";
+                    }
+
+                    // "Boş olarak kaydet" butonuna basıldıysa
+                    if (isset($_POST['clear_log'])) {
+                        // Log dosyasını boşalt ve kaydet
+                        file_put_contents($log_file, '');
+                        $error_log = ''; // Sayfada boş bir textarea göstermek için içeriği boşalt
+                        $message = "Hata Log dosyası başarıyla temizlendi.";
+                    } else {
+                        $message = "Hata Log dosyasını aşağıda görebilirsiniz.";
+                    }
+?>
+                    <form method="post">
+                    <table class="table" style="min-width: 1000px;">
+                        <tr class="bg-primary" style="line-height: .40;font-size: 1rem;">
+                            <th style="text-align:center;"><?php echo $message; ?></th>
+                        </tr>
+                        <tr>
+                            <td>
+                                <textarea rows="10" class="form-control" style="width: 100%; max-width: 100%; padding: 10px;" readonly><?php echo $error_log; ?></textarea><br>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:center;"><button type="submit" name="clear_log" class="btn btn-success btn-sm"><span class="glyphicon glyphicon-erase"></span> Boş olarak kaydet </button></td>
+                        </tr>
+                    </table>
+                    </form>
+                </div><!-- / <div class="card-body p-0"> -->
+            </div><!-- / <div class="card"> -->
+        </div><!-- / <div class="col-sm-12"> -->
+        </div><!-- / <div class="row mb-2"> -->
+    </div><!-- / <div class="container-fluid"> -->
+    </section><!-- / <section class="content"> -->
+    <!-- Gövde İçerik Sonu -->
+
 
 <br />
         </div><!-- / <div class="content-wrapper"> -->

@@ -15,8 +15,8 @@ if (isset($_POST['mainDir'])) {
         function getAllDirectories($dir, $relativePath = '', $secilen_alt_dizin = '') {
             $subDirs = array_filter(glob($dir . '/*'), 'is_dir');
             $output = '';
-            foreach ($subDirs as $secilen_web_sitenin_alt_dizini) {
-                $dirName = basename($secilen_web_sitenin_alt_dizini);
+            foreach ($subDirs as $subDir) {
+                $dirName = basename($subDir);
                 // Tam dizin yolunu oluştur (root dizin hariç)
                 $currentPath = trim($relativePath . '/' . $dirName, '/');
                 
@@ -27,7 +27,7 @@ if (isset($_POST['mainDir'])) {
                 $output .= '<option value="' . $currentPath . '" ' . $isSelected . '>' . $currentPath . '</option>';
                 
                 // Alt dizinlere devam et (recursive)
-                $output .= getAllDirectories($secilen_web_sitenin_alt_dizini, $currentPath, $secilen_alt_dizin);
+                $output .= getAllDirectories($subDir, $currentPath, $secilen_alt_dizin);
             }
             return $output;
         }
@@ -45,4 +45,5 @@ if (isset($_POST['mainDir'])) {
         echo '<option value="">Geçersiz dizin</option>';
     }
 }
+
 ?>

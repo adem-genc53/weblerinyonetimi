@@ -1,11 +1,15 @@
 <?php 
 // Bismillahirrahmanirrahim
+if(isset($_POST['googla_yukle']) && $_POST['googla_yukle'] == '1'){
 header('Connection: Keep-Alive');
 header('Keep-Alive: timeout=5, max=100');
+}
 require_once __DIR__ . '/includes/connect.php';
 include __DIR__ . '/google_drive_setup.php';
 
+if(isset($_POST['googla_yukle']) && $_POST['googla_yukle'] == '1'){
 ob_start();
+}
 ini_set('memory_limit', '-1');
 ignore_user_abort(true);
 set_time_limit(3600); // 7200 saniye 120 dakikadır, 3600 1 saat
@@ -477,8 +481,8 @@ try {
     echo "Hata: " . $e->getMessage();
 }
 
-}
-
 ob_flush();
 flush();
+}
+
 ?>

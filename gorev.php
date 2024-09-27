@@ -281,7 +281,7 @@ if(!empty($veritabani_backup_yedekleme_sonucu) && in_array('Veritabanı Başarı
     if(!empty($veritabani_backup_yedekleme_sonucu['dosya_adi']) && strlen($veritabani_backup_yedekleme_sonucu['dosya_adi'])>10){
 
         $veritabani_ftp_dosya_adi_yolu = $veritabani_backup_yedekleme_sonucu['dosya_adi'];
-        $veritabani_ftp_yedekleme_sonucu = uzakFTPsunucuyaYedekle($ftp_server, $ftp_username, $ftp_password, $ftp_path, $veritabani_ftp_dosya_adi_yolu, $yedekleme_gorevi, $uzak_sunucu_ici_dizin_adi, $ftp_sunucu_korunacak_yedek, $secilen_yedekleme_oneki);
+        $veritabani_ftp_yedekleme_sonucu = uzakFTPsunucuyaYedekle($genel_ayarlar, $ftp_server, $ftp_username, $ftp_password, $ftp_path, $veritabani_ftp_dosya_adi_yolu, $yedekleme_gorevi, $uzak_sunucu_ici_dizin_adi, $ftp_sunucu_korunacak_yedek, $secilen_yedekleme_oneki);
         // UZAK FTP YEDEKLEME BAŞARILI OLURSA KENDİ DOSYA İÇİNDE ESKİ FTP YEDEKLERİ SİLECEK
         if(!empty($veritabani_ftp_yedekleme_sonucu) && in_array('FTP Sunucusuna Başarıyla Yüklendi',$veritabani_ftp_yedekleme_sonucu)){
 

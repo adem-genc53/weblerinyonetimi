@@ -440,7 +440,7 @@ foreach($directoriesAndFiles AS $key => $klasor_dosya_arr){
 
     if(veritabani_id==="" && $("input[name='sadece']:checked").val()==1) {
         $(function(){
-            jw("b olumsuz").baslik("Veritabanı Belirlemediniz!").icerik("Karşılaştıracağınız veritabanı seçmelisiniz").kilitle().en(400).boy(100).ac();
+            jw("b olumsuz").baslik("Veritabanı Belirlemediniz!").icerik("Karşılaştıracağınız veritabanı seçmelisiniz").kilitle().en(450).boy(100).ac();
         })
         return false;
     }
@@ -713,7 +713,7 @@ function OK(x){
     if(x==1){
         var yeniadi = document.getElementById('sqlyoludosyadi').value;
 
-        var bekleme = jw("b bekle").baslik("Veritabanı Kaydediliyor...").en(400).boy(10).kilitle().akilliKapatPasif().ac();
+        var bekleme = jw("b bekle").baslik("Veritabanı Kaydediliyor...").en(450).boy(10).kilitle().akilliKapatPasif().ac();
 
             const xhr = new XMLHttpRequest();
             xhr.open("POST", "save_sql.php", true);
@@ -812,7 +812,7 @@ $('#bakim').click(function( e ){
     var veritabani_id = $('#selectedFilePath1').val();
         if(!veritabani_id) {
             $(function(){
-                jw("b olumsuz").baslik("Veritabanı Belirlemediniz!").icerik("Bakım yapacağınız veritabanı seçmelisiniz").kilitle().en(400).boy(100).ac();
+                jw("b olumsuz").baslik("Veritabanı Belirlemediniz!").icerik("Bakım yapacağınız veritabanı seçmelisiniz").kilitle().en(450).boy(100).ac();
             })
             return false;
         }
