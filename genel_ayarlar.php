@@ -1210,6 +1210,12 @@ $(document).ready(function() {
                             <th style="text-align:center;"><?php echo $message; ?></th>
                         </tr>
                         <tr>
+                            <td style="text-align:center;">
+                                Bu scriptin işleyişinde herhangi bir hata oluştuğunda ekranda görünmeyebilir bu durumda error.log dosyasına kaydedilir.<br />
+                                Hosting Panele giriş yapmadan bu hataları aşağıdaki alanda hızlıca görebilirsiniz. Hatanın durumuna göre giderebilirsiniz.
+                            </td>
+                        </tr>
+                        <tr>
                             <td>
                                 <textarea rows="10" class="form-control" style="width: 100%; max-width: 100%; padding: 10px;" readonly><?php echo $error_log; ?></textarea><br>
                             </td>

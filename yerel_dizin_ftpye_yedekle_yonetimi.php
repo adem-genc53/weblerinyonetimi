@@ -250,10 +250,30 @@ include('includes/footer.php');
                         String(seconds).padStart(2, '0') + ':' +
                         String(milliseconds).padStart(3, '0');
 
-                        $(function () {
-                            //pen.icerik(msg);
-                            bekleme.kapat();
-                            var pen = jw('d').baslik('Uzak FTP Hesabına Yedekleme Sonucu').icerik("<b>Yükleme süresi:</b> " + formattedTime + "<br />" + msg).en(750).boy(550).kucultPasif().acEfekt(2, 1000).kapatEfekt(2, 1000).ac();
+                    var mesajlar = JSON.parse(msg);  // JSON yanıtı bir JavaScript dizisine dönüştür
+                    var tumMesajlar = '';  // Tüm mesajları toplamak için bir değişken
+                    // Mesajları ekrana yazdır veya işle
+                    mesajlar.forEach(function(mesaj) {
+                        if (mesaj.status === 'success') {
+                            //console.log('Başarı: ' + mesaj.message);
+                            tumMesajlar += mesaj.message + '<br />';  // Mesajları birleştir ve <br /> ile ayır
+                        } else if (mesaj.status === 'error') {
+                            //console.error('Hata: ' + mesaj.message);
+                            tumMesajlar += mesaj.message + '<br />';  // Mesajları birleştir ve <br /> ile ayır
+                        }
+                    });
+
+                    $(function () {
+                        //pen.icerik(msg);
+                        bekleme.kapat();
+                        var pen = jw('d').baslik('Uzak FTP Hesabına Yedekleme Sonucu').icerik("<b>Yükleme süresi:</b> " + formattedTime + "<br />" + tumMesajlar).en(750).boy(550).kucultPasif().acEfekt(2, 1000).kapatEfekt(2, 1000).ac();
+                    })                    
+
+                    }, // success
+                    error: function(xhr, status, error) {
+                        bekleme.kapat();
+                        $(function(){
+                            jw("b olumsuz").baslik("Ajax Sunucu ile iletişimde hata oluştu.").icerik("Durum: " + status + "<br />Hata mesajı: " + error + "<br />Sunucu cevabı: " + xhr.responseText).kilitle().en(450).boy(50).ac();
                         })
                     }
                 });

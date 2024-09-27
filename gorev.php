@@ -597,7 +597,7 @@ function flatten_and_filter_array($array) {
     foreach ($array as $item) {
         if (is_array($item)) {
             foreach ($item as $key => $value) {
-                if ($key !== 'dosya_adi') {
+                if (!in_array($key, ['dosya_adi'])) {
                     if (is_array($value)) {
                         $result = array_merge($result, flatten_and_filter_array($value));
                     } else {
@@ -624,6 +624,9 @@ $calistirma_sonuc_mesaji = array_filter($calistirma_sonuc_mesaji, function($valu
 // Tekrar eden değerleri kaldırın
 $calistirma_sonuc_mesaji = array_unique($calistirma_sonuc_mesaji);
 
+unset($calistirma_sonuc_mesaji[array_search('success', $calistirma_sonuc_mesaji)]);
+
+//file_put_contents(KOKYOLU.'error.log', date('Y-m-d H:i:s') . '<pre>' . print_r($calistirma_sonuc_mesaji, true) . '</pre>' . "\n", FILE_APPEND);
 //echo '<pre>' . print_r($calistirma_sonuc_mesaji, true) . '</pre>';
 
 $calistirmasonucmesaji = implode("<br>", $calistirma_sonuc_mesaji);

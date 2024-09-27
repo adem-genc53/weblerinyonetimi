@@ -5,7 +5,8 @@ if (!(PHP_VERSION_ID >= 80100)) {
 
 if (!file_exists(AUTHCONFIGPATH)) {
     echo 'Hata: AuthConfig dosyası bulunamadı.';
-    die('Hata: AuthConfig dosyası bulunamadı.');
+    file_put_contents(KOKYOLU . 'error.log', date('Y-m-d H:i:s') . ' - ' . basename(__FILE__) . ' - Hata: AuthConfig dosyası bulunamadı.' . "\n", FILE_APPEND);
+    exit;
 }
 
 require_once __DIR__ . '/plugins/google_drive/vendor/autoload.php';
@@ -22,6 +23,7 @@ set_error_handler(function ($severity, $message, $file, $line) {
 
 set_exception_handler(function ($exception) {
     echo "Bağlantı başarısız, bilgileri kontrol edin: " . $exception->getMessage();
+    file_put_contents(KOKYOLU . 'error.log', date('Y-m-d H:i:s') . ' - ' . basename(__FILE__) . ' - Bağlantı başarısız, bilgileri kontrol edin: ' . $exception->getMessage() . "\n", FILE_APPEND);
 });
 
 
@@ -42,9 +44,11 @@ function getClient() {
         return $client;
     } catch (\Google\Exception $e) {
         echo "Bağlantı başarısız, bilgileri kontrol edin: " . $e->getMessage();
+        file_put_contents(KOKYOLU . 'error.log', date('Y-m-d H:i:s') . ' - ' . basename(__FILE__) . ' - Bağlantı başarısız, bilgileri kontrol edin: ' .  $e->getMessage() . "\n", FILE_APPEND);
         return null;
     } catch (Exception $e) {
         echo "Beklenmeyen bir hata oluştu: " . $e->getMessage();
+        file_put_contents(KOKYOLU . 'error.log', date('Y-m-d H:i:s') . ' - ' . basename(__FILE__) . ' - Beklenmeyen bir hata oluştu: ' .  $e->getMessage() . "\n", FILE_APPEND);
         return null;
     }
 }
@@ -57,14 +61,18 @@ try {
             $service = new \Google\Service\Drive($client);
         } catch (\Google\Exception $e) {
             echo "Google Drive hizmetine bağlanırken bir hata oluştu: " . $e->getMessage();
+            file_put_contents(KOKYOLU . 'error.log', date('Y-m-d H:i:s') . ' - ' . basename(__FILE__) . ' - Google Drive hizmetine bağlanırken bir hata oluştu: ' .  $e->getMessage() . "\n", FILE_APPEND);
         } catch (Exception $e) {
             echo "Beklenmeyen bir hata oluştu: " . $e->getMessage();
+            file_put_contents(KOKYOLU . 'error.log', date('Y-m-d H:i:s') . ' - ' . basename(__FILE__) . ' - Beklenmeyen bir hata oluştu: ' .  $e->getMessage() . "\n", FILE_APPEND);
         }
     } else {
         echo "Google Client oluşturulamadı.";
+        file_put_contents(KOKYOLU . 'error.log', date('Y-m-d H:i:s') . ' - ' . basename(__FILE__) . ' - Google Client oluşturulamadı.' . "\n", FILE_APPEND);
     }
 } catch (Exception $e) {
     echo "Beklenmeyen bir hata oluştu (dış try-catch): " . $e->getMessage();
+    file_put_contents(KOKYOLU . 'error.log', date('Y-m-d H:i:s') . ' - ' . basename(__FILE__) . ' - Beklenmeyen bir hata oluştu (dış try-catch): ' .  $e->getMessage() . "\n", FILE_APPEND);
 }
 
 

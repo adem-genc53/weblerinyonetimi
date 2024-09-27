@@ -42,13 +42,15 @@ class FtpTreeView {
             // SSL bağlantısı kur ve oturumu aç
             $this->ftp_connect = ftp_ssl_connect($this->ftpsunucu);
             if (!$this->ftp_connect) {
-                die("FTP SSL bağlantısı kurulamadı.");
+                echo "FTP SSL bağlantısı kurulamadı.";
+                exit;
             }
         } else {
             // Standart bağlantı kur ve oturumu aç
             $this->ftp_connect = ftp_connect($this->ftpsunucu);
             if (!$this->ftp_connect) {
-                die("FTP Standart bağlantısı kurulamadı.");
+                echo "FTP Standart bağlantısı kurulamadı.";
+                exit;
             }
         }
 
@@ -56,7 +58,13 @@ class FtpTreeView {
         ftp_set_option($this->ftp_connect, FTP_TIMEOUT_SEC, 120);
 
         if ($this->ftp_connect) {
-            ftp_login($this->ftp_connect, $this->ftpusername, $this->ftppass);
+            // Giriş yapmayı dene
+            if (!@ftp_login($this->ftp_connect, $this->ftpusername, $this->ftppass)) {
+                echo "FTP Kimlik doğrulama sorunu: geçersiz ftp kimlik bilgileri";
+                // Giriş başarısız
+                ftp_close($this->ftp_connect);
+                exit;
+            }
 
             // Pasif/Aktif mod ayarı
             if ($this->ftp_mode) {
@@ -67,7 +75,8 @@ class FtpTreeView {
             $this->getFtpContent();
         }else{
             ftp_close($this->ftp_connect);
-            die("FTP oturumu açılamadı.");
+            echo "FTP oturumu açılamadı.";
+            exit;
         }
     }
 
