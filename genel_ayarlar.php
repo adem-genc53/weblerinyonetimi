@@ -876,9 +876,9 @@ $(document).ready(function() {
                                                             <td style="padding: 0rem 0.75rem 0rem 0.75rem;vertical-align: middle;min-width: 200px;">
                                                             <?php 
                                                             if(isset($genel_ayarlar['ftp_ssl']) && $genel_ayarlar['ftp_ssl']==0){
-                                                                echo "<input type='radio' name='ftp_ssl' value='1' checked>";
+                                                                echo "<input type='radio' name='ftp_ssl' value='0' checked>";
                                                             } else if(isset($genel_ayarlar['ftp_ssl']) && $genel_ayarlar['ftp_ssl']==1){
-                                                                echo "<input type='radio' name='ftp_ssl' value='1'>";
+                                                                echo "<input type='radio' name='ftp_ssl' value='0'>";
                                                             }
                                                             ?>
                                                             </td>
