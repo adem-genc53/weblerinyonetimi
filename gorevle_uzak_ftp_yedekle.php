@@ -14,14 +14,14 @@ ignore_user_abort(true);
 set_time_limit(3600); // 7200 saniye 120 dakikadır, 3600 1 saat
 
 if (!function_exists('uzakFTPsunucuyaYedekle')) {
-    function uzakFTPsunucuyaYedekle($genel_ayarlar, $ftp_server, $ftp_username, $ftp_password, $ftp_path, $dosya_adi_yolu, $yedekleme_gorevi, $uzak_sunucu_ici_dizin_adi, $ftp_sunucu_korunacak_yedek, $secilen_yedekleme_oneki) {
-        
+    function uzakFTPsunucuyaYedekle($islemi_yapan, $genel_ayarlar, $ftp_server, $ftp_username, $ftp_password, $ftp_path, $dosya_adi_yolu, $yedekleme_gorevi, $uzak_sunucu_ici_dizin_adi, $ftp_sunucu_korunacak_yedek, $secilen_yedekleme_oneki) {
+
     // FTP Bağlantı türü ve modunu ayarlardan al
     $ftp_mode = $genel_ayarlar['ftp_mode']; // 'active' veya 'passive'
     $ftp_ssl = $genel_ayarlar['ftp_ssl']; // true veya false
         
         $ftpyedeklemebasarili = false;
-        $ftp_cikti_mesaji = [];
+        $sonuc_cikti_mesaji = [];
 
         // FTP bağlantısı kur
         if ($ftp_ssl) {
@@ -29,27 +29,27 @@ if (!function_exists('uzakFTPsunucuyaYedekle')) {
             $ftp_connect = ftp_ssl_connect($ftp_server);
             if (!$ftp_connect) {
                 file_put_contents(KOKYOLU . 'error.log', date('Y-m-d H:i:s') . ' - ' . basename(__FILE__) . ' - FTP SSL bağlantısı kurulamadı.' . "\n", FILE_APPEND);
-                    $ftp_cikti_mesaji[] = [
+                    $sonuc_cikti_mesaji[] = [
                         'status' => 'error',
-                        'message' => 'FTP SSL bağlantısı kurulamadı.'
+                        'message' => '<span style="color:red;">FTP SSL bağlantısı kurulamadı.</span>'
                     ];
-                    return json_encode($ftp_cikti_mesaji);  // Mesajı JSON olarak gönder
+                    return json_encode($sonuc_cikti_mesaji);  // Mesajı JSON olarak gönder
             }
         } else {
             // Standart bağlantı kur ve oturumu aç
             $ftp_connect = ftp_connect($ftp_server);
             if (!$ftp_connect) {
                 file_put_contents(KOKYOLU . 'error.log', date('Y-m-d H:i:s') . ' - ' . basename(__FILE__) . ' - FTP bağlantısı kurulamadı.' . "\n", FILE_APPEND);
-                    $ftp_cikti_mesaji[] = [
+                    $sonuc_cikti_mesaji[] = [
                         'status' => 'error',
-                        'message' => 'FTP bağlantısı kurulamadı.'
+                        'message' => '<span style="color:red;">FTP bağlantısı kurulamadı.</span>'
                     ];
-                    return json_encode($ftp_cikti_mesaji);  // Mesajı JSON olarak gönder
+                    return json_encode($sonuc_cikti_mesaji);  // Mesajı JSON olarak gönder
             }
         }
 
         // Zaman aşımını ayarla (örneğin, 120 saniye)
-        ftp_set_option($ftp_connect, FTP_TIMEOUT_SEC, 120);
+        ftp_set_option($ftp_connect, FTP_TIMEOUT_SEC, 300);
 
         if ($ftp_connect) {
             // Giriş yapmayı dene
@@ -57,11 +57,11 @@ if (!function_exists('uzakFTPsunucuyaYedekle')) {
                 // Giriş başarısız
                 ftp_close($ftp_connect);
                 file_put_contents(KOKYOLU . 'error.log', date('Y-m-d H:i:s') . ' - ' . basename(__FILE__) . ' - FTP oturum açma başarısız oldu.' . "\n", FILE_APPEND);
-                $ftp_cikti_mesaji[] = [
-                    'status' => 'error',
-                    'message' => 'FTP oturum açma başarısız oldu. Lütfen kullanıcı adı ve şifreyi kontrol edin.'
-                ];
-                return json_encode($ftp_cikti_mesaji);  // Mesajı JSON olarak gönder
+                    $sonuc_cikti_mesaji[] = [
+                        'status' => 'error',
+                        'message' => '<span style="color:red;">FTP oturum açma başarısız oldu. Lütfen kullanıcı adı ve şifreyi kontrol edin.</span>'
+                    ];
+                    return json_encode($sonuc_cikti_mesaji);  // Mesajı JSON olarak gönder
             }
 
             // Pasif/Aktif mod ayarı
@@ -73,16 +73,16 @@ if (!function_exists('uzakFTPsunucuyaYedekle')) {
         }else{
             ftp_close($ftp_connect);
                 file_put_contents(KOKYOLU . 'error.log', date('Y-m-d H:i:s') . ' - ' . basename(__FILE__) . ' - FTP oturumu açılamadı.' . "\n", FILE_APPEND);
-                    $ftp_cikti_mesaji[] = [
+                    $sonuc_cikti_mesaji[] = [
                         'status' => 'error',
-                        'message' => 'FTP oturumu açılamadı.'
+                        'message' => '<span style="color:red;">FTP oturumu açılamadı.</span>'
                     ];
-                    return json_encode($ftp_cikti_mesaji);  // Mesajı JSON olarak gönder
+                    return json_encode($sonuc_cikti_mesaji);  // Mesajı JSON olarak gönder
         }
 
         // TÜM ALT DİZİNLERİ OLUŞTURMA FONKSİYONU
         if (!function_exists('ftp_mkdir_recursive')) {
-            function ftp_mkdir_recursive($ftp_connect, $dir, &$ftp_cikti_mesaji) {
+            function ftp_mkdir_recursive($ftp_connect, $dir, &$sonuc_cikti_mesaji, $islemi_yapan) {
                 // Yol ayırıcıları düzenleyelim
                 $dir = str_replace('\\', '/', $dir);
                 $dir = rtrim($dir, '/'); // Sondaki fazladan /'leri kaldır
@@ -93,9 +93,9 @@ if (!function_exists('uzakFTPsunucuyaYedekle')) {
                     $current_dir .= "/$part";
                     if (!@ftp_chdir($ftp_connect, $current_dir)) {
                         if (!@ftp_mkdir($ftp_connect, $current_dir)) {
-                            $ftp_cikti_mesaji[] = [
+                            $sonuc_cikti_mesaji[] = [
                                 'status' => 'error',
-                                'message' => 'Alt-Dizin oluşturulamadı: ' . $current_dir
+                                'message' => '<span style="color:red;">Alt-Dizin oluşturulamadı:</span> ' . $current_dir
                             ];
                             return false;
                         }
@@ -108,17 +108,17 @@ if (!function_exists('uzakFTPsunucuyaYedekle')) {
 
         // DOSYA VEYA DİZİN YÜKLEME FONKSİYONU
     if (!function_exists('upload')) {
-        function upload($ftp_connect, $dosya_adi_yolu, $remote_path, &$ftp_cikti_mesaji) {
+        function upload($ftp_connect, $dosya_adi_yolu, $remote_path, &$sonuc_cikti_mesaji, $islemi_yapan) {
             // Yol ayırıcıları düzenleyelim
             $dosya_adi_yolu = str_replace('\\', '/', $dosya_adi_yolu);
             $remote_path = str_replace('\\', '/', $remote_path);
             // Klasör kontrolü
             if (is_dir($dosya_adi_yolu)) {
                 // Hedef dizini oluştur
-                if (!ftp_mkdir_recursive($ftp_connect, $remote_path, $ftp_cikti_mesaji)) {
-                    $ftp_cikti_mesaji[] = [
+                if (!ftp_mkdir_recursive($ftp_connect, $remote_path, $sonuc_cikti_mesaji, $islemi_yapan)) {
+                    $sonuc_cikti_mesaji[] = [
                         'status' => 'error',
-                        'message' => 'Hedef Dizin oluşturulamadı: ' . $remote_path
+                        'message' => '<span style="color:red;">Hedef Dizin oluşturulamadı:</span> ' . $remote_path
                     ];
                     return false;
                 }
@@ -129,48 +129,47 @@ if (!function_exists('uzakFTPsunucuyaYedekle')) {
                     if ($file == '.' || $file == '..') continue;
                     $local_file = "$dosya_adi_yolu/$file";
                     $remote_file = "$remote_path/$file";
-                    if (!upload($ftp_connect, $local_file, $remote_file, $ftp_cikti_mesaji)) {
+                    if (!upload($ftp_connect, $local_file, $remote_file, $sonuc_cikti_mesaji, $islemi_yapan)) {
                         return false; // Hata olursa false döner
                     }
                 }
             } else {
                 // Dosya kontrolü
                 if (!is_file($dosya_adi_yolu)) {
-                    $ftp_cikti_mesaji[] = [
+                    $sonuc_cikti_mesaji[] = [
                         'status' => 'error',
-                        'message' => 'Geçersiz dosya: ' . $dosya_adi_yolu
+                        'message' => '<span style="color:red;">Geçersiz dosya:</span> ' . $dosya_adi_yolu
                     ];
                     return false;
                 }
 
                 // Hedef dizini oluştur
                 $remote_dir = dirname($remote_path);
-                if (!ftp_mkdir_recursive($ftp_connect, $remote_dir, $ftp_cikti_mesaji)) {
-                    $ftp_cikti_mesaji[] = [
+                if (!ftp_mkdir_recursive($ftp_connect, $remote_dir, $sonuc_cikti_mesaji, $islemi_yapan)) {
+                    $sonuc_cikti_mesaji[] = [
                         'status' => 'error',
-                        'message' => 'Hedef Dizin oluşturulamadı: ' . $remote_dir
+                        'message' => '<span style="color:red;">Hedef Dizin oluşturulamadı:</span> ' . $remote_dir
                     ];
                     return false;
                 }
 
                 // Dosyayı yükle
                 if (!ftp_put($ftp_connect, $remote_path, $dosya_adi_yolu, FTP_BINARY)) {
-                    $ftp_cikti_mesaji[] = [
+                    $sonuc_cikti_mesaji[] = [
                         'status' => 'error',
-                        'message' => 'Dosya yüklenemedi: ' . $dosya_adi_yolu
+                        'message' => '<span style="color:red;">Dosya yüklenemedi:</span> ' . $dosya_adi_yolu
                     ];
                     return false;
                 }
-                GLOBAL $secilen_yedekleme_oneki;
-                if($secilen_yedekleme_oneki==='|'){
-                    $ftp_cikti_mesaji[] = [
+                if($islemi_yapan){
+                    $sonuc_cikti_mesaji[] = [
                         'status' => 'success',
-                        'message' => 'FTP Sunucusuna Başarıyla Yüklendi: ' . ltrim($remote_path,'/')
+                        'message' => '<span style="color:green;">FTP Sunucusuna Başarıyla Yüklendi</span>'
                     ];
                 }else{
-                    $ftp_cikti_mesaji[] = [
+                    $sonuc_cikti_mesaji[] = [
                         'status' => 'success',
-                        'message' => 'FTP Sunucusuna Başarıyla Yüklendi'
+                        'message' => '<span style="color:green;">FTP Sunucusuna Başarıyla Yüklendi:</span> ' . ltrim($remote_path,'/')
                     ];
                 }
             }
@@ -194,19 +193,22 @@ if (!function_exists('uzakFTPsunucuyaYedekle')) {
         $remote_path = $ftp_path . basename($dosya_adi_yolu);
 
         // Yükleme işlemini başlat
-        if (upload($ftp_connect, $dosya_adi_yolu, $remote_path, $ftp_cikti_mesaji)) {
+        if (upload($ftp_connect, $dosya_adi_yolu, $remote_path, $sonuc_cikti_mesaji, $islemi_yapan)) {
             // Yerelden FTP ye elle seçilerek yükleme yapıldığında silme işlemi devre dışı
-            if($secilen_yedekleme_oneki!=='|'){
+            if($islemi_yapan){
                 $ftpyedeklemebasarili = true;
             }
         } else {
-            $ftp_cikti_mesaji[] = [
+            $sonuc_cikti_mesaji[] = [
                 'status' => 'error',
-                'message' => 'FTP Sunucusuna Yükleme BAŞARISIZ'
+                'message' => '<span style="color:red;">FTP Sunucusuna Yükleme BAŞARISIZ</span>'
             ];
         }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+###################################################################################################################################
+###################################################################################################################################
+###################################################################################################################################
+###################################################################################################################################
 
         // UZAK FTP BAŞARILI İSE ESKİ YEDEKLERİ SİLMEYE BAŞLA
         if ($ftpyedeklemebasarili && $ftp_sunucu_korunacak_yedek != '-1') {
@@ -293,10 +295,10 @@ if (!function_exists('uzakFTPsunucuyaYedekle')) {
                     $dosya_tarihi = substr($silinendosya, strpos($silinendosya, $secilen_yedekleme_oneki . "-") + strlen($secilen_yedekleme_oneki . "-"), 19);
                     if (validateDate($dosya_tarihi)) {
                         deleteDirectoryRecursive($silinendosya, $ftp_connect);
-                        $ftp_cikti_mesaji[] = [
-                            'status' => 'success',
-                            'message' => 'FTP Sunucusundaki Eski Dosya(lar) Başarıyla Silindi'
-                        ];
+                            $sonuc_cikti_mesaji[] = [
+                                'status' => 'success',
+                                'message' => '<span style="color:green;">FTP Sunucusundaki Eski Dosya(lar) Başarıyla Silindi</span>'
+                            ];
                     }
                 }
             }
@@ -307,10 +309,10 @@ if (!function_exists('uzakFTPsunucuyaYedekle')) {
                     $dizin_tarihi = substr($silinendizin, -19);
                     if (validateDate($dizin_tarihi)) {
                         deleteDirectoryRecursive($silinendizin, $ftp_connect);
-                        $ftp_cikti_mesaji[] = [
-                            'status' => 'success',
-                            'message' => 'FTP Sunucusundaki Eski Klasör(ler) Başarıyla Silindi'
-                        ];
+                            $sonuc_cikti_mesaji[] = [
+                                'status' => 'success',
+                                'message' => '<span style="color:green;">FTP Sunucusundaki Eski Klasör(ler) Başarıyla Silindi</span>'
+                            ];
                     }
                 }
             }
@@ -319,7 +321,7 @@ if (!function_exists('uzakFTPsunucuyaYedekle')) {
         // BAĞLANTIYI KAPAT
         ftp_close($ftp_connect);
 
-        return $ftp_cikti_mesaji;
+        return $sonuc_cikti_mesaji;
     }
 }
 
@@ -337,23 +339,26 @@ ob_start();
     $dosya_adi_yolu                 = $_POST['yerel_den_secilen_dosya'];
     $uzak_sunucu_ici_dizin_adi      = $_POST['ftp_den_secilen_dosya'];
     $ftp_sunucu_korunacak_yedek     = '-1';
-    $secilen_yedekleme_oneki        = "|";
+    $secilen_yedekleme_oneki        = "";
     $yedekleme_gorevi               = "";
+    $islemi_yapan                   = false; // İşlemin kimin yaptığını belirler, gorev.php de true dir
 
 try {
-    $uzakFTPsunucuyaYedekle = uzakFTPsunucuyaYedekle($genel_ayarlar, $ftp_server, $ftp_username, $ftp_password, $ftp_path, $dosya_adi_yolu, $yedekleme_gorevi, $uzak_sunucu_ici_dizin_adi, $ftp_sunucu_korunacak_yedek, $secilen_yedekleme_oneki);
+    $uzakFTPsunucuyaYedekle = uzakFTPsunucuyaYedekle($islemi_yapan, $genel_ayarlar, $ftp_server, $ftp_username, $ftp_password, $ftp_path, $dosya_adi_yolu, $yedekleme_gorevi, $uzak_sunucu_ici_dizin_adi, $ftp_sunucu_korunacak_yedek, $secilen_yedekleme_oneki);
     //echo "FTP Sunucusuna Başarıyla Yüklendi: ". basename($dosya_adi_yolu);
     echo json_encode($uzakFTPsunucuyaYedekle, JSON_UNESCAPED_UNICODE);
 } catch (\Google\Service\Exception $e) {
-    echo json_encode([
+    $sonuc_cikti_mesaji[] = [
         'status' => 'error',
-        'message' => 'Hata: ' . $e->getMessage()
-    ]);
+        'message' => '<span style="color:red;">Hata:</span> ' . $e->getMessage()
+    ];
+    echo json_encode($sonuc_cikti_mesaji, JSON_UNESCAPED_UNICODE);  // Mesajı JSON olarak gönder
 } catch (Exception $e) {
-    echo json_encode([
+    $sonuc_cikti_mesaji[] = [
         'status' => 'error',
-        'message' => 'Hata: ' . $e->getMessage()
-    ]);
+        'message' => '<span style="color:red;">Hata:</span> ' . $e->getMessage()
+    ];
+    echo json_encode($sonuc_cikti_mesaji, JSON_UNESCAPED_UNICODE);  // Mesajı JSON olarak gönder
 }
 
 ob_flush();

@@ -250,8 +250,11 @@ include('includes/footer.php');
                         String(seconds).padStart(2, '0') + ':' +
                         String(milliseconds).padStart(3, '0');
 
+            var mesajlar;
+            try {
                     var mesajlar = JSON.parse(msg);  // JSON yanıtı bir JavaScript dizisine dönüştür
                     var tumMesajlar = '';  // Tüm mesajları toplamak için bir değişken
+                if (Array.isArray(mesajlar)) {
                     // Mesajları ekrana yazdır veya işle
                     mesajlar.forEach(function(mesaj) {
                         if (mesaj.status === 'success') {
@@ -262,11 +265,17 @@ include('includes/footer.php');
                             tumMesajlar += mesaj.message + '<br />';  // Mesajları birleştir ve <br /> ile ayır
                         }
                     });
+                }else{
+                    tumMesajlar = mesajlar;
+                }
+            } catch (e) {
+                tumMesajlar = msg;
+            }
 
                     $(function () {
                         //pen.icerik(msg);
                         bekleme.kapat();
-                        var pen = jw('d').baslik('Uzak FTP Hesabına Yedekleme Sonucu').icerik("<b>Yükleme süresi:</b> " + formattedTime + "<br />" + tumMesajlar).en(750).boy(550).kucultPasif().acEfekt(2, 1000).kapatEfekt(2, 1000).ac();
+                        var pen = jw('d').baslik('Uzak FTP Hesabına Yedekleme Sonucu').icerik("<b>Yükleme süresi:</b> " + formattedTime + "<br />" + tumMesajlar).en(750).boy(550).kucultPasif().acEfekt(2, 1000).kapatEfekt(2, 1000).kapaninca(function() { loadFtpFileTree(); }).ac();
                     })                    
 
                     }, // success
@@ -285,6 +294,15 @@ include('includes/footer.php');
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     function ftpDenSil() {
+
+    // Aktif sınıfa sahip öğeyi seç (örneğin class="aktif" olan a tagı)
+    var aktifOge = document.querySelector('#ftp_uzak .aktif');
+
+    if (aktifOge) {
+        // 'adi' özniteliğini al
+        var adi = aktifOge.getAttribute('adi');
+    }
+
         var ftp_den_secileni_sil = $('#ftp_den_secilen_dosya').val();
 
         if( ftp_den_secileni_sil == '' ){
@@ -296,10 +314,10 @@ include('includes/footer.php');
 
             $(function()
               {
-                jw('b secim',ftp_dur).baslik("FTP'den Silmeyi Onayla").icerik("FTP'den seçilen yedek silmek istediğinizden emin misiniz?").en(450).kilitle().ac();
+                jw('b secim',dur).baslik("FTP'den Silmeyi Onayla").icerik("FTP'den seçilen yedek silmek istediğinizden emin misiniz?").en(450).kilitle().ac();
               })
               
-        function ftp_dur(x){
+        function dur(x){
             if(x==1){
 
             var bekleme = jw("b bekle").baslik("FTP'deki Yedek(ler) siliniyor...").en(300).boy(10).kilitle().akilliKapatPasif().ac();
@@ -308,10 +326,9 @@ include('includes/footer.php');
         $.ajax({
             url: "elle_uzak_ve_yerel_sunucudan_dosyalari_sil.php",
             type: "POST",
-            dataType: "json",
             data: { ftpden_sil: 1, ftp_den_secileni_sil : ftp_den_secileni_sil },
             timeout: 3600000, // 1 saat = 3600000 ms
-            success: function (data) {
+            success: function (msg) {
 
             // İstek sonlandığında zamanı al
             const endTime = new Date();
@@ -332,9 +349,42 @@ include('includes/footer.php');
                 String(seconds).padStart(2, '0') + ':' +
                 String(milliseconds).padStart(3, '0');
 
-                bekleme.kapat();
-                jw("b olumlu").baslik("FTP'den Silme Sonucu").icerik("<b>Silme süresi:</b> " + formattedTime + "<br />" + data.mesaj).en(500).boy(10).kilitle().akilliKapatPasif().kapaninca(function(){ ftpSatirSil(data.li_sil_adi); }).ac(); 
+            var mesajlar;
+            try {
+                    var mesajlar = JSON.parse(msg);  // JSON yanıtı bir JavaScript dizisine dönüştür
+                    var tumMesajlar = '';  // Tüm mesajları toplamak için bir değişken
+                if (Array.isArray(mesajlar)) {
+                    // Mesajları ekrana yazdır veya işle
+                    mesajlar.forEach(function(mesaj) {
+                        if (mesaj.status === 'success') {
+                            //console.log('Başarı: ' + mesaj.message);
+                            tumMesajlar += mesaj.message + '<br />';  // Mesajları birleştir ve <br /> ile ayır
+                        } else if (mesaj.status === 'error') {
+                            //console.error('Hata: ' + mesaj.message);
+                            tumMesajlar += mesaj.message + '<br />';  // Mesajları birleştir ve <br /> ile ayır
+                        }
+                    });
+                }else{
+                    tumMesajlar = mesajlar;
+                }
+            } catch (e) {
+                tumMesajlar = msg;
             }
+
+            $(function () {
+                //pen.icerik(msg);
+                bekleme.kapat();
+                var pen = jw('d').baslik('Uzak FTP Hesabından Silme Sonucu').icerik("<b>Silme süresi:</b> " + formattedTime + "<br />" + tumMesajlar).en(750).boy(550).kucultPasif().acEfekt(2, 1000).kapatEfekt(2, 1000).kapaninca(function(){ ftpSatirSil(adi); }).ac();
+            })                    
+
+            }, // success
+            error: function(xhr, status, error) {
+                bekleme.kapat();
+                $(function(){
+                    jw("b olumsuz").baslik("Ajax Sunucu ile iletişimde hata oluştu.").icerik("Durum: " + status + "<br />Hata mesajı: " + error + "<br />Sunucu cevabı: " + xhr.responseText).kilitle().en(450).boy(50).ac();
+                })
+            }
+
         });
 
         }
@@ -354,6 +404,15 @@ include('includes/footer.php');
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     function yerelOgeleriSil() {
+
+    // Aktif sınıfa sahip öğeyi seç (örneğin class="aktif" olan a tagı)
+    var aktifOge = document.querySelector('#yerel .aktif');
+
+    if (aktifOge) {
+        // 'adi' özniteliğini al
+        var adi = aktifOge.getAttribute('adi');
+    }
+
         var yerel_den_secilen_dosya = $('#yerel_den_secilen_dosya').val();
 
         if(yerel_den_secilen_dosya==''){
@@ -365,10 +424,10 @@ include('includes/footer.php');
 
         $(function()
             {
-            jw('b secim',ftp_dur).baslik("Yerelden Silmeyi Onayla").icerik("Yerelden dosya silmek istediğinizden emin misiniz?").en(450).kilitle().ac();
+            jw('b secim',dur).baslik("Yerelden Silmeyi Onayla").icerik("Yerelden dosya silmek istediğinizden emin misiniz?").en(450).kilitle().ac();
             })
 
-        function ftp_dur(x){
+        function dur(x){
             if(x==1){
 
             var bekleme = jw("b bekle").baslik("Yerelden dosya siliniyor...").en(300).boy(10).kilitle().akilliKapatPasif().ac();
@@ -377,10 +436,9 @@ include('includes/footer.php');
                 $.ajax({
                     url: "elle_uzak_ve_yerel_sunucudan_dosyalari_sil.php",
                     type: "POST",
-                    dataType: "json",
                     data: { yerelden_sil: 1, yerel_den_secilen_dosya: yerel_den_secilen_dosya },
                     timeout: 3600000, // 1 saat = 3600000 ms
-                    success: function (data) {
+                    success: function (msg) {
 
                     // İstek sonlandığında zamanı al
                     const endTime = new Date();
@@ -401,8 +459,40 @@ include('includes/footer.php');
                         String(seconds).padStart(2, '0') + ':' +
                         String(milliseconds).padStart(3, '0');
 
-                    bekleme.kapat();
-                        jw("b olumlu").baslik("Yerelden Dosya Silme Sonucu").icerik("<b>Silme süresi:</b> " + formattedTime + "<br />" + data.mesaj).en(500).boy(10).kilitle().akilliKapatPasif().kapaninca(function(){ yerelSatirSil(data.li_sil_adi); }).ac(); 
+            var mesajlar;
+            try {
+                    var mesajlar = JSON.parse(msg);  // JSON yanıtı bir JavaScript dizisine dönüştür
+                    var tumMesajlar = '';  // Tüm mesajları toplamak için bir değişken
+                if (Array.isArray(mesajlar)) {
+                    // Mesajları ekrana yazdır veya işle
+                    mesajlar.forEach(function(mesaj) {
+                        if (mesaj.status === 'success') {
+                            //console.log('Başarı: ' + mesaj.message);
+                            tumMesajlar += mesaj.message + '<br />';  // Mesajları birleştir ve <br /> ile ayır
+                        } else if (mesaj.status === 'error') {
+                            //console.error('Hata: ' + mesaj.message);
+                            tumMesajlar += mesaj.message + '<br />';  // Mesajları birleştir ve <br /> ile ayır
+                        }
+                    });
+                }else{
+                    tumMesajlar = mesajlar;
+                }
+            } catch (e) {
+                tumMesajlar = msg;
+            }
+
+                    $(function () {
+                        //pen.icerik(msg);
+                        bekleme.kapat();
+                        var pen = jw('d').baslik('Yerelden Dosya Silme Sonucu').icerik("<b>Silme süresi:</b> " + formattedTime + "<br />" + tumMesajlar).en(750).boy(550).kucultPasif().acEfekt(2, 1000).kapatEfekt(2, 1000).kapaninca(function(){ yerelSatirSil(adi); }).ac();
+                    })                    
+
+                    }, // success
+                    error: function(xhr, status, error) {
+                        bekleme.kapat();
+                        $(function(){
+                            jw("b olumsuz").baslik("Ajax Sunucu ile iletişimde hata oluştu.").icerik("Durum: " + status + "<br />Hata mesajı: " + error + "<br />Sunucu cevabı: " + xhr.responseText).kilitle().en(450).boy(50).ac();
+                        })
                     }
                 });
 
@@ -427,7 +517,7 @@ include('includes/footer.php');
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	$( '#yerel_dizin_agac' ).html( '<ul class="filetree start"><li class="wait" style="padding-left: 20px;">' + 'Yerel klasör ağacı oluşturuluyor...' + '<li></ul>' );
+	$( '#yerel_dizin_agac' ).html( '<ul class="filetree start"><li class="wait" style="padding-left: 20px;">Yerel klasör ağacı oluşturuluyor...<li></ul>' );
 	
 	getfilelist( $('#yerel_dizin_agac') , '<?php echo DIZINDIR; ?>' );
 
@@ -487,9 +577,19 @@ include('includes/footer.php');
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	$( '#ftp_uzaktan_agac' ).html( '<ul class="filetree start"><li class="wait" style="padding-left: 20px;">' + 'FTP içerik ağacı oluşturuluyor...' + '<li></ul>' );
-	
-	getFtpfilelist( $('#ftp_uzaktan_agac') , '/' );
+    // FTP ağacını yükleme fonksiyonu
+    function loadFtpFileTree() {
+        // Yükleniyor mesajını hemen göster
+        $('#ftp_uzaktan_agac').html('<ul class="filetree start"><li class="wait" style="padding-left: 20px;">FTP içerik ağacı oluşturuluyor...<li></ul>');
+        
+        // FTP dosya listesini yükle
+        getFtpfilelist( $('#ftp_uzaktan_agac') , '/' );
+    }
+
+    // Sayfa yüklendiğinde FTP ağacını yükle
+    $(document).ready(function() {
+        loadFtpFileTree();
+    });
 	
 	function getFtpfilelist( cont, root ) {
 	

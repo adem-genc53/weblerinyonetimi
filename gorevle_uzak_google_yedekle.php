@@ -7,9 +7,6 @@ header('Keep-Alive: timeout=5, max=100');
 require_once __DIR__ . '/includes/connect.php';
 include __DIR__ . '/google_drive_setup.php';
 
-if(isset($_POST['googla_yukle']) && $_POST['googla_yukle'] == '1'){
-ob_start();
-}
 ini_set('memory_limit', '-1');
 ignore_user_abort(true);
 set_time_limit(3600); // 7200 saniye 120 dakikadır, 3600 1 saat
@@ -19,6 +16,8 @@ if (!function_exists('uzakGoogleSunucudaDosyaSil')) {
 function uzakGoogleSunucudaDosyaSil($dosya_adi_yolu, $yedekleme_gorevi, $silinecek_dosya_tipi, $uzak_sunucu_ici_dizin_adi, $google_sunucu_korunacak_yedek, $secilen_yedekleme_oneki) {
 
     $googlesilmemesaji = [];
+    $sonuc_cikti_mesaji = [];
+
     $client = getClient();
     $service = new \Google\Service\Drive($client);
 
@@ -79,7 +78,11 @@ if (!function_exists('onAltDizinYolu')) {
             //printf("Folder ID: %s\n", $folder->id);
             return $folder->id; // Return the ID of the created folder
         } catch (Exception $e) {
-            echo "An error occurred: " . $e->getMessage();
+            //echo "An error occurred: " . $e->getMessage();
+            $sonuc_cikti_mesaji[] = [
+                'status' => 'error',
+                'message' => '<span style="color:red;">Hata1: </span>' . $e->getMessage()
+            ];
         }
         return null; // Return null if something went wrong
     }
@@ -154,9 +157,16 @@ if (!function_exists('onAltDizinYolu')) {
             //echo "<b style='color: red;'>Temsili Silinen dosya: </b>".$silinendosya."<br>";
             try {
                 $service->files->delete(trim($silinendosya), array('supportsAllDrives' => true));
-                $googlesilmemesaji[] = "Google Drive Sunucusundaki Eski DOSYA(lar) Başarıyla Silindi";
+                $sonuc_cikti_mesaji[] = [
+                    'status' => 'success',
+                    'message' => '<span style="color:green;">Google Drive Sunucusundaki Eski DOSYA(lar) Başarıyla Silindi</span>'
+                ];
             } catch (Exception $e) {
-                $googlesilmemesaji[] = "Hata: " . $e->getMessage()['error']['message'];
+                //$googlesilmemesaji[] = "Hata: " . $e->getMessage()['error']['message'];
+                $sonuc_cikti_mesaji[] = [
+                    'status' => 'error',
+                    'message' => '<span style="color:red;">Hata2: </span>' . $e->getMessage()['error']['message']
+                ];
                 //print "Bir hata oluştu: " . $e->getMessage();
                 //exit();
             }
@@ -169,15 +179,22 @@ if (!function_exists('onAltDizinYolu')) {
             //echo "<b style='color: blue;'>Temsili Silinen klasör: </b>".$silinendizin."<br>";
             try {
                 $service->files->delete(trim($silinendizin), array('supportsAllDrives' => true));
-                $googlesilmemesaji[] = "Google Drive Sunucusundaki Eski KLASÖR(ler) Başarıyla Silindi";
+                $sonuc_cikti_mesaji[] = [
+                    'status' => 'success',
+                    'message' => '<span style="color:green;">Google Drive Sunucusundaki Eski KLASÖR(ler) Başarıyla Silindi</span>'
+                ];
             } catch (Exception $e) {
-                $googlesilmemesaji[] = "Hata: " . $e->getMessage()['error']['message'];
+                //$googlesilmemesaji[] = "Hata: " . $e->getMessage()['error']['message'];
+                $sonuc_cikti_mesaji[] = [
+                    'status' => 'error',
+                    'message' => '<span style="color:red;">Hata3: </span>' . $e->getMessage()['error']['message']
+                ];
                 //print "Bir hata oluştu: " . $e->getMessage();
                 //exit();
             }
         }
     }
-    return $googlesilmemesaji;
+    return $sonuc_cikti_mesaji;
 }
 }
 
@@ -186,7 +203,11 @@ if (!function_exists('onAltDizinYolu')) {
 ##################################################################################################################################
 ##################################################################################################################################
 
+//$sonuc_cikti_mesaji = [];  // Global hatalar arrayi
+
+// Dosya Yükleme Fonksiyonu
 function uploadFile($service, $filePath, $parentFolderId = null) {
+    global $sonuc_cikti_mesaji;
     $fileInfo = pathinfo($filePath);
     $fileName = $fileInfo['basename'];
     $fileMimeType = mime_content_type($filePath);
@@ -228,15 +249,27 @@ function uploadFile($service, $filePath, $parentFolderId = null) {
     $client->setDefer(false);
 
     if ($status != false) {
-        return $status->id;
+        $sonuc_cikti_mesaji[] = [
+            'status' => 'success',
+            'message' => "<span style='color:green;'>Google Drive Api Sunucusuna Dosya Başarıyla Yüklendi: </span> $fileName"
+        ];
+        return true;
     } else {
         $error = $client->getHttpClient()->getLastResponse()->getBody()->getContents();
         $errorData = json_decode($error, true);
 
         if (isset($errorData['error']['message']) && strpos($errorData['error']['message'], 'quotaExceeded') !== false) {
-            return "Depo alanı dolu. Dosya yüklenemedi.";
+            $sonuc_cikti_mesaji[] = [
+                'status' => 'error',
+                'message' => '<span style="color:red;">Depo alanı dolu. Dosya yüklenemedi.</span>'
+            ];
+            return false;
         } else {
-            return "Dosya yükleme hatası.";
+            $sonuc_cikti_mesaji[] = [
+                'status' => 'error',
+                'message' => '<span style="color:red;">Dosya yükleme hatası.</span>'
+            ];
+            return false;
         }
     }
 }
@@ -245,16 +278,19 @@ function deleteFile($service, $fileId) {
     try {
         $service->files->delete($fileId);
         return true;
-    } catch (Exception $e) {
-        return "Dosya silme hatası: " . $e->getMessage();
+    } catch (\Google\Service\Exception $e) {
+        return false;
     }
 }
 
+
+// Klasör Yükleme Fonksiyonu
 function uploadFolder($service, $folderPath, $parentFolderId = null) {
+    global $sonuc_cikti_mesaji;
     $folderInfo = pathinfo($folderPath);
     $folderName = $folderInfo['basename'];
 
-    $folderId = getFolderIdByName($service, $folderName, $parentFolderId);
+    $folderId = getFolderIdByName($service, $folderName, $parentFolderId); // Buradaki fonksiyon hataya sebep oluyor olabilir.
     if (!$folderId) {
         $folderMetadata = new \Google\Service\Drive\DriveFile([
             'name' => $folderName,
@@ -277,15 +313,27 @@ function uploadFolder($service, $folderPath, $parentFolderId = null) {
                     $retryCount++;
                     sleep(2); // Bekle ve tekrar dene
                 } else if ($e->getCode() == 403 && strpos($e->getMessage(), 'quotaExceeded') !== false) {
-                    return "Depo alanı dolu. Klasör oluşturulamadı.";
+                    $sonuc_cikti_mesaji[] = [
+                        'status' => 'error',
+                        'message' => '<span style="color:red;">Depo alanı dolu. Klasör oluşturulamadı.</span>'
+                    ];
+                    return false;
                 } else {
-                    return "Klasör oluşturma hatası: " . $e->getMessage();
+                    $sonuc_cikti_mesaji[] = [
+                        'status' => 'error',
+                        'message' => '<span style="color:red;">Klasör oluşturma hatası: </span>' . $e->getMessage()
+                    ];
+                    return false;
                 }
             }
         }
 
         if (!$success) {
-            return "Klasör oluşturma $maxRetries deneme sonrası başarısız oldu";
+            $sonuc_cikti_mesaji[] = [
+                'status' => 'error',
+                'message' => '<span style="color:red;">Klasör oluşturma <b>' . $maxRetries . '</b> deneme sonrası başarısız oldu</span>'
+            ];
+            return false;
         }
     }
 
@@ -297,42 +345,43 @@ function uploadFolder($service, $folderPath, $parentFolderId = null) {
         $itemPath = $folderPath . '/' . $item;
         if (is_dir($itemPath)) {
             $result = uploadFolder($service, $itemPath, $folderId);
-            if ($result !== true) {
-                return $result;
+            if (!$result) {
+                return false;
             }
         } else {
             $result = uploadFile($service, $itemPath, $folderId);
-            if (!is_string($result)) {
-                return $result;
+            if (!$result) {
+                return false;
             }
         }
     }
 
+    $sonuc_cikti_mesaji[] = [
+        'status' => 'success',
+        'message' => "<span style='font-weight: bold;color:green;'>Google Drive Api Sunucusuna Klasör Başarıyla Yüklendi: </span> $folderName"
+    ];
+
     return true;
 }
 
-function createFolder($service, $folderName, $parentFolderId = null) {
-    $existingFolderId = getFolderIdByName($service, $folderName, $parentFolderId);
-    if ($existingFolderId) {
-        return $existingFolderId;
+// Yardımcı Fonksiyonlar
+
+// Belirtilen klasörün adını kontrol eden ve ID'sini döndüren fonksiyon
+function getFolderIdByName($service, $folderName, $parentFolderId = null) {
+    $query = "name='$folderName' and mimeType='application/vnd.google-apps.folder' and trashed=false";
+    if ($parentFolderId) {
+        $query .= " and '{$parentFolderId}' in parents";
     }
 
-    $folderMetadata = new \Google\Service\Drive\DriveFile([
-        'name' => $folderName,
-        'mimeType' => 'application/vnd.google-apps.folder',
-        'parents' => $parentFolderId ? [$parentFolderId] : []
+    $response = $service->files->listFiles([
+        'q' => $query,
+        'fields' => 'files(id, name)',
     ]);
 
-    try {
-        $folder = $service->files->create($folderMetadata, [
-            'fields' => 'id'
-        ]);
-        return $folder->id;
-    } catch (\Google\Service\Exception $e) {
-        throw new Exception("Failed to create folder: " . $e->getMessage());
-    }
+    return count($response->files) > 0 ? $response->files[0]->id : null;
 }
 
+// Yol boyunca klasörleri oluşturan fonksiyon
 function getFolderIdByPath($service, $path) {
     $parts = explode('/', trim($path, '/'));
     $parentId = 'root';
@@ -350,6 +399,21 @@ function getFolderIdByPath($service, $path) {
     return $parentId;
 }
 
+// Klasör oluşturma fonksiyonu
+function createFolder($service, $folderName, $parentFolderId = null) {
+    $folderMetadata = new \Google\Service\Drive\DriveFile([
+        'name' => $folderName,
+        'mimeType' => 'application/vnd.google-apps.folder',
+        'parents' => $parentFolderId ? [$parentFolderId] : []
+    ]);
+
+    $folder = $service->files->create($folderMetadata, [
+        'fields' => 'id'
+    ]);
+    return $folder->id;
+}
+
+// Belirtilen dosyanın adını kontrol eden ve ID'sini döndüren fonksiyon
 function getFileIdByName($service, $fileName, $parentFolderId = null) {
     $query = "name='$fileName' and trashed=false";
     if ($parentFolderId) {
@@ -364,125 +428,118 @@ function getFileIdByName($service, $fileName, $parentFolderId = null) {
     return count($response->files) > 0 ? $response->files[0]->id : null;
 }
 
-
-function getFolderIdByName($service, $folderName, $parentFolderId = null) {
-    $query = "name='$folderName' and mimeType='application/vnd.google-apps.folder' and trashed=false";
-    if ($parentFolderId) {
-        $query .= " and '{$parentFolderId}' in parents";
-    }
-
-    $response = $service->files->listFiles([
-        'q' => $query,
-        'fields' => 'files(id, name)',
-    ]);
-
-    return count($response->files) > 0 ? $response->files[0]->id : null;
-}
+###############################################################################################################
+###############################################################################################################
 
 
-function main($sourcePath, $drivePath) {
+if (!function_exists('uzakGoogleSunucuyaYedekle')) {
+function uzakGoogleSunucuyaYedekle($islemi_yapan, $dosya_adi_yolu, $yedekleme_gorevi, $silinecek_dosya_tipi, $uzak_sunucu_ici_dizin_adi, $google_sunucu_korunacak_yedek, $secilen_yedekleme_oneki){
+
+    // Google Drive API istemcisi oluşturma
     $client = getClient();
     $service = new \Google\Service\Drive($client);
 
     $rootFolderId = 'root'; // Root klasörünün ID'si 'root' olarak belirlenir
+    $sonuc_cikti_mesaji = [];
 
-    //echo "Yükleme başlatılıyor. Kaynak yol: $sourcePath, Drive yolu: $drivePath\n";
+    // Eğer uzaktan sunucu içi dizin adı belirtildiyse, bu dizini oluştur veya ID'yi kontrol et
+    if ($uzak_sunucu_ici_dizin_adi) {
+        $parentFolderId = getFolderIdByPath($service, $uzak_sunucu_ici_dizin_adi);
+    } else {
+        $parentFolderId = $rootFolderId; // Eğer belirtilmediyse root klasörü kullanılır
+    }
 
-    // Drive iç yolu belirtilmişse, bu yolu oluştur veya ID'yi kontrol et
-    if ($drivePath) {
-        if (isDriveId($drivePath)) {
-            // Drive ID ise, doğrudan kullan
-            $parentFolderId = $drivePath;
-        } else {
-            // Drive yolu ise, yolu oluştur
-            $parentFolderId = getFolderIdByPath($service, $drivePath);
+    // Dosya veya klasör yedekleme işlemi
+    if (is_dir($dosya_adi_yolu)) {
+        // Eğer dosya bir klasörse, klasörü yedekle
+        $result = uploadFolder($service, $dosya_adi_yolu, $parentFolderId);
+    } elseif (file_exists($dosya_adi_yolu)) {
+        // Eğer dosya mevcutsa, dosyayı yedekle
+        $result = uploadFile($service, $dosya_adi_yolu, $parentFolderId);
+    } else {
+        // Dosya veya dizin bulunamadı hatası
+        $sonuc_cikti_mesaji[] = [
+            'status' => 'error',
+            'message' => '<span style="color:red;">Dosya veya dizin bulunamadı: </span>' . $dosya_adi_yolu
+        ];
+        return $sonuc_cikti_mesaji;
+    }
+
+
+    // Yükleme başarılı olduysa
+    if ($result === true) {
+        if($islemi_yapan){
+            $sonuc_cikti_mesaji[] = [
+                'status' => 'success',
+                'message' => '<span style="color:green;">Google Drive Api Sunucusuna Başarıyla Yüklendi</span>'
+            ];
+        }else{
+            $sonuc_cikti_mesaji[] = [
+                'status' => 'success',
+                'message' => '<span style="color:green;">Google Drive Api Sunucusuna Başarıyla Yüklendi: </span>' . basename($dosya_adi_yolu)
+            ];
         }
-        //echo "Drive yolu '$drivePath' için üst klasör ID: $parentFolderId\n";
-    } else {
-        $parentFolderId = $rootFolderId; // Drive iç yolu belirtilmemişse, dosyaları root klasörüne yükle
-    }
 
-    // Source path dosya veya dizin kontrolü yapılır
-    if (is_dir($sourcePath)) {
-        // Eğer source path bir dizin ise, içeriğini yükle
-        $result = uploadFolder($service, $sourcePath, $parentFolderId);
-    } elseif (file_exists($sourcePath)) {
-        // Eğer source path bir dosya ise, tek dosyayı yükle
-        $result = uploadFile($service, $sourcePath, $parentFolderId);
     } else {
-        // Ne dosya ne de dizin bulunamadıysa hata fırlat
-        return "Dosya veya dizin bulunamadı: $sourcePath";
-    }
-
-    if ($result !== true) {
+        // Yükleme hatası varsa sonucu döndür
         return $result;
     }
 
-    return "Yükleme başarılı";
+    // Sonuçları JSON formatında döndür
+    return $sonuc_cikti_mesaji;
+} // function uzakGoogleSunucuyaYedekle($service, $dosya_adi_yolu, $uzak_sunucu_ici_dizin_adi){
+} // if (!function_exists('uzakGoogleSunucuyaYedekle')) {
+
+##################################################################################################################################
+##################################################################################################################################
+##################################################################################################################################
+##################################################################################################################################
+
+// Her yerel alandan googla yükleme kodu
+if(isset($_POST['googla_yukle']) && $_POST['googla_yukle'] == '1' && isset($_POST['yerel_den_secilen_dosya']) && !empty($_POST['yerel_den_secilen_dosya']) && isset($_POST['google_drive_dan_secilen_dosya_id']) && !empty($_POST['google_drive_dan_secilen_dosya_id'])) {
+
+ob_start();
+    $islemi_yapan = false;
+    $yedekleme_gorevi = false;
+    $silinecek_dosya_tipi = "";
+    $google_sunucu_korunacak_yedek = "";
+    $secilen_yedekleme_oneki = "";
+
+    $dosya_adi_yolu = $_POST['yerel_den_secilen_dosya'];
+    if($_POST['google_drive_dan_secilen_dosya_id'] == 'root'){
+        $uzak_sunucu_ici_dizin_adi = "";
+    }else{
+        $uzak_sunucu_ici_dizin_adi = $_POST['google_drive_dan_secilen_dosya_id'];
+    }
+
+
+// Elle işlem
+try {
+
+     $sonuc_cikti_mesaji = uzakGoogleSunucuyaYedekle($islemi_yapan, $dosya_adi_yolu, $yedekleme_gorevi, $silinecek_dosya_tipi, $uzak_sunucu_ici_dizin_adi, $google_sunucu_korunacak_yedek, $secilen_yedekleme_oneki);
+
+    echo json_encode($sonuc_cikti_mesaji, JSON_UNESCAPED_UNICODE);  // Mesajı JSON olarak gönder
+} catch (\Google\Service\Exception $e) {
+    $sonuc_cikti_mesaji[] = [
+        'status' => 'error',
+        'message' => '<span style="color:red;">Hata7:</span> ' . $e->getMessage()
+    ];
+    echo json_encode($sonuc_cikti_mesaji, JSON_UNESCAPED_UNICODE);  // Mesajı JSON olarak gönder
+} catch (Exception $e) {
+    $sonuc_cikti_mesaji[] = [
+        'status' => 'error',
+        'message' => '<span style="color:red;">Hata8:</span> ' . $e->getMessage()
+    ];
+    echo json_encode($sonuc_cikti_mesaji, JSON_UNESCAPED_UNICODE);  // Mesajı JSON olarak gönder
+}
+
+ob_flush();
+flush();
 }
 
 function isDriveId($drivePath) {
     // Google Drive ID'si genellikle 28-34 karakter uzunluğunda alfanümerik bir dizgedir
     return preg_match('/^[a-zA-Z0-9_-]{28,34}$/', $drivePath);
-}
-
-
-if (!function_exists('uzakGoogleSunucuyaYedekle')) {
-function uzakGoogleSunucuyaYedekle( $dosya_adi_yolu, $yedekleme_gorevi, $silinecek_dosya_tipi, $uzak_sunucu_ici_dizin_adi, $google_sunucu_korunacak_yedek, $secilen_yedekleme_oneki ){
-$googleyulendimesaji = [];
-$googlesilmemesaji = [];
-
-    //file_put_contents(KOKYOLU.'error.log', date('Y-m-d H:i:s') . '<pre>' . print_r($tables, true) . '</pre>' . "\n", FILE_APPEND);
-    //$dosya_adi_yolu = 'DATABASEBACKUP/webyonetimi-deneme-2024-05-30-23-58-32';
-
-// Kullanım
-try {
-    main($dosya_adi_yolu, $uzak_sunucu_ici_dizin_adi);
-        $googleyulendimesaji[] = "Google Drive Sunucusuna Başarıyla Yüklendi";
-
-    try {
-        $googlesilmemesaji = uzakGoogleSunucudaDosyaSil( $dosya_adi_yolu, $yedekleme_gorevi, $silinecek_dosya_tipi, $uzak_sunucu_ici_dizin_adi, $google_sunucu_korunacak_yedek, $secilen_yedekleme_oneki );
-
-    } catch (Exception $e) {
-        $googlesilmemesaji[] = 'Hata: ' . $e->getMessage();
-    }
-
-} catch (\Google\Service\Exception $e) {
-    $googleyulendimesaji[] = "Hata: " . $e->getMessage();
-} catch (Exception $e) {
-    $googleyulendimesaji[] = "Hata: " . $e->getMessage();
-}
-return array_merge($googleyulendimesaji,$googlesilmemesaji);
-
-
-} // function uzakGoogleSunucuyaYedekle($service, $dosya_adi_yolu, $uzak_sunucu_ici_dizin_adi){
-} // if (!function_exists('uzakGoogleSunucuyaYedekle')) {
-
-// Her yerel alandan googla yükleme kodu
-if(isset($_POST['googla_yukle']) && $_POST['googla_yukle'] == '1' && isset($_POST['yerel_den_secilen_dosya']) && !empty($_POST['yerel_den_secilen_dosya']) && isset($_POST['google_drive_dan_secilen_dosya_id']) && !empty($_POST['google_drive_dan_secilen_dosya_id']))
-{
-
-$dosya_adi_yolu = $_POST['yerel_den_secilen_dosya'];
-if($_POST['google_drive_dan_secilen_dosya_id'] == 'root'){
-    $uzak_sunucu_ici_dizin_id = "";
-}else{
-    $uzak_sunucu_ici_dizin_id = $_POST['google_drive_dan_secilen_dosya_id'];
-}
-
-
-// Kullanım
-try {
-    main($dosya_adi_yolu, $uzak_sunucu_ici_dizin_id);
-        echo "<b>Google Drive Sunucusuna Başarıyla Yüklendi:</b> " . basename($dosya_adi_yolu);
-
-} catch (\Google\Service\Exception $e) {
-    echo "Hata: " . $e->getMessage();
-} catch (Exception $e) {
-    echo "Hata: " . $e->getMessage();
-}
-
-ob_flush();
-flush();
 }
 
 ?>

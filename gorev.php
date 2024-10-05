@@ -28,7 +28,7 @@ $lock_file = $temp_dir . DIRECTORY_SEPARATOR . 'gorev.lock';
 // Eğer kilit dosyası varsa ve dosya halen var ise işlemi sonlandır
 if (file_exists($lock_file)) {
     // Hata günlüğüne yazmak isterseniz aşağıdaki satırı yorumdan çıkarabilirsiniz
-     //file_put_contents(KOKYOLU.'error.log', date('Y-m-d H:i:s') . '<pre>' . print_r($tables, true) . '</pre>' . "\n", FILE_APPEND);
+     //file_put_contents(KOKYOLU.'error.log', date('Y-m-d H:i:s') . ' - 1 - ' . basename(__FILE__) . ' - ' . '<pre>' . print_r($tables, true) . '</pre>' . "\n", FILE_APPEND);
     
     // Kilit dosyası mevcut, başka bir işlem çalışıyor.
     exit();
@@ -65,7 +65,7 @@ function isFullUrl($kaynak_url) {
     return filter_var($kaynak_url, FILTER_VALIDATE_URL) !== false;
 }
 #########################################################################################################################
-  // file_put_contents(KOKYOLU.'error.log', date('Y-m-d H:i:s') . '<pre>' . print_r($tables, true) . '</pre>' . "\n", FILE_APPEND);
+  // file_put_contents(KOKYOLU.'error.log', date('Y-m-d H:i:s') . ' - 2 - ' . basename(__FILE__) . ' - ' . '<pre>' . print_r($tables, true) . '</pre>' . "\n", FILE_APPEND);
 $gorevden = true; // CRON ZAMANLAYICI DOSYA İÇİNDE ETKİNLEŞTİRMEK İÇİNDİR
 
 require __DIR__ . '/cron_zamanlayici.php'; // sonraki çalışacak zamanı unix zaman damgası olarak verir
@@ -87,14 +87,14 @@ if(isset($_POST['elle_yurutme']) && $_POST['elle_yurutme'] == 1 && isset($_POST[
 $yedeklenecek_tablolar = [];
 $yedeklendi_mi = false;
 
-     // file_put_contents(KOKYOLU.'error.log', date('Y-m-d H:i:s') . '<pre>' . print_r($tables, true) . '</pre>' . "\n", FILE_APPEND);
+     // file_put_contents(KOKYOLU.'error.log', date('Y-m-d H:i:s') . ' - 3 - ' . basename(__FILE__) . ' - ' . '<pre>' . print_r($tables, true) . '</pre>' . "\n", FILE_APPEND);
 
 while ($row = $gorevler->fetch()) {
 
-     // file_put_contents(KOKYOLU.'error.log', date('Y-m-d H:i:s') . '<pre>' . print_r($tables, true) . '</pre>' . "\n", FILE_APPEND);
+     // file_put_contents(KOKYOLU.'error.log', date('Y-m-d H:i:s') . ' - 4 - ' . basename(__FILE__) . ' - ' . '<pre>' . print_r($tables, true) . '</pre>' . "\n", FILE_APPEND);
 
 $yedeklenecek_tablolar = [];
-$calistirma_sonuc_mesaji[] = array();
+$calistirma_sonuc_mesaji = [];
 $yedeklendi_mi = false;
 
     $dosya_tarihi                   = date('Y-m-d-H-i-s'); // date('Y-m-d-H-i-s', $row['sonraki_calisma']);
@@ -154,6 +154,7 @@ if(!empty($yedekleme_gorevi) && $yedekleme_gorevi == '1' && $gz == '0' && $combi
         '4' => ''
     ];
 */
+
 #########################################################################################################################
 #########################################################################################################################
 #########################################################################################################################
@@ -241,7 +242,6 @@ if( isset($row['tablolar']) && !empty($row['tablolar']) && $row['combine'] == '3
 
     }
 
-
 } // if( isset($row['tablolar']) && !empty($row['tablolar']) && $row['combine'] == '3' ) {
 
 #########################################################################################################################
@@ -258,19 +258,23 @@ if( isset($row['tablolar']) && !empty($row['tablolar']) && $row['combine'] == '3
         // Elle seçilen tablo yoksa tam yedekleme var demektir
         $yedeklendi_mi = true;
 
-          // file_put_contents(KOKYOLU.'error.log', date('Y-m-d H:i:s') . '<pre>' . print_r($tables, true) . '</pre>' . "\n", FILE_APPEND);
+        $islemi_yapan = true;
+        $veritabani_backup_yedekleme_sonucu = veritabaniYedekleme($islemi_yapan, $PDOdbsecilen, $veritabani_id, $secilen_yedekleme_oneki, $combine, $elle, $grup, $dbbakim, $gz, $yedekleyen, $dblock, $db_name, $yedeklenecek_tablolar, $dosya_tarihi);
 
-        $veritabani_backup_yedekleme_sonucu = veritabaniYedekleme($PDOdbsecilen, $veritabani_id, $secilen_yedekleme_oneki, $combine, $elle, $grup, $dbbakim, $gz, $yedekleyen, $dblock, $db_name, $yedeklenecek_tablolar, $dosya_tarihi);
+          //file_put_contents(KOKYOLU.'error.log', date('Y-m-d H:i:s') . ' - 5 - ' . basename(__FILE__) . ' - ' . '<pre>' . print_r($veritabani_backup_yedekleme_sonucu, true) . '</pre>' . "\n", FILE_APPEND);
 
-          // file_put_contents(KOKYOLU.'error.log', date('Y-m-d H:i:s') . '<pre>' . print_r($tables, true) . '</pre>' . "\n", FILE_APPEND);
-
-    } // else if(count($yedeklenecek_tablolar)==0){
+    }
 #############################################################################################################################
 // VERİTABANI YEDEKLEME YAPILMADI İSE $yedeklendi_mi = false; OLACAĞI İÇİN UZAK SUNUCULARA YÜKLEMEYİ YAPMAYACAKTIR
-if(!empty($veritabani_backup_yedekleme_sonucu) && in_array('Veritabanı Başarıyla Yedeklendi',$veritabani_backup_yedekleme_sonucu) && $yedeklendi_mi){
+    // Veritabanı yedekleme sonrasında "Yedeklendi" içeren metin geliyormu?
+    $basarili_metin = "Yedeklendi";
+    if (!empty(array_values(array_filter(array_column($veritabani_backup_yedekleme_sonucu, 'message'), function($var) use ($basarili_metin){ return strpos($var, $basarili_metin) !== false; })))) {
 
     if(isset($_POST['elle_yurutme']) && $_POST['elle_yurutme'] == 1){
-        $calistirma_sonuc_mesaji[] = array("Görev Elle Yürütüldü");
+        $calistirma_sonuc_mesaji[][] = [
+            'status' => 'hand_run',
+            'message' => '<span style="color:green;font-weight: bold;">Görev Elle Yürütüldü</span>'
+        ];
     }
         $calistirma_sonuc_mesaji[] = $veritabani_backup_yedekleme_sonucu;
 
@@ -278,41 +282,59 @@ if(!empty($veritabani_backup_yedekleme_sonucu) && in_array('Veritabanı Başarı
 // EĞER FTP YEDEKLEME ETKİN İSE FTP SUNUCUSUNA YEDEKLE
     if(isset($row['ftp_yedekle']) && $row['ftp_yedekle'] == 1){
 
-    if(!empty($veritabani_backup_yedekleme_sonucu['dosya_adi']) && strlen($veritabani_backup_yedekleme_sonucu['dosya_adi'])>10){
+    // FTP Sunucusuna yedekleme için dosya adı varmı, varsa FTP sunucuna yedekle
+    if(!empty($veritabani_backup_yedekleme_sonucu[array_search('dosya_adi', array_column($veritabani_backup_yedekleme_sonucu, 'status'))]['message']) && strlen($veritabani_backup_yedekleme_sonucu[array_search('dosya_adi', array_column($veritabani_backup_yedekleme_sonucu, 'status'))]['message'])>10){
 
-        $veritabani_ftp_dosya_adi_yolu = $veritabani_backup_yedekleme_sonucu['dosya_adi'];
-        $veritabani_ftp_yedekleme_sonucu = uzakFTPsunucuyaYedekle($genel_ayarlar, $ftp_server, $ftp_username, $ftp_password, $ftp_path, $veritabani_ftp_dosya_adi_yolu, $yedekleme_gorevi, $uzak_sunucu_ici_dizin_adi, $ftp_sunucu_korunacak_yedek, $secilen_yedekleme_oneki);
+        // Dosya adı
+        $veritabani_ftp_dosya_adi_yolu = $veritabani_backup_yedekleme_sonucu[array_search('dosya_adi', array_column($veritabani_backup_yedekleme_sonucu, 'status'))]['message'];
+
+        $islemi_yapan = true;
+        $veritabani_ftp_yedekleme_sonucu = uzakFTPsunucuyaYedekle($islemi_yapan, $genel_ayarlar, $ftp_server, $ftp_username, $ftp_password, $ftp_path, $veritabani_ftp_dosya_adi_yolu, $yedekleme_gorevi, $uzak_sunucu_ici_dizin_adi, $ftp_sunucu_korunacak_yedek, $secilen_yedekleme_oneki);
+
         // UZAK FTP YEDEKLEME BAŞARILI OLURSA KENDİ DOSYA İÇİNDE ESKİ FTP YEDEKLERİ SİLECEK
-        if(!empty($veritabani_ftp_yedekleme_sonucu) && in_array('FTP Sunucusuna Başarıyla Yüklendi',$veritabani_ftp_yedekleme_sonucu)){
+        // FTP sunucusan yedekleme sonrası "Yüklendi" içeren metin geliyor mu?
+        $basarili_metin = "Yüklendi";
+        if (!empty(array_values(array_filter(array_column($veritabani_ftp_yedekleme_sonucu, 'message'), function($var) use ($basarili_metin){ return strpos($var, $basarili_metin) !== false; })))) {
 
             $calistirma_sonuc_mesaji[] = $veritabani_ftp_yedekleme_sonucu;
             unset($veritabani_ftp_dosya_adi_yolu);
         }else{
             $calistirma_sonuc_mesaji[] = $veritabani_ftp_yedekleme_sonucu;
         }
-    } // if(!empty($veritabani_backup_yedekleme_sonucu['dosya_adi']) && strlen($veritabani_backup_yedekleme_sonucu['dosya_adi'])>10){
-    } // if(isset($row['ftp_yedekle']) && $row['ftp_yedekle'] == 1){
+    }
+    }
 #############################################################################################################################
 // EĞER GOOGLE YEDEKLEME ETKİN İSE GOOGLE DRIVE SUNUCUSUNA YEDEKLE
     if(isset($row['google_yedekle']) && $row['google_yedekle'] == 1){
 
-    if(!empty($veritabani_backup_yedekleme_sonucu['dosya_adi']) && strlen($veritabani_backup_yedekleme_sonucu['dosya_adi'])>10){
+    // Google sunucusuna yedeklemek için dosya adı mevcut mu, mevcut ise yedekle
+    if(!empty($veritabani_backup_yedekleme_sonucu[array_search('dosya_adi', array_column($veritabani_backup_yedekleme_sonucu, 'status'))]['message']) && strlen($veritabani_backup_yedekleme_sonucu[array_search('dosya_adi', array_column($veritabani_backup_yedekleme_sonucu, 'status'))]['message'])>10){
 
-        $veritabani_google_dosya_adi_yolu = $veritabani_backup_yedekleme_sonucu['dosya_adi'];
+        // Dosya adı
+        $veritabani_google_dosya_adi_yolu = $veritabani_backup_yedekleme_sonucu[array_search('dosya_adi', array_column($veritabani_backup_yedekleme_sonucu, 'status'))]['message'];
+        $islemi_yapan = true;
+        $veritabani_google_yedekleme_sonucu = uzakGoogleSunucuyaYedekle($islemi_yapan, $veritabani_google_dosya_adi_yolu, $yedekleme_gorevi, $silinecek_dosya_tipi, $uzak_sunucu_ici_dizin_adi, $google_sunucu_korunacak_yedek, $secilen_yedekleme_oneki );
+        
+        //file_put_contents(KOKYOLU.'error.log', date('Y-m-d H:i:s') . ' - 6 - ' . basename(__FILE__) . ' - ' . '<pre>uzakGoogleSunucuyaYedekle' . print_r($veritabani_google_dosya_adi_yolu, true) . '</pre>' . "\n", FILE_APPEND);
 
-        $veritabani_google_yedekleme_sonucu = uzakGoogleSunucuyaYedekle( $veritabani_google_dosya_adi_yolu, $yedekleme_gorevi, $silinecek_dosya_tipi, $uzak_sunucu_ici_dizin_adi, $google_sunucu_korunacak_yedek, $secilen_yedekleme_oneki );
         // UZAK GOOGLE YEDEKLEME BAŞARILI OLURSA KENDİ DOSYA İÇİNDE ESKİ GOOGLE YEDEKLERİ SİLECEK
-        if(!empty($veritabani_google_yedekleme_sonucu) && in_array('Google Drive Sunucusuna Başarıyla Yüklendi',$veritabani_google_yedekleme_sonucu)){
+        // Google sunucusuna yedekleme sonrası "Yüklendi" içeren metin geliyor mu
+        $basarili_metin = "Yüklendi";
+        if (!empty(array_values(array_filter(array_column($veritabani_ftp_yedekleme_sonucu, 'message'), function($var) use ($basarili_metin){ return strpos($var, $basarili_metin) !== false; })))) {
+
+            $veritabani_google_yedekl_silme_sonucu = uzakGoogleSunucudaDosyaSil($veritabani_google_dosya_adi_yolu, $yedekleme_gorevi, $silinecek_dosya_tipi, $uzak_sunucu_ici_dizin_adi, $google_sunucu_korunacak_yedek, $secilen_yedekleme_oneki);
+
             $calistirma_sonuc_mesaji[] = $veritabani_google_yedekleme_sonucu;
+            $calistirma_sonuc_mesaji[] = $veritabani_google_yedekl_silme_sonucu;
             unset($veritabani_google_dosya_adi_yolu);
         }else{
             $calistirma_sonuc_mesaji[] = $veritabani_google_yedekleme_sonucu;
         }
-    } // if(!empty($veritabani_backup_yedekleme_sonucu['dosya_adi']) && strlen($veritabani_backup_yedekleme_sonucu['dosya_adi'])>10){
-    } // if(isset($row['google_yedekle']) && $row['google_yedekle'] == 1){
+    }
+    }
 #############################################################################################################################
 
-} // if(isset($veritabani_backup_yedekleme_sonucu[]) && $veritabani_backup_yedekleme_sonucu[] == 'Veritabanı Başarıyla Yedeklendi' && $yedeklendi_mi){
+}
 
 }else // if(isset($row['yedekleme_gorevi']) && $row['yedekleme_gorevi'] == '1' && is_numeric($row['secilen_yedekleme'])){
 #########################################################################################################################
@@ -338,7 +360,7 @@ if($row['yedekleme_gorevi'] == '2' && is_string($row['secilen_yedekleme']) && !i
     $destination = ZIPDIR . $secilen_yedekleme_oneki . "-" . $dosya_tarihi . '.zip';
     $comment = $secilen_yedekleme;
 
-    //file_put_contents(KOKYOLU.'error.log', date('Y-m-d H:i:s') . '<pre>' . print_r($tables, true) . '</pre>' . "\n", FILE_APPEND);
+    //file_put_contents(KOKYOLU.'error.log', date('Y-m-d H:i:s') . ' - 7 - ' . basename(__FILE__) . ' - ' . '<pre>' . print_r($tables, true) . '</pre>' . "\n", FILE_APPEND);
 
         if(isset($genel_ayarlar['zip_tercihi']) && $genel_ayarlar['zip_tercihi'] == 1){
             $zipyap_sonucu = zipDataUsingZipArchive($source, $destination, $comment);
@@ -348,57 +370,74 @@ if($row['yedekleme_gorevi'] == '2' && is_string($row['secilen_yedekleme']) && !i
             $zipyap_sonucu = "";
         }
 
-    //file_put_contents(KOKYOLU.'error.log', date('Y-m-d H:i:s') . '<pre>' . print_r($tables, true) . '</pre>' . "\n", FILE_APPEND);
+    //file_put_contents(KOKYOLU.'error.log', date('Y-m-d H:i:s') . ' - 8 - ' . basename(__FILE__) . ' - ' . '<pre>' . print_r($tables, true) . '</pre>' . "\n", FILE_APPEND);
 
-    if(!empty($zipyap_sonucu) && in_array('Zip Arşivi Başarıyla Oluşturuldu',$zipyap_sonucu)){
+    if(!empty($zipyap_sonucu[array_search('dosya_adi', array_column($zipyap_sonucu, 'status'))]['message']) && strlen($zipyap_sonucu[array_search('dosya_adi', array_column($zipyap_sonucu, 'status'))]['message'])>10){
     $yedeklendi_mi = true;
 
     if(isset($_POST['elle_yurutme']) && $_POST['elle_yurutme'] == 1){
-        $calistirma_sonuc_mesaji[] = array("Görev Elle Yürütüldü");
+        $calistirma_sonuc_mesaji[][] = [
+            'status' => 'hand_run',
+            'message' => '<span style="color:green;font-weight: bold;">Görev Elle Yürütüldü</span>'
+        ];
     }
         $calistirma_sonuc_mesaji[] = $zipyap_sonucu;
 #############################################################################################################################
 // EĞER FTP YEDEKLEME ETKİN İSE FTP SUNUCUSUNA YEDEKLE
     if(isset($row['ftp_yedekle']) && $row['ftp_yedekle'] == 1){
 
-    if(!empty($zipyap_sonucu['dosya_adi']) && strlen($zipyap_sonucu['dosya_adi'])>10){
+    if(!empty($zipyap_sonucu[array_search('dosya_adi', array_column($zipyap_sonucu, 'status'))]['message']) && strlen($zipyap_sonucu[array_search('dosya_adi', array_column($zipyap_sonucu, 'status'))]['message'])>10){
 
-        $zip_ftp_dosya_adi_yolu = $zipyap_sonucu['dosya_adi'];
-        $dizin_zip_ftp_yedekleme_sonucu = uzakFTPsunucuyaYedekle($genel_ayarlar, $ftp_server, $ftp_username, $ftp_password, $ftp_path, $zip_ftp_dosya_adi_yolu, $yedekleme_gorevi, $uzak_sunucu_ici_dizin_adi, $ftp_sunucu_korunacak_yedek, $secilen_yedekleme_oneki);
+        $zip_ftp_dosya_adi_yolu = $zipyap_sonucu[array_search('dosya_adi', array_column($zipyap_sonucu, 'status'))]['message'];
+
+        $islemi_yapan = true;
+        $dizin_zip_ftp_yedekleme_sonucu = uzakFTPsunucuyaYedekle($islemi_yapan, $genel_ayarlar, $ftp_server, $ftp_username, $ftp_password, $ftp_path, $zip_ftp_dosya_adi_yolu, $yedekleme_gorevi, $uzak_sunucu_ici_dizin_adi, $ftp_sunucu_korunacak_yedek, $secilen_yedekleme_oneki);
         // UZAK FTP YEDEKLEME BAŞARILI OLURSA KENDİ DOSYA İÇİNDE ESKİ FTP YEDEKLERİ SİLECEK
-        if(!empty($dizin_zip_ftp_yedekleme_sonucu) && in_array('FTP Sunucusuna Başarıyla Yüklendi',$dizin_zip_ftp_yedekleme_sonucu)){
+
+        $basarili_metin = "Yüklendi";
+        if (!empty(array_values(array_filter(array_column($dizin_zip_ftp_yedekleme_sonucu, 'message'), function($var) use ($basarili_metin){ return strpos($var, $basarili_metin) !== false; })))) {
 
             $calistirma_sonuc_mesaji[] = $dizin_zip_ftp_yedekleme_sonucu;
+
             unset($zip_ftp_dosya_adi_yolu);
-        }else{
+        } else {
             $calistirma_sonuc_mesaji[] = $dizin_zip_ftp_yedekleme_sonucu;
         }
-    } // if(!empty($zipyap_sonucu['dosya_adi']) && strlen($zipyap_sonucu['dosya_adi'])>10){
-    } // if(isset($row['ftp_yedekle']) && $row['ftp_yedekle'] == 1){
+
+        //echo '<pre>' . print_r($calistirma_sonuc_mesaji, true) . '</pre>';
+    }
+    }
 #############################################################################################################################
 // EĞER GOOGLE YEDEKLEME ETKİN İSE GOOGLE DRIVE SUNUCUSUNA YEDEKLE
     
     if(isset($row['google_yedekle']) && $row['google_yedekle'] == 1){
 
-    if(!empty($zipyap_sonucu['dosya_adi']) && strlen($zipyap_sonucu['dosya_adi'])>10){
+    if(!empty($zipyap_sonucu[array_search('dosya_adi', array_column($zipyap_sonucu, 'status'))]['message']) && strlen($zipyap_sonucu[array_search('dosya_adi', array_column($zipyap_sonucu, 'status'))]['message'])>10){
 
-        $zip_google_dosya_adi_yolu = $zipyap_sonucu['dosya_adi'];
-        $dizin_zip_google_yedekleme_sonucu = uzakGoogleSunucuyaYedekle( $zip_google_dosya_adi_yolu, $yedekleme_gorevi, $silinecek_dosya_tipi, $uzak_sunucu_ici_dizin_adi, $google_sunucu_korunacak_yedek, $secilen_yedekleme_oneki );
+        $zip_google_dosya_adi_yolu = $zipyap_sonucu[array_search('dosya_adi', array_column($zipyap_sonucu, 'status'))]['message'];
+        $islemi_yapan = true;
+        $dizin_zip_google_yedekleme_sonucu = uzakGoogleSunucuyaYedekle($islemi_yapan, $zip_google_dosya_adi_yolu, $yedekleme_gorevi, $silinecek_dosya_tipi, $uzak_sunucu_ici_dizin_adi, $google_sunucu_korunacak_yedek, $secilen_yedekleme_oneki );
 
         // UZAK GOOGLE YEDEKLEME BAŞARILI OLURSA KENDİ DOSYA İÇİNDE ESKİ GOOGLE YEDEKLERİ SİLECEK
-        if(!empty($dizin_zip_google_yedekleme_sonucu) && in_array('Google Drive Sunucusuna Başarıyla Yüklendi',$dizin_zip_google_yedekleme_sonucu)){
+        $basarili_metin = "Yüklendi";
+        if (!empty(array_values(array_filter(array_column($dizin_zip_google_yedekleme_sonucu, 'message'), function($var) use ($basarili_metin){ return strpos($var, $basarili_metin) !== false; })))) {
+
+            $zip_google_dosya_silme_sonucu = uzakGoogleSunucudaDosyaSil($zip_google_dosya_adi_yolu, $yedekleme_gorevi, $silinecek_dosya_tipi, $uzak_sunucu_ici_dizin_adi, $google_sunucu_korunacak_yedek, $secilen_yedekleme_oneki);
 
             $calistirma_sonuc_mesaji[] = $dizin_zip_google_yedekleme_sonucu;
+            $calistirma_sonuc_mesaji[] = $zip_google_dosya_silme_sonucu;
+
+            //$dizin_zip_google_yedekleme_sonucu;
             unset($zip_google_dosya_adi_yolu);
 
         }else{
             $calistirma_sonuc_mesaji[] = $dizin_zip_google_yedekleme_sonucu;
         }
-    } // if(!empty($zipyap_sonucu['dosya_adi']) && strlen($zipyap_sonucu['dosya_adi'])>10){
-    } // if(isset($row['google_yedekle']) && $row['google_yedekle'] == 1){
+    }
+    }
 #############################################################################################################################
 
-    } // if(isset($zipyap_sonucu[]) && $zipyap_sonucu[] == 'Zip Arşivi Başarıyla Oluşturuldu'){
+    }
 
 }else
 #########################################################################################################################
@@ -417,7 +456,10 @@ if($row['yedekleme_gorevi'] == '2' && is_string($row['secilen_yedekleme']) && !i
 if($row['yedekleme_gorevi'] == '3' && (empty($row['secilen_yedekleme']) || is_null($row['secilen_yedekleme'])) ){
 
     if(isset($_POST['elle_yurutme']) && $_POST['elle_yurutme'] == 1){
-        $calistirma_sonuc_mesaji[] = array("Görev Elle Yürütüldü");
+        $calistirma_sonuc_mesaji[][] = [
+            'status' => 'hand_run',
+            'message' => '<span style="color:green;font-weight: bold;">Görev Elle Yürütüldü</span>'
+        ];
     }
 
 // ÇALIŞTIRILACAK DOSYANIN URL OLUP OLMADIĞINI KONTROL EDİYORUZ
@@ -432,7 +474,7 @@ if(isFullUrl($kaynak_url)){
  */
 
 /*
-    // POST verileri
+    // POST verileri için
     $data = [
         'key1' => 'value1',
         'key2' => 'value2'
@@ -444,7 +486,7 @@ if(isFullUrl($kaynak_url)){
         'http' => [
             'method' => 'GET', // GET veya POST
             'header' => "Content-Type: application/x-www-form-urlencoded\r\n"
-            //'content' => http_build_query($data) // POST verileri
+            //'content' => http_build_query($data) // POST verileri için
         ]
     ];
 
@@ -454,9 +496,17 @@ if(isFullUrl($kaynak_url)){
     $response = @file_get_contents($kaynak_url, false, $context);
 
     if ($response === false) {
-        $calistirma_sonuc_mesaji[] = array("<b>Bağlantı başarısız:</b> ". $kaynak_url);
+        $calistirma_sonuc_mesaji[][] = [
+            'status' => 'error',
+            'message' => '<span style="color:red;">Özel Dosya Bağlantısı başarısız: </span>' . $kaynak_url
+        ];
+
         $error = error_get_last();
-        $calistirma_sonuc_mesaji[] = array("<b>Hata mesajı:</b> " . $error['message']);
+        $calistirma_sonuc_mesaji[][] = [
+            'status' => 'error',
+            'message' => '<span style="color:red;">Özel Dosya Hatası: </span>' . $error['message']
+        ];
+
     } else {
         // POST isteği başarılı, sunucudan gelen yanıtı al ve kontrol et
         //echo "POST isteği başarılı. Sunucudan gelen yanıt:<br>";
@@ -474,16 +524,26 @@ if(isFullUrl($kaynak_url)){
             $content = $element->textContent;
             //echo "ID 'tamurl' içeriği: " . $content;
             $yedeklendi_mi = true;
-            $calistirma_sonuc_mesaji[] = array($content);
+            $calistirma_sonuc_mesaji[][] = [
+                'status' => 'success',
+                'message' => '<span style="color:green;">Özel Dosya Tam URL Başarıyla Çalıştırıldı.</span>'
+            ];
+            $calistirma_sonuc_mesaji[][] = [
+                'status' => 'success',
+                'message' => '<span style="color:green;">' . $content . '</span>'
+            ];
         } else {
             // Element bulunamadı, başarılı bir mesaj görüntüle
             //echo "ID 'tamurl' bulunamadı. Başarılı bir şekilde işlem yapıldı.";
             $yedeklendi_mi = true;
-            $calistirma_sonuc_mesaji[] = array("Başarıyla Tam URL Çalıştırıldı.");
+            $calistirma_sonuc_mesaji[][] = [
+                'status' => 'success',
+                'message' => '<span style="color:green;">Özel Dosya Tam URL Başarıyla Çalıştırıldı.</span>'
+            ];
         }
     }
 
-}else{
+}else{ // Dahili php dosya çalıştırma
 
 require __DIR__ . '/' . $kaynak_url;
 
@@ -508,19 +568,12 @@ require __DIR__ . '/' . $kaynak_url;
             exit;
         }
     }
+    $calistirma_sonuc_mesaji[] = $ozel_dosya_calisma_sonucu;
 
-    if(!empty($ozel_dosya_calisma_sonucu) && in_array('Özel Dosya Başarıyla Çalıştırıldı',$ozel_dosya_calisma_sonucu)){
+    //echo '<pre>' . print_r($ozel_dosya_calisma_sonucu, true) . '</pre>';
+
+    if(!empty($ozel_dosya_calisma_sonucu) && !in_array('error', array_column($ozel_dosya_calisma_sonucu, 'status'))){
         $yedeklendi_mi = true;
-        $ozel_dosya_calisma_sonucu = array_unique($ozel_dosya_calisma_sonucu);
-        // "Özel Dosya Başarıyla Çalıştırıldı" metni çıktıların en üstünde göstermek için önce diziden çıkarıyoruz sonra dizinin ilk sırasına ekliyoruz
-        // Hedef değer
-        $hedef = "Özel Dosya Başarıyla Çalıştırıldı";
-        // Hedef değeri bul ve diziden çıkar
-        if(($anahtar = array_search($hedef, $ozel_dosya_calisma_sonucu)) !== false) {
-            unset($ozel_dosya_calisma_sonucu[$anahtar]);
-        }
-        // Hedef değeri dizinin başına ekle
-        array_unshift($ozel_dosya_calisma_sonucu, $hedef);
         $calistirma_sonuc_mesaji[] = $ozel_dosya_calisma_sonucu;
     }else{
         $calistirma_sonuc_mesaji[] = $ozel_dosya_calisma_sonucu;
@@ -528,6 +581,7 @@ require __DIR__ . '/' . $kaynak_url;
 
 }
 }
+
 #########################################################################################################################
 ################################### GÖREV DİĞER SCRIPTLER İÇİN GÖREVİ SONU ##############################################
 #########################################################################################################################
@@ -591,45 +645,54 @@ if( !isset($_POST['elle_yurutme']) ){
 #########################################################################################################################
 // GÖREV ÇALIŞTIRMA SONRASI İŞLEM MESAJLARI YENİDEN DÜZENLEME
 // Dizi düzleştirme ve 'dosya_adi' anahtarını çıkarma fonksiyonu
-if (!function_exists('flatten_and_filter_array')) {
-function flatten_and_filter_array($array) {
-    $result = array();
-    foreach ($array as $item) {
-        if (is_array($item)) {
-            foreach ($item as $key => $value) {
-                if (!in_array($key, ['dosya_adi'])) {
-                    if (is_array($value)) {
-                        $result = array_merge($result, flatten_and_filter_array($value));
-                    } else {
-                        $result[] = $value;
-                    }
-                }
-            }
-        } else {
-            $result[] = $item;
-        }
-    }
-    return $result;
-}
-}
 
-// Diziyi düzleştir ve 'dosya_adi' anahtarını çıkar
-$calistirma_sonuc_mesaji = flatten_and_filter_array($calistirma_sonuc_mesaji);
 
-// Boş değerleri çıkarın
-$calistirma_sonuc_mesaji = array_filter($calistirma_sonuc_mesaji, function($value) {
-    return !empty($value);
+// 1. Boş dizileri çıkartma
+$calistirma_sonuc_mesaji = array_filter($calistirma_sonuc_mesaji, function($item) {
+    return !empty($item);
 });
 
-// Tekrar eden değerleri kaldırın
-$calistirma_sonuc_mesaji = array_unique($calistirma_sonuc_mesaji);
+// 2. Tekrar eden 'message' değerlerini tekilleştirme
+$allMessages = [];
+foreach ($calistirma_sonuc_mesaji as $group) {
+    foreach ($group as $entry) {
+        $allMessages[] = $entry['message'];
+    }
+}
+$uniqueMessages = array_unique($allMessages); // Tekrarlanan mesajları çıkar
 
-unset($calistirma_sonuc_mesaji[array_search('success', $calistirma_sonuc_mesaji)]);
+// 3. Dosya adlarını ayırma (status 'dosya_adi' olanları ayır)
+$nonFileMessages = array_filter($uniqueMessages, function($message) use ($calistirma_sonuc_mesaji) {
+    foreach ($calistirma_sonuc_mesaji as $group) {
+        foreach ($group as $entry) {
+            if ($entry['message'] === $message && $entry['status'] === 'dosya_adi') {
+                return false; // dosya_adi status'üne sahip olanları çıkar
+            }
+        }
+    }
+    return true;
+});
 
-//file_put_contents(KOKYOLU.'error.log', date('Y-m-d H:i:s') . '<pre>' . print_r($calistirma_sonuc_mesaji, true) . '</pre>' . "\n", FILE_APPEND);
-//echo '<pre>' . print_r($calistirma_sonuc_mesaji, true) . '</pre>';
+//echo '<pre>' . print_r($nonFileMessages, true) . '</pre>';
 
-$calistirmasonucmesaji = implode("<br>", $calistirma_sonuc_mesaji);
+// 4. Popup penceresinde gösterirken dosya adına 'basename' uygulama
+$popupContent = array_map(function($message) use ($calistirma_sonuc_mesaji) {
+    foreach ($calistirma_sonuc_mesaji as $group) {
+        foreach ($group as $entry) {
+            // Eğer status 'dosya_adi' ise, dosya adını formatla
+            if ($entry['message'] === $message && $entry['status'] === 'dosya_adi') {
+                return "<b>Dosya Adı: </b>" . basename($message); 
+            }
+        }
+    }
+    return $message;
+}, $uniqueMessages);
+
+$popup_pencere_mesaji = implode("<br>", $popupContent);
+
+$nonFileMessages = array_map('strip_tags', $nonFileMessages);
+$sonuc_mesaji_veritabanina = implode("<br>", $nonFileMessages);
+
 #########################################################################################################################
 // GÜNLÜK KAYIT AKTİF İSE VE $yedeklendi_mi TRUE İSE GÜNLÜĞE YAZ
 if( $row['gunluk_kayit'] == 'Aktif' && $yedeklendi_mi ){
@@ -644,7 +707,7 @@ if( $row['gunluk_kayit'] == 'Aktif' && $yedeklendi_mi ){
     $calisma_suresi = sprintf('%02d:%02d:%02d:%05.0f', $hours,$minutes,$seconds,$milliseconds);
 
     $sonuc_yaz = $PDOdb->prepare("INSERT INTO zamanlanmisgorev_gunluk (calistirma_ciktisi, gorev_adi, calistirilan_dosya, calisma_zamani, calisma_suresi) values (:calistirma_ciktisi, :gorev_adi, :calistirilan_dosya, :calisma_zamani, :calisma_suresi)");
-    $sonuc_yaz->bindValue(':calistirma_ciktisi', $calistirmasonucmesaji);
+    $sonuc_yaz->bindValue(':calistirma_ciktisi', $sonuc_mesaji_veritabanina);
     $sonuc_yaz->bindParam(':gorev_adi', $gorev_adi);
     $sonuc_yaz->bindParam(':calistirilan_dosya', $kaynak_url);
     $sonuc_yaz->bindParam(':calisma_zamani', $calisma_zamani);
@@ -653,7 +716,7 @@ if( $row['gunluk_kayit'] == 'Aktif' && $yedeklendi_mi ){
 
     if(!empty($PDOdb->lastInsertId())){
         if( !isset($_POST['elle_yurutme']) ){
-            unset($calistirma_sonuc_mesaji, $calistirma_sonuc_mesaji_filter, $calistirmasonucmesaji, $calisma_suresi, $calisma_zamani);
+            unset($calistirma_sonuc_mesaji, $calistirma_sonuc_mesaji_filter, $sonuc_mesaji_veritabanina, $calisma_suresi, $calisma_zamani);
         }
         //echo "Yedek Başarılı sonuç günlüğe yazıldı<br />";
     }else{
@@ -770,12 +833,12 @@ if(!empty($yol)){
         }
     }
 }
-    } // if($row['yerel_korunacak_yedek'] != '-1'){
+}
 ###################################################################################################
 ###################################################################################################
 
 if( isset($_POST['elle_yurutme']) ){
-    echo $calistirmasonucmesaji;
+    echo $popup_pencere_mesaji;
 }
 unset($id,
 $yerelden_secilen,
@@ -819,7 +882,7 @@ $dosya_tarihi,
 $zipyap_sonucu,
 $dizin_zip_ftp_yedekleme_sonucu,
 $dizin_zip_google_yedekleme_sonucu,
-$calistirmasonucmesaji,
+$sonuc_mesaji_veritabanina,
 $PDOdbsecilen,
 $veritabani_ftp_yedekleme_sonucu,
 $veritabani_google_yedekleme_sonucu,
@@ -870,7 +933,7 @@ $dosya_tarihi,
 $zipyap_sonucu,
 $dizin_zip_ftp_yedekleme_sonucu,
 $dizin_zip_google_yedekleme_sonucu,
-$calistirmasonucmesaji,
+$sonuc_mesaji_veritabanina,
 $calistirma_sonuc_mesaji,
 $PDOdbsecilen,
 $yedeklenecek_tablolar,
@@ -879,15 +942,13 @@ $veritabani_ftp_yedekleme_sonucu,
 $veritabani_google_yedekleme_sonucu,
 $ozel_dosya_calisma_sonucu);
 
-// file_put_contents(KOKYOLU.'error.log', date('Y-m-d H:i:s') . '<pre>' . print_r($tables, true) . '</pre>' . "\n", FILE_APPEND);
-
     // İşlem tamamlandığında kilit dosyasını sil
     if (file_exists($lock_file)) {
         unlink($lock_file);
     }
 } catch (Exception $e) {
     // Hata yönetimi burada yapılabilir
-    file_put_contents(KOKYOLU.'error.log', date('Y-m-d H:i:s') . '<pre>' . print_r($e->getMessage(), true) . '</pre>' . "\n", FILE_APPEND);
+    file_put_contents(KOKYOLU . 'error.log', date('Y-m-d H:i:s') . ' - 11 - ' . basename(__FILE__) . ' - ' . print_r($e->getMessage(), true) . '</pre>' . "\n", FILE_APPEND);
 
     // Hata oluştuğunda da kilit dosyasını sil
     if (file_exists($lock_file)) {

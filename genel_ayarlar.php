@@ -1138,7 +1138,7 @@ $(document).ready(function() {
                                                             }
                                                             ?>
                                                             </td>
-                                                            <td colspan="3">Ajax kodu mevcuttur</td>
+                                                            <td colspan="3">Script içinde Ajax kodu mevcuttur</td>
                                                         </tr>
                                                         <tr>
                                                             <td>Görevi Ajax & Cron İle Çalıştır:</td>

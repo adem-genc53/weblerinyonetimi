@@ -8,9 +8,9 @@ $hash = new Hash;
     //exit;
 
 if (!function_exists('veritabaniYedekleme')) {
-    function veritabaniYedekleme($PDOdbsecilen, $veritabani_id, $secilen_yedekleme_oneki, $combine, $elle, $grup, $dbbakim, $gz, $yedekleyen, $dblock, $db_name, $yedeklenecek_tablolar, $dosya_tarihi) {
+    function veritabaniYedekleme($islemi_yapan, $PDOdbsecilen, $veritabani_id, $secilen_yedekleme_oneki, $combine, $elle, $grup, $dbbakim, $gz, $yedekleyen, $dblock, $db_name, $yedeklenecek_tablolar, $dosya_tarihi) {
         // ÇIKTI MESAJI BAŞLAT
-        $backup_mesaji = [];
+        $sonuc_cikti_mesaji = [];
 
         // SUNUCU BİLGİLERİNİ VE AYARLARI BELİRLEME
     if (!function_exists('getInitialSettings')) {
@@ -137,9 +137,9 @@ if (!function_exists('veritabaniYedekleme')) {
 
         // TABLOLARI YEDEKLEME FONKSİYONU
     if (!function_exists('backupTables')) {
-        function backupTables($PDOdbsecilen, $tables, $combine, $elle, $onek_ve_tarih, $db_name, $gz) {
+        function backupTables($islemi_yapan, $PDOdbsecilen, $tables, $combine, $elle, $onek_ve_tarih, $db_name, $gz) {
 
-            $backup_mesaji = [];
+            $sonuc_cikti_mesaji = [];
             $handle = "";
             $success = false;
 
@@ -157,11 +157,20 @@ if (!function_exists('veritabaniYedekleme')) {
                 // YEDEKLEME BAŞLANGIÇ AYARLARINI OLUŞTUR
                 $initialSettingsString = generateInitialSettingsString($tables, $initialSettings);
                 writeToFile($filePath, $initialSettingsString); // BAŞLANGIÇ AYARLARINI YAZ
-                        $backup_mesaji[] = "Veritabanı Başarıyla Yedeklendi";                
+                    $sonuc_cikti_mesaji[] = [
+                        'status' => 'success',
+                        'message' => '<span style="color:green;">Veritabanı Başarıyla Yedeklendi</span>'
+                    ];            
                     if ($gz) {
-                        $backup_mesaji["dosya_adi"] = $filePath.".gz";
+                        $sonuc_cikti_mesaji[] = [
+                            'status' => 'dosya_adi',
+                            'message' => $filePath.".gz"
+                        ];
                     }else{
-                        $backup_mesaji["dosya_adi"] = $filePath;
+                        $sonuc_cikti_mesaji[] = [
+                            'status' => 'dosya_adi',
+                            'message' => $filePath
+                        ];
                     }
             }
 
@@ -171,12 +180,21 @@ if (!function_exists('veritabaniYedekleme')) {
                     // YEDEKLEME BAŞLANGIÇ AYARLARINI OLUŞTUR
                     $initialSettingsString = generateInitialSettingsString($tables, $initialSettings);
                     writeToFile($filePath, $initialSettingsString); // BAŞLANGIÇ AYARLARINI YAZ
-                        $backup_mesaji[] = "Veritabanı Başarıyla Yedeklendi";                
-                    if ($gz) {
-                        $backup_mesaji["dosya_adi"] = $filePath.".gz";
-                    }else{
-                        $backup_mesaji["dosya_adi"] = $filePath;
-                    }
+                        $sonuc_cikti_mesaji[] = [
+                            'status' => 'success',
+                            'message' => '<span style="color:green;">Veritabanı Başarıyla Yedeklendi</span>'
+                        ];             
+                        if ($gz) {
+                            $sonuc_cikti_mesaji[] = [
+                                'status' => 'dosya_adi',
+                                'message' => $filePath.".gz"
+                            ];
+                        }else{
+                            $sonuc_cikti_mesaji[] = [
+                                'status' => 'dosya_adi',
+                                'message' => $filePath
+                            ];
+                        }
                 }
             }
 
@@ -200,8 +218,14 @@ if (!function_exists('veritabaniYedekleme')) {
                     if ($gz) {
                         gzipFileChunked($filePath);
                     }
-                        $backup_mesaji[] = "Veritabanı Başarıyla Yedeklendi";
-                        $backup_mesaji["dosya_adi"] = $subBackupDir;
+                        $sonuc_cikti_mesaji[] = [
+                            'status' => 'success',
+                            'message' => '<span style="color:green;">Veritabanı Başarıyla Yedeklendi</span>'
+                        ];             
+                        $sonuc_cikti_mesaji[] = [
+                            'status' => 'dosya_adi',
+                            'message' => $subBackupDir
+                        ];
 
                 } elseif ($combine == '3' && $elle == '1'){ // ELLE SEÇİLEN TABLO(LAR)
 
@@ -212,12 +236,21 @@ if (!function_exists('veritabaniYedekleme')) {
                         writeToFile($filePath, $initialSettingsString . $backupContent); //BAŞLANGIÇ AYARLARINI YAZ
                         // YEDEK DOSYANIN SONUNA BİLGİ EKLE
                         appendInfoToFile($filePath, $finalSettingsString);
-                            $backup_mesaji[] = "Veritabanı Başarıyla Yedeklendi";                
+                            $sonuc_cikti_mesaji[] = [
+                                'status' => 'success',
+                                'message' => '<span style="color:green;">Veritabanı Başarıyla Yedeklendi</span>'
+                            ];              
                         if ($gz) {
                             gzipFileChunked($filePath);
-                            $backup_mesaji["dosya_adi"] = $filePath.".gz";
+                            $sonuc_cikti_mesaji[] = [
+                                'status' => 'dosya_adi',
+                                'message' => $filePath.".gz"
+                            ];
                         }else{
-                            $backup_mesaji["dosya_adi"] = $filePath;
+                            $sonuc_cikti_mesaji[] = [
+                                'status' => 'dosya_adi',
+                                'message' => $filePath
+                            ];
                         }
                     }else{ // $combile 3 && $elle 1 için Genel bilgi bir kez yazıldıktan sonra kalan tablo yedek içeriği yazılır
                         writeToFile($filePath, $backupContent);
@@ -237,8 +270,15 @@ if (!function_exists('veritabaniYedekleme')) {
                     if ($gz) {
                         gzipFileChunked($filePath);
                     }
-                        $backup_mesaji[] = "Veritabanı Başarıyla Yedeklendi";
-                        $backup_mesaji["dosya_adi"] = $subBackupDir;
+                    $sonuc_cikti_mesaji[] = [
+                        'status' => 'success',
+                        'message' => '<span style="color:green;">Veritabanı Başarıyla Yedeklendi</span>'
+                    ];
+                    $sonuc_cikti_mesaji[] = [
+                        'status' => 'dosya_adi',
+                        'message' => $subBackupDir
+                    ];
+
                 } else { // $combine 1 için Genel bilgi bir kez yazıldıktan sonra kalan tablo yedek içeriği yazılır
                     writeToFile($filePath, $backupContent);
                 }
@@ -257,7 +297,7 @@ if (!function_exists('veritabaniYedekleme')) {
                 }
             }
 
-        return $backup_mesaji;
+        return $sonuc_cikti_mesaji;
         }
     }
 
@@ -469,9 +509,9 @@ if (!function_exists('veritabaniYedekleme')) {
         }
 
         // YEDEKLEME İŞLEMİNİ BAŞLAT
-        $backup_mesaji = backupTables($PDOdbsecilen, $tables, $combine, $elle, $onek_ve_tarih, $db_name, $gz);
+        $sonuc_cikti_mesaji = backupTables($islemi_yapan, $PDOdbsecilen, $tables, $combine, $elle, $onek_ve_tarih, $db_name, $gz);
 
-    return $backup_mesaji;
+    return $sonuc_cikti_mesaji;
     }
 }
 
@@ -498,9 +538,9 @@ set_time_limit(0);
     // Seçilen veritabanı varsa bağlantı oluşturuyoruz
     $secilen = "mysql:host=".$varsayilan['database_host'].";dbname=".$varsayilan['db_name'].";charset=".$varsayilan['charset'].";port=".$varsayilan['port']."";
     try {
-    $PDOdbsecilen = new PDO($secilen, $hash->take($varsayilan['database_user']), $hash->take($varsayilan['database_password']), $options);
-    $PDOdbsecilen->exec("set names ".CHARSET);
-    $PDOdbsecilen->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $PDOdbsecilen = new PDO($secilen, $hash->take($varsayilan['database_user']), $hash->take($varsayilan['database_password']), $options);
+        $PDOdbsecilen->exec("set names ".CHARSET);
+        $PDOdbsecilen->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     } catch (\PDOException $e) {
         die($e->getMessage());
     }
@@ -516,35 +556,30 @@ set_time_limit(0);
     $dblock                     = isset($_POST['lock'])         ? $_POST['lock']        : "";
     $yedeklenecek_tablolar      = isset($_POST['tablolar'])     ? $_POST['tablolar']    : [];
     $dosya_tarihi               = date_tr('Y-m-d-H-i-s', time());
+    $islemi_yapan               = false;
 
-    $backup_yedekleme_sonucu = veritabaniYedekleme($PDOdbsecilen, $veritabani_id, $secilen_yedekleme_oneki, $combine, $elle, $grup, $dbbakim, $gz, $yedekleyen, $dblock, $db_name, $yedeklenecek_tablolar, $dosya_tarihi);
-
+    $backup_yedekleme_sonucu = veritabaniYedekleme($islemi_yapan, $PDOdbsecilen, $veritabani_id, $secilen_yedekleme_oneki, $combine, $elle, $grup, $dbbakim, $gz, $yedekleyen, $dblock, $db_name, $yedeklenecek_tablolar, $dosya_tarihi);
+    //echo array_column($backup_yedekleme_sonucu, ['status']['dosya_adi']);
+    //echo '<pre>' . print_r($backup_yedekleme_sonucu, true) . '</pre>';
+//exit;
 if(!empty($backup_yedekleme_sonucu)){
-
-// Boş değerleri çıkarın
-$backup_yedekleme_sonucu = array_filter($backup_yedekleme_sonucu, function($value) {
-    return !empty($value);
-});
-
-// Tekrar eden değerleri kaldırın
-$backup_yedekleme_sonucu = array_unique($backup_yedekleme_sonucu);
 
 //echo '<pre>' . print_r($backup_yedekleme_sonucu, true) . '</pre>';
 
-foreach ($backup_yedekleme_sonucu as &$mesaj) {
-    if (strpos($mesaj, BACKUPDIR . "/") === 0) {
-        if(is_dir($mesaj)){
-            $mesaj = "<b>Alt-Dizin Adı:</b> ".str_replace(BACKUPDIR . "/", '', $mesaj);
-        }else{
-            $mesaj = "<b>Dosya Adı:</b> ".str_replace(BACKUPDIR . "/", '', $mesaj);
-        }
+foreach ($backup_yedekleme_sonucu AS $item) {
+    if ( isset($item['status']) && $item['status'] === 'success' ) {
+        echo $item['message'] . "<br>";
+    } else if ( isset($item['status']) && $item['status'] === 'dosya_adi' ) {
+        echo "<b>Dosya Adı:</b> " . basename($item['message']) . "<br>";
+    }else{
+
     }
-}
-$calistirmasonucmesaji = implode("<br>", $backup_yedekleme_sonucu);
-echo $calistirmasonucmesaji;
 }
 
 }
+
+}
+
 ###################################################################################################################################################
 ###################################################################################################################################################
 ###################################################################################################################################################

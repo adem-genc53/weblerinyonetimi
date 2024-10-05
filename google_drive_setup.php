@@ -22,8 +22,8 @@ set_error_handler(function ($severity, $message, $file, $line) {
 });
 
 set_exception_handler(function ($exception) {
-    echo "Bağlantı başarısız, bilgileri kontrol edin: " . $exception->getMessage();
-    file_put_contents(KOKYOLU . 'error.log', date('Y-m-d H:i:s') . ' - ' . basename(__FILE__) . ' - Bağlantı başarısız, bilgileri kontrol edin: ' . $exception->getMessage() . "\n", FILE_APPEND);
+    echo "Bağlantı başarısız, bilgileri kontrol edin 1: " . $exception->getMessage();
+    file_put_contents(KOKYOLU . 'error.log', date('Y-m-d H:i:s') . ' - ' . basename(__FILE__) . ' - Bağlantı başarısız, bilgileri kontrol edin 1: ' . $exception->getMessage() . "\n", FILE_APPEND);
 });
 
 
@@ -32,7 +32,7 @@ function getClient() {
         $client = new \Google\Client();
         $client->setApplicationName('Google Drive API PHP Quickstart');
         $client->setScopes(\Google\Service\Drive::DRIVE);
-        
+
         // Doğru dosya yolunu ve içeriğini kontrol et
         if (!file_exists(AUTHCONFIGPATH)) {
             throw new Exception("Config file not found: " . AUTHCONFIGPATH);
@@ -43,8 +43,8 @@ function getClient() {
         $client->setAccessType('offline');
         return $client;
     } catch (\Google\Exception $e) {
-        echo "Bağlantı başarısız, bilgileri kontrol edin: " . $e->getMessage();
-        file_put_contents(KOKYOLU . 'error.log', date('Y-m-d H:i:s') . ' - ' . basename(__FILE__) . ' - Bağlantı başarısız, bilgileri kontrol edin: ' .  $e->getMessage() . "\n", FILE_APPEND);
+        echo "Bağlantı başarısız, bilgileri kontrol edin 2: " . $e->getMessage();
+        file_put_contents(KOKYOLU . 'error.log', date('Y-m-d H:i:s') . ' - ' . basename(__FILE__) . ' - Bağlantı başarısız, bilgileri kontrol edin 2: ' .  $e->getMessage() . "\n", FILE_APPEND);
         return null;
     } catch (Exception $e) {
         echo "Beklenmeyen bir hata oluştu: " . $e->getMessage();

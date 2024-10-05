@@ -1914,7 +1914,7 @@ function simdiCalistir(gorev_adi, runid){
             data: { "elle_yurutme" : 1, "gorevid" : runid },
             success: function(veriler){
                 bekleme.kapat();
-                jw("b olumlu", function(){ window.location = "gorevzamanlayici.php"; }).baslik("Görevi Elle Yürütme Sonucu").icerik(veriler).en(450).boy(80).kilitle().akilliKapatPasif().ac();
+                jw("b olumlu", function(){ window.location = "gorevzamanlayici.php"; }).baslik("Görevi Elle Yürütme Sonucu").icerik(veriler).en(550).boy(80).kilitle().akilliKapatPasif().ac();
             }
             });
         }
