@@ -113,6 +113,8 @@ CREATE TABLE IF NOT EXISTS `uyeler` (
   `user_group` int NOT NULL,
   `remember_me_token` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `token_expiry` datetime DEFAULT NULL,
+  `failed_attempts` int DEFAULT '0',
+  `lock_until` datetime DEFAULT NULL,
   PRIMARY KEY (`user_id`),
   UNIQUE KEY `user_name` (`user_name`),
   UNIQUE KEY `email_user` (`user_email`)
@@ -121,7 +123,7 @@ CREATE TABLE IF NOT EXISTS `uyeler` (
 -- ------------------------------------------------------
 -- Tablonun veri dökümü `uyeler`
 -- ------------------------------------------------------
-INSERT INTO `uyeler` VALUES(1, 'Adem GENÇ', '$2y$10$uY/PW6S17AXp0s/xvu73qusf52qkOUrdueLkXvqjHdXXYhhaZuhgi', 'admin@gmail.com', 1, 'e24d3c696497212ba5efba4e8ac3d8abe7e79ae48b9bc28f9d8c73ea81637f6a', '0000-00-00 00:00:00');
+INSERT INTO `uyeler` VALUES(1, 'Adem GENÇ', '$2y$10$uY/PW6S17AXp0s/xvu73qusf52qkOUrdueLkXvqjHdXXYhhaZuhgi', 'admin@gmail.com', 1, '08720afbccc389bd671baa0f05ae262919e7863764f46770112e12bd4807b31d', '0000-00-00 00:00:00', 0, NULL);
 
 
 -- ------------------------------------------------------

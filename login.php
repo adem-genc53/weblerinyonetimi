@@ -1,6 +1,7 @@
 <?php 
 // Bismillahirrahmanirrahim
 require_once __DIR__ . '/includes/connect.php';
+require_once __DIR__ . '/includes/turkcegunler.php';
 
 class SecureLogin {
     private $errors = [];
@@ -58,6 +59,12 @@ class SecureLogin {
             $count = $result->rowCount();
             $res = $result->fetch(PDO::FETCH_ASSOC);
             if($count == 1){
+
+    // Hesap kilitlenmiş mi kontrol et
+    if ($res['lock_until'] && strtotime($res['lock_until']) > time()) {
+        $this->addError("Hesabınız kilitli.");
+        $this->addError("Lütfen daha sonra tekrar deneyin.");
+    }else{
                 // Girilen şifre ile veritabanındaki şifreyi karşılaştır
                 if(password_verify($password, $res['user_password_hash'])){
 
@@ -79,8 +86,8 @@ class SecureLogin {
                         }else{
                             setcookie('beni_hatirla', "$userId:$beni_token", $expiry, "/", "", false, true);
                         }
-                        $stmt = $this->PDOdb->prepare("UPDATE uyeler SET remember_me_token = ?, token_expiry = ? WHERE user_id = ?");
-                        $stmt->execute([$beni_token, $expiry, $userId]);
+                        $stmt = $this->PDOdb->prepare("UPDATE uyeler SET failed_attempts = ?, lock_until = ?, remember_me_token = ?, token_expiry = ? WHERE user_id = ?");
+                        $stmt->execute([0, null, $beni_token, $expiry, $userId]);
                     }
 
                         // Kullanıcının ID'sini oturumdan alın
@@ -115,10 +122,35 @@ class SecureLogin {
                         $delete->execute();
                     }
         return true;
-                }else{
-                    $this->addError("E-posta veya Şifre Hatalı");
+                }else{ // Şifre yanlış ise mesaj
+                    //$this->addError("E-posta veya Şifre Hatalı");
+
+                    // Şifre yanlışsa: Deneme sayısını artır
+                    $failed_attempts = $res['failed_attempts'] + 1;
+                    $lock_until = NULL;
+
+                    // 3 denemeden sonra kilitle
+                    if ($failed_attempts >= 3) {
+                        $lock_until = date("Y-m-d H:i:s", strtotime("+15 minutes"));
+                    }
+
+                    $stmt = $this->PDOdb->prepare("UPDATE uyeler SET failed_attempts = :failed_attempts, lock_until = :lock_until WHERE user_email = :user_email");
+                    $stmt->execute([
+                        ':failed_attempts' => $failed_attempts,
+                        ':lock_until' => $lock_until,
+                        ':user_email' => $user_email
+                    ]);
+
+                    if ($lock_until) {
+                        $this->addError("Çok fazla başarısız giriş denemesi.");
+                        $this->addError("Hesabınız 15 dakika kilitlendi.");
+                    } else {
+                        $this->addError("E-posta veya Şifre Hatalı");
+                    }
+
                 }
-            }else{
+            }
+            }else{ // Email yanlış ise mesaj
                 $this->addError("E-posta veya Şifre Hatalı");
             }
     return false;
