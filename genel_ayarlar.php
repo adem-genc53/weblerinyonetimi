@@ -697,7 +697,7 @@ $(document).ready(function() {
                                     foreach($dizin_array AS $dizin){
                                         $uzanti = (new SplFileInfo(DIZINDIR.$dizin))->getExtension();
                                         if(in_array($dizin, $gizli_dizinler)){
-                                            echo "<div class='file-item'>";
+                                            echo "<div class='file-item' style='background-color: #f8f9fa;'>";
                                                 echo "<input type='checkbox' name='dizinler[]' value='{$dizin}' checked>";
                                                 if(is_dir(DIZINDIR.$dizin)){
                                                     echo "<i class='fas fa-folder' style='font-size:16px;color:orange;'></i>";
