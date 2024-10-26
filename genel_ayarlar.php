@@ -7,19 +7,46 @@ require_once(__DIR__ . '/hash.php');
 $hash = new Hash;
 ##########################################################################################################
 
-    //$dizin_array = array_map('basename', glob(DIZINDIR.'*', GLOB_ONLYDIR));
-    //echo '<pre>' . print_r(array_map('basename', glob(DIZINDIR.'*', GLOB_ONLYDIR)), true) . '</pre>';
-
     if (is_dir(DIZINDIR)) {
         if ($dit = opendir(DIZINDIR)) {
+            $dizinler = [];
+            $dosyalar = [];
+
             while (($dosya = readdir($dit)) !== false) {
-                if($dosya != "." && $dosya != ".." && $dosya != ".htaccess"){
-                    $dizin_array[] = $dosya;
+                if ($dosya != "." && $dosya != ".." && $dosya != ".htaccess") {
+                    $tam_yol = DIZINDIR . DIRECTORY_SEPARATOR . $dosya;
+
+                    // Dizini ve dosyayı ayırt edin
+                    if (is_dir($tam_yol)) {
+                        $dizinler[] = $dosya;
+                    } else {
+                        $dosyalar[] = $dosya;
+                    }
                 }
             }
-            closedir();
+            
+            closedir($dit);
+
+            // Dizinleri alfabetik olarak sırala
+            sort($dizinler);
+
+            // Dosyaları uzantı ve isme göre sırala
+            usort($dosyalar, function($a, $b) {
+                $extA = pathinfo($a, PATHINFO_EXTENSION);
+                $extB = pathinfo($b, PATHINFO_EXTENSION);
+
+                if ($extA === $extB) {
+                    return strcmp($a, $b); // Aynı uzantıya sahip dosyaları alfabetik sıraya göre sırala
+                }
+                return strcmp($extA, $extB); // Uzantıya göre sırala
+            });
+
+            // Dizileri birleştir
+            $dizin_array = array_merge($dizinler, $dosyalar);
         }
     }
+
+
             if($_SERVER['REQUEST_METHOD'] == 'POST'){
                 //echo '<pre>' . print_r($_POST, true) . '</pre>';
                 //exit;
