@@ -27,8 +27,8 @@ $hash = new Hash;
             
             closedir($dit);
 
-            // Dizinleri alfabetik olarak sırala
-            sort($dizinler);
+            // Dizinleri büyük/küçük harfe duyarsız olarak alfabetik sırala
+            usort($dizinler, 'strcasecmp');
 
             // Dosyaları uzantı ve isme göre sırala
             usort($dosyalar, function($a, $b) {
@@ -721,12 +721,12 @@ $(document).ready(function() {
                                             $gizli_dizinler = [];
                                         }
                                     }
-                                    foreach($dizin_array AS $dizin){
-                                        $uzanti = (new SplFileInfo(DIZINDIR.$dizin))->getExtension();
-                                        if(in_array($dizin, $gizli_dizinler)){
+                                    foreach($dizin_array AS $gizlenenler){
+                                        $uzanti = (new SplFileInfo(DIZINDIR.$gizlenenler))->getExtension();
+                                        if(in_array($gizlenenler, $gizli_dizinler)){
                                             echo "<div class='file-item' style='background-color: #f8f9fa;'>";
-                                                echo "<input type='checkbox' name='dizinler[]' value='{$dizin}' checked>";
-                                                if(is_dir(DIZINDIR.$dizin)){
+                                                echo "<input type='checkbox' name='dizinler[]' value='{$gizlenenler}' checked>";
+                                                if(is_dir(DIZINDIR.$gizlenenler)){
                                                     echo "<i class='fas fa-folder' style='font-size:16px;color:orange;'></i>";
                                                 }else if($uzanti=='zip'){
                                                     echo "<i class='fas fa-file-archive' style='font-size:16px;color: #7d6498;'></i>";
@@ -737,21 +737,21 @@ $(document).ready(function() {
                                                 }else{
                                                     echo "<i class='fas fa-file-alt' style='font-size:16px;color: #7d6498;'></i>";
                                                 }
-                                                echo "<span>{$dizin}</span>";
+                                                echo "<span>{$gizlenenler}</span>";
                                             echo "</div>";
-                                            //echo "<span style='width: 500px;text-align: left;font-weight: 500;font-size: 14px;' class='badge text-dark'><input type='checkbox' name='dizinler[]' value='{$dizin}' checked> {$dizin}</span>";
+                                            //echo "<span style='width: 500px;text-align: left;font-weight: 500;font-size: 14px;' class='badge text-dark'><input type='checkbox' name='dizinler[]' value='{$gizlenenler}' checked> {$gizlenenler}</span>";
                                         }else{
-                                            ////echo "<span style='width: 500px;text-align: left;font-weight: 400;font-size: 14px;' class='badge text-dark'><input type='checkbox' name='dizinler[]' value='{$dizin}'> {$dizin}</span>";
+                                            ////echo "<span style='width: 500px;text-align: left;font-weight: 400;font-size: 14px;' class='badge text-dark'><input type='checkbox' name='dizinler[]' value='{$gizlenenler}'> {$gizlenenler}</span>";
                                         }
                                     }
-                                    foreach($dizin_array AS $dizin){
-                                        $uzanti = (new SplFileInfo(DIZINDIR.$dizin))->getExtension();
-                                        if(in_array($dizin, $gizli_dizinler)){
-                                            ////echo "<span style='width: 500px;text-align: left;font-weight: 500;font-size: 14px;' class='badge text-dark'><input type='checkbox' name='dizinler[]' value='{$dizin}' checked> {$dizin}</span>";
+                                    foreach($dizin_array AS $gosterilenler){
+                                        $uzanti = (new SplFileInfo(DIZINDIR.$gosterilenler))->getExtension();
+                                        if(in_array($gosterilenler, $gizli_dizinler)){
+                                            ////echo "<span style='width: 500px;text-align: left;font-weight: 500;font-size: 14px;' class='badge text-dark'><input type='checkbox' name='dizinler[]' value='{$gosterilenler}' checked> {$gosterilenler}</span>";
                                         }else{
                                             echo "<div class='file-item'>";
-                                                echo "<input type='checkbox' name='dizinler[]' value='{$dizin}'>";
-                                                if(is_dir(DIZINDIR.$dizin)){
+                                                echo "<input type='checkbox' name='dizinler[]' value='{$gosterilenler}'>";
+                                                if(is_dir(DIZINDIR.$gosterilenler)){
                                                     echo "<i class='fas fa-folder' style='font-size:16px;color:orange;'></i>";
                                                 }else if($uzanti=='zip'){
                                                     echo "<i class='fas fa-file-archive' style='font-size:6px;color: #7d6498;'></i>";
@@ -762,9 +762,9 @@ $(document).ready(function() {
                                                 }else{
                                                     echo "<i class='fas fa-file-alt' style='font-size:16px;color: #7d6498;'></i>";
                                                 }
-                                                echo "<span>{$dizin}</span>";
+                                                echo "<span>{$gosterilenler}</span>";
                                             echo "</div>";
-                                            //echo "<span style='width: 500px;text-align: left;font-weight: 400;font-size: 14px;' class='badge text-dark'><input type='checkbox' name='dizinler[]' value='{$dizin}'> {$dizin}</span>";
+                                            //echo "<span style='width: 500px;text-align: left;font-weight: 400;font-size: 14px;' class='badge text-dark'><input type='checkbox' name='dizinler[]' value='{$gosterilenler}'> {$gosterilenler}</span>";
                                         }
                                     }
                                 ?>
