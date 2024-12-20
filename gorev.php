@@ -26,7 +26,7 @@ $temp_dir = sys_get_temp_dir();
 $lock_file = $temp_dir . DIRECTORY_SEPARATOR . 'gorev.lock';
 
 // Eğer kilit dosyası varsa ve dosya halen var ise işlemi sonlandır
-if (file_exists($lock_file)) {
+if (is_file($lock_file)) {
     // Hata günlüğüne yazmak isterseniz aşağıdaki satırı yorumdan çıkarabilirsiniz
      //file_put_contents(KOKYOLU.'error.log', date('Y-m-d H:i:s') . ' - 1 - ' . basename(__FILE__) . ' - ' . '<pre>' . print_r($tables, true) . '</pre>' . "\n", FILE_APPEND);
     
@@ -40,7 +40,7 @@ file_put_contents($lock_file, "locked");
 // Hata durumunda kilidi temizlemek için bir kapanış fonksiyonu tanımla
 register_shutdown_function(function() use ($lock_file) {
     if (file_exists($lock_file)) {
-        unlink($lock_file);
+        @unlink($lock_file);
     }
 });
 #########################################################################################################################
@@ -943,16 +943,16 @@ $veritabani_google_yedekleme_sonucu,
 $ozel_dosya_calisma_sonucu);
 
     // İşlem tamamlandığında kilit dosyasını sil
-    if (file_exists($lock_file)) {
-        unlink($lock_file);
+    if (is_file($lock_file)) {
+        @unlink($lock_file);
     }
 } catch (Exception $e) {
     // Hata yönetimi burada yapılabilir
     file_put_contents(KOKYOLU . 'error.log', date('Y-m-d H:i:s') . ' - 11 - ' . basename(__FILE__) . ' - ' . print_r($e->getMessage(), true) . '</pre>' . "\n", FILE_APPEND);
 
     // Hata oluştuğunda da kilit dosyasını sil
-    if (file_exists($lock_file)) {
-        unlink($lock_file);
+    if (is_file($lock_file)) {
+        @unlink($lock_file);
     }
 
     // İsterseniz, kullanıcıya hata mesajı gösterin veya yönlendirin

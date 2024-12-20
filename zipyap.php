@@ -148,7 +148,9 @@ if (!function_exists('zipDataUsingZipArchive')) {
             }
         }
 
+    if (file_exists($destinationDirRealPath)) {
         $zip->close();
+    }
 
         // Orijinal dosya adındaki tek tırnakları kaldır
         $destinationClean = str_replace("'", "", $destination);

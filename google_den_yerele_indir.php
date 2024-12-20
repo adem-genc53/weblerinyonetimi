@@ -293,7 +293,12 @@ class GoogleDriveDownloader {
                 $range = sprintf('bytes=%s-%s', $chunkStart, $chunkEnd);
                 $promises[] = $http->requestAsync('GET', sprintf('/drive/v3/files/%s', $fileId), [
                     'query' => ['alt' => 'media'],
-                    'headers' => ['Range' => $range],
+                    /*'headers' => ['Range' => $range],*/
+/*
+'headers' => [
+    'Range' => $range,
+    'Authorization' => 'Bearer ' . $this->service->getClient()->getAccessToken()['access_token']
+],
                 ])->then(function($response) use ($fp) {
                     fwrite($fp, $response->getBody()->getContents());
                 });
