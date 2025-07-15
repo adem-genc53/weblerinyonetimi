@@ -333,7 +333,8 @@ if (!function_exists('veritabaniYedekleme')) {
                 "-- Veritabanı: `" . $initialSettings['database_name'] . "`\n";
 
             $genel_bilgi .= 
-                "\n\nSET SQL_MODE = '" . $sql_mode . "';\n" .
+                "\n\nSET FOREIGN_KEY_CHECKS = 0;\n" .
+                "SET SQL_MODE = '" . $sql_mode . "';\n" .
                 "START TRANSACTION;\n" .
                 "SET time_zone = '" . $time_zone . "';\n\n" .
 
@@ -358,7 +359,8 @@ if (!function_exists('veritabaniYedekleme')) {
         // Bitiş ayarlarını string olarak oluşturma fonksiyonu
     if (!function_exists('generateFinalSettingsString')) {
         function generateFinalSettingsString($finalSettings) {
-            return "\nCOMMIT;" .
+            return "\n\nSET FOREIGN_KEY_CHECKS = 1;\n\n" .
+                "COMMIT;" .
                 "\n\n" .
                 "/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;\n" .
                 "/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;\n" .
