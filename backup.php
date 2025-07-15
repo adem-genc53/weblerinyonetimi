@@ -330,7 +330,16 @@ if (!function_exists('veritabaniYedekleme')) {
                 "-- MySQL Sunucu Sürümü: " . $initialSettings['mysql_sunucu_surumu'] . "\n" .
                 "-- PHP Sürümü: " . phpversion() . "\n" .
                 "-- Karakter Seti: " . $initialSettings['karakter_seti'] . "\n\n" . 
-                "-- Veritabanı: `" . $initialSettings['database_name'] . "`\n";
+                "-- Veritabanı: `" . $initialSettings['database_name'] . "`\n" . 
+                "-- Tablolar:\n";
+            // BAŞLANGIÇ BİLGİLERİNDE TABLO ADI VE VERİ SATIR SAYISI GÖSTERMEK İÇİNDİR
+            foreach ($initialSettings['tables'] as $table) {
+                if(in_array($table, $tables)){
+                    $count = $initialSettings['table_counts'][$table];
+                    $genel_bilgi .= "-- - {$table}: {$count} kayıt\n";
+                }
+            }
+            //$genel_bilgi .= "-- - SON\n"; // INSERT sayıldığı için iptal edildi
 
             $genel_bilgi .= 
                 "\n\nSET FOREIGN_KEY_CHECKS = 0;\n" .
@@ -342,7 +351,7 @@ if (!function_exists('veritabaniYedekleme')) {
                 "/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;\n" .
                 "/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;\n" .
                 "/*!40101 SET NAMES " . $initialSettings['karakter_seti'] . " */;\n\n";
-
+/*
             $genel_bilgi .= "\n\n-- Tablolar:\n";
             // BAŞLANGIÇ BİLGİLERİNDE TABLO ADI VE VERİ SATIR SAYISI GÖSTERMEK İÇİNDİR
             foreach ($initialSettings['tables'] as $table) {
@@ -351,7 +360,7 @@ if (!function_exists('veritabaniYedekleme')) {
                     $genel_bilgi .= "-- Tablo Adı: {$table}: {$count} kayıt\n";
                 }
             }
-
+*/
         return $genel_bilgi;
         }
     }
