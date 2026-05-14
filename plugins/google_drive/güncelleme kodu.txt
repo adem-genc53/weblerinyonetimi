@@ -1,0 +1,3 @@
+Düzenli olarak composer update --with-all-dependencies çalýþtýrarak paketleri güncel tut.
+
+Ara sýra composer audit ile güvenlik kontrolü yap.

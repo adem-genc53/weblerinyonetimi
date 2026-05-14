@@ -122,9 +122,9 @@ if($_POST['urun'] == "zamanlanmisgorev"){
 			  <td><div class="smallfont">'.$row['aktif'].'</div></td>
 			  <td><div class="smallfont">'.$row['gunluk_kayit'].'</div></td>
 			  <td><div class="smallfont">'.$row['gorev_adi'].'</div></td>
+              <td style="text-align: center;" onclick="simdiCalistir(\''.$row['gorev_adi'].'\',\''.$row['id'].'\');"><a href="#" title="Bu görevi şimdi çalıştır"><i class="fas fa-running"></i></a></td>
 			  <td style="text-align: center;"><div class="smallfont"><a href="?edit='.$row['id'].'#edit"><span title="Görevi düzenlemek için tıkla" class="glyphicon glyphicon-edit"></span></a></div></td>
 			  <td style="text-align: center;"><div class="smallfont"><a href="#" style="cursor: pointer;"><span data-name="'.strip_tags($row['gorev_adi']).'" id="veri_sil_'.$row['id'].'" title="Görevi silmek için tıkla" class="glyphicon glyphicon-remove"></span></a></div></td>
-			  <td style="text-align: center;" onclick="simdiCalistir(\''.$row['gorev_adi'].'\',\''.$row['id'].'\');"><a href="#" title="Bu görevi şimdi çalıştır"><i class="fas fa-running"></i></a></td>
 			</tr>
 	';
 

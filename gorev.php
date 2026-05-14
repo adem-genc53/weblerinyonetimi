@@ -11,7 +11,9 @@ $hash = new Hash;
 ini_set('memory_limit', '-1');
 ignore_user_abort(true);
 set_time_limit(0);
-
+$veritabani_ftp_yedekleme_sonucu = [];
+$veritabani_backup_yedekleme_sonucu = [];
+$veritabani_google_yedekl_silme_sonucu = [];
 #########################################################################################################################
 // Cron job tarafından çalıştırılmasını engellemek için PHP_SAPI kontrolü
 if (php_sapi_name() === 'cli' && $genel_ayarlar['gorevi_calistir'] === 2) {

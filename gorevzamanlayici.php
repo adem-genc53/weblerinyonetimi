@@ -597,9 +597,9 @@ include('includes/sub_navbar.php');
             <th>Görev</th>
             <th>Günlük</th>
             <th>Görev Adı</th>
+            <th style="text-align:center;">Yurut</th>
             <th style="text-align:center;">Düzelt</th>
             <th style="text-align:center;">Sil</th>
-            <th style="text-align:center;">Yurut</th>
         </tr>
     </thead>
 
