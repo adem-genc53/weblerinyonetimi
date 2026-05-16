@@ -11,9 +11,7 @@ $hash = new Hash;
 ini_set('memory_limit', '-1');
 ignore_user_abort(true);
 set_time_limit(0);
-$veritabani_ftp_yedekleme_sonucu = [];
-$veritabani_backup_yedekleme_sonucu = [];
-$veritabani_google_yedekl_silme_sonucu = [];
+
 #########################################################################################################################
 // Cron job tarafından çalıştırılmasını engellemek için PHP_SAPI kontrolü
 if (php_sapi_name() === 'cli' && $genel_ayarlar['gorevi_calistir'] === 2) {
@@ -322,7 +320,7 @@ if( isset($row['tablolar']) && !empty($row['tablolar']) && $row['combine'] == '3
         // UZAK GOOGLE YEDEKLEME BAŞARILI OLURSA KENDİ DOSYA İÇİNDE ESKİ GOOGLE YEDEKLERİ SİLECEK
         // Google sunucusuna yedekleme sonrası "Yüklendi" içeren metin geliyor mu
         $basarili_metin = "Yüklendi";
-        if (!empty(array_values(array_filter(array_column($veritabani_ftp_yedekleme_sonucu, 'message'), function($var) use ($basarili_metin){ return strpos($var, $basarili_metin) !== false; })))) {
+        if (!empty(array_values(array_filter(array_column($veritabani_google_yedekleme_sonucu, 'message'), function($var) use ($basarili_metin){ return strpos($var, $basarili_metin) !== false; })))) {
 
             $veritabani_google_yedekl_silme_sonucu = uzakGoogleSunucudaDosyaSil($veritabani_google_dosya_adi_yolu, $yedekleme_gorevi, $silinecek_dosya_tipi, $uzak_sunucu_ici_dizin_adi, $google_sunucu_korunacak_yedek, $secilen_yedekleme_oneki);
 
@@ -950,7 +948,7 @@ $ozel_dosya_calisma_sonucu);
     }
 } catch (Exception $e) {
     // Hata yönetimi burada yapılabilir
-    file_put_contents(KOKYOLU . 'error.log', date('Y-m-d H:i:s') . ' - 11 - ' . basename(__FILE__) . ' - ' . print_r($e->getMessage(), true) . '</pre>' . "\n", FILE_APPEND);
+    file_put_contents(KOKYOLU . 'error.log', date('Y-m-d H:i:s') . ' - 11 - ' . basename(__FILE__) . ' - ' . print_r($e->getMessage(), true) . ' | Line: ' . $e->getLine() . "\n", FILE_APPEND);
 
     // Hata oluştuğunda da kilit dosyasını sil
     if (is_file($lock_file)) {
